@@ -18,6 +18,13 @@ module KeystoneUi
         column: { "wide" => WIDTHS, "narrow" => WIDTHS, "align" => %w[top center bottom] },
         element: { "align" => %w[stretch start center end] }
       }.freeze
+      DEFAULTS = {
+        section: { "spacing" => "md" },
+        row: { "gap" => "md" },
+        column: { "narrow" => "1/1", "align" => "top" },
+        element: { "align" => "stretch" }
+      }.freeze
+      SHARES = { 1 => "1/1", 2 => "1/2", 3 => "1/3", 4 => "1/4" }.freeze
 
       module_function
 
