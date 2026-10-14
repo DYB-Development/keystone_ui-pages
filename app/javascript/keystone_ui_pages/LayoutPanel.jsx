@@ -15,13 +15,12 @@ export default function LayoutPanel({ node, values, arrangements, refusal, onAdd
   const settings = Object.keys(arrangements[node.kind]).filter((setting) => labels[setting])
 
   return (
-    <aside data-layout-panel className="flex flex-col gap-3 lg:w-72">
+    <aside data-layout-panel className="flex flex-col gap-3">
       {refusal && <div data-layout-refusal><Alert type="error" message={refusal} /></div>}
       {settings.map((setting) => (
         <div key={`${node.id}-${setting}`} className="flex flex-col gap-1">
           <Label htmlFor={`ks-pages-${setting}`}>{labels[setting]}</Label>
           <Select id={`ks-pages-${setting}`} defaultValue={values[setting] ?? ""} onChange={(event) => onArrange(node.id, setting, event.target.value)}>
-            <option value="" disabled>Choose</option>
             {arrangements[node.kind][setting].map((value) => <option key={value} value={value}>{value}</option>)}
           </Select>
         </div>

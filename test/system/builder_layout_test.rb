@@ -127,7 +127,7 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-column-id].\\@sm\\:col-span-8"
     all("[data-column-id]").last.click
 
-    select "1/2", from: "Width on wide screens"
+    select "3/4", from: "Width on wide screens"
 
     assert_selector "[data-layout-refusal]", text: "Row 1 of section 1 is wider than the page on wide screens"
   end
@@ -232,6 +232,17 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     within("[data-selection-toolbar]") { click_on "Duplicate" }
 
     assert_selector "[data-column-id] [data-element-id]", count: 2
+  end
+
+  test "the settings panel shows the layout values in use, including defaults the editor has not changed" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    all("[data-column-id]").first.click
+
+    assert_equal %w[1/2 1/1 top], [ find_field("Width on wide screens").value, find_field("Width on narrow screens").value, find_field("Vertical alignment").value ]
   end
 
   private

@@ -23,7 +23,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
@@ -143,6 +143,12 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     return () => layout.forEach((sortable) => sortable.destroy())
   }, [canvas, selectedId])
 
+  const inUse = (chosen) => {
+    const row = chosen.kind === "column" && nodeIn(document, chosen.rowId)
+    const share = row ? { wide: shares[row.columns.length] ?? "1/1" } : {}
+    return { ...defaults[chosen.kind], ...share, ...nodeIn(document, chosen.id) }
+  }
+
   const removeSelected = () => removeNode(nodes_url, token, selectedId).then((answer) => { shown(answer); setNode(null); setSelected(null) }, refused)
 
   return (
@@ -167,7 +173,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </main>
         <aside data-settings-panel className="w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) p-4">
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
-          {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
+          {node && <LayoutPanel node={node} values={inUse(node)} arrangements={arrangements}
             onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
             refusal={refusal}
             onSelect={chose}
