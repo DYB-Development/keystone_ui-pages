@@ -86,4 +86,19 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
       })()
     JS
   end
+
+  test "hovering a column outlines it, and not its row, and shows that it is a column" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-column-id]").hover
+
+    assert_equal [ "solid", '"Column"', "none" ], page.evaluate_script(<<~JS)
+      (() => {
+        const column = document.querySelector("[data-column-id]")
+        const row = document.querySelector("[data-row-id]")
+        return [getComputedStyle(column).outlineStyle, getComputedStyle(column, "::before").content, getComputedStyle(row).outlineStyle]
+      })()
+    JS
+  end
 end
