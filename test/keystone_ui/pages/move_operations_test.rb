@@ -42,6 +42,14 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal [ [ @elements[0], @elements[2] ], [] ], element_ids(removed)
   end
 
+  def test_moving_a_node_whose_id_is_not_in_the_document_is_refused_naming_the_id
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.move(@document, node_id: "missing", into: @second, position: 0)
+    end
+
+    assert_equal "Nothing in this page has the id missing", refusal.message
+  end
+
   private
 
   def element_ids(document)

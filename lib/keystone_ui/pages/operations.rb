@@ -74,11 +74,16 @@ module KeystoneUi
       end
 
       def move(document, node_id:, into:, position:)
+        present(document, node_id)
         copied(document).tap do |changed|
           moved = node(changed, node_id)
           parent_list(changed, node_id).delete(moved)
           children(changed, into).insert(position.to_i, moved)
         end
+      end
+
+      def present(document, node_id)
+        node(document, node_id) or raise InvalidDocument, "Nothing in this page has the id #{node_id}"
       end
 
       def parent_list(document, node_id)
