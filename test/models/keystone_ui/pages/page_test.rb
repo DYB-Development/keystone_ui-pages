@@ -19,4 +19,13 @@ class KeystoneUi::Pages::PageTest < ActiveSupport::TestCase
 
     assert_equal %w[superseded live], page.versions.reload.map(&:status)
   end
+
+  test "a page cannot hold a second live version" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.publish
+
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      page.versions.create!(number: 2, document: page.document, status: :live)
+    end
+  end
 end
