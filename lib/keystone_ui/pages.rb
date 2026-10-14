@@ -64,6 +64,9 @@ module KeystoneUi
         catalog.register(key: :badge, name: "Badge", component: :ui_badge,
           fields: [ { key: :label, label: "Label", kind: :text, default: "Badge" },
                     { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
+        catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button,
+          fields: [ { key: :text, label: "Text to copy", kind: :text },
+                    { key: :label, label: "Label", kind: :text, default: "Copy" } ])
       end
     end
   end

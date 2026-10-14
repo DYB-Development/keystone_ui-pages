@@ -74,6 +74,12 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal [ :ui_badge, [ :text, :one_of ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
   end
 
+  def test_the_catalog_offers_keystone_ui_copy_button
+    element = KeystoneUi::Pages.catalog.find(:copy_button)
+
+    assert_equal [ :ui_copy_button, [ :text, :text ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
