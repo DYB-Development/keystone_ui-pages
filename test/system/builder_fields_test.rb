@@ -28,6 +28,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal %w[info success warning error], all("select#ks-pages-field-type option").map(&:value)
   end
 
+  test "a yes or no field is a checkbox that redraws the element when ticked" do
+    selected("alert", ".ks-alert")
+
+    check "Can be dismissed"
+
+    assert_selector "[data-element-id] .ks-alert-dismiss"
+  end
+
   private
 
   def selected(key, drawn)
