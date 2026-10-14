@@ -58,6 +58,16 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal "Nothing in this page has the id missing", refusal.message
   end
 
+  def test_moving_a_node_into_one_of_its_own_children_is_refused
+    section = @document["sections"][0]
+
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.move(@document, node_id: section["id"], into: section["rows"][0]["id"], position: 0)
+    end
+
+    assert_equal "A section cannot be moved into something inside it", refusal.message
+  end
+
   private
 
   def element_ids(document)

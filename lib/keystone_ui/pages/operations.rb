@@ -75,11 +75,23 @@ module KeystoneUi
 
       def move(document, node_id:, into:, position:)
         present(document, node_id)
+        outside(document, node_id, into)
         copied(document).tap do |changed|
           moved = node(changed, node_id)
           parent_list(changed, node_id).delete(moved)
           children(changed, into).insert(position.to_i, moved)
         end
+      end
+
+      def outside(document, node_id, into)
+        return unless inside(node(document, node_id)).any? { |child| child["id"] == into }
+
+        raise InvalidDocument, "A #{kind(document, node_id)} cannot be moved into something inside it"
+      end
+
+      def inside(node)
+        children = node.values_at("rows", "columns", "elements").compact.flatten
+        children + children.flat_map { |child| inside(child) }
       end
 
       def present(document, node_id)
