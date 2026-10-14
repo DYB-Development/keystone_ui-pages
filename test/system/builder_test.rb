@@ -85,6 +85,14 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-element-id] .ks-button", text: "Get a quote"
   end
 
+  test "the builder draws the page inside the host's editor layout" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-editor-layout] [data-page-canvas] [data-column-id]"
+  end
+
   private
 
   def touched(source, target)
