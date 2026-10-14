@@ -26,4 +26,13 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
 
     assert_equal original, JSON.generate(@document)
   end
+
+  def test_setting_a_field_changes_that_fields_value
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: @column_id)
+    element_id = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+
+    changed = KeystoneUi::Pages::Operations.set(added, element_id: element_id, field: "label", value: "Get a quote")
+
+    assert_equal({ "label" => "Get a quote" }, changed["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"])
+  end
 end
