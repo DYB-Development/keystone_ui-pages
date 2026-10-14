@@ -84,6 +84,14 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal [ :ui_copy_button, [ :text, :text ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
   end
 
+  def test_every_keystone_ui_element_has_an_icon_and_belongs_to_a_group
+    elements = keystone_elements.elements
+    groups = elements.group_by(&:group).to_h { |group, members| [ group, members.map(&:key).sort ] }
+    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner], "Data" => %i[figure progress stat_card], "Text" => %i[alert code hero info] }
+
+    assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
