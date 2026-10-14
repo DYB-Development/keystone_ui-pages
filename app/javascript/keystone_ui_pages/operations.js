@@ -14,3 +14,5 @@ export const addSection = (url, token) => sent(url, token, "POST", {})
 export const addColumn = (url, token, rowId) => sent(url, token, "POST", { row_id: rowId })
 
 export const addRow = (url, token, sectionId) => sent(url, token, "POST", { section_id: sectionId })
+
+export const arrange = (url, token, nodeId, setting, value) => sent(`${url}/${nodeId}`, token, "PATCH", { setting, value })

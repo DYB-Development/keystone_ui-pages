@@ -44,6 +44,18 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-section-id] [data-row-id]", count: 2, visible: :all
   end
 
+  test "an editor sets a column's width for wide and narrow screens" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id]").click
+
+    select "1/2", from: "Width on wide screens"
+    assert_selector "[data-column-id].sm\\:col-span-6"
+    select "1/3", from: "Width on narrow screens"
+
+    assert_selector "[data-column-id].col-span-4.sm\\:col-span-6"
+  end
+
   private
 
   def layout_classes

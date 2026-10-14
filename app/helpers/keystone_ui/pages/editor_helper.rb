@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "keystone_ui/pages/operations"
+
 module KeystoneUi
   module Pages
     module EditorHelper
@@ -12,6 +14,8 @@ module KeystoneUi
           sections_url: manage_page_sections_path(page),
           columns_url: manage_page_columns_path(page),
           rows_url: manage_page_rows_path(page),
+          nodes_url: "#{manage_page_path(page)}/nodes",
+          arrangements: Operations::ARRANGEMENTS,
           token: form_authenticity_token
         }
       end
