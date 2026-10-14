@@ -137,6 +137,15 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-column-id] [data-element-id] blockquote.testimonial", text: "It works."
   end
 
+  test "the builder does not offer a keystone_ui element the host leaves out" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-element-palette] [data-element-key='button']"
+    assert_no_selector "[data-element-palette] [data-element-key='copy_button']"
+  end
+
   private
 
   def background_of(selector)
