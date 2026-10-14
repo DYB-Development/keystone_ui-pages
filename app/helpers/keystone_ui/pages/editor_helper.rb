@@ -16,6 +16,8 @@ module KeystoneUi
           rows_url: manage_page_rows_path(page),
           nodes_url: "#{manage_page_path(page)}/nodes",
           arrangements: Operations::ARRANGEMENTS,
+          defaults: Operations::DEFAULTS,
+          shares: Operations::SHARES,
           token: form_authenticity_token
         }
       end
