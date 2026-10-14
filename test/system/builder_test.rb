@@ -102,6 +102,17 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_equal color_of_variable("--ks-color-accent"), background_of("[data-element-id] .ks-button")
   end
 
+  test "the builder follows the host's dark theme when the host chooses it" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+    find("[data-element-id] .ks-button").click
+
+    page.execute_script(%(document.documentElement.dataset.theme = "dark"))
+
+    assert_equal color_of_variable("--ks-color-border-control-dark"), page.evaluate_script("getComputedStyle(document.querySelector('[data-element-fields] .ks-input')).borderTopColor")
+  end
+
   private
 
   def background_of(selector)
