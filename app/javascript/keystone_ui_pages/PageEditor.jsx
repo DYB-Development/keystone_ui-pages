@@ -86,6 +86,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         onAddColumn={(rowId) => addColumn(columns_url, token, rowId).then(shown)}
         onAddRow={(sectionId) => addRow(rows_url, token, sectionId).then(shown)} />}
       {definition && <ElementFields element={element} definition={definition} alignments={arrangements.element.align}
+        onRemove={(id) => removeNode(nodes_url, token, id).then((answer) => { shown(answer); setSelected(null) })}
         onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
         onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
     </div>

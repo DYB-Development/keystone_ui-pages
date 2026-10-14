@@ -132,6 +132,18 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-layout-refusal]", text: "Row 1 of section 1 is wider than the page on wide screens"
   end
 
+  test "an editor removes the selected element from the builder" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] .ks-button").click
+
+    click_on "Remove element"
+
+    assert_no_selector "[data-element-id]"
+  end
+
   private
 
   def layout_classes
