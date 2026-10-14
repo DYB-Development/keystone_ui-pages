@@ -26,4 +26,12 @@ class KeystoneUi::Pages::DocumentReplacementTest < ActionDispatch::IntegrationTe
 
     assert_equal [ 422, "The button element has no colour field", draft ], [ response.status, response.parsed_body["error"], @page.reload.document ]
   end
+
+  test "a whole document with an element key the catalog does not have is refused the way the operations refuse it" do
+    @replacement["sections"][0]["rows"][0]["columns"][0]["elements"][0]["key"] = "carousel"
+
+    put "/pages/manage/pages/#{@page.id}/document", params: { document: @replacement }, as: :json
+
+    assert_equal [ 422, "No element is registered as carousel" ], [ response.status, response.parsed_body["error"] ]
+  end
 end
