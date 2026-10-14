@@ -11,6 +11,13 @@ const FieldInput = ({ field, value, onChange }) => {
     onBlur: (event) => event.target.value !== (value ?? "") && onChange(field.key, event.target.value)
   }
 
+  if (field.kind === "one_of") {
+    return (
+      <Select id={shared.id} defaultValue={value ?? field.default ?? ""} onChange={(event) => onChange(field.key, event.target.value)}>
+        {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+      </Select>
+    )
+  }
   if (field.kind === "long_text") return <Textarea {...shared} rows={4} />
   if (field.kind === "number") return <Input {...shared} type="number" />
   if (field.kind === "address") return <Input {...shared} type="url" />

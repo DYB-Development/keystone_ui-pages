@@ -22,6 +22,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-fields] input[type='url']#ks-pages-field-link"
   end
 
+  test "a one of a list field is chosen from its options" do
+    selected("alert", ".ks-alert")
+
+    assert_equal %w[info success warning error], all("select#ks-pages-field-type option").map(&:value)
+  end
+
   private
 
   def selected(key, drawn)
