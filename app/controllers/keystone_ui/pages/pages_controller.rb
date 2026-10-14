@@ -8,7 +8,14 @@ module KeystoneUi
       layout -> { KeystoneUi::Pages.layout }
 
       def show
-        @version = Page.find_by!(slug: params[:slug]).live_version
+        @version = Page.find_by(slug: params[:slug])&.live_version
+        refuse if @version.nil?
+      end
+
+      private
+
+      def refuse
+        head :not_found
       end
     end
   end
