@@ -13,6 +13,10 @@ module KeystoneUi
         @elements[key.to_sym] = Element.new(key: key.to_sym, name: name, component: component, fields: fields, body: body)
       end
 
+      def leave_out(*keys)
+        keys.each { |key| @elements.delete(key.to_sym) }
+      end
+
       def elements
         @elements.values
       end

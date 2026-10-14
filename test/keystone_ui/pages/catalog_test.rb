@@ -20,4 +20,13 @@ class KeystoneUi::Pages::CatalogTest < Minitest::Test
 
     assert_equal :text, catalog.find(:note).body
   end
+
+  def test_a_host_leaves_an_element_out_of_the_catalog
+    catalog = KeystoneUi::Pages::Catalog.new
+    catalog.register(key: :card, name: "Card", component: :ui_card, fields: [])
+
+    catalog.leave_out(:card)
+
+    assert_nil catalog.find(:card)
+  end
 end
