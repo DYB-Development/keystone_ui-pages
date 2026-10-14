@@ -72,4 +72,18 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
       })()
     JS
   end
+
+  test "an empty column shows a drop area saying an element can be dropped there" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-column-id]"
+    assert_equal [ '"Drop an element here"', "dashed" ], page.evaluate_script(<<~JS)
+      (() => {
+        const column = document.querySelector("[data-column-id]")
+        return [getComputedStyle(column, "::after").content, getComputedStyle(column).borderTopStyle]
+      })()
+    JS
+  end
 end
