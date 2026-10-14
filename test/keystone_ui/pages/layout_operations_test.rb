@@ -55,4 +55,15 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal "Row 1 of section 1 is wider than the page on wide screens", refusal.message
   end
+
+  def test_removing_a_section_row_or_column_that_holds_elements_is_refused_saying_how_many
+    filled = KeystoneUi::Pages::Operations.add(@document, "button", column_id: @column["id"])
+    filled = KeystoneUi::Pages::Operations.add(filled, "button", column_id: @column["id"])
+
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.remove(filled, node_id: @section["id"])
+    end
+
+    assert_equal "This section holds 2 elements, so it cannot be removed", refusal.message
+  end
 end

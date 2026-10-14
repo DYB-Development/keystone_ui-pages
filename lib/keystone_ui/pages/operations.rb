@@ -73,6 +73,27 @@ module KeystoneUi
         :element
       end
 
+      def remove(document, node_id:)
+        held = held_elements(node(document, node_id))
+        raise InvalidDocument, "This #{kind(document, node_id)} holds #{held} elements, so it cannot be removed" if held.positive?
+
+        copied(document).tap { |changed| removed(changed, node_id) }
+      end
+
+      def held_elements(node)
+        return node["elements"].size if node.key?("elements")
+
+        (node["rows"] || node["columns"]).sum { |child| held_elements(child) }
+      end
+
+      def removed(document, node_id)
+        document["sections"].reject! { |section| section["id"] == node_id }
+        document["sections"].each do |section|
+          section["rows"].reject! { |row| row["id"] == node_id }
+          section["rows"].each { |row| row["columns"].reject! { |column| column["id"] == node_id } }
+        end
+      end
+
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)
         copied(document).tap do |changed|
           element = element(changed, element_id)
