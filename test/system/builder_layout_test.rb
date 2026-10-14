@@ -173,6 +173,23 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
   end
 
+  test "an editor drags the selected section above another by the move control on its toolbar" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_section(page_record.document))
+    first, second = page_record.document["sections"].map { |section| section["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    all("[data-column-id]").last.click
+    click_on "Select row"
+    click_on "Select section"
+
+    redrawn do
+      page.driver.browser.action.click_and_hold(find("[data-move-handle]").native).move_by(10, 10).pause(duration: 0.1)
+        .move_to(find("[data-section-id='#{first}']").native, 0, -20).pause(duration: 0.2).move_by(0, -2).pause(duration: 0.1).release.perform
+    end
+
+    assert_equal [ second, first ], page_record.reload.document["sections"].map { |section| section["id"] }
+  end
+
   private
 
   def redrawn
