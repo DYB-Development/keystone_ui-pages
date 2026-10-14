@@ -10,6 +10,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       resources :rows, only: %i[create]
       resources :nodes, only: %i[update destroy] do
         post :move, on: :member
+        post :duplicate, on: :member
       end
       resource :document, only: %i[update]
     end
