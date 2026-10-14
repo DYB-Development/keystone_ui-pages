@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "digest"
 require "json"
 require "securerandom"
 require "keystone_ui/pages"
@@ -23,6 +24,18 @@ module KeystoneUi
           element = element(changed, element_id)
           offered(defined(catalog, element["key"]), field)
           element["fields"][field.to_s] = value
+        end
+      end
+
+      def digest(document)
+        Digest::SHA256.hexdigest(JSON.generate(sorted(document)))
+      end
+
+      def sorted(value)
+        case value
+        when Hash then value.sort_by { |key, _| key.to_s }.to_h { |key, nested| [ key, sorted(nested) ] }
+        when Array then value.map { |nested| sorted(nested) }
+        else value
         end
       end
 

@@ -54,4 +54,10 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
 
     assert_equal "The button element has no colour field", refusal.message
   end
+
+  def test_two_documents_with_the_same_content_give_the_same_digest
+    reordered = @document.to_a.reverse.to_h
+
+    assert_equal KeystoneUi::Pages::Operations.digest(@document), KeystoneUi::Pages::Operations.digest(reordered)
+  end
 end
