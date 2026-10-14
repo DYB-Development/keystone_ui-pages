@@ -1,0 +1,13 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "New page") %>
+
+  <%= ui_form(action: manage_pages_path, method: :post) do %>
+    <label class="ks-label mb-1">Name</label>
+    <%= ui_input(name: "page[name]", placeholder: "e.g. Pricing") %>
+
+    <label class="ks-label mb-1">Address</label>
+    <%= ui_input(name: "page[slug]", placeholder: "e.g. pricing") %>
+
+    <%= ui_button(label: "Create", type: :submit) %>
+  <% end %>
+<% end %>
