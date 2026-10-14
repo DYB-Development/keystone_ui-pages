@@ -160,6 +160,19 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
   end
 
+  test "an editor drags the selected column before another by the move control on its toolbar with a finger" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    first, second = page_record.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id='#{second}']").click
+
+    redrawn { touched(find("[data-move-handle]"), find("[data-column-id='#{first}']")) }
+
+    assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+  end
+
   private
 
   def redrawn
