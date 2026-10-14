@@ -10,6 +10,7 @@ module KeystoneUi
           document: page.document,
           elements_url: manage_page_elements_path(page),
           sections_url: manage_page_sections_path(page),
+          columns_url: manage_page_columns_path(page),
           token: form_authenticity_token
         }
       end

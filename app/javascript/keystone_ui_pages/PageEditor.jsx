@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addElement, addSection, setField } from "./operations"
+import { addColumn, addElement, addSection, setField } from "./operations"
+import LayoutPanel from "./LayoutPanel"
 import ElementFields from "./ElementFields"
 import { elementIn } from "./document"
 
-export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, sections_url, token }) {
+export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
+  const [node, setNode] = useState(null)
   const manager = useRef(null)
   const palette = useRef(null)
   const page = useRef(null)
@@ -20,9 +22,15 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
 
   const select = (event) => {
     const chosen = event.target.closest("[data-element-id]")
-    if (!chosen) return
-    event.preventDefault()
-    setSelected(chosen.dataset.elementId)
+    if (chosen) {
+      event.preventDefault()
+      setNode(null)
+      return setSelected(chosen.dataset.elementId)
+    }
+    const column = event.target.closest("[data-column-id]")
+    if (!column) return
+    setSelected(null)
+    setNode({ kind: "column", id: column.dataset.columnId, rowId: column.closest("[data-row-id]").dataset.rowId })
   }
 
   const element = selected && elementIn(document, selected)
@@ -61,6 +69,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
       </aside>
       <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+      {node && <LayoutPanel node={node} onAddColumn={(rowId) => addColumn(columns_url, token, rowId).then(shown)} />}
       {definition && <ElementFields element={element} definition={definition} onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
     </div>
   )
