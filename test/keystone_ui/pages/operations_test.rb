@@ -60,4 +60,10 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
 
     assert_equal KeystoneUi::Pages::Operations.digest(@document), KeystoneUi::Pages::Operations.digest(reordered)
   end
+
+  def test_any_change_gives_a_different_digest
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: @column_id)
+
+    refute_equal KeystoneUi::Pages::Operations.digest(@document), KeystoneUi::Pages::Operations.digest(added)
+  end
 end
