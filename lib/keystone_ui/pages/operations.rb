@@ -27,6 +27,14 @@ module KeystoneUi
         end
       end
 
+      def check(document, catalog: Pages.catalog)
+        elements(document).each do |element|
+          definition = defined(catalog, element["key"])
+          element["fields"].each_key { |field| offered(definition, field) }
+        end
+        document
+      end
+
       def digest(document)
         Digest::SHA256.hexdigest(JSON.generate(sorted(document)))
       end
@@ -61,8 +69,12 @@ module KeystoneUi
         columns(document).find { |column| column["id"] == column_id }
       end
 
+      def elements(document)
+        columns(document).flat_map { |column| column["elements"] }
+      end
+
       def element(document, element_id)
-        columns(document).flat_map { |column| column["elements"] }.find { |element| element["id"] == element_id }
+        elements(document).find { |element| element["id"] == element_id }
       end
     end
   end

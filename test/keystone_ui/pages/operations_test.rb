@@ -66,4 +66,16 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
 
     refute_equal KeystoneUi::Pages::Operations.digest(@document), KeystoneUi::Pages::Operations.digest(added)
   end
+
+  def test_a_whole_document_is_refused_naming_the_first_element_or_field_that_fails
+    column = @document["sections"][0]["rows"][0]["columns"][0]
+    column["elements"] = [
+      { "id" => "first", "key" => "button", "fields" => { "colour" => "red" } },
+      { "id" => "second", "key" => "carousel", "fields" => {} }
+    ]
+
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) { KeystoneUi::Pages::Operations.check(@document) }
+
+    assert_equal "The button element has no colour field", refusal.message
+  end
 end
