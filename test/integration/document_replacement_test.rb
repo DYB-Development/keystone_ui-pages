@@ -17,4 +17,13 @@ class KeystoneUi::Pages::DocumentReplacementTest < ActionDispatch::IntegrationTe
 
     assert_equal @replacement, @page.reload.document
   end
+
+  test "a whole document that fails a check is refused naming the first element or field that fails, and the draft is unchanged" do
+    draft = @page.document
+    @replacement["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"] = { "colour" => "red" }
+
+    put "/pages/manage/pages/#{@page.id}/document", params: { document: @replacement }, as: :json
+
+    assert_equal [ 422, "The button element has no colour field", draft ], [ response.status, response.parsed_body["error"], @page.reload.document ]
+  end
 end
