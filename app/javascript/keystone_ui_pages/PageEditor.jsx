@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from "react"
-import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
+import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
+import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, removeNode, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, moveNode, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
+
+const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
 export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, token }) {
   const [canvas, setCanvas] = useState(drawn)
@@ -51,9 +54,20 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
     const items = [...palette.current.querySelectorAll("[data-element-key]")].map((element) =>
       new Draggable({ id: `palette-${element.dataset.elementKey}`, element, feedback: "clone", data: { key: element.dataset.elementKey } }, dragging))
 
+    const marked = () => page.current.querySelectorAll("[data-drop-target]").forEach((element) => delete element.dataset.dropTarget)
+    dragging.monitor.addEventListener("dragover", ({ operation }) => {
+      marked()
+      if (operation.target?.element) operation.target.element.dataset.dropTarget = ""
+    })
+
     dragging.monitor.addEventListener("dragend", ({ operation, canceled }) => {
-      if (canceled || !operation.target) return
-      addElement(elements_url, token, operation.source.data.key, operation.target.id).then(shown)
+      marked()
+      const { source, target } = operation
+      if (canceled || !target) return
+      if (source.data?.key) return addElement(elements_url, token, source.data.key, target.id).then(shown)
+      const into = source.group === source.initialGroup && target.id !== source.group && !(target instanceof Sortable) ? target.id : source.group
+      const position = into === source.group ? source.index : 0
+      moveNode(nodes_url, token, source.id, into, position).then(shown, refused)
     })
 
     return () => {
@@ -65,8 +79,13 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
   useEffect(() => {
     const columns = [...page.current.querySelectorAll("[data-column-id]")].map((element) =>
       new Droppable({ id: element.dataset.columnId, element }, manager.current))
+    const placed = [...page.current.querySelectorAll("[data-element-id]")].map((element) => {
+      const column = element.closest("[data-column-id]")
+      const index = [...column.children].indexOf(element)
+      return new Sortable({ id: element.dataset.elementId, element, index, group: column.dataset.columnId, type: "element", accept: "element", sensors: PLACED_SENSORS }, manager.current)
+    })
 
-    return () => columns.forEach((column) => column.destroy())
+    return () => [...columns, ...placed].forEach((droppable) => droppable.destroy())
   }, [canvas])
 
   return (
@@ -77,7 +96,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         ))}
         <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
       </aside>
-      <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+      <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16 [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
       {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
         onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
         refusal={refusal}
@@ -86,6 +105,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         onAddColumn={(rowId) => addColumn(columns_url, token, rowId).then(shown)}
         onAddRow={(sectionId) => addRow(rows_url, token, sectionId).then(shown)} />}
       {definition && <ElementFields element={element} definition={definition} alignments={arrangements.element.align}
+        onRemove={(id) => removeNode(nodes_url, token, id).then((answer) => { shown(answer); setSelected(null) })}
         onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
         onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
     </div>

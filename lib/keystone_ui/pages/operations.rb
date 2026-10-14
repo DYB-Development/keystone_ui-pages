@@ -73,25 +73,61 @@ module KeystoneUi
         :element
       end
 
+      def move(document, node_id:, into:, position:)
+        present(document, node_id)
+        outside(document, node_id, into)
+        copied(document).tap do |changed|
+          moved = node(changed, node_id)
+          parent_list(changed, node_id).delete(moved)
+          children(changed, into).insert(position.to_i, moved)
+        end
+      end
+
+      def outside(document, node_id, into)
+        return unless inside(node(document, node_id)).any? { |child| child["id"] == into }
+
+        raise InvalidDocument, "A #{kind(document, node_id)} cannot be moved into something inside it"
+      end
+
+      def inside(node)
+        children = node.values_at("rows", "columns", "elements").compact.flatten
+        children + children.flat_map { |child| inside(child) }
+      end
+
+      def present(document, node_id)
+        node(document, node_id) or raise InvalidDocument, "Nothing in this page has the id #{node_id}"
+      end
+
+      def parent_list(document, node_id)
+        lists(document).find { |list| list.any? { |child| child["id"] == node_id } }
+      end
+
+      def lists(document)
+        sections = document["sections"]
+        rows = sections.flat_map { |section| section["rows"] }
+        [ sections ] + sections.map { |section| section["rows"] } + rows.map { |row| row["columns"] } + columns(document).map { |column| column["elements"] }
+      end
+
+      def children(document, parent_id)
+        return document["sections"] if parent_id.nil?
+
+        parent = node(document, parent_id)
+        parent["rows"] || parent["columns"] || parent["elements"]
+      end
+
       def remove(document, node_id:)
+        present(document, node_id)
         held = held_elements(node(document, node_id))
         raise InvalidDocument, "This #{kind(document, node_id)} holds #{held} #{held == 1 ? 'element' : 'elements'}, so it cannot be removed" if held.positive?
 
-        copied(document).tap { |changed| removed(changed, node_id) }
+        copied(document).tap { |changed| parent_list(changed, node_id).reject! { |child| child["id"] == node_id } }
       end
 
       def held_elements(node)
+        return 0 if node.key?("key")
         return node["elements"].size if node.key?("elements")
 
         (node["rows"] || node["columns"]).sum { |child| held_elements(child) }
-      end
-
-      def removed(document, node_id)
-        document["sections"].reject! { |section| section["id"] == node_id }
-        document["sections"].each do |section|
-          section["rows"].reject! { |row| row["id"] == node_id }
-          section["rows"].each { |row| row["columns"].reject! { |column| column["id"] == node_id } }
-        end
       end
 
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)

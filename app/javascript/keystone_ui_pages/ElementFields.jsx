@@ -3,6 +3,7 @@ import Input from "keystone_ui-react/src/Input.jsx"
 import Select from "keystone_ui-react/src/Select.jsx"
 import Textarea from "keystone_ui-react/src/Textarea.jsx"
 import Checkbox from "keystone_ui-react/src/Checkbox.jsx"
+import Button from "keystone_ui-react/src/Button.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
 
 const FieldInput = ({ field, value, onChange }) => {
@@ -28,7 +29,7 @@ const FieldInput = ({ field, value, onChange }) => {
   return <Input {...shared} type="text" />
 }
 
-export default function ElementFields({ element, definition, alignments, onChange, onArrange }) {
+export default function ElementFields({ element, definition, alignments, onChange, onArrange, onRemove }) {
   return (
     <aside data-element-fields className="flex flex-col gap-3 lg:w-72">
       {definition.fields.map((field) => (
@@ -43,6 +44,7 @@ export default function ElementFields({ element, definition, alignments, onChang
           {alignments.map((value) => <option key={value} value={value}>{value}</option>)}
         </Select>
       </div>
+      <Button type="button" variant="danger" onClick={() => onRemove(element.id)}>Remove element</Button>
     </aside>
   )
 }

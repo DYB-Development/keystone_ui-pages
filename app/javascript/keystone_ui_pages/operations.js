@@ -18,3 +18,5 @@ export const addRow = (url, token, sectionId) => sent(url, token, "POST", { sect
 export const arrange = (url, token, nodeId, setting, value) => sent(`${url}/${nodeId}`, token, "PATCH", { setting, value })
 
 export const removeNode = (url, token, nodeId) => sent(`${url}/${nodeId}`, token, "DELETE")
+
+export const moveNode = (url, token, nodeId, into, position) => sent(`${url}/${nodeId}/move`, token, "POST", { into, position })
