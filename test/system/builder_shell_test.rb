@@ -46,4 +46,13 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
       find("[data-builder-top-bar] button[type='submit']").text
     ]
   end
+
+  test "choosing phone draws the page at phone width" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    click_on "Phone"
+
+    assert_equal 390, page.evaluate_script("Math.round(document.querySelector('[data-page-canvas]').getBoundingClientRect().width)")
+  end
 end
