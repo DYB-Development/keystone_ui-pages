@@ -16,6 +16,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-fields] input[type='number']#ks-pages-field-value"
   end
 
+  test "an address field is edited in a web address input" do
+    selected("card", ".ks-card")
+
+    assert_selector "[data-element-fields] input[type='url']#ks-pages-field-link"
+  end
+
   private
 
   def selected(key, drawn)
