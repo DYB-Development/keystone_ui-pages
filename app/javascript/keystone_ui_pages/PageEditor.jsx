@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
@@ -11,13 +11,22 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
   const [node, setNode] = useState(null)
+  const [refusal, setRefusal] = useState(null)
   const manager = useRef(null)
   const palette = useRef(null)
   const page = useRef(null)
 
   const shown = ({ canvas, document }) => {
+    setRefusal(null)
     setCanvas(canvas)
     setDocument(document)
+  }
+
+  const refused = ({ error }) => setRefusal(error)
+
+  const chose = (chosen) => {
+    setRefusal(null)
+    setNode(chosen)
   }
 
   const select = (event) => {
@@ -71,7 +80,9 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
       <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
       {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
         onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
-        onSelect={setNode}
+        refusal={refusal}
+        onSelect={chose}
+        onRemove={(id) => removeNode(nodes_url, token, id).then((answer) => { shown(answer); setNode(null) }, refused)}
         onAddColumn={(rowId) => addColumn(columns_url, token, rowId).then(shown)}
         onAddRow={(sectionId) => addRow(rows_url, token, sectionId).then(shown)} />}
       {definition && <ElementFields element={element} definition={definition} alignments={arrangements.element.align}

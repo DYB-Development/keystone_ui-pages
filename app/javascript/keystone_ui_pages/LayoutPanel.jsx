@@ -1,6 +1,7 @@
 import React from "react"
 import Button from "keystone_ui-react/src/Button.jsx"
 import Select from "keystone_ui-react/src/Select.jsx"
+import Alert from "keystone_ui-react/src/Alert.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
 
 const LABELS = {
@@ -9,12 +10,13 @@ const LABELS = {
   column: { wide: "Width on wide screens", narrow: "Width on narrow screens", align: "Vertical alignment" }
 }
 
-export default function LayoutPanel({ node, values, arrangements, onAddColumn, onAddRow, onArrange, onSelect }) {
+export default function LayoutPanel({ node, values, arrangements, refusal, onAddColumn, onAddRow, onArrange, onSelect, onRemove }) {
   const labels = LABELS[node.kind]
   const settings = Object.keys(arrangements[node.kind]).filter((setting) => labels[setting])
 
   return (
     <aside data-layout-panel className="flex flex-col gap-3 lg:w-72">
+      {refusal && <div data-layout-refusal><Alert type="error" message={refusal} /></div>}
       {settings.map((setting) => (
         <div key={`${node.id}-${setting}`} className="flex flex-col gap-1">
           <Label htmlFor={`ks-pages-${setting}`}>{labels[setting]}</Label>
@@ -34,6 +36,7 @@ export default function LayoutPanel({ node, values, arrangements, onAddColumn, o
       {node.kind === "row" && (
         <Button type="button" variant="secondary" onClick={() => onSelect({ kind: "section", id: node.sectionId })}>Select section</Button>
       )}
+      <Button type="button" variant="danger" onClick={() => onRemove(node.id)}>Remove {node.kind}</Button>
     </aside>
   )
 }

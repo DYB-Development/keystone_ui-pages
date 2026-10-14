@@ -1,4 +1,4 @@
-const sent = (url, token, method, body) =>
+const sent = (url, token, method, body = {}) =>
   fetch(url, {
     method,
     headers: { "Content-Type": "application/json", Accept: "application/json", "X-CSRF-Token": token },
@@ -16,3 +16,5 @@ export const addColumn = (url, token, rowId) => sent(url, token, "POST", { row_i
 export const addRow = (url, token, sectionId) => sent(url, token, "POST", { section_id: sectionId })
 
 export const arrange = (url, token, nodeId, setting, value) => sent(`${url}/${nodeId}`, token, "PATCH", { setting, value })
+
+export const removeNode = (url, token, nodeId) => sent(`${url}/${nodeId}`, token, "DELETE")

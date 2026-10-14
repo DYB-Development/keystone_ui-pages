@@ -101,6 +101,22 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id].justify-center"
   end
 
+  test "removing a section that still holds elements is refused in the builder, saying how many" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id)
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(document, row_id: row_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    all("[data-column-id]").last.click
+    click_on "Select row"
+    click_on "Select section"
+
+    click_on "Remove section"
+
+    assert_selector "[data-layout-refusal]", text: "This section holds 1 element, so it cannot be removed"
+  end
+
   private
 
   def layout_classes
