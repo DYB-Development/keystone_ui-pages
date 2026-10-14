@@ -36,6 +36,11 @@ module KeystoneUi
         catalog.register(key: :code, name: "Code", component: :ui_code, body: :code,
           fields: [ { key: :code, label: "Code", kind: :long_text }, { key: :language, label: "Language", kind: :text },
                     { key: :caption, label: "Caption", kind: :text } ])
+        catalog.register(key: :hero, name: "Hero", component: :ui_hero,
+          fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
+                    { key: :subtitle, label: "Subtitle", kind: :long_text },
+                    { key: :badge, label: "Badge", kind: :text },
+                    { key: :layout, label: "Layout", kind: :one_of, options: %w[split centered], default: "split" } ])
       end
     end
   end
