@@ -54,7 +54,14 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
     const items = [...palette.current.querySelectorAll("[data-element-key]")].map((element) =>
       new Draggable({ id: `palette-${element.dataset.elementKey}`, element, feedback: "clone", data: { key: element.dataset.elementKey } }, dragging))
 
+    const marked = () => page.current.querySelectorAll("[data-drop-target]").forEach((element) => delete element.dataset.dropTarget)
+    dragging.monitor.addEventListener("dragover", ({ operation }) => {
+      marked()
+      if (operation.target?.element) operation.target.element.dataset.dropTarget = ""
+    })
+
     dragging.monitor.addEventListener("dragend", ({ operation, canceled }) => {
+      marked()
       const { source, target } = operation
       if (canceled || !target) return
       if (source.data?.key) return addElement(elements_url, token, source.data.key, target.id).then(shown)
@@ -89,7 +96,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         ))}
         <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
       </aside>
-      <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+      <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16 [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
       {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
         onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
         refusal={refusal}

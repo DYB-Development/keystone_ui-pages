@@ -161,6 +161,21 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-column-id='#{second}'] [data-element-id] .ks-button"
   end
 
+  test "the builder marks where a dragged element will land before it is dropped" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id)
+    first = document["sections"][0]["rows"][0]["columns"][0]["id"]
+    second = document["sections"][0]["rows"][0]["columns"][1]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(document, "button", column_id: first))
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    page.driver.browser.action.click_and_hold(find("[data-element-id] .ks-button").native).move_by(10, 10).pause(duration: 0.1)
+      .move_to(find("[data-column-id='#{second}']").native).pause(duration: 0.2).perform
+
+    assert_selector "[data-column-id='#{second}'][data-drop-target]"
+  end
+
   private
 
   def background_of(selector)
