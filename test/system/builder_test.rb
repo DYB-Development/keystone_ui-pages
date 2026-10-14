@@ -227,16 +227,6 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     JS
   end
 
-  def touched(source, target)
-    actions = page.driver.browser.action
-    finger = actions.add_pointer_input(:touch, "finger")
-    actions
-      .move_to(source.native, device: "finger").pointer_down(:left, device: "finger").pause(device: finger, duration: 0.3)
-      .move_by(10, 10, device: "finger").pause(device: finger, duration: 0.1)
-      .move_to(target.native, device: "finger").pause(device: finger, duration: 0.1)
-      .pointer_up(:left, device: "finger").perform
-  end
-
   def dragged(source, target)
     page.driver.browser.action
       .click_and_hold(source.native).move_by(10, 10).pause(duration: 0.1)
