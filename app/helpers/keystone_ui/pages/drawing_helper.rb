@@ -49,10 +49,22 @@ module KeystoneUi
         tag.div(component_for(element), class: "ks-pages-element #{ELEMENT_ALIGNMENTS.fetch(element['align'] || 'stretch')}", data: data)
       end
 
+      def field_value(field, value)
+        return value if value.blank?
+        return value.to_s == "true" if field[:kind] == :yes_or_no
+        return value.to_sym if field[:kind] == :one_of
+        return value unless field[:kind] == :number
+
+        value.to_s.include?(".") ? value.to_f : value.to_i
+      end
+
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
-        values = definition.fields.to_h { |field| [ field[:key].to_sym, element["fields"][field[:key].to_s] ] }
-        send(definition.component, **values)
+        values = definition.fields.to_h { |field| [ field[:key].to_sym, field_value(field, element["fields"][field[:key].to_s].presence || field[:default]) ] }
+        return send(definition.component, **values) unless definition.body
+
+        body = values.delete(definition.body)
+        send(definition.component, **values) { body }
       end
     end
   end

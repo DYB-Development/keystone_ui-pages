@@ -128,6 +128,24 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector ".ks-pages-column .ks-button", text: "Get a quote"
   end
 
+  test "the builder offers an element the host draws with its own component next to keystone_ui's" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    dragged(find("[data-element-palette] [data-element-key='testimonial']"), find("[data-column-id]"))
+
+    assert_selector "[data-column-id] [data-element-id] blockquote.testimonial", text: "It works."
+  end
+
+  test "the builder does not offer a keystone_ui element the host leaves out" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-element-palette] [data-element-key='button']"
+    assert_no_selector "[data-element-palette] [data-element-key='copy_button']"
+  end
+
   private
 
   def background_of(selector)

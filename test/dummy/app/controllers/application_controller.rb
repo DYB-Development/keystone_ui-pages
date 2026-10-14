@@ -1,4 +1,10 @@
 class ApplicationController < ActionController::Base
+  helper_method :testimonial
+
+  def testimonial(quote:)
+    helpers.tag.blockquote(quote, class: "testimonial")
+  end
+
   def refuse_page
     render plain: "This page is not available", status: :forbidden
   end

@@ -2,6 +2,7 @@
 
 require "keystone_ui/pages/version"
 require "keystone_ui/pages/catalog"
+require "keystone_ui/pages/keystone_elements"
 require "keystone_ui/pages/engine"
 
 module KeystoneUi
@@ -24,10 +25,7 @@ module KeystoneUi
     end
 
     def self.catalog
-      @catalog ||= Catalog.new.tap do |catalog|
-        catalog.register(key: :button, name: "Button", component: :ui_button,
-          fields: [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ])
-      end
+      @catalog ||= Catalog.new.tap { |catalog| KeystoneElements.register(catalog) }
     end
   end
 end
