@@ -61,6 +61,9 @@ module KeystoneUi
         catalog.register(key: :info, name: "Info", component: :ui_info, body: :detail,
           fields: [ { key: :summary, label: "Summary", kind: :text, default: "More information" },
                     { key: :detail, label: "Detail", kind: :long_text } ])
+        catalog.register(key: :badge, name: "Badge", component: :ui_badge,
+          fields: [ { key: :label, label: "Label", kind: :text, default: "Badge" },
+                    { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
       end
     end
   end
