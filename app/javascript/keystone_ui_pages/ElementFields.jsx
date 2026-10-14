@@ -7,10 +7,11 @@ import Button from "keystone_ui-react/src/Button.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
 
 const FieldInput = ({ field, value, onChange }) => {
+  const shown = value ?? field.default ?? ""
   const shared = {
     id: `ks-pages-field-${field.key}`,
-    defaultValue: value ?? "",
-    onBlur: (event) => event.target.value !== (value ?? "") && onChange(field.key, event.target.value)
+    defaultValue: shown,
+    onBlur: (event) => event.target.value !== shown && onChange(field.key, event.target.value)
   }
 
   if (field.kind === "yes_or_no") {
@@ -31,7 +32,7 @@ const FieldInput = ({ field, value, onChange }) => {
 
 export default function ElementFields({ element, definition, alignments, onChange, onArrange, onRemove }) {
   return (
-    <aside data-element-fields className="flex flex-col gap-3 lg:w-72">
+    <aside data-element-fields className="flex flex-col gap-3">
       {definition.fields.map((field) => (
         <div key={`${element.id}-${field.key}`} className="flex flex-col gap-1">
           <Label htmlFor={`ks-pages-field-${field.key}`}>{field.label}</Label>
