@@ -20,6 +20,9 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.2.0"
 
-  spec.files = Dir["lib/**/*"] + [ "LICENSE" ]
+  spec.files = Dir["lib/**/*", "app/**/*", "config/**/*", "db/**/*"] + [ "LICENSE" ]
   spec.require_paths = [ "lib" ]
+
+  spec.add_dependency "rails", ">= 7.1"
+  spec.add_dependency "keystone_ui", ">= 0.41.0"
 end
