@@ -21,6 +21,12 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal [ [ @elements[0], @elements[2] ], [ @elements[1] ] ], element_ids(moved)
   end
 
+  def test_moving_an_element_to_another_place_in_its_column_keeps_the_others_in_order
+    moved = KeystoneUi::Pages::Operations.move(@document, node_id: @elements[0], into: @first, position: 2)
+
+    assert_equal [ [ @elements[1], @elements[2], @elements[0] ], [] ], element_ids(moved)
+  end
+
   private
 
   def element_ids(document)
