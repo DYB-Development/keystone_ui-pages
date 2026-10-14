@@ -73,6 +73,31 @@ module KeystoneUi
         :element
       end
 
+      def move(document, node_id:, into:, position:)
+        copied(document).tap do |changed|
+          moved = node(changed, node_id)
+          parent_list(changed, node_id).delete(moved)
+          children(changed, into).insert(position.to_i, moved)
+        end
+      end
+
+      def parent_list(document, node_id)
+        lists(document).find { |list| list.any? { |child| child["id"] == node_id } }
+      end
+
+      def lists(document)
+        sections = document["sections"]
+        rows = sections.flat_map { |section| section["rows"] }
+        [ sections ] + sections.map { |section| section["rows"] } + rows.map { |row| row["columns"] } + columns(document).map { |column| column["elements"] }
+      end
+
+      def children(document, parent_id)
+        return document["sections"] if parent_id.nil?
+
+        parent = node(document, parent_id)
+        parent["rows"] || parent["columns"] || parent["elements"]
+      end
+
       def remove(document, node_id:)
         held = held_elements(node(document, node_id))
         raise InvalidDocument, "This #{kind(document, node_id)} holds #{held} #{held == 1 ? 'element' : 'elements'}, so it cannot be removed" if held.positive?
