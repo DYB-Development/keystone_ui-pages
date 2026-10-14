@@ -19,4 +19,18 @@ class KeystoneUi::Pages::BuilderRefusalTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, "This page is not available" ], [ response.status, response.body ]
   end
+
+  test "a person the edit check refuses gets the host's refusal when adding an element" do
+    column_id = @page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+
+    post "/pages/manage/pages/#{@page.id}/elements", params: { key: "button", column_id: column_id }, headers: { "X-Editor" => "refused" }
+
+    assert_equal [ 403, [] ], [ response.status, @page.reload.document["sections"][0]["rows"][0]["columns"][0]["elements"] ]
+  end
+
+  test "a person the edit check refuses gets the host's refusal when creating a page" do
+    post "/pages/manage/pages", params: { page: { name: "About", slug: "about" } }, headers: { "X-Editor" => "refused" }
+
+    assert_equal [ 403, false ], [ response.status, KeystoneUi::Pages::Page.exists?(slug: "about") ]
+  end
 end
