@@ -29,6 +29,19 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-column-id] [data-element-id] .ks-button"
   end
 
+  test "an editor drags an element from the palette into the page's column with the keyboard" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    palette_item = find("[data-element-palette] [data-element-key='button']")
+
+    palette_item.send_keys(:space)
+    40.times { palette_item.send_keys(:arrow_right) }
+    5.times { palette_item.send_keys(:arrow_down) }
+    palette_item.send_keys(:space)
+
+    assert_selector "[data-column-id] [data-element-id] .ks-button"
+  end
+
   private
 
   def dragged(source, target)
