@@ -124,4 +124,13 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     button = find("[data-element-palette] [data-element-key='button']")
     assert_equal [ "Hero", true ], [ hero.text.strip, hero.find("svg path")[:d] != button.find("svg path")[:d] ]
   end
+
+  test "the element panel groups similar elements together" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    data = find("[data-element-palette] [data-element-group='Data']")
+    assert_equal [ "data", %w[progress stat_card figure] ], [ data.find("h2").text.downcase, data.all("[data-element-key]").map { |item| item["data-element-key"] } ]
+  end
 end

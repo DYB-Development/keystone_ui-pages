@@ -16,17 +16,35 @@ const ICONS = {
   box: "M3 3h18v18H3z"
 }
 
+const grouped = (elements) => {
+  const groups = new Map()
+  elements.forEach((element) => {
+    const group = element.group ?? "Other"
+    groups.set(group, [...(groups.get(group) ?? []), element])
+  })
+  return [...groups]
+}
+
+const PaletteItem = ({ element }) => (
+  <button type="button" data-element-key={element.key}
+    className="flex cursor-grab items-center gap-3 rounded-md border border-(--ks-color-border) bg-white px-3 py-2 text-left text-sm hover:border-(--ks-color-accent) dark:bg-transparent">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 shrink-0 fill-none stroke-current stroke-2 text-(--ks-color-icon)" strokeLinecap="round" strokeLinejoin="round">
+      <path d={ICONS[element.icon] ?? ICONS.box} />
+    </svg>
+    <span>{element.name}</span>
+  </button>
+)
+
 const ElementPalette = forwardRef(function ElementPalette({ elements, children }, palette) {
   return (
-    <aside ref={palette} data-element-palette className="flex w-64 shrink-0 flex-col gap-2 overflow-y-auto border-r border-(--ks-color-border) p-4">
-      {elements.map((element) => (
-        <button key={element.key} type="button" data-element-key={element.key}
-          className="flex cursor-grab items-center gap-3 rounded-md border border-(--ks-color-border) bg-white px-3 py-2 text-left text-sm hover:border-(--ks-color-accent) dark:bg-transparent">
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 shrink-0 fill-none stroke-current stroke-2 text-(--ks-color-icon)" strokeLinecap="round" strokeLinejoin="round">
-            <path d={ICONS[element.icon] ?? ICONS.box} />
-          </svg>
-          <span>{element.name}</span>
-        </button>
+    <aside ref={palette} data-element-palette className="flex w-64 shrink-0 flex-col gap-5 overflow-y-auto border-r border-(--ks-color-border) p-4">
+      {grouped(elements).map(([group, members]) => (
+        <section key={group} data-element-group={group} className="flex flex-col gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-(--ks-color-icon)">{group}</h2>
+          {members.map((element) => (
+            <PaletteItem key={element.key} element={element} />
+          ))}
+        </section>
       ))}
       {children}
     </aside>
