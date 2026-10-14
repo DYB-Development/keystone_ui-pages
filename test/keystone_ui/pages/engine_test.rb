@@ -11,4 +11,10 @@ class KeystoneUi::Pages::EngineTest < ActiveSupport::TestCase
       KeystoneUi.configuration.tailwind_sources.include?(root.join("app/helpers/**/*.rb").to_s)
     ]
   end
+
+  test "the editor script's source is handed to the host's Tailwind build" do
+    source = KeystoneUi::Pages::Engine.root.join("app/javascript/**/*.{js,jsx}").to_s
+
+    assert_includes KeystoneUi.configuration.tailwind_sources, source
+  end
 end

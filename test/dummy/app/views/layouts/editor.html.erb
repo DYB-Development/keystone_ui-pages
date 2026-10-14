@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html <%= keystone_theme_attributes %>>
+  <head>
+    <title>Editor</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= yield :head %>
+    <%= stylesheet_link_tag "tailwind" %>
+  </head>
+
+  <body data-editor-layout class="bg-white dark:bg-surface-950">
+    <%= yield %>
+  </body>
+</html>

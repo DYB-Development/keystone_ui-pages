@@ -13,6 +13,10 @@ module KeystoneUi
         @elements[key.to_sym] = Element.new(key: key.to_sym, name: name, component: component, fields: fields)
       end
 
+      def elements
+        @elements.values
+      end
+
       def find(key)
         @elements[key.to_sym]
       end
