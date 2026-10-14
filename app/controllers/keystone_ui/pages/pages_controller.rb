@@ -15,7 +15,9 @@ module KeystoneUi
       private
 
       def refuse
-        head :not_found
+        return head(:not_found) unless KeystoneUi::Pages.refusal_method
+
+        send(KeystoneUi::Pages.refusal_method)
       end
     end
   end
