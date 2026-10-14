@@ -35,9 +35,17 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     visit "/pages/manage/pages/#{page_record.id}"
     palette_item = find("[data-element-palette] [data-element-key='button']")
 
+    across, down = page.evaluate_script(<<~JS)
+      (() => {
+        const from = document.querySelector("[data-element-palette] [data-element-key='button']").getBoundingClientRect()
+        const to = document.querySelector("[data-column-id]").getBoundingClientRect()
+        return [Math.round((to.left + to.width / 2 - from.left - from.width / 2) / 10), Math.round((to.top + to.height / 2 - from.top - from.height / 2) / 10)]
+      })()
+    JS
+
     palette_item.send_keys(:space)
-    40.times { palette_item.send_keys(:arrow_right) }
-    5.times { palette_item.send_keys(:arrow_down) }
+    across.abs.times { palette_item.send_keys(across.positive? ? :arrow_right : :arrow_left) }
+    down.abs.times { palette_item.send_keys(down.positive? ? :arrow_down : :arrow_up) }
     palette_item.send_keys(:space)
 
     assert_selector "[data-column-id] [data-element-id] .ks-button"

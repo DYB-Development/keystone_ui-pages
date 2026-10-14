@@ -1,4 +1,5 @@
-import React, { forwardRef } from "react"
+import React, { forwardRef, useState } from "react"
+import Input from "keystone_ui-react/src/Input.jsx"
 
 const ICONS = {
   cursor: "M5 3l14 8-6 2-2 6z",
@@ -25,8 +26,8 @@ const grouped = (elements) => {
   return [...groups]
 }
 
-const PaletteItem = ({ element }) => (
-  <button type="button" data-element-key={element.key}
+const PaletteItem = ({ element, shown }) => (
+  <button type="button" data-element-key={element.key} hidden={!shown}
     className="flex cursor-grab items-center gap-3 rounded-md border border-(--ks-color-border) bg-white px-3 py-2 text-left text-sm hover:border-(--ks-color-accent) dark:bg-transparent">
     <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 shrink-0 fill-none stroke-current stroke-2 text-(--ks-color-icon)" strokeLinecap="round" strokeLinejoin="round">
       <path d={ICONS[element.icon] ?? ICONS.box} />
@@ -36,13 +37,17 @@ const PaletteItem = ({ element }) => (
 )
 
 const ElementPalette = forwardRef(function ElementPalette({ elements, children }, palette) {
+  const [search, setSearch] = useState("")
+  const matches = (element) => element.name.toLowerCase().includes(search.trim().toLowerCase())
+
   return (
     <aside ref={palette} data-element-palette className="flex w-64 shrink-0 flex-col gap-5 overflow-y-auto border-r border-(--ks-color-border) p-4">
+      <Input type="search" aria-label="Search elements" placeholder="Search elements" value={search} onChange={(event) => setSearch(event.target.value)} />
       {grouped(elements).map(([group, members]) => (
-        <section key={group} data-element-group={group} className="flex flex-col gap-2">
+        <section key={group} data-element-group={group} hidden={!members.some(matches)} className="flex flex-col gap-2">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-(--ks-color-icon)">{group}</h2>
           {members.map((element) => (
-            <PaletteItem key={element.key} element={element} />
+            <PaletteItem key={element.key} element={element} shown={matches(element)} />
           ))}
         </section>
       ))}

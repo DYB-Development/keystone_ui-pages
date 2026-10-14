@@ -133,4 +133,13 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     data = find("[data-element-palette] [data-element-group='Data']")
     assert_equal [ "data", %w[progress stat_card figure] ], [ data.find("h2").text.downcase, data.all("[data-element-key]").map { |item| item["data-element-key"] } ]
   end
+
+  test "a search box in the element panel filters the list of elements" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    fill_in "Search elements", with: "car"
+
+    assert_equal %w[card], all("[data-element-palette] [data-element-key]").map { |item| item["data-element-key"] }
+  end
 end
