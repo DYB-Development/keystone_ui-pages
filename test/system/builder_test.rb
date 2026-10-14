@@ -93,7 +93,34 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-editor-layout] [data-page-canvas] [data-column-id]"
   end
 
+  test "the builder draws elements in the host's accent colour" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+
+    assert_equal color_of_variable("--ks-color-accent"), background_of("[data-element-id] .ks-button")
+  end
+
   private
+
+  def background_of(selector)
+    find(selector)
+    page.evaluate_script("getComputedStyle(document.querySelector(#{selector.to_json})).backgroundColor")
+  end
+
+  def color_of_variable(name)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const probe = document.createElement("div")
+        probe.style.backgroundColor = "var(#{name})"
+        document.body.appendChild(probe)
+        const color = getComputedStyle(probe).backgroundColor
+        probe.remove()
+        return color
+      })()
+    JS
+  end
 
   def touched(source, target)
     actions = page.driver.browser.action
