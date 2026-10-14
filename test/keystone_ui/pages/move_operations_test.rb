@@ -27,6 +27,15 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal [ [ @elements[1], @elements[2], @elements[0] ], [] ], element_ids(moved)
   end
 
+  def test_moving_a_row_to_another_section_takes_its_columns_and_elements_with_it
+    document = KeystoneUi::Pages::Operations.add_section(@document)
+    row = document["sections"][0]["rows"][0]
+
+    moved = KeystoneUi::Pages::Operations.move(document, node_id: row["id"], into: document["sections"][1]["id"], position: 0)
+
+    assert_equal [ [], [ row, document["sections"][1]["rows"][0] ] ], moved["sections"].map { |section| section["rows"] }
+  end
+
   private
 
   def element_ids(document)
