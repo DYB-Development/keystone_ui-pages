@@ -75,4 +75,14 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal [ @column["id"] ], narrowed["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
   end
+
+  def test_removing_a_column_that_holds_one_element_is_refused_in_the_singular
+    filled = KeystoneUi::Pages::Operations.add(@document, "button", column_id: @column["id"])
+
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.remove(filled, node_id: @column["id"])
+    end
+
+    assert_equal "This column holds 1 element, so it cannot be removed", refusal.message
+  end
 end

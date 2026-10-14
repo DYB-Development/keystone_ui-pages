@@ -75,7 +75,7 @@ module KeystoneUi
 
       def remove(document, node_id:)
         held = held_elements(node(document, node_id))
-        raise InvalidDocument, "This #{kind(document, node_id)} holds #{held} elements, so it cannot be removed" if held.positive?
+        raise InvalidDocument, "This #{kind(document, node_id)} holds #{held} #{held == 1 ? 'element' : 'elements'}, so it cannot be removed" if held.positive?
 
         copied(document).tap { |changed| removed(changed, node_id) }
       end
