@@ -9,6 +9,12 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal [ :ui_button, [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ] ], [ button.component, button.fields ]
   end
 
+  def test_the_catalog_offers_a_keystone_ui_progress_bar_with_number_fields
+    progress = KeystoneUi::Pages.catalog.find(:progress)
+
+    assert_equal [ :ui_progress, [ :number, :number, :text ] ], [ progress.component, progress.fields.map { |field| field[:kind] } ]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,

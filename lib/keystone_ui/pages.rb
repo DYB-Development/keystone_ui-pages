@@ -27,6 +27,8 @@ module KeystoneUi
       @catalog ||= Catalog.new.tap do |catalog|
         catalog.register(key: :button, name: "Button", component: :ui_button,
           fields: [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ])
+        catalog.register(key: :progress, name: "Progress", component: :ui_progress,
+          fields: [ { key: :value, label: "Value", kind: :number }, { key: :max, label: "Out of", kind: :number }, { key: :label, label: "Label", kind: :text } ])
       end
     end
   end
