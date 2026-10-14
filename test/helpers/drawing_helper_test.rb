@@ -65,4 +65,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-progress-bar[style*='50%']"
   end
+
+  test "a one of a list field reaches its component as the chosen option" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "alert", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"] = { "message" => "Saved", "type" => "success" }
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-alert.ks-alert-success"
+  end
 end

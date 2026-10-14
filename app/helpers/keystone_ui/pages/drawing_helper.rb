@@ -50,7 +50,9 @@ module KeystoneUi
       end
 
       def field_value(field, value)
-        return value unless field[:kind] == :number && value.present?
+        return value if value.blank?
+        return value.to_sym if field[:kind] == :one_of
+        return value unless field[:kind] == :number
 
         value.to_s.include?(".") ? value.to_f : value.to_i
       end
