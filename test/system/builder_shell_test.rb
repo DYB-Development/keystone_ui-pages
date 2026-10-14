@@ -19,4 +19,19 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
       })()
     JS
   end
+
+  test "the page is drawn as a page on a contrasting background" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-page-canvas]", visible: :all
+    assert_equal [ true, true ], page.evaluate_script(<<~JS)
+      (() => {
+        const canvas = getComputedStyle(document.querySelector("[data-page-canvas]"))
+        const frame = getComputedStyle(document.querySelector("[data-page-frame]"))
+        return [canvas.backgroundColor !== frame.backgroundColor && canvas.backgroundColor !== "rgba(0, 0, 0, 0)", canvas.boxShadow !== "none"]
+      })()
+    JS
+  end
 end

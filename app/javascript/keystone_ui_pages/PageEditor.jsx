@@ -104,8 +104,8 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
           ))}
           <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
         </aside>
-        <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-(--ks-color-fill-muted) p-8">
-          <div ref={page} data-page-canvas className="[&_[data-column-id]:empty]:min-h-16 [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+        <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-surface-200 p-8 dark:bg-surface-900">
+          <div ref={page} data-page-canvas className="mx-auto min-h-full w-full max-w-screen-xl bg-white px-6 shadow-lg ring-1 ring-black/5 dark:bg-(--ks-color-surface-dark,black) [&_[data-column-id]:empty]:min-h-16 [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
         </main>
         <aside data-settings-panel className="w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) p-4">
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
