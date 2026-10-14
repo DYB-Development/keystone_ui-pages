@@ -22,6 +22,10 @@ class KeystoneUi::PagesTest < Minitest::Test
       [ alert.component, alert.fields.map { |field| field[:kind] }, alert.fields[2][:options] ]
   end
 
+  def test_the_alert_type_defaults_to_info
+    assert_equal "info", KeystoneUi::Pages.catalog.find(:alert).fields[2][:default]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
