@@ -26,6 +26,12 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal "info", KeystoneUi::Pages.catalog.find(:alert).fields[2][:default]
   end
 
+  def test_the_catalog_offers_keystone_ui_code_whose_code_field_is_its_content
+    code = KeystoneUi::Pages.catalog.find(:code)
+
+    assert_equal [ :ui_code, :code, %i[code language caption] ], [ code.component, code.body, code.fields.map { |field| field[:key] } ]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,

@@ -33,6 +33,9 @@ module KeystoneUi
           fields: [ { key: :message, label: "Message", kind: :long_text }, { key: :title, label: "Title", kind: :text },
                     { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error], default: "info" },
                     { key: :dismissible, label: "Can be dismissed", kind: :yes_or_no } ])
+        catalog.register(key: :code, name: "Code", component: :ui_code, body: :code,
+          fields: [ { key: :code, label: "Code", kind: :long_text }, { key: :language, label: "Language", kind: :text },
+                    { key: :caption, label: "Caption", kind: :text } ])
       end
     end
   end
