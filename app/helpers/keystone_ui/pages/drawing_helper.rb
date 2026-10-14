@@ -51,6 +51,7 @@ module KeystoneUi
 
       def field_value(field, value)
         return value if value.blank?
+        return value.to_s == "true" if field[:kind] == :yes_or_no
         return value.to_sym if field[:kind] == :one_of
         return value unless field[:kind] == :number
 
