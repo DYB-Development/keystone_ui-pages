@@ -6,3 +6,5 @@ const sent = (url, token, method, body) =>
   }).then((response) => response.json())
 
 export const addElement = (url, token, key, columnId) => sent(url, token, "POST", { key, column_id: columnId })
+
+export const setField = (url, token, elementId, field, value) => sent(`${url}/${elementId}`, token, "PATCH", { field, value })

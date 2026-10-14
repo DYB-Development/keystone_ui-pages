@@ -73,6 +73,18 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_equal [ "Label", "Address" ], all("[data-element-fields] label").map(&:text)
   end
 
+  test "changing a field redraws the element once the field loses focus" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+    find("[data-element-id] .ks-button").click
+
+    fill_in "Label", with: "Get a quote"
+    find("[data-element-fields] label", text: "Address").click
+
+    assert_selector "[data-element-id] .ks-button", text: "Get a quote"
+  end
+
   private
 
   def touched(source, target)

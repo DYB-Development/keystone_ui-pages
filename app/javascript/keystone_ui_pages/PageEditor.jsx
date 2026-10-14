@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addElement } from "./operations"
+import { addElement, setField } from "./operations"
 import ElementFields from "./ElementFields"
 import { elementIn } from "./document"
 
@@ -60,7 +60,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         ))}
       </aside>
       <div ref={page} data-page-canvas className="flex-1" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
-      {definition && <ElementFields element={element} definition={definition} />}
+      {definition && <ElementFields element={element} definition={definition} onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
     </div>
   )
 }
