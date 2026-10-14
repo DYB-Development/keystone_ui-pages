@@ -30,6 +30,8 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const [node, setNode] = useState(null)
   const [refusal, setRefusal] = useState(null)
   const [device, setDevice] = useState("desktop")
+  const [openPanel, setOpenPanel] = useState(null)
+  const toggled = (panel) => setOpenPanel((current) => (current === panel ? null : panel))
   const sheet = useRef(null)
   const moveHandle = useRef(null)
   const [toolbarPlace, setToolbarPlace] = useState(null)
@@ -154,15 +156,21 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   return (
     <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface,white)">
       <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) px-4">
-        <h1 className="truncate text-base font-semibold">{name}</h1>
-        <DeviceWidth chosen={device} onChoose={setDevice} />
+        <div className="flex min-w-0 items-center gap-2">
+          <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "elements"} onClick={() => toggled("elements")}>Elements</Button>
+          <h1 className="truncate text-base font-semibold">{name}</h1>
+        </div>
+        <div className="max-lg:hidden"><DeviceWidth chosen={device} onChoose={setDevice} /></div>
+        <div className="flex items-center gap-2">
+        <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "settings"} onClick={() => toggled("settings")}>Settings</Button>
         <form method="post" action={publish_url}>
           <input type="hidden" name="authenticity_token" value={token} />
           <Button type="submit" size="sm">Publish</Button>
         </form>
+        </div>
       </header>
-      <div className="flex min-h-0 flex-1">
-        <ElementPalette ref={palette} elements={elements}>
+      <div className="relative flex min-h-0 flex-1">
+        <ElementPalette ref={palette} elements={elements} open={openPanel === "elements"}>
           <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
         </ElementPalette>
         <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-surface-200 p-8 dark:bg-surface-900">
@@ -171,7 +179,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
             <SelectionToolbar ref={moveHandle} place={toolbarPlace} onRemove={removeSelected} onDuplicate={() => duplicateNode(nodes_url, token, selectedId).then(shown, refused)} />
           </div>
         </main>
-        <aside data-settings-panel className="w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) p-4">
+        <aside data-settings-panel className={`${openPanel === "settings" ? "max-lg:block" : "max-lg:hidden"} w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-white p-4 max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:shadow-xl dark:bg-(--ks-color-surface-dark,black)`}>
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
           {node && <LayoutPanel node={node} values={inUse(node)} arrangements={arrangements}
             onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
