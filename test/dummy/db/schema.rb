@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_120001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_130000) do
   create_table "keystone_ui_pages_pages", force: :cascade do |t|
     t.string "name", null: false
     t.string "slug", null: false
@@ -33,6 +33,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_120001) do
     t.index ["page_id", "number"], name: "index_keystone_ui_pages_versions_on_page_id_and_number", unique: true
     t.index ["page_id"], name: "index_keystone_ui_pages_versions_on_one_live_per_page", unique: true, where: "status = 'live'"
     t.index ["page_id"], name: "index_keystone_ui_pages_versions_on_page_id"
+  end
+
+  create_table "teams", force: :cascade do |t|
+    t.string "name", null: false
   end
 
   add_foreign_key "keystone_ui_pages_versions", "keystone_ui_pages_pages", column: "page_id"
