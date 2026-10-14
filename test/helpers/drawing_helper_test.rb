@@ -26,4 +26,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select "div.ks-pages-row.grid.grid-cols-12.ks-grid-gap-xl"
   end
+
+  test "a column is drawn with its widths for narrow and wide screens" do
+    column = @document["sections"][0]["rows"][0]["columns"][0]
+    column["narrow"] = "1/2"
+    column["wide"] = "1/3"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-pages-column.col-span-6.sm\\:col-span-4"
+  end
 end
