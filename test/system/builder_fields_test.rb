@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+require "application_system_test_case"
+require "keystone_ui/pages/operations"
+
+class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSystemTestCase
+  test "a long text field is edited in a text area" do
+    selected("alert", ".ks-alert")
+
+    assert_selector "[data-element-fields] textarea#ks-pages-field-message"
+  end
+
+  private
+
+  def selected(key, drawn)
+    page_record = KeystoneUi::Pages::Page.create!(name: "Fields", slug: "fields")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, key, column_id: column_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] #{drawn}").click
+  end
+end
