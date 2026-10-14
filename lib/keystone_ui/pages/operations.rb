@@ -115,6 +115,21 @@ module KeystoneUi
         parent["rows"] || parent["columns"] || parent["elements"]
       end
 
+      def duplicate(document, node_id:)
+        present(document, node_id)
+        copied(document).tap do |changed|
+          siblings = parent_list(changed, node_id)
+          original = siblings.find { |child| child["id"] == node_id }
+          siblings.insert(siblings.index(original) + 1, renewed(copied(original)))
+        end
+      end
+
+      def renewed(node)
+        node.merge("id" => SecureRandom.uuid).tap do |copy|
+          %w[rows columns elements].each { |list| copy[list] = copy[list].map { |child| renewed(child) } if copy.key?(list) }
+        end
+      end
+
       def remove(document, node_id:)
         present(document, node_id)
         held = held_elements(node(document, node_id))

@@ -68,6 +68,13 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal "A section cannot be moved into something inside it", refusal.message
   end
 
+  def test_duplicating_an_element_places_a_copy_with_a_new_id_right_after_it
+    duplicated = KeystoneUi::Pages::Operations.duplicate(@document, node_id: @elements[0])
+
+    ids = element_ids(duplicated)[0]
+    assert_equal [ 4, @elements[0], @elements[1], true ], [ ids.size, ids[0], ids[2], !@elements.include?(ids[1]) ]
+  end
+
   private
 
   def element_ids(document)
