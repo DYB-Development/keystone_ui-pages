@@ -16,8 +16,13 @@ module KeystoneUi
 
       def publish
         transaction do
+          live_version&.update!(status: :superseded)
           versions.create!(number: next_number, document: document, status: :live)
         end
+      end
+
+      def live_version
+        versions.find_by(status: :live)
       end
 
       def next_number
