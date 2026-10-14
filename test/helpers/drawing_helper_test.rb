@@ -18,4 +18,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select "section.ks-pages-section.ks-section-lg"
   end
+
+  test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
+    @document["sections"][0]["rows"][0]["gap"] = "xl"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-pages-row.grid.grid-cols-12.ks-grid-gap-xl"
+  end
 end

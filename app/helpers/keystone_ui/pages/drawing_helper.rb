@@ -3,6 +3,10 @@
 module KeystoneUi
   module Pages
     module DrawingHelper
+      NARROW_SPANS = { "1/1" => "col-span-12", "3/4" => "col-span-9", "2/3" => "col-span-8", "1/2" => "col-span-6", "1/3" => "col-span-4", "1/4" => "col-span-3" }.freeze
+      WIDE_SPANS = { "1/1" => "sm:col-span-12", "3/4" => "sm:col-span-9", "2/3" => "sm:col-span-8", "1/2" => "sm:col-span-6", "1/3" => "sm:col-span-4", "1/4" => "sm:col-span-3" }.freeze
+      SHARES = { 1 => "1/1", 2 => "1/2", 3 => "1/3", 4 => "1/4" }.freeze
+
       def drawn_document(document, editing: false)
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
       end
@@ -15,14 +19,18 @@ module KeystoneUi
       end
 
       def drawn_row(row, editing)
-        tag.div(safe_join(row["columns"].map { |column| drawn_column(column, editing) }), class: "ks-pages-row flex flex-col gap-6 sm:flex-row")
+        gap = Keystone::Ui::GridComponent::GAP_CLASSES.fetch((row["gap"] || "md").to_sym)
+        share = SHARES.fetch(row["columns"].size, "1/1")
+        columns = row["columns"].map { |column| drawn_column(column, editing, share) }
+        tag.div(safe_join(columns), class: "ks-pages-row grid grid-cols-12 #{gap}")
       end
 
-      def drawn_column(column, editing)
+      def drawn_column(column, editing, share)
         elements = safe_join(column["elements"].map { |element| editing ? edited_element(element) : drawn_element(element) })
-        return tag.div(elements, class: "ks-pages-column flex flex-1 flex-col gap-4") unless editing
+        spans = "#{NARROW_SPANS.fetch(column['narrow'] || '1/1')} #{WIDE_SPANS.fetch(column['wide'] || share)}"
+        return tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans}") unless editing
 
-        tag.div(elements, class: "ks-pages-column flex flex-1 flex-col gap-4 min-h-16", data: { column_id: column["id"] })
+        tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans} min-h-16", data: { column_id: column["id"] })
       end
 
       def edited_element(element)
