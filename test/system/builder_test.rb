@@ -193,6 +193,20 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-column-id='#{second}'] [data-element-id] .ks-button"
   end
 
+  test "an editor drags an element into another column with a finger" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id)
+    first = document["sections"][0]["rows"][0]["columns"][0]["id"]
+    second = document["sections"][0]["rows"][0]["columns"][1]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(document, "button", column_id: first))
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    touched(find("[data-element-id] .ks-button"), find("[data-column-id='#{second}']"))
+
+    assert_selector "[data-column-id='#{second}'] [data-element-id] .ks-button"
+  end
+
   private
 
   def background_of(selector)
