@@ -10,4 +10,8 @@ class ApplicationController < ActionController::Base
   def may_view_page?(_page)
     request.headers["X-Visitor"] != "blocked"
   end
+
+  def may_edit_pages?
+    request.headers["X-Editor"] != "refused"
+  end
 end

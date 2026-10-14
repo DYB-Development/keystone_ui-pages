@@ -3,12 +3,7 @@
 module KeystoneUi
   module Pages
     module Manage
-      class PagesController < KeystoneUi::Pages.base_controller.constantize
-        include HostChecks
-        helper KeystoneUiHelper
-        helper DrawingHelper
-        layout -> { KeystoneUi::Pages.editor_layout }
-
+      class PagesController < BaseController
         def new
         end
 
