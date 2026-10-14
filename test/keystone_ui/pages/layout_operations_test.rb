@@ -43,4 +43,16 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal "A section's spacing cannot be huge", refusal.message
   end
+
+  def test_a_row_whose_column_widths_add_up_to_more_than_the_row_is_refused_naming_the_row
+    widened = KeystoneUi::Pages::Operations.add_column(@document, row_id: @row["id"])
+    widened = KeystoneUi::Pages::Operations.arrange(widened, node_id: @column["id"], setting: "wide", value: "2/3")
+    second = widened["sections"][0]["rows"][0]["columns"][1]["id"]
+
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.arrange(widened, node_id: second, setting: "wide", value: "1/2")
+    end
+
+    assert_equal "Row 1 of section 1 is wider than the page on wide screens", refusal.message
+  end
 end

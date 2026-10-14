@@ -42,7 +42,20 @@ module KeystoneUi
 
       def arrange(document, node_id:, setting:, value:)
         offered_arrangement(kind(document, node_id), setting.to_s, value)
-        copied(document).tap { |changed| node(changed, node_id)[setting.to_s] = value }
+        copied(document).tap do |changed|
+          node(changed, node_id)[setting.to_s] = value
+          fitting(changed, setting.to_s) if %w[wide narrow].include?(setting.to_s)
+        end
+      end
+
+      def fitting(document, screen)
+        document["sections"].each.with_index(1) do |section, section_number|
+          section["rows"].each.with_index(1) do |row, row_number|
+            next if row["columns"].sum { |column| Rational(column[screen] || "0") } <= 1
+
+            raise InvalidDocument, "Row #{row_number} of section #{section_number} is wider than the page on #{screen} screens"
+          end
+        end
       end
 
       def offered_arrangement(kind, setting, value)
