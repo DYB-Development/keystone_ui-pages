@@ -4,6 +4,7 @@ require "digest"
 require "json"
 require "securerandom"
 require "keystone_ui/pages"
+require "keystone_ui/pages/document"
 
 module KeystoneUi
   module Pages
@@ -17,6 +18,10 @@ module KeystoneUi
         copied(document).tap do |changed|
           column(changed, column_id)["elements"] << { "id" => SecureRandom.uuid, "key" => key.to_s, "fields" => {} }
         end
+      end
+
+      def add_section(document)
+        copied(document).tap { |changed| changed["sections"] << Document.section }
       end
 
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)
