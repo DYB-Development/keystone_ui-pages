@@ -36,4 +36,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select "div.ks-pages-column.col-span-6.sm\\:col-span-4"
   end
+
+  test "a column is drawn with its vertical alignment" do
+    @document["sections"][0]["rows"][0]["columns"][0]["align"] = "bottom"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-pages-column.justify-end"
+  end
 end

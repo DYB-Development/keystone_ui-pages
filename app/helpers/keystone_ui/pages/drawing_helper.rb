@@ -6,6 +6,7 @@ module KeystoneUi
       NARROW_SPANS = { "1/1" => "col-span-12", "3/4" => "col-span-9", "2/3" => "col-span-8", "1/2" => "col-span-6", "1/3" => "col-span-4", "1/4" => "col-span-3" }.freeze
       WIDE_SPANS = { "1/1" => "sm:col-span-12", "3/4" => "sm:col-span-9", "2/3" => "sm:col-span-8", "1/2" => "sm:col-span-6", "1/3" => "sm:col-span-4", "1/4" => "sm:col-span-3" }.freeze
       SHARES = { 1 => "1/1", 2 => "1/2", 3 => "1/3", 4 => "1/4" }.freeze
+      COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
 
       def drawn_document(document, editing: false)
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
@@ -27,7 +28,7 @@ module KeystoneUi
 
       def drawn_column(column, editing, share)
         elements = safe_join(column["elements"].map { |element| editing ? edited_element(element) : drawn_element(element) })
-        spans = "#{NARROW_SPANS.fetch(column['narrow'] || '1/1')} #{WIDE_SPANS.fetch(column['wide'] || share)}"
+        spans = "#{NARROW_SPANS.fetch(column['narrow'] || '1/1')} #{WIDE_SPANS.fetch(column['wide'] || share)} #{COLUMN_ALIGNMENTS.fetch(column['align'] || 'top')}"
         return tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans}") unless editing
 
         tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans} min-h-16", data: { column_id: column["id"] })
