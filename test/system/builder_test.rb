@@ -70,7 +70,7 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
 
     find("[data-element-id] .ks-button").click
 
-    assert_equal [ "Label", "Address" ], all("[data-element-fields] label").map(&:text)
+    assert_equal [ "Label", "Address", "Horizontal alignment" ], all("[data-element-fields] label").map(&:text)
   end
 
   test "changing a field redraws the element once the field loses focus" do

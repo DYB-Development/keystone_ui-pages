@@ -1,0 +1,58 @@
+# frozen_string_literal: true
+
+require "test_helper"
+require "keystone_ui/pages/document"
+require "keystone_ui/pages/operations"
+
+class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
+  helper KeystoneUiHelper
+  include KeystoneUi::Pages::DrawingHelper
+
+  setup do
+    @document = KeystoneUi::Pages::Document.blank
+  end
+
+  test "a section is drawn with keystone_ui's class for its spacing" do
+    @document["sections"][0]["spacing"] = "lg"
+
+    render html: drawn_document(@document)
+
+    assert_select "section.ks-pages-section.ks-section-lg"
+  end
+
+  test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
+    @document["sections"][0]["rows"][0]["gap"] = "xl"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-pages-row.grid.grid-cols-12.ks-grid-gap-xl"
+  end
+
+  test "a column is drawn with its widths for narrow and wide screens" do
+    column = @document["sections"][0]["rows"][0]["columns"][0]
+    column["narrow"] = "1/2"
+    column["wide"] = "1/3"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-pages-column.col-span-6.sm\\:col-span-4"
+  end
+
+  test "a column is drawn with its vertical alignment" do
+    @document["sections"][0]["rows"][0]["columns"][0]["align"] = "bottom"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-pages-column.justify-end"
+  end
+
+  test "an element is drawn inside a wrapper carrying its horizontal alignment" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["align"] = "center"
+
+    render html: drawn_document(added)
+
+    assert_select "div.ks-pages-element.flex.justify-center > .ks-button"
+  end
+end

@@ -1,28 +1,45 @@
 import React, { useEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addElement, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, removeNode, setField } from "./operations"
+import LayoutPanel from "./LayoutPanel"
 import ElementFields from "./ElementFields"
-import { elementIn } from "./document"
+import { elementIn, nodeIn } from "./document"
 
-export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, token }) {
+export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
+  const [node, setNode] = useState(null)
+  const [refusal, setRefusal] = useState(null)
   const manager = useRef(null)
   const palette = useRef(null)
   const page = useRef(null)
 
   const shown = ({ canvas, document }) => {
+    setRefusal(null)
     setCanvas(canvas)
     setDocument(document)
   }
 
+  const refused = ({ error }) => setRefusal(error)
+
+  const chose = (chosen) => {
+    setRefusal(null)
+    setNode(chosen)
+  }
+
   const select = (event) => {
     const chosen = event.target.closest("[data-element-id]")
-    if (!chosen) return
-    event.preventDefault()
-    setSelected(chosen.dataset.elementId)
+    if (chosen) {
+      event.preventDefault()
+      setNode(null)
+      return setSelected(chosen.dataset.elementId)
+    }
+    const column = event.target.closest("[data-column-id]")
+    if (!column) return
+    setSelected(null)
+    setNode({ kind: "column", id: column.dataset.columnId, rowId: column.closest("[data-row-id]").dataset.rowId, sectionId: column.closest("[data-section-id]").dataset.sectionId })
   }
 
   const element = selected && elementIn(document, selected)
@@ -58,9 +75,19 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
         {elements.map((element) => (
           <Button key={element.key} type="button" variant="secondary" data-element-key={element.key}>{element.name}</Button>
         ))}
+        <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
       </aside>
-      <div ref={page} data-page-canvas className="flex-1" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
-      {definition && <ElementFields element={element} definition={definition} onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
+      <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+      {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
+        onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
+        refusal={refusal}
+        onSelect={chose}
+        onRemove={(id) => removeNode(nodes_url, token, id).then((answer) => { shown(answer); setNode(null) }, refused)}
+        onAddColumn={(rowId) => addColumn(columns_url, token, rowId).then(shown)}
+        onAddRow={(sectionId) => addRow(rows_url, token, sectionId).then(shown)} />}
+      {definition && <ElementFields element={element} definition={definition} alignments={arrangements.element.align}
+        onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
+        onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
     </div>
   )
 }
