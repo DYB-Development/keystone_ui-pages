@@ -35,4 +35,12 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal "1/2", arranged["sections"][0]["rows"][0]["columns"][0]["wide"]
   end
+
+  def test_arranging_a_node_with_a_value_it_does_not_offer_is_refused
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.arrange(@document, node_id: @section["id"], setting: "spacing", value: "huge")
+    end
+
+    assert_equal "A section's spacing cannot be huge", refusal.message
+  end
 end

@@ -41,7 +41,23 @@ module KeystoneUi
       end
 
       def arrange(document, node_id:, setting:, value:)
+        offered_arrangement(kind(document, node_id), setting.to_s, value)
         copied(document).tap { |changed| node(changed, node_id)[setting.to_s] = value }
+      end
+
+      def offered_arrangement(kind, setting, value)
+        return if ARRANGEMENTS.fetch(kind).fetch(setting, []).include?(value)
+
+        raise InvalidDocument, "A #{kind}'s #{setting} cannot be #{value}"
+      end
+
+      def kind(document, node_id)
+        sections = document["sections"]
+        return :section if sections.any? { |section| section["id"] == node_id }
+        return :row if sections.flat_map { |section| section["rows"] }.any? { |row| row["id"] == node_id }
+        return :column if column(document, node_id)
+
+        :element
       end
 
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)
