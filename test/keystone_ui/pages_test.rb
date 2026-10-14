@@ -15,6 +15,13 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal [ :ui_progress, [ :number, :number, :text ] ], [ progress.component, progress.fields.map { |field| field[:kind] } ]
   end
 
+  def test_the_catalog_offers_a_keystone_ui_alert_with_a_choice_of_type_and_a_yes_or_no_dismiss
+    alert = KeystoneUi::Pages.catalog.find(:alert)
+
+    assert_equal [ :ui_alert, [ :long_text, :text, :one_of, :yes_or_no ], %w[info success warning error] ],
+      [ alert.component, alert.fields.map { |field| field[:kind] }, alert.fields[2][:options] ]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,

@@ -29,6 +29,10 @@ module KeystoneUi
           fields: [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress,
           fields: [ { key: :value, label: "Value", kind: :number }, { key: :max, label: "Out of", kind: :number }, { key: :label, label: "Label", kind: :text } ])
+        catalog.register(key: :alert, name: "Alert", component: :ui_alert,
+          fields: [ { key: :message, label: "Message", kind: :long_text }, { key: :title, label: "Title", kind: :text },
+                    { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error] },
+                    { key: :dismissible, label: "Can be dismissed", kind: :yes_or_no } ])
       end
     end
   end
