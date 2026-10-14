@@ -56,6 +56,17 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-column-id].col-span-4.sm\\:col-span-6"
   end
 
+  test "an editor sets a row's gap from keystone_ui's spacing sizes" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id]").click
+
+    click_on "Select row"
+    select "lg", from: "Row gap"
+
+    assert_selector "[data-row-id].ks-grid-gap-lg"
+  end
+
   private
 
   def layout_classes

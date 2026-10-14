@@ -71,6 +71,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
       <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
       {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
         onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
+        onSelect={setNode}
         onAddColumn={(rowId) => addColumn(columns_url, token, rowId).then(shown)}
         onAddRow={(sectionId) => addRow(rows_url, token, sectionId).then(shown)} />}
       {definition && <ElementFields element={element} definition={definition} onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
