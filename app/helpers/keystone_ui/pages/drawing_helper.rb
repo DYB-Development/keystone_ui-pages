@@ -6,6 +6,7 @@ module KeystoneUi
       NARROW_SPANS = { "1/1" => "col-span-12", "3/4" => "col-span-9", "2/3" => "col-span-8", "1/2" => "col-span-6", "1/3" => "col-span-4", "1/4" => "col-span-3" }.freeze
       WIDE_SPANS = { "1/1" => "sm:col-span-12", "3/4" => "sm:col-span-9", "2/3" => "sm:col-span-8", "1/2" => "sm:col-span-6", "1/3" => "sm:col-span-4", "1/4" => "sm:col-span-3" }.freeze
       SHARES = { 1 => "1/1", 2 => "1/2", 3 => "1/3", 4 => "1/4" }.freeze
+      ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
 
       def drawn_document(document, editing: false)
@@ -35,10 +36,18 @@ module KeystoneUi
       end
 
       def edited_element(element)
-        tag.div(drawn_element(element), class: "contents", data: { element_id: element["id"] })
+        wrapped_element(element, data: { element_id: element["id"] })
       end
 
       def drawn_element(element)
+        wrapped_element(element)
+      end
+
+      def wrapped_element(element, data: {})
+        tag.div(component_for(element), class: "ks-pages-element #{ELEMENT_ALIGNMENTS.fetch(element['align'] || 'stretch')}", data: data)
+      end
+
+      def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
         values = definition.fields.to_h { |field| [ field[:key].to_sym, element["fields"][field[:key].to_s] ] }
         send(definition.component, **values)

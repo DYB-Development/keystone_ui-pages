@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "keystone_ui/pages/document"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
   helper KeystoneUiHelper
@@ -43,5 +44,15 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     render html: drawn_document(@document)
 
     assert_select "div.ks-pages-column.justify-end"
+  end
+
+  test "an element is drawn inside a wrapper carrying its horizontal alignment" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["align"] = "center"
+
+    render html: drawn_document(added)
+
+    assert_select "div.ks-pages-element.flex.justify-center > .ks-button"
   end
 end
