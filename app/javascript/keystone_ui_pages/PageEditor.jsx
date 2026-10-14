@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from "react"
-import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
+import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
+import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, removeNode, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, moveNode, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
+
+const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
 export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, token }) {
   const [canvas, setCanvas] = useState(drawn)
@@ -52,8 +55,12 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
       new Draggable({ id: `palette-${element.dataset.elementKey}`, element, feedback: "clone", data: { key: element.dataset.elementKey } }, dragging))
 
     dragging.monitor.addEventListener("dragend", ({ operation, canceled }) => {
-      if (canceled || !operation.target) return
-      addElement(elements_url, token, operation.source.data.key, operation.target.id).then(shown)
+      const { source, target } = operation
+      if (canceled || !target) return
+      if (source.data?.key) return addElement(elements_url, token, source.data.key, target.id).then(shown)
+      const into = source.group === source.initialGroup && target.id !== source.group && !(target instanceof Sortable) ? target.id : source.group
+      const position = into === source.group ? source.index : 0
+      moveNode(nodes_url, token, source.id, into, position).then(shown, refused)
     })
 
     return () => {
@@ -65,8 +72,13 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
   useEffect(() => {
     const columns = [...page.current.querySelectorAll("[data-column-id]")].map((element) =>
       new Droppable({ id: element.dataset.columnId, element }, manager.current))
+    const placed = [...page.current.querySelectorAll("[data-element-id]")].map((element) => {
+      const column = element.closest("[data-column-id]")
+      const index = [...column.children].indexOf(element)
+      return new Sortable({ id: element.dataset.elementId, element, index, group: column.dataset.columnId, type: "element", accept: "element", sensors: PLACED_SENSORS }, manager.current)
+    })
 
-    return () => columns.forEach((column) => column.destroy())
+    return () => [...columns, ...placed].forEach((droppable) => droppable.destroy())
   }, [canvas])
 
   return (

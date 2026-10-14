@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "application_system_test_case"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestCase
   test "an editor creates a page with a name and a slug and opens it in the builder" do
@@ -144,6 +145,20 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
 
     assert_selector "[data-element-palette] [data-element-key='button']"
     assert_no_selector "[data-element-palette] [data-element-key='copy_button']"
+  end
+
+  test "an editor drags an element into another column with a mouse" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id)
+    first = document["sections"][0]["rows"][0]["columns"][0]["id"]
+    second = document["sections"][0]["rows"][0]["columns"][1]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(document, "button", column_id: first))
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    dragged(find("[data-element-id] .ks-button"), find("[data-column-id='#{second}']"))
+
+    assert_selector "[data-column-id='#{second}'] [data-element-id] .ks-button"
   end
 
   private
