@@ -14,10 +14,11 @@ class KeystoneUi::PagesTest < Minitest::Test
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
                  owner_method: :current_team, refusal_method: :refuse }
 
+    kept = settings.to_h { |name, _| [ name, KeystoneUi::Pages.instance_variable_get(:"@#{name}") ] }
     settings.each { |name, value| KeystoneUi::Pages.public_send(:"#{name}=", value) }
 
     assert_equal settings, settings.to_h { |name, _| [ name, KeystoneUi::Pages.public_send(name) ] }
   ensure
-    settings.each_key { |name| KeystoneUi::Pages.public_send(:"#{name}=", nil) }
+    kept.each { |name, value| KeystoneUi::Pages.public_send(:"#{name}=", value) }
   end
 end
