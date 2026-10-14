@@ -50,10 +50,10 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     find("[data-column-id]").click
 
     select "1/2", from: "Width on wide screens"
-    assert_selector "[data-column-id].sm\\:col-span-6"
+    assert_selector "[data-column-id].\\@sm\\:col-span-6"
     select "1/3", from: "Width on narrow screens"
 
-    assert_selector "[data-column-id].col-span-4.sm\\:col-span-6"
+    assert_selector "[data-column-id].col-span-4.\\@sm\\:col-span-6"
   end
 
   test "an editor sets a row's gap from keystone_ui's spacing sizes" do
@@ -124,7 +124,7 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     visit "/pages/manage/pages/#{page_record.id}"
     all("[data-column-id]").first.click
     select "2/3", from: "Width on wide screens"
-    assert_selector "[data-column-id].sm\\:col-span-8"
+    assert_selector "[data-column-id].\\@sm\\:col-span-8"
     all("[data-column-id]").last.click
 
     select "1/2", from: "Width on wide screens"

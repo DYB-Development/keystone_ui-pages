@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "application_system_test_case"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystemTestCase
   test "the builder fills the window with a top bar, an element panel, the page and a settings panel" do
@@ -54,5 +55,21 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     click_on "Phone"
 
     assert_equal 390, page.evaluate_script("Math.round(document.querySelector('[data-page-canvas]').getBoundingClientRect().width)")
+  end
+
+  test "at phone width the page's columns stack the way they do on a phone" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    click_on "Phone"
+
+    assert_equal true, page.evaluate_script(<<~JS)
+      (() => {
+        const [first, second] = [...document.querySelectorAll("[data-column-id]")].map((column) => column.getBoundingClientRect())
+        return second.top >= first.bottom
+      })()
+    JS
   end
 end

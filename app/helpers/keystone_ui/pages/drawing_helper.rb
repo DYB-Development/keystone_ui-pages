@@ -4,7 +4,7 @@ module KeystoneUi
   module Pages
     module DrawingHelper
       NARROW_SPANS = { "1/1" => "col-span-12", "3/4" => "col-span-9", "2/3" => "col-span-8", "1/2" => "col-span-6", "1/3" => "col-span-4", "1/4" => "col-span-3" }.freeze
-      WIDE_SPANS = { "1/1" => "sm:col-span-12", "3/4" => "sm:col-span-9", "2/3" => "sm:col-span-8", "1/2" => "sm:col-span-6", "1/3" => "sm:col-span-4", "1/4" => "sm:col-span-3" }.freeze
+      WIDE_SPANS = { "1/1" => "@sm:col-span-12", "3/4" => "@sm:col-span-9", "2/3" => "@sm:col-span-8", "1/2" => "@sm:col-span-6", "1/3" => "@sm:col-span-4", "1/4" => "@sm:col-span-3" }.freeze
       SHARES = { 1 => "1/1", 2 => "1/2", 3 => "1/3", 4 => "1/4" }.freeze
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
