@@ -11,6 +11,14 @@ module KeystoneUi
     class InvalidDocument < StandardError; end
 
     module Operations
+      WIDTHS = %w[1/1 3/4 2/3 1/2 1/3 1/4].freeze
+      ARRANGEMENTS = {
+        section: { "spacing" => %w[sm md lg] },
+        row: { "gap" => %w[sm md lg xl] },
+        column: { "wide" => WIDTHS, "narrow" => WIDTHS, "align" => %w[top center bottom] },
+        element: { "align" => %w[stretch start center end] }
+      }.freeze
+
       module_function
 
       def add(document, key, column_id:, catalog: Pages.catalog)
@@ -30,6 +38,10 @@ module KeystoneUi
 
       def add_column(document, row_id:)
         copied(document).tap { |changed| node(changed, row_id)["columns"] << Document.column }
+      end
+
+      def arrange(document, node_id:, setting:, value:)
+        copied(document).tap { |changed| node(changed, node_id)[setting.to_s] = value }
       end
 
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)

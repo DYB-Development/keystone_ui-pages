@@ -29,4 +29,10 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal [ 2, [] ], [ added["sections"][0]["rows"][0]["columns"].size, added["sections"][0]["rows"][0]["columns"][1]["elements"] ]
   end
+
+  def test_arranging_a_column_stores_its_wide_width
+    arranged = KeystoneUi::Pages::Operations.arrange(@document, node_id: @column["id"], setting: "wide", value: "1/2")
+
+    assert_equal "1/2", arranged["sections"][0]["rows"][0]["columns"][0]["wide"]
+  end
 end
