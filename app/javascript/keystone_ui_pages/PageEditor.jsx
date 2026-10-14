@@ -9,6 +9,12 @@ import SelectionToolbar from "./SelectionToolbar"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
 
+const LAYOUT = [
+  { kind: "section", selector: "[data-section-id]", id: (element) => element.dataset.sectionId, group: () => "page" },
+  { kind: "row", selector: "[data-row-id]", id: (element) => element.dataset.rowId, group: (element) => element.closest("[data-section-id]").dataset.sectionId },
+  { kind: "column", selector: "[data-column-id]", id: (element) => element.dataset.columnId, group: (element) => element.closest("[data-row-id]").dataset.rowId }
+]
+
 const NODES = [["[data-element-id]", "Element"], ["[data-column-id]", "Column"], ["[data-row-id]", "Row"], ["[data-section-id]", "Section"]]
 
 const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(selector), kind]).filter(([node]) => node)
@@ -88,8 +94,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
       marked()
       const { source, target } = operation
       if (canceled || !target) return
-      if (source.data?.key) return addElement(elements_url, token, source.data.key, target.id).then(shown)
-      const into = source.group === source.initialGroup && target.id !== source.group && !(target instanceof Sortable) ? target.id : source.group
+      if (source.data?.key) return target.data?.columnId && addElement(elements_url, token, source.data.key, target.data.columnId).then(shown)
+      if (source.type !== "element") return moveNode(nodes_url, token, source.id, source.group === "page" ? null : source.group, source.index).then(shown, refused)
+      const into = source.group === source.initialGroup && target.data?.columnId && target.data.columnId !== source.group ? target.data.columnId : source.group
       const position = into === source.group ? source.index : 0
       moveNode(nodes_url, token, source.id, into, position).then(shown, refused)
     })
@@ -102,7 +109,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
 
   useEffect(() => {
     const columns = [...page.current.querySelectorAll("[data-column-id]")].map((element) =>
-      new Droppable({ id: element.dataset.columnId, element }, manager.current))
+      new Droppable({ id: `drop-${element.dataset.columnId}`, element, data: { columnId: element.dataset.columnId }, accept: (source) => !source.type || source.type === "element" }, manager.current))
     const placed = [...page.current.querySelectorAll("[data-element-id]")].map((element) => {
       const column = element.closest("[data-column-id]")
       const index = [...column.children].indexOf(element)
@@ -123,6 +130,17 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     const inner = chosen.getBoundingClientRect()
     setToolbarPlace({ top: inner.top - outer.top, left: inner.left - outer.left })
   }, [canvas, selectedId, device])
+
+  useEffect(() => {
+    const unreachable = window.document.createElement("span")
+    const layout = LAYOUT.flatMap(({ kind, selector, id, group }) =>
+      [...page.current.querySelectorAll(selector)].map((element) => new Sortable({
+        id: id(element), element, index: [...element.parentElement.children].indexOf(element), group: group(element), type: kind, accept: kind,
+        handle: selectedId === id(element) ? moveHandle.current : unreachable
+      }, manager.current)))
+
+    return () => layout.forEach((sortable) => sortable.destroy())
+  }, [canvas, selectedId])
 
   const removeSelected = () => removeNode(nodes_url, token, selectedId).then((answer) => { shown(answer); setNode(null); setSelected(null) }, refused)
 

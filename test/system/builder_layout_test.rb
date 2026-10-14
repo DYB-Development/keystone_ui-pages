@@ -144,7 +144,29 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_no_selector "[data-element-id]"
   end
 
+  test "an editor drags the selected column before another by the move control on its toolbar with a mouse" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    first, second = page_record.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id='#{second}']").click
+
+    redrawn do
+      page.driver.browser.action.click_and_hold(find("[data-move-handle]").native).move_by(10, 10).pause(duration: 0.1)
+        .move_to(find("[data-column-id='#{first}']").native, -100, 0).pause(duration: 0.2).move_by(-2, 0).pause(duration: 0.1).release.perform
+    end
+
+    assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+  end
+
   private
+
+  def redrawn
+    page.execute_script("document.querySelectorAll('[data-page-canvas] *').forEach((node) => { node.dataset.stale = '' })")
+    yield
+    assert_selector "[data-page-canvas] [data-section-id]:not([data-stale])", visible: :all
+  end
 
   def layout_classes
     assert_selector ".ks-pages-column", visible: :all
