@@ -11,4 +11,12 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
 
     assert_selector "[data-page-builder] h1", text: "Pricing"
   end
+
+  test "the builder lists the elements the catalog offers" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-element-palette] [data-element-key='button']", text: "Button"
+  end
 end

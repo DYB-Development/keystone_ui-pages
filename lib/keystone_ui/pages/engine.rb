@@ -2,6 +2,8 @@
 
 require "rails"
 require "keystone_ui"
+require "keystone_ui-react"
+require "keystone_ui/react/mount_helper"
 
 module KeystoneUi
   module Pages
