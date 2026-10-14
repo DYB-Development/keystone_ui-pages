@@ -18,4 +18,12 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
     elements = added["sections"][0]["rows"][0]["columns"][0]["elements"]
     assert_equal [ [ "button", true ] ], elements.map { |element| [ element["key"], element["id"].match?(UUID) ] }
   end
+
+  def test_adding_an_element_leaves_the_original_document_unchanged
+    original = JSON.generate(@document)
+
+    KeystoneUi::Pages::Operations.add(@document, "button", column_id: @column_id)
+
+    assert_equal original, JSON.generate(@document)
+  end
 end
