@@ -7,6 +7,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       resources :elements, only: %i[create update]
       resources :sections, only: %i[create]
       resources :columns, only: %i[create]
+      resources :rows, only: %i[create]
     end
   end
 

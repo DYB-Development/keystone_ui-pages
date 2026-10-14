@@ -34,6 +34,16 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-row-id] [data-column-id]", count: 2
   end
 
+  test "an editor adds a row to a section" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-column-id]").click
+    click_on "Add row"
+
+    assert_selector "[data-section-id] [data-row-id]", count: 2, visible: :all
+  end
+
   private
 
   def layout_classes

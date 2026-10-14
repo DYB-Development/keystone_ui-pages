@@ -12,3 +12,5 @@ export const setField = (url, token, elementId, field, value) => sent(`${url}/${
 export const addSection = (url, token) => sent(url, token, "POST", {})
 
 export const addColumn = (url, token, rowId) => sent(url, token, "POST", { row_id: rowId })
+
+export const addRow = (url, token, sectionId) => sent(url, token, "POST", { section_id: sectionId })

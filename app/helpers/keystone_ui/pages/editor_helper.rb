@@ -11,6 +11,7 @@ module KeystoneUi
           elements_url: manage_page_elements_path(page),
           sections_url: manage_page_sections_path(page),
           columns_url: manage_page_columns_path(page),
+          rows_url: manage_page_rows_path(page),
           token: form_authenticity_token
         }
       end
