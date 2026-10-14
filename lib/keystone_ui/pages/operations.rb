@@ -18,14 +18,22 @@ module KeystoneUi
         end
       end
 
-      def set(document, element_id:, field:, value:)
+      def set(document, element_id:, field:, value:, catalog: Pages.catalog)
         copied(document).tap do |changed|
-          element(changed, element_id)["fields"][field.to_s] = value
+          element = element(changed, element_id)
+          offered(defined(catalog, element["key"]), field)
+          element["fields"][field.to_s] = value
         end
       end
 
       def defined(catalog, key)
         catalog.find(key) or raise InvalidDocument, "No element is registered as #{key}"
+      end
+
+      def offered(definition, field)
+        return if definition.fields.any? { |offered| offered[:key].to_s == field.to_s }
+
+        raise InvalidDocument, "The #{definition.key} element has no #{field} field"
       end
 
       def copied(document)

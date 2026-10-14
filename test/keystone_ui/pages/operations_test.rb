@@ -43,4 +43,15 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
 
     assert_equal "No element is registered as carousel", refusal.message
   end
+
+  def test_setting_a_field_the_element_does_not_have_is_refused_naming_the_field
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: @column_id)
+    element_id = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.set(added, element_id: element_id, field: "colour", value: "red")
+    end
+
+    assert_equal "The button element has no colour field", refusal.message
+  end
 end
