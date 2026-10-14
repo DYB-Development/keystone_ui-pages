@@ -50,6 +50,11 @@ module KeystoneUi
                     { key: :summary, label: "Summary", kind: :long_text },
                     { key: :link, label: "Link", kind: :address },
                     { key: :cta, label: "Link text", kind: :text, default: "Read more" } ])
+        catalog.register(key: :stat_card, name: "Stat", component: :ui_stat_card,
+          fields: [ { key: :label, label: "Label", kind: :text, default: "Label" },
+                    { key: :value, label: "Value", kind: :text, default: "0" },
+                    { key: :suffix, label: "Suffix", kind: :text },
+                    { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
       end
     end
   end
