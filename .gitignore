@@ -10,3 +10,5 @@ node_modules/
 /test/dummy/db/*.sqlite3-*
 /test/dummy/log/
 /test/dummy/tmp/
+/test/dummy/app/assets/builds/
+/test/dummy/app/assets/tailwind/keystone_source.css
