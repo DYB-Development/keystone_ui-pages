@@ -42,7 +42,26 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-column-id] [data-element-id] .ks-button"
   end
 
+  test "an editor drags an element from the palette into the page's column with a finger" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    touched(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+
+    assert_selector "[data-column-id] [data-element-id] .ks-button"
+  end
+
   private
+
+  def touched(source, target)
+    actions = page.driver.browser.action
+    finger = actions.add_pointer_input(:touch, "finger")
+    actions
+      .move_to(source.native, device: "finger").pointer_down(:left, device: "finger").pause(device: finger, duration: 0.3)
+      .move_by(10, 10, device: "finger").pause(device: finger, duration: 0.1)
+      .move_to(target.native, device: "finger").pause(device: finger, duration: 0.1)
+      .pointer_up(:left, device: "finger").perform
+  end
 
   def dragged(source, target)
     page.driver.browser.action
