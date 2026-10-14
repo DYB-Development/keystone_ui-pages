@@ -28,6 +28,10 @@ module KeystoneUi
         copied(document).tap { |changed| node(changed, section_id)["rows"] << Document.row }
       end
 
+      def add_column(document, row_id:)
+        copied(document).tap { |changed| node(changed, row_id)["columns"] << Document.column }
+      end
+
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)
         copied(document).tap do |changed|
           element = element(changed, element_id)
