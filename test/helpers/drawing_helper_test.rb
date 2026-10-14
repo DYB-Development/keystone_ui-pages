@@ -95,4 +95,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-alert.ks-alert-info"
   end
+
+  test "an element whose component takes nested content draws its body field as that content" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "code", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"] = { "code" => "puts 1", "language" => "ruby" }
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-pages-element", text: /puts 1/
+  end
 end

@@ -61,7 +61,10 @@ module KeystoneUi
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
         values = definition.fields.to_h { |field| [ field[:key].to_sym, field_value(field, element["fields"][field[:key].to_s].presence || field[:default]) ] }
-        send(definition.component, **values)
+        return send(definition.component, **values) unless definition.body
+
+        body = values.delete(definition.body)
+        send(definition.component, **values) { body }
       end
     end
   end
