@@ -44,4 +44,10 @@ class KeystoneUi::Pages::BuilderRefusalTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, {} ], [ response.status, @page.reload.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"] ]
   end
+
+  test "a person the edit check refuses gets the host's refusal when publishing" do
+    post "/pages/manage/pages/#{@page.id}/publish", headers: { "X-Editor" => "refused" }
+
+    assert_equal [ 403, nil ], [ response.status, @page.reload.live_version ]
+  end
 end
