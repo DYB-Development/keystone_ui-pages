@@ -89,6 +89,18 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-column-id].justify-end"
   end
 
+  test "an editor sets an element's horizontal alignment" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] .ks-button").click
+
+    select "center", from: "Horizontal alignment"
+
+    assert_selector "[data-element-id].justify-center"
+  end
+
   private
 
   def layout_classes
