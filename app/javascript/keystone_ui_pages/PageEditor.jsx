@@ -2,12 +2,31 @@ import React, { useEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable } from "@dnd-kit/dom"
 import Button from "keystone_ui-react/src/Button.jsx"
 import { addElement } from "./operations"
+import ElementFields from "./ElementFields"
+import { elementIn } from "./document"
 
-export default function PageEditor({ elements, canvas: drawn, elements_url, token }) {
+export default function PageEditor({ elements, canvas: drawn, document: saved, elements_url, token }) {
   const [canvas, setCanvas] = useState(drawn)
+  const [document, setDocument] = useState(saved)
+  const [selected, setSelected] = useState(null)
   const manager = useRef(null)
   const palette = useRef(null)
   const page = useRef(null)
+
+  const shown = ({ canvas, document }) => {
+    setCanvas(canvas)
+    setDocument(document)
+  }
+
+  const select = (event) => {
+    const chosen = event.target.closest("[data-element-id]")
+    if (!chosen) return
+    event.preventDefault()
+    setSelected(chosen.dataset.elementId)
+  }
+
+  const element = selected && elementIn(document, selected)
+  const definition = element && elements.find((offered) => offered.key === element.key)
 
   useEffect(() => {
     const dragging = new DragDropManager()
@@ -17,7 +36,7 @@ export default function PageEditor({ elements, canvas: drawn, elements_url, toke
 
     dragging.monitor.addEventListener("dragend", ({ operation, canceled }) => {
       if (canceled || !operation.target) return
-      addElement(elements_url, token, operation.source.data.key, operation.target.id).then(({ canvas }) => setCanvas(canvas))
+      addElement(elements_url, token, operation.source.data.key, operation.target.id).then(shown)
     })
 
     return () => {
@@ -40,7 +59,8 @@ export default function PageEditor({ elements, canvas: drawn, elements_url, toke
           <Button key={element.key} type="button" variant="secondary" data-element-key={element.key}>{element.name}</Button>
         ))}
       </aside>
-      <div ref={page} data-page-canvas className="flex-1" dangerouslySetInnerHTML={{ __html: canvas }} />
+      <div ref={page} data-page-canvas className="flex-1" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+      {definition && <ElementFields element={element} definition={definition} />}
     </div>
   )
 }

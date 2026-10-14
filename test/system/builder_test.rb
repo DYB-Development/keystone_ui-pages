@@ -63,6 +63,16 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_equal built, find(".ks-pages-column .ks-button")[:outerHTML]
   end
 
+  test "selecting an element shows its fields" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+
+    find("[data-element-id] .ks-button").click
+
+    assert_equal [ "Label", "Address" ], all("[data-element-fields] label").map(&:text)
+  end
+
   private
 
   def touched(source, target)
