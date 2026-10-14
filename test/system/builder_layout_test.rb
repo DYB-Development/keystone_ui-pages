@@ -222,6 +222,18 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-row-id] > [data-column-id='#{second}']:first-child"
   end
 
+  test "duplicating the selected element from its toolbar places a copy right after it" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] .ks-button").click
+
+    within("[data-selection-toolbar]") { click_on "Duplicate" }
+
+    assert_selector "[data-column-id] [data-element-id]", count: 2
+  end
+
   private
 
   def redrawn

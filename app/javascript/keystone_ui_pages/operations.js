@@ -20,3 +20,5 @@ export const arrange = (url, token, nodeId, setting, value) => sent(`${url}/${no
 export const removeNode = (url, token, nodeId) => sent(`${url}/${nodeId}`, token, "DELETE")
 
 export const moveNode = (url, token, nodeId, into, position) => sent(`${url}/${nodeId}/move`, token, "POST", { into, position })
+
+export const duplicateNode = (url, token, nodeId) => sent(`${url}/${nodeId}/duplicate`, token, "POST")
