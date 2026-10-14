@@ -8,11 +8,18 @@ module KeystoneUi
       layout -> { KeystoneUi::Pages.layout }
 
       def show
-        @version = owned_pages.find_by(slug: params[:slug])&.live_version
-        refuse if @version.nil?
+        page = owned_pages.find_by(slug: params[:slug])
+        @version = page&.live_version
+        refuse if @version.nil? || !viewable?(page)
       end
 
       private
+
+      def viewable?(page)
+        return true unless KeystoneUi::Pages.view_check_method
+
+        send(KeystoneUi::Pages.view_check_method, page)
+      end
 
       def owned_pages
         return Page.all unless KeystoneUi::Pages.owner_method

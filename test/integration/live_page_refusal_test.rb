@@ -6,6 +6,7 @@ class KeystoneUi::Pages::LivePageRefusalTest < ActionDispatch::IntegrationTest
   teardown do
     KeystoneUi::Pages.refusal_method = nil
     KeystoneUi::Pages.owner_method = nil
+    KeystoneUi::Pages.view_check_method = nil
   end
 
   test "a page with no live version is not found when the host sets no refusal" do
@@ -37,5 +38,15 @@ class KeystoneUi::Pages::LivePageRefusalTest < ActionDispatch::IntegrationTest
     get "/pages/pricing", headers: { "X-Team" => "Acme" }
 
     assert_equal missing, [ response.status, response.body ]
+  end
+
+  test "a visitor the host's view check refuses gets the host's refusal" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages.view_check_method = :may_view_page?
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
+
+    get "/pages/pricing", headers: { "X-Visitor" => "blocked" }
+
+    assert_equal [ 403, "This page is not available" ], [ response.status, response.body ]
   end
 end
