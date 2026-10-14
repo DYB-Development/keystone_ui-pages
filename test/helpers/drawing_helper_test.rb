@@ -85,4 +85,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-alert-dismiss", 0
   end
+
+  test "a field with no value reaches its component as the field's default" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "alert", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"] = { "message" => "Saved" }
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-alert.ks-alert-info"
+  end
 end
