@@ -15,6 +15,15 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal built, layout_classes
   end
 
+  test "an editor adds a section to the page" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    click_on "Add section"
+
+    assert_selector "[data-page-canvas] [data-section-id]", count: 2, visible: :all
+  end
+
   private
 
   def layout_classes

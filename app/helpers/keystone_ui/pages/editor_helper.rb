@@ -9,6 +9,7 @@ module KeystoneUi
           canvas: drawn_document(page.document, editing: true),
           document: page.document,
           elements_url: manage_page_elements_path(page),
+          sections_url: manage_page_sections_path(page),
           token: form_authenticity_token
         }
       end

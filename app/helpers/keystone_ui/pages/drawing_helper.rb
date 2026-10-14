@@ -17,14 +17,16 @@ module KeystoneUi
 
       def drawn_section(section, editing)
         spacing = Keystone::Ui::SectionComponent::SPACING_CLASSES.fetch((section["spacing"] || "md").to_sym)
-        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 #{spacing}")
+        data = editing ? { section_id: section["id"] } : {}
+        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 #{spacing}", data: data)
       end
 
       def drawn_row(row, editing)
         gap = Keystone::Ui::GridComponent::GAP_CLASSES.fetch((row["gap"] || "md").to_sym)
         share = SHARES.fetch(row["columns"].size, "1/1")
         columns = row["columns"].map { |column| drawn_column(column, editing, share) }
-        tag.div(safe_join(columns), class: "ks-pages-row grid grid-cols-12 #{gap}")
+        data = editing ? { row_id: row["id"] } : {}
+        tag.div(safe_join(columns), class: "ks-pages-row grid grid-cols-12 #{gap}", data: data)
       end
 
       def drawn_column(column, editing, share)
