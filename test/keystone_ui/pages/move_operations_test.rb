@@ -36,6 +36,12 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal [ [], [ row, document["sections"][1]["rows"][0] ] ], moved["sections"].map { |section| section["rows"] }
   end
 
+  def test_removing_an_element_returns_a_document_without_it
+    removed = KeystoneUi::Pages::Operations.remove(@document, node_id: @elements[1])
+
+    assert_equal [ [ @elements[0], @elements[2] ], [] ], element_ids(removed)
+  end
+
   private
 
   def element_ids(document)
