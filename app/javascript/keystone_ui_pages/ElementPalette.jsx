@@ -1,0 +1,36 @@
+import React, { forwardRef } from "react"
+
+const ICONS = {
+  cursor: "M5 3l14 8-6 2-2 6z",
+  tag: "M3 7v6l8 8 8-8-8-8H5a2 2 0 0 0-2 2zM7.5 7.5h.01",
+  copy: "M8 8h11v11H8zM5 16V5h11",
+  heading: "M6 4v16M18 4v16M6 12h12",
+  info: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01",
+  code: "M8 6l-6 6 6 6M16 6l6 6-6 6",
+  alert: "M12 3l10 18H2zM12 10v4M12 17h.01",
+  card: "M3 5h18v14H3zM3 10h18",
+  megaphone: "M3 11v2l13 5V6zM16 9a3 3 0 0 1 0 6M6 14l1 5h3l-1-4",
+  chart: "M4 20V10M10 20V4M16 20v-7M22 20H2",
+  number: "M10 3L8 21M16 3l-2 18M4 9h17M3 15h17",
+  progress: "M3 12h18M3 12h10",
+  box: "M3 3h18v18H3z"
+}
+
+const ElementPalette = forwardRef(function ElementPalette({ elements, children }, palette) {
+  return (
+    <aside ref={palette} data-element-palette className="flex w-64 shrink-0 flex-col gap-2 overflow-y-auto border-r border-(--ks-color-border) p-4">
+      {elements.map((element) => (
+        <button key={element.key} type="button" data-element-key={element.key}
+          className="flex cursor-grab items-center gap-3 rounded-md border border-(--ks-color-border) bg-white px-3 py-2 text-left text-sm hover:border-(--ks-color-accent) dark:bg-transparent">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 shrink-0 fill-none stroke-current stroke-2 text-(--ks-color-icon)" strokeLinecap="round" strokeLinejoin="round">
+            <path d={ICONS[element.icon] ?? ICONS.box} />
+          </svg>
+          <span>{element.name}</span>
+        </button>
+      ))}
+      {children}
+    </aside>
+  )
+})
+
+export default ElementPalette

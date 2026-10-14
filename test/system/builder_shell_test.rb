@@ -114,4 +114,14 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
       page.evaluate_script("getComputedStyle(document.querySelector('[data-column-id]')).outlineStyle")
     ]
   end
+
+  test "the element panel shows each element with an icon and its name" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    hero = find("[data-element-palette] [data-element-key='hero']")
+    button = find("[data-element-palette] [data-element-key='button']")
+    assert_equal [ "Hero", true ], [ hero.text.strip, hero.find("svg path")[:d] != button.find("svg path")[:d] ]
+  end
 end

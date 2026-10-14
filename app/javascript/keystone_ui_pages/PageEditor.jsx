@@ -6,6 +6,7 @@ import { addColumn, addElement, addRow, addSection, arrange, duplicateNode, move
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
+import ElementPalette from "./ElementPalette"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
 
@@ -155,12 +156,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </form>
       </header>
       <div className="flex min-h-0 flex-1">
-        <aside ref={palette} data-element-palette className="flex w-64 shrink-0 flex-col gap-2 overflow-y-auto border-r border-(--ks-color-border) p-4">
-          {elements.map((element) => (
-            <Button key={element.key} type="button" variant="secondary" data-element-key={element.key}>{element.name}</Button>
-          ))}
+        <ElementPalette ref={palette} elements={elements}>
           <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
-        </aside>
+        </ElementPalette>
         <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-surface-200 p-8 dark:bg-surface-900">
           <div ref={sheet} data-page-sheet style={{ width: DEVICES.find((choice) => choice.key === device).width }} className="relative mx-auto min-h-full max-w-full bg-white px-6 shadow-lg ring-1 ring-black/5 dark:bg-(--ks-color-surface-dark,black)">
             <div ref={page} data-page-canvas className="@container min-h-full [&_[data-selected]]:relative [&_[data-selected]]:outline-2 [&_[data-selected]]:outline-(--ks-color-accent) [&_[data-hovered]]:relative [&_[data-hovered]]:outline-1 [&_[data-hovered]]:outline-(--ks-color-accent) [&_[data-hovered]]:before:absolute [&_[data-hovered]]:before:-top-5 [&_[data-hovered]]:before:left-0 [&_[data-hovered]]:before:z-10 [&_[data-hovered]]:before:rounded-t [&_[data-hovered]]:before:bg-(--ks-color-accent) [&_[data-hovered]]:before:px-1.5 [&_[data-hovered]]:before:text-xs [&_[data-hovered]]:before:leading-5 [&_[data-hovered]]:before:text-white [&_[data-hovered]]:before:content-[attr(data-kind)] [&_[data-column-id]:empty]:min-h-16 [&_[data-column-id]:empty]:items-center [&_[data-column-id]:empty]:justify-center [&_[data-column-id]:empty]:rounded-md [&_[data-column-id]:empty]:border-2 [&_[data-column-id]:empty]:border-dashed [&_[data-column-id]:empty]:border-(--ks-color-border-strong) [&_[data-column-id]:empty]:after:text-sm [&_[data-column-id]:empty]:after:text-(--ks-color-icon) [&_[data-column-id]:empty]:after:content-['Drop_an_element_here'] [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} onMouseOver={hovered} onMouseLeave={() => page.current.querySelectorAll("[data-hovered]").forEach((node) => delete node.dataset.hovered)} />
