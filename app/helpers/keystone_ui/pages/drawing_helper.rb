@@ -32,7 +32,7 @@ module KeystoneUi
         spans = "#{NARROW_SPANS.fetch(column['narrow'] || '1/1')} #{WIDE_SPANS.fetch(column['wide'] || share)} #{COLUMN_ALIGNMENTS.fetch(column['align'] || 'top')}"
         return tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans}") unless editing
 
-        tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans} min-h-16", data: { column_id: column["id"] })
+        tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans}", data: { column_id: column["id"] })
       end
 
       def edited_element(element)

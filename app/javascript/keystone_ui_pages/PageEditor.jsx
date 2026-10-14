@@ -59,7 +59,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
           <Button key={element.key} type="button" variant="secondary" data-element-key={element.key}>{element.name}</Button>
         ))}
       </aside>
-      <div ref={page} data-page-canvas className="flex-1" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
+      <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
       {definition && <ElementFields element={element} definition={definition} onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
     </div>
   )
