@@ -55,6 +55,9 @@ module KeystoneUi
                     { key: :value, label: "Value", kind: :text, default: "0" },
                     { key: :suffix, label: "Suffix", kind: :text },
                     { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
+        catalog.register(key: :figure, name: "Figure", component: :ui_figure,
+          fields: [ { key: :text, label: "Text", kind: :text, default: "0" },
+                    { key: :tone, label: "Tone", kind: :one_of, options: %w[neutral success danger], default: "neutral" } ])
       end
     end
   end
