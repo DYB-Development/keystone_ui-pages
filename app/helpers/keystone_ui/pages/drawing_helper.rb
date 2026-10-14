@@ -10,7 +10,8 @@ module KeystoneUi
       private
 
       def drawn_section(section, editing)
-        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 py-8")
+        spacing = Keystone::Ui::SectionComponent::SPACING_CLASSES.fetch((section["spacing"] || "md").to_sym)
+        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 #{spacing}")
       end
 
       def drawn_row(row, editing)
