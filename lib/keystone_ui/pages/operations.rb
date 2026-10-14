@@ -2,13 +2,17 @@
 
 require "json"
 require "securerandom"
+require "keystone_ui/pages"
 
 module KeystoneUi
   module Pages
+    class InvalidDocument < StandardError; end
+
     module Operations
       module_function
 
-      def add(document, key, column_id:)
+      def add(document, key, column_id:, catalog: Pages.catalog)
+        defined(catalog, key)
         copied(document).tap do |changed|
           column(changed, column_id)["elements"] << { "id" => SecureRandom.uuid, "key" => key.to_s, "fields" => {} }
         end
@@ -18,6 +22,10 @@ module KeystoneUi
         copied(document).tap do |changed|
           element(changed, element_id)["fields"][field.to_s] = value
         end
+      end
+
+      def defined(catalog, key)
+        catalog.find(key) or raise InvalidDocument, "No element is registered as #{key}"
       end
 
       def copied(document)

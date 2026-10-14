@@ -35,4 +35,12 @@ class KeystoneUi::Pages::OperationsTest < Minitest::Test
 
     assert_equal({ "label" => "Get a quote" }, changed["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"])
   end
+
+  def test_adding_an_element_the_catalog_does_not_have_is_refused_naming_the_key
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.add(@document, "carousel", column_id: @column_id)
+    end
+
+    assert_equal "No element is registered as carousel", refusal.message
+  end
 end
