@@ -113,6 +113,21 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_equal color_of_variable("--ks-color-border-control-dark"), page.evaluate_script("getComputedStyle(document.querySelector('[data-element-fields] .ks-input')).borderTopColor")
   end
 
+  test "publishing from the builder makes the current draft the page's live version" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+    find("[data-element-id] .ks-button").click
+    fill_in "Label", with: "Get a quote"
+    find("[data-element-fields] label", text: "Address").click
+    assert_selector "[data-element-id] .ks-button", text: "Get a quote"
+
+    click_on "Publish"
+    visit "/pages/pricing"
+
+    assert_selector ".ks-pages-column .ks-button", text: "Get a quote"
+  end
+
   private
 
   def background_of(selector)

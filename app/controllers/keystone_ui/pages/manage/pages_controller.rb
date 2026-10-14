@@ -15,6 +15,12 @@ module KeystoneUi
         def show
           @page = owned_pages.find(params[:id])
         end
+
+        def publish
+          page = owned_pages.find(params[:id])
+          page.publish
+          redirect_to manage_page_path(page)
+        end
       end
     end
   end

@@ -5,5 +5,10 @@
 
 <div data-page-builder>
   <%= ui_page_header(title: @page.name) %>
+
+  <%= ui_form(action: publish_manage_page_path(@page), method: :post) do %>
+    <%= ui_button(label: "Publish", type: :submit) %>
+  <% end %>
+
   <%= react_ui("keystone_ui_pages/editor", editor_props(@page)) %>
 </div>
