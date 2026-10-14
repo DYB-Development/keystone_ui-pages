@@ -66,4 +66,13 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal "This section holds 2 elements, so it cannot be removed", refusal.message
   end
+
+  def test_removing_an_empty_column_takes_it_out_of_its_row
+    widened = KeystoneUi::Pages::Operations.add_column(@document, row_id: @row["id"])
+    second = widened["sections"][0]["rows"][0]["columns"][1]["id"]
+
+    narrowed = KeystoneUi::Pages::Operations.remove(widened, node_id: second)
+
+    assert_equal [ @column["id"] ], narrowed["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+  end
 end
