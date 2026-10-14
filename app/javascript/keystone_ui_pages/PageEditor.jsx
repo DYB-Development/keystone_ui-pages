@@ -79,7 +79,7 @@ export default function PageEditor({ elements, canvas: drawn, document: saved, e
       </aside>
       <div ref={page} data-page-canvas className="flex-1 [&_[data-column-id]:empty]:min-h-16" onClick={select} dangerouslySetInnerHTML={{ __html: canvas }} />
       {node && <LayoutPanel node={node} values={nodeIn(document, node.id) ?? {}} arrangements={arrangements}
-        onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
+        onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
         refusal={refusal}
         onSelect={chose}
         onRemove={(id) => removeNode(nodes_url, token, id).then((answer) => { shown(answer); setNode(null) }, refused)}

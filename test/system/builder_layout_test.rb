@@ -117,6 +117,21 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-layout-refusal]", text: "This section holds 1 element, so it cannot be removed"
   end
 
+  test "column widths that add up to more than their row are refused in the builder, naming the row" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    all("[data-column-id]").first.click
+    select "2/3", from: "Width on wide screens"
+    assert_selector "[data-column-id].sm\\:col-span-8"
+    all("[data-column-id]").last.click
+
+    select "1/2", from: "Width on wide screens"
+
+    assert_selector "[data-layout-refusal]", text: "Row 1 of section 1 is wider than the page on wide screens"
+  end
+
   private
 
   def layout_classes
