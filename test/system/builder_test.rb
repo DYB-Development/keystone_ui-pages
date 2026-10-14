@@ -51,6 +51,18 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     assert_selector "[data-column-id] [data-element-id] .ks-button"
   end
 
+  test "a dropped element is drawn by the same component with the same classes as on the live page" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+    built = find("[data-column-id] [data-element-id] .ks-button")[:outerHTML]
+    page_record.reload.publish
+
+    visit "/pages/pricing"
+
+    assert_equal built, find(".ks-pages-column .ks-button")[:outerHTML]
+  end
+
   private
 
   def touched(source, target)
