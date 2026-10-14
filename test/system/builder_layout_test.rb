@@ -79,6 +79,16 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-section-id].ks-section-lg"
   end
 
+  test "an editor sets a column's vertical alignment" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id]").click
+
+    select "bottom", from: "Vertical alignment"
+
+    assert_selector "[data-column-id].justify-end"
+  end
+
   private
 
   def layout_classes

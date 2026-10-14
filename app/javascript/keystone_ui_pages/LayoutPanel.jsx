@@ -6,7 +6,7 @@ import { Label } from "keystone_ui-react/src/FieldText.jsx"
 const LABELS = {
   section: { spacing: "Section spacing" },
   row: { gap: "Row gap" },
-  column: { wide: "Width on wide screens", narrow: "Width on narrow screens" }
+  column: { wide: "Width on wide screens", narrow: "Width on narrow screens", align: "Vertical alignment" }
 }
 
 export default function LayoutPanel({ node, values, arrangements, onAddColumn, onAddRow, onArrange, onSelect }) {
