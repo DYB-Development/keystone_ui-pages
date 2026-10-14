@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
 import { addColumn, addElement, addRow, addSection, arrange, moveNode, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
+import SelectionToolbar from "./SelectionToolbar"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
 
@@ -22,6 +23,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const [node, setNode] = useState(null)
   const [refusal, setRefusal] = useState(null)
   const [device, setDevice] = useState("desktop")
+  const sheet = useRef(null)
+  const moveHandle = useRef(null)
+  const [toolbarPlace, setToolbarPlace] = useState(null)
   const manager = useRef(null)
   const palette = useRef(null)
   const page = useRef(null)
@@ -64,6 +68,10 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const element = selected && elementIn(document, selected)
   const definition = element && elements.find((offered) => offered.key === element.key)
 
+  useLayoutEffect(() => {
+    page.current.innerHTML = canvas
+  }, [canvas])
+
   useEffect(() => {
     const dragging = new DragDropManager()
     manager.current = dragging
@@ -104,6 +112,20 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     return () => [...columns, ...placed].forEach((droppable) => droppable.destroy())
   }, [canvas])
 
+  const selectedId = selected ?? node?.id
+
+  useEffect(() => {
+    page.current.querySelectorAll("[data-selected]").forEach((marked) => delete marked.dataset.selected)
+    const chosen = selectedId && page.current.querySelector(`[data-element-id="${selectedId}"], [data-column-id="${selectedId}"], [data-row-id="${selectedId}"], [data-section-id="${selectedId}"]`)
+    if (!chosen) return setToolbarPlace(null)
+    chosen.dataset.selected = ""
+    const outer = sheet.current.getBoundingClientRect()
+    const inner = chosen.getBoundingClientRect()
+    setToolbarPlace({ top: inner.top - outer.top, left: inner.left - outer.left })
+  }, [canvas, selectedId, device])
+
+  const removeSelected = () => removeNode(nodes_url, token, selectedId).then((answer) => { shown(answer); setNode(null); setSelected(null) }, refused)
+
   return (
     <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface,white)">
       <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) px-4">
@@ -122,7 +144,10 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
           <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
         </aside>
         <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-surface-200 p-8 dark:bg-surface-900">
-          <div ref={page} data-page-canvas style={{ width: DEVICES.find((choice) => choice.key === device).width }} className="@container mx-auto min-h-full max-w-full bg-white px-6 shadow-lg ring-1 ring-black/5 dark:bg-(--ks-color-surface-dark,black) [&_[data-hovered]]:relative [&_[data-hovered]]:outline-1 [&_[data-hovered]]:outline-(--ks-color-accent) [&_[data-hovered]]:before:absolute [&_[data-hovered]]:before:-top-5 [&_[data-hovered]]:before:left-0 [&_[data-hovered]]:before:z-10 [&_[data-hovered]]:before:rounded-t [&_[data-hovered]]:before:bg-(--ks-color-accent) [&_[data-hovered]]:before:px-1.5 [&_[data-hovered]]:before:text-xs [&_[data-hovered]]:before:leading-5 [&_[data-hovered]]:before:text-white [&_[data-hovered]]:before:content-[attr(data-kind)] [&_[data-column-id]:empty]:min-h-16 [&_[data-column-id]:empty]:items-center [&_[data-column-id]:empty]:justify-center [&_[data-column-id]:empty]:rounded-md [&_[data-column-id]:empty]:border-2 [&_[data-column-id]:empty]:border-dashed [&_[data-column-id]:empty]:border-(--ks-color-border-strong) [&_[data-column-id]:empty]:after:text-sm [&_[data-column-id]:empty]:after:text-(--ks-color-icon) [&_[data-column-id]:empty]:after:content-['Drop_an_element_here'] [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} onMouseOver={hovered} onMouseLeave={() => page.current.querySelectorAll("[data-hovered]").forEach((node) => delete node.dataset.hovered)} dangerouslySetInnerHTML={{ __html: canvas }} />
+          <div ref={sheet} data-page-sheet style={{ width: DEVICES.find((choice) => choice.key === device).width }} className="relative mx-auto min-h-full max-w-full bg-white px-6 shadow-lg ring-1 ring-black/5 dark:bg-(--ks-color-surface-dark,black)">
+            <div ref={page} data-page-canvas className="@container min-h-full [&_[data-selected]]:relative [&_[data-selected]]:outline-2 [&_[data-selected]]:outline-(--ks-color-accent) [&_[data-hovered]]:relative [&_[data-hovered]]:outline-1 [&_[data-hovered]]:outline-(--ks-color-accent) [&_[data-hovered]]:before:absolute [&_[data-hovered]]:before:-top-5 [&_[data-hovered]]:before:left-0 [&_[data-hovered]]:before:z-10 [&_[data-hovered]]:before:rounded-t [&_[data-hovered]]:before:bg-(--ks-color-accent) [&_[data-hovered]]:before:px-1.5 [&_[data-hovered]]:before:text-xs [&_[data-hovered]]:before:leading-5 [&_[data-hovered]]:before:text-white [&_[data-hovered]]:before:content-[attr(data-kind)] [&_[data-column-id]:empty]:min-h-16 [&_[data-column-id]:empty]:items-center [&_[data-column-id]:empty]:justify-center [&_[data-column-id]:empty]:rounded-md [&_[data-column-id]:empty]:border-2 [&_[data-column-id]:empty]:border-dashed [&_[data-column-id]:empty]:border-(--ks-color-border-strong) [&_[data-column-id]:empty]:after:text-sm [&_[data-column-id]:empty]:after:text-(--ks-color-icon) [&_[data-column-id]:empty]:after:content-['Drop_an_element_here'] [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} onMouseOver={hovered} onMouseLeave={() => page.current.querySelectorAll("[data-hovered]").forEach((node) => delete node.dataset.hovered)} />
+            <SelectionToolbar ref={moveHandle} place={toolbarPlace} onRemove={removeSelected} />
+          </div>
         </main>
         <aside data-settings-panel className="w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) p-4">
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}

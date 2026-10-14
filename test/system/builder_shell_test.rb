@@ -29,7 +29,7 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_selector "[data-page-canvas]", visible: :all
     assert_equal [ true, true ], page.evaluate_script(<<~JS)
       (() => {
-        const canvas = getComputedStyle(document.querySelector("[data-page-canvas]"))
+        const canvas = getComputedStyle(document.querySelector("[data-page-sheet]"))
         const frame = getComputedStyle(document.querySelector("[data-page-frame]"))
         return [canvas.backgroundColor !== frame.backgroundColor && canvas.backgroundColor !== "rgba(0, 0, 0, 0)", canvas.boxShadow !== "none"]
       })()
@@ -54,7 +54,7 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
 
     click_on "Phone"
 
-    assert_equal 390, page.evaluate_script("Math.round(document.querySelector('[data-page-canvas]').getBoundingClientRect().width)")
+    assert_equal 390, page.evaluate_script("Math.round(document.querySelector('[data-page-sheet]').getBoundingClientRect().width)")
   end
 
   test "at phone width the page's columns stack the way they do on a phone" do
@@ -100,5 +100,18 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
         return [getComputedStyle(column).outlineStyle, getComputedStyle(column, "::before").content, getComputedStyle(row).outlineStyle]
       })()
     JS
+  end
+
+  test "the selected column stays outlined and shows a toolbar with move, duplicate and remove" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-column-id]").click
+    find("[data-builder-top-bar] h1").hover
+
+    assert_equal [ %w[Move Duplicate Remove], "solid" ], [
+      all("[data-selection-toolbar] button").map(&:text),
+      page.evaluate_script("getComputedStyle(document.querySelector('[data-column-id]')).outlineStyle")
+    ]
   end
 end
