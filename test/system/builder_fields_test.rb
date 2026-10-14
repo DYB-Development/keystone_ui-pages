@@ -10,6 +10,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-fields] textarea#ks-pages-field-message"
   end
 
+  test "a number field is edited in a number input" do
+    selected("progress", ".ks-progress-track")
+
+    assert_selector "[data-element-fields] input[type='number']#ks-pages-field-value"
+  end
+
   private
 
   def selected(key, drawn)

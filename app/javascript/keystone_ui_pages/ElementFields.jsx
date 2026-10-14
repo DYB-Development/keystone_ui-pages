@@ -12,6 +12,7 @@ const FieldInput = ({ field, value, onChange }) => {
   }
 
   if (field.kind === "long_text") return <Textarea {...shared} rows={4} />
+  if (field.kind === "number") return <Input {...shared} type="number" />
   return <Input {...shared} type="text" />
 }
 
