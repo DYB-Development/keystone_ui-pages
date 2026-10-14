@@ -4,6 +4,7 @@ import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
 import { addColumn, addElement, addRow, addSection, arrange, moveNode, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
+import DeviceWidth from "./DeviceWidth"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
 
@@ -15,6 +16,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const [selected, setSelected] = useState(null)
   const [node, setNode] = useState(null)
   const [refusal, setRefusal] = useState(null)
+  const [device, setDevice] = useState("desktop")
   const manager = useRef(null)
   const palette = useRef(null)
   const page = useRef(null)
@@ -92,6 +94,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface,white)">
       <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) px-4">
         <h1 className="truncate text-base font-semibold">{name}</h1>
+        <DeviceWidth chosen={device} onChoose={setDevice} />
         <form method="post" action={publish_url}>
           <input type="hidden" name="authenticity_token" value={token} />
           <Button type="submit" size="sm">Publish</Button>

@@ -34,4 +34,16 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
       })()
     JS
   end
+
+  test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_equal [ "Pricing", %w[Phone Tablet Desktop], "Publish" ], [
+      find("[data-builder-top-bar] h1").text,
+      all("[data-builder-top-bar] [data-device-width] button").map(&:text),
+      find("[data-builder-top-bar] button[type='submit']").text
+    ]
+  end
 end
