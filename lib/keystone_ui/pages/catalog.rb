@@ -3,14 +3,14 @@
 module KeystoneUi
   module Pages
     class Catalog
-      Element = Data.define(:key, :name, :component, :fields, :body)
+      Element = Data.define(:key, :name, :component, :fields, :body, :icon, :group)
 
       def initialize
         @elements = {}
       end
 
-      def register(key:, name:, component:, fields:, body: nil)
-        @elements[key.to_sym] = Element.new(key: key.to_sym, name: name, component: component, fields: fields, body: body)
+      def register(key:, name:, component:, fields:, body: nil, icon: nil, group: nil)
+        @elements[key.to_sym] = Element.new(key: key.to_sym, name: name, component: component, fields: fields, body: body, icon: icon, group: group)
       end
 
       def leave_out(*keys)
