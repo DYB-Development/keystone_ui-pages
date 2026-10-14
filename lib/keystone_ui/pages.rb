@@ -41,6 +41,10 @@ module KeystoneUi
                     { key: :subtitle, label: "Subtitle", kind: :long_text },
                     { key: :badge, label: "Badge", kind: :text },
                     { key: :layout, label: "Layout", kind: :one_of, options: %w[split centered], default: "split" } ])
+        catalog.register(key: :cta_banner, name: "Call to action", component: :ui_cta_banner, body: :text,
+          fields: [ { key: :title, label: "Title", kind: :text, default: "Ready to start?" },
+                    { key: :subtitle, label: "Subtitle", kind: :text },
+                    { key: :text, label: "Text", kind: :long_text } ])
       end
     end
   end

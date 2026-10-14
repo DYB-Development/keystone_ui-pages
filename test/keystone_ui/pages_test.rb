@@ -38,6 +38,12 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal [ :ui_hero, [ :text, :long_text, :text, :one_of ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
   end
 
+  def test_the_catalog_offers_keystone_ui_cta_banner
+    element = KeystoneUi::Pages.catalog.find(:cta_banner)
+
+    assert_equal [ :ui_cta_banner, [ :text, :text, :long_text ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
