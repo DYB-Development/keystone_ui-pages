@@ -49,9 +49,15 @@ module KeystoneUi
         tag.div(component_for(element), class: "ks-pages-element #{ELEMENT_ALIGNMENTS.fetch(element['align'] || 'stretch')}", data: data)
       end
 
+      def field_value(field, value)
+        return value unless field[:kind] == :number && value.present?
+
+        value.to_s.include?(".") ? value.to_f : value.to_i
+      end
+
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
-        values = definition.fields.to_h { |field| [ field[:key].to_sym, element["fields"][field[:key].to_s] ] }
+        values = definition.fields.to_h { |field| [ field[:key].to_sym, field_value(field, element["fields"][field[:key].to_s]) ] }
         send(definition.component, **values)
       end
     end

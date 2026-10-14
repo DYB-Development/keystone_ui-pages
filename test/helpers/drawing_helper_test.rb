@@ -55,4 +55,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select "div.ks-pages-element.flex.justify-center > .ks-button"
   end
+
+  test "a number field reaches its component as a number" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "progress", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"] = { "value" => "40", "max" => "80" }
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-progress-bar[style*='50%']"
+  end
 end
