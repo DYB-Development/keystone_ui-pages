@@ -9,7 +9,7 @@ module KeystoneUi
         catalog.register(key: :button, name: "Button", component: :ui_button,
           fields: [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress,
-          fields: [ { key: :value, label: "Value", kind: :number }, { key: :max, label: "Out of", kind: :number }, { key: :label, label: "Label", kind: :text } ])
+          fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text } ])
         catalog.register(key: :alert, name: "Alert", component: :ui_alert,
           fields: [ { key: :message, label: "Message", kind: :long_text }, { key: :title, label: "Title", kind: :text },
                     { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error], default: "info" },
@@ -29,7 +29,7 @@ module KeystoneUi
         catalog.register(key: :card, name: "Card", component: :ui_card,
           fields: [ { key: :title, label: "Title", kind: :text, default: "Card title" },
                     { key: :summary, label: "Summary", kind: :long_text },
-                    { key: :link, label: "Link", kind: :address },
+                    { key: :link, label: "Link", kind: :address, default: "#" },
                     { key: :cta, label: "Link text", kind: :text, default: "Read more" } ])
         catalog.register(key: :stat_card, name: "Stat", component: :ui_stat_card,
           fields: [ { key: :label, label: "Label", kind: :text, default: "Label" },
