@@ -24,6 +24,10 @@ module KeystoneUi
         copied(document).tap { |changed| changed["sections"] << Document.section }
       end
 
+      def add_row(document, section_id:)
+        copied(document).tap { |changed| node(changed, section_id)["rows"] << Document.row }
+      end
+
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)
         copied(document).tap do |changed|
           element = element(changed, element_id)
@@ -64,6 +68,16 @@ module KeystoneUi
 
       def copied(document)
         JSON.parse(JSON.generate(document))
+      end
+
+      def nodes(document)
+        sections = document["sections"]
+        rows = sections.flat_map { |section| section["rows"] }
+        sections + rows + columns(document) + elements(document)
+      end
+
+      def node(document, node_id)
+        nodes(document).find { |node| node["id"] == node_id }
       end
 
       def columns(document)

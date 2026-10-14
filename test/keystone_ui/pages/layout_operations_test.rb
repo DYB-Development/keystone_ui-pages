@@ -17,4 +17,10 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
 
     assert_equal [ 2, 1, 1 ], [ added["sections"].size, added["sections"][1]["rows"].size, added["sections"][1]["rows"][0]["columns"].size ]
   end
+
+  def test_adding_a_row_to_a_section_appends_one_holding_a_column
+    added = KeystoneUi::Pages::Operations.add_row(@document, section_id: @section["id"])
+
+    assert_equal [ 2, 1 ], [ added["sections"][0]["rows"].size, added["sections"][0]["rows"][1]["columns"].size ]
+  end
 end
