@@ -29,4 +29,18 @@ class KeystoneUi::Pages::VersionHistoryTest < ActionDispatch::IntegrationTest
 
     assert_equal "First", Nokogiri::HTML(response.body).at_css(".ks-pages-element .ks-button").text.strip
   end
+
+  test "restoring an earlier version copies it into the draft and changes no published version" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.publish
+    first = page.versions.find_by(number: 1)
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "button", column_id: column_id))
+    page.publish
+    published = page.versions.reload.map { |version| [ version.number, version.status, version.document ] }
+
+    post "/pages/manage/pages/#{page.id}/versions/#{first.id}/restore"
+
+    assert_equal [ first.document, published ], [ page.reload.document, page.versions.reload.map { |version| [ version.number, version.status, version.document ] } ]
+  end
 end

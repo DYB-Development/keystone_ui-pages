@@ -13,6 +13,12 @@ module KeystoneUi
           @page = owned_pages.find(params[:page_id])
           @version = @page.versions.find(params[:id])
         end
+
+        def restore
+          page = owned_pages.find(params[:page_id])
+          page.update!(document: page.versions.find(params[:id]).document)
+          redirect_to manage_page_path(page)
+        end
       end
     end
   end
