@@ -1,6 +1,7 @@
 import React from "react"
 import Input from "keystone_ui-react/src/Input.jsx"
 import Button from "keystone_ui-react/src/Button.jsx"
+import Checkbox from "keystone_ui-react/src/Checkbox.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
 
 const swapped = (entries, from, to) => {
@@ -20,9 +21,12 @@ export default function ListField({ field, entries, onChange }) {
           {parts.map((part) => (
             <div key={part.key} className="flex flex-col gap-1">
               <Label htmlFor={`ks-pages-${field.key}-${index}-${part.key}`}>{part.label}</Label>
-              <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? ""}
-                onBlur={(event) => event.target.value !== (entry[part.key] ?? "") &&
-                  saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: event.target.value } : kept)))} />
+              {part.kind === "yes_or_no"
+                ? <Checkbox id={`ks-pages-${field.key}-${index}-${part.key}`} defaultChecked={entry[part.key] === "true"}
+                    onChange={(event) => saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: String(event.target.checked) } : kept)))} />
+                : <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? ""}
+                    onBlur={(event) => event.target.value !== (entry[part.key] ?? "") &&
+                      saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: event.target.value } : kept)))} />}
             </div>
           ))}
           <div className="flex flex-wrap gap-2">
