@@ -64,6 +64,15 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal [ %w[Light Dark System], "dark" ], [ mode.all("option").map(&:text), mode.value ]
   end
 
+  test "choosing dark mode in the top bar draws the page in the dark mode" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    assert_equal "dark", page.evaluate_script("document.documentElement.dataset.theme")
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
