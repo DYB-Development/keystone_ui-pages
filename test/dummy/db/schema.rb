@@ -51,6 +51,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_211918) do
     t.index ["owner_type", "owner_id"], name: "index_keystone_ui_pages_pages_on_owner"
   end
 
+  create_table "keystone_ui_pages_pdfs", force: :cascade do |t|
+    t.integer "version_id", null: false
+    t.string "values_digest", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["version_id", "values_digest"], name: "index_keystone_ui_pages_pdfs_on_version_id_and_values_digest", unique: true
+    t.index ["version_id"], name: "index_keystone_ui_pages_pdfs_on_version_id"
+  end
+
   create_table "keystone_ui_pages_versions", force: :cascade do |t|
     t.integer "page_id", null: false
     t.integer "number", null: false
@@ -69,5 +78,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_211918) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "keystone_ui_pages_pdfs", "keystone_ui_pages_versions", column: "version_id"
   add_foreign_key "keystone_ui_pages_versions", "keystone_ui_pages_pages", column: "page_id"
 end
