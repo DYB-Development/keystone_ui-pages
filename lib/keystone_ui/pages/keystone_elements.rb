@@ -6,7 +6,7 @@ module KeystoneUi
       module_function
 
       def register(catalog)
-        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics",
+        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start",
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
@@ -42,10 +42,10 @@ module KeystoneUi
         catalog.register(key: :info, name: "Info", component: :ui_info, icon: :info, group: "Text", body: :detail,
           fields: [ { key: :summary, label: "Summary", kind: :text, default: "More information" },
                     { key: :detail, label: "Detail", kind: :long_text } ])
-        catalog.register(key: :badge, name: "Badge", component: :ui_badge, icon: :tag, group: "Basics",
+        catalog.register(key: :badge, name: "Badge", component: :ui_badge, icon: :tag, group: "Basics", align: "start",
           fields: [ { key: :label, label: "Label", kind: :text, default: "Badge" },
                     { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
-        catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics",
+        catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start",
           fields: [ { key: :text, label: "Text to copy", kind: :text },
                     { key: :label, label: "Label", kind: :text, default: "Copy" } ])
       end

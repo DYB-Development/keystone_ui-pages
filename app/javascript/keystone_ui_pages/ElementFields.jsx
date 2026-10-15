@@ -41,7 +41,7 @@ export default function ElementFields({ element, definition, alignments, onChang
       ))}
       <div className="flex flex-col gap-1">
         <Label htmlFor="ks-pages-element-align">Horizontal alignment</Label>
-        <Select key={`${element.id}-align`} id="ks-pages-element-align" defaultValue={element.align ?? "stretch"} onChange={(event) => onArrange(element.id, "align", event.target.value)}>
+        <Select key={`${element.id}-align`} id="ks-pages-element-align" defaultValue={element.align ?? definition.align ?? "stretch"} onChange={(event) => onArrange(element.id, "align", event.target.value)}>
           {alignments.map((value) => <option key={value} value={value}>{value}</option>)}
         </Select>
       </div>
