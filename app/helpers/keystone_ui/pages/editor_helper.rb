@@ -8,7 +8,7 @@ module KeystoneUi
       def editor_props(page)
         {
           elements: KeystoneUi::Pages.catalog.elements.map { |element| element.to_h.slice(:key, :name, :fields, :icon, :group, :align) },
-          canvas: drawn_document(page.document, editing: true),
+          canvas: editor_canvas(page),
           document: page.document,
           elements_url: manage_page_elements_path(page),
           sections_url: manage_page_sections_path(page),
@@ -21,6 +21,10 @@ module KeystoneUi
           value_names: Values.names,
           token: form_authenticity_token
         }
+      end
+
+      def editor_canvas(page)
+        drawn_document(page.document, editing: true)
       end
     end
   end
