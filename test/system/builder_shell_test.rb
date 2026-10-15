@@ -93,6 +93,21 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal [ %w[Light Dark System Custom], "custom" ], [ mode.all("option").map(&:text), mode.value ]
   end
 
+  test "the top bar offers the looks the host app registers and opens on the editor's own look" do
+    KeystoneUi.configuration.register_look :plain, "plain.css"
+    KeystoneUi.configuration.register_look :bold, "bold.css"
+    KeystoneUi.configuration.default_look = :bold
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    look = find("[data-builder-top-bar] [data-look-choice]")
+
+    assert_equal [ %w[Plain Bold], "bold" ], [ look.all("option").map(&:text), look.value ]
+  ensure
+    KeystoneUi.configuration.looks.clear
+    KeystoneUi.configuration.default_look = nil
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
