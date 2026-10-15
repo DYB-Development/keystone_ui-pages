@@ -146,6 +146,18 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] thead th:first-child.text-right"
   end
 
+  test "the builder draws a list bound to a value its preview does not supply with no rows" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(page_record.document, "value_list", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["rows"] = { "value" => "billing", "fallback" => nil }
+    page_record.update!(document: added)
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-element-id] .ks-value-list", visible: :all
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 
