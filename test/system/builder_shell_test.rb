@@ -153,12 +153,27 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal [ true, true ], borders
   end
 
+  test "choosing print draws the page at paper width in light mode, as it prints" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    within("[data-device-width]") { click_on "Print" }
+
+    assert_equal [ "794px", "light", "rgb(255, 255, 255)" ], page.evaluate_script(<<~JS)
+      (() => {
+        const sheet = document.querySelector("[data-page-sheet]")
+        return [sheet.style.width, sheet.dataset.theme, getComputedStyle(sheet).backgroundColor]
+      })()
+    JS
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
     visit "/pages/manage/pages/#{page_record.id}"
 
-    assert_equal [ "Pricing", %w[Phone Tablet Desktop], "Publish" ], [
+    assert_equal [ "Pricing", %w[Phone Tablet Desktop Print], "Publish" ], [
       find("[data-builder-top-bar] h1").text,
       all("[data-builder-top-bar] [data-device-width] button").map(&:text),
       find("[data-builder-top-bar] button[type='submit']").text
