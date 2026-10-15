@@ -295,6 +295,19 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Portal", "2.0" ], css_select("tbody tr[data-table-group] th").map { |cell| cell.text.strip }
   end
 
+  test "a data table ends with a total row showing the values the host supplies" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+    fields = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]
+    fields["items"] = { "value" => "work", "fallback" => nil }
+    fields["columns"] = [ { "key" => "task", "label" => "Task" }, { "key" => "hours", "label" => "Hours" } ]
+    fields["total"] = { "value" => "totals", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "work" => [ { "task" => "Export", "hours" => "2.0" } ], "totals" => { "task" => "Total", "hours" => "2.0" } })
+
+    assert_equal [ "Total", "2.0" ], css_select("tfoot th").map { |cell| cell.text.strip }
+  end
+
   test "a line chart draws the series and labels the host supplies" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "line_chart", column_id: column_id)
