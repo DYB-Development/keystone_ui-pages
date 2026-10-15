@@ -48,6 +48,15 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal "Something worth knowing.", find_field("Message").value
   end
 
+  test "changing a field in the settings panel replaces its placeholder content" do
+    selected("button", ".ks-button")
+
+    fill_in "Label", with: "Get a quote"
+    find("[data-element-fields] label", text: "Address").click
+
+    assert_selector "[data-element-id] .ks-button", text: "Get a quote"
+  end
+
   private
 
   def selected(key, drawn)
