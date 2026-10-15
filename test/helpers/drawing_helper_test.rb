@@ -213,6 +213,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "$150.00", "N/A" ], css_select(".ks-value-list-value").map { |value| value.text.strip }
   end
 
+  test "a value list bound to a host value the host does not supply draws with no rows" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "value_list", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["rows"] = { "value" => "billing", "fallback" => nil }
+
+    render html: drawn_document(added, values: {})
+
+    assert_select ".ks-value-list-row", count: 0
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
