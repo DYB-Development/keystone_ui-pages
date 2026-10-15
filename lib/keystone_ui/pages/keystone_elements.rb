@@ -48,6 +48,30 @@ module KeystoneUi
         catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start",
           fields: [ { key: :text, label: "Text to copy", kind: :text },
                     { key: :label, label: "Label", kind: :text, default: "Copy" } ])
+        catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content",
+          fields: [ { key: :title, label: "Title", kind: :text, default: "Why teams choose us" },
+                    { key: :subtitle, label: "Subtitle", kind: :text },
+                    { key: :features, label: "Features", kind: :list,
+                      entry: [ { key: :title, label: "Title", kind: :text }, { key: :description, label: "Description", kind: :long_text },
+                               { key: :icon, label: "Icon", kind: :text, hidden: true,
+                                 default: '<svg viewBox="0 0 24 24" class="size-6 fill-none stroke-current stroke-2"><path d="M5 12l5 5L20 7"/></svg>' } ],
+                      default: [ { "title" => "Fast", "description" => "Pages load quickly." },
+                                 { "title" => "Clear", "description" => "Every page reads plainly." },
+                                 { "title" => "Yours", "description" => "Built from your own components." } ] } ])
+        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
+          fields: [ { key: :items, label: "Questions", kind: :list,
+                      entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],
+                      default: [ { "question" => "What is this?", "answer" => "A question visitors often ask." },
+                                 { "question" => "How does it work?", "answer" => "The answer opens below its question." } ] } ])
+        catalog.register(key: :data_table, name: "Table", component: :ui_data_table, icon: :card, group: "Data",
+          fields: [ { key: :items, label: "Rows", kind: :data,
+                      default: [ { "name" => "First row", "status" => "Open" }, { "name" => "Second row", "status" => "Closed" } ] },
+                    { key: :columns, label: "Columns", kind: :list, as: :pairs,
+                      entry: [ { key: :key, label: "Key", kind: :text }, { key: :label, label: "Heading", kind: :text } ],
+                      default: [ { "key" => "name", "label" => "Name" }, { "key" => "status", "label" => "Status" } ] } ])
+        catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data",
+          fields: [ { key: :series, label: "Series", kind: :data, default: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ] },
+                    { key: :labels, label: "Labels", kind: :data, default: %w[Mon Tue Wed Thu] } ])
       end
     end
   end

@@ -83,6 +83,45 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     KeystoneUi::Pages::Values.names = {}
   end
 
+  test "an editor adds an entry to a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    within("[data-list-field='items']") { click_on "Add item" }
+
+    assert_selector "[data-element-id] .ks-accordion-item", count: 3
+  end
+
+  test "an editor edits an entry of a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    fill_in "ks-pages-items-0-question", with: "Is it free?"
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-accordion-item", text: "Is it free?"
+  end
+
+  test "an editor removes an entry from a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    within(all("[data-list-entry]").first) { click_on "Remove item" }
+
+    assert_selector "[data-element-id] .ks-accordion-item", count: 1, text: "How does it work?"
+  end
+
+  test "an editor reorders the entries of a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    within(all("[data-list-entry]").last) { click_on "Move up" }
+
+    assert_selector "[data-element-id] .ks-accordion-item:first-child", text: "How does it work?"
+  end
+
+  test "a data field says the host fills it instead of offering a text box" do
+    selected("data_table", "tbody tr:first-child td:first-child")
+
+    assert_equal [ false, true ], [ has_field?("Rows"), has_css?("[data-element-fields]", text: "Filled with data the host supplies on a template page") ]
+  end
+
   private
 
   def selected(key, drawn)

@@ -10,4 +10,11 @@ class KeystoneUi::Pages::ReadmeTest < ActiveSupport::TestCase
 
     assert_equal [], (components - offered).reject { |component| readme.include?("`#{component}`") }
   end
+
+  test "the README's list of left-out components names none the catalog offers" do
+    offered = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }.elements.map { |element| element.component.to_s.delete_prefix("ui_") }
+    left_out = KeystoneUi::Pages::Engine.root.join("README.md").read.split("### Components left out of the catalog").last
+
+    assert_equal [], offered.select { |component| left_out.include?("`#{component}`") }
+  end
 end

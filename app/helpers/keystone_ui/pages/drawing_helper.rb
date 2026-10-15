@@ -52,12 +52,20 @@ module KeystoneUi
       end
 
       def field_value(field, value)
+        return value.map { |entry| entry.is_a?(Hash) ? entry.symbolize_keys : entry } if field[:kind] == :data && value.is_a?(Array)
+        return value.map { |entry| { entry["key"].to_s.to_sym => entry["label"] } } if field[:as] == :pairs && value.is_a?(Array)
+        return value.map { |entry| entry_with_defaults(field, entry) } if field[:kind] == :list && value.is_a?(Array)
         return value if value.blank?
         return value.to_s == "true" if field[:kind] == :yes_or_no
         return value.to_sym if field[:kind] == :one_of
         return value unless field[:kind] == :number
 
         value.to_s.include?(".") ? value.to_f : value.to_i
+      end
+
+      def entry_with_defaults(field, entry)
+        defaults = Array(field[:entry]).to_h { |part| [ part[:key], part[:default] ] }.compact
+        defaults.merge(entry.to_h.symbolize_keys.compact_blank)
       end
 
       def filled(stored)
