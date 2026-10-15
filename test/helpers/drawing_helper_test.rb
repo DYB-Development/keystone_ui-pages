@@ -217,4 +217,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     chart = JSON.parse(css_select("[data-line-chart-data-value]").first["data-line-chart-data-value"])
     assert_equal [ %w[W1 W2], "Score", [ 60, 72 ] ], [ chart["labels"], chart["datasets"][0]["label"], chart["datasets"][0]["data"] ]
   end
+
+  test "a hero set to content height drops keystone_ui's full-screen minimum height" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "hero", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["height"] = "content"
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-pages-element[class~='[&_.ks-hero]:min-h-0'] .ks-hero"
+  end
 end

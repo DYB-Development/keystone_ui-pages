@@ -39,7 +39,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_the_catalog_offers_keystone_ui_hero
     element = keystone_elements.find(:hero)
 
-    assert_equal [ :ui_hero, [ :text, :long_text, :text, :one_of ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
+    assert_equal [ :ui_hero, [ :text, :long_text, :text, :one_of, :one_of ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
   end
 
   def test_the_catalog_offers_keystone_ui_cta_banner

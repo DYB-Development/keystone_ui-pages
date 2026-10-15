@@ -21,7 +21,9 @@ module KeystoneUi
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
                     { key: :subtitle, label: "Subtitle", kind: :long_text },
                     { key: :badge, label: "Badge", kind: :text },
-                    { key: :layout, label: "Layout", kind: :one_of, options: %w[split centered], default: "split" } ])
+                    { key: :layout, label: "Layout", kind: :one_of, options: %w[split centered], default: "split" },
+                    { key: :height, label: "Height", kind: :one_of, options: %w[content tall full_screen], default: "tall",
+                      classes: { "content" => "[&_.ks-hero]:min-h-0", "tall" => "[&_.ks-hero]:min-h-[28rem]", "full_screen" => "[&_.ks-hero]:min-h-screen" } } ])
         catalog.register(key: :cta_banner, name: "Call to action", component: :ui_cta_banner, icon: :megaphone, group: "Content", body: :text,
           fields: [ { key: :title, label: "Title", kind: :text, default: "Ready to start?" },
                     { key: :subtitle, label: "Subtitle", kind: :text },

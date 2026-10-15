@@ -53,7 +53,7 @@ module KeystoneUi
       end
 
       def wrapped_element(element, data: {})
-        tag.div(component_for(element), class: "ks-pages-element #{ELEMENT_ALIGNMENTS.fetch(element["align"] || KeystoneUi::Pages.catalog.find(element["key"])&.align || Operations::DEFAULTS[:element]["align"])}", data: data)
+        tag.div(component_for(element), class: "ks-pages-element #{wrapper_classes(element)} #{ELEMENT_ALIGNMENTS.fetch(element["align"] || KeystoneUi::Pages.catalog.find(element["key"])&.align || Operations::DEFAULTS[:element]["align"])}", data: data)
       end
 
       def field_value(field, value)
@@ -79,9 +79,15 @@ module KeystoneUi
         (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence || ""
       end
 
+      def wrapper_classes(element)
+        definition = KeystoneUi::Pages.catalog.find(element["key"])
+        definition.fields.select { |field| field[:classes] }
+          .map { |field| field[:classes][element["fields"][field[:key].to_s].presence || field[:default]] }.compact.join(" ")
+      end
+
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
-        values = definition.fields.to_h { |field| [ field[:key].to_sym, field_value(field, filled(element["fields"][field[:key].to_s]) || field[:default]) ] }
+        values = definition.fields.reject { |field| field[:classes] }.to_h { |field| [ field[:key].to_sym, field_value(field, filled(element["fields"][field[:key].to_s]) || field[:default]) ] }
         return send(definition.component, **values) unless definition.body
 
         body = values.delete(definition.body)
