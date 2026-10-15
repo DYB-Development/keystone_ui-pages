@@ -63,6 +63,12 @@ module KeystoneUi
                       entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],
                       default: [ { "question" => "What is this?", "answer" => "A question visitors often ask." },
                                  { "question" => "How does it work?", "answer" => "The answer opens below its question." } ] } ])
+        catalog.register(key: :data_table, name: "Table", component: :ui_data_table, icon: :card, group: "Data",
+          fields: [ { key: :items, label: "Rows", kind: :data,
+                      default: [ { "name" => "First row", "status" => "Open" }, { "name" => "Second row", "status" => "Closed" } ] },
+                    { key: :columns, label: "Columns", kind: :list, as: :pairs,
+                      entry: [ { key: :key, label: "Key", kind: :text }, { key: :label, label: "Heading", kind: :text } ],
+                      default: [ { "key" => "name", "label" => "Name" }, { "key" => "status", "label" => "Status" } ] } ])
       end
     end
   end

@@ -191,4 +191,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_equal %w[Uptime Support], css_select("h3").map { |heading| heading.text.strip }
   end
+
+  test "a data table draws the rows the host supplies under the columns the editor listed" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+    fields = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]
+    fields["items"] = { "value" => "orders", "fallback" => nil }
+    fields["columns"] = [ { "key" => "number", "label" => "Order" } ]
+
+    render html: drawn_document(added, values: { "orders" => [ { "number" => "A-1" }, { "number" => "A-2" } ] })
+
+    assert_equal [ "Order", %w[A-1 A-2] ], [ css_select("th").map { |cell| cell.text.strip }.first, css_select("td").map { |cell| cell.text.strip } ]
+  end
 end
