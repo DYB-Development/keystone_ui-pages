@@ -161,4 +161,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-button", text: "Acme"
   end
+
+  test "a bound field whose value is missing draws its fallback" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"] = { "value" => "client_name", "fallback" => "Our client" }
+
+    render html: drawn_document(added, values: {})
+
+    assert_select ".ks-button", text: "Our client"
+  end
 end
