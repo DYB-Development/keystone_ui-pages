@@ -36,6 +36,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-alert-dismiss"
   end
 
+  test "a field the editor has not changed shows its default in the settings panel" do
+    selected("hero", "h1")
+
+    assert_equal [ "Headline", "split" ], [ find_field("Title").value, find_field("Layout").value ]
+  end
+
   private
 
   def selected(key, drawn)

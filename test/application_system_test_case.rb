@@ -13,6 +13,16 @@ module KeystoneUi
         chrome = ENV["CHROME_BIN"].presence || CACHED_CHROME
         options.binary = chrome if chrome
       end
+
+      def touched(source, target)
+        actions = page.driver.browser.action
+        finger = actions.add_pointer_input(:touch, "finger")
+        actions
+          .move_to(source.native, device: "finger").pointer_down(:left, device: "finger").pause(device: finger, duration: 0.3)
+          .move_by(10, 10, device: "finger").pause(device: finger, duration: 0.1)
+          .move_to(target.native, device: "finger").pause(device: finger, duration: 0.1)
+          .pointer_up(:left, device: "finger").perform
+      end
     end
   end
 end

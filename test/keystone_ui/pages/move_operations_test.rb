@@ -68,6 +68,24 @@ class KeystoneUi::Pages::MoveOperationsTest < Minitest::Test
     assert_equal "A section cannot be moved into something inside it", refusal.message
   end
 
+  def test_duplicating_an_element_places_a_copy_with_a_new_id_right_after_it
+    duplicated = KeystoneUi::Pages::Operations.duplicate(@document, node_id: @elements[0])
+
+    ids = element_ids(duplicated)[0]
+    assert_equal [ 4, @elements[0], @elements[1], true ], [ ids.size, ids[0], ids[2], !@elements.include?(ids[1]) ]
+  end
+
+  def test_duplicating_a_row_gives_the_copy_and_everything_in_it_new_ids
+    row = @document["sections"][0]["rows"][0]
+
+    duplicated = KeystoneUi::Pages::Operations.duplicate(@document, node_id: row["id"])
+
+    copy = duplicated["sections"][0]["rows"][1]
+    original_ids = [ row["id"] ] + row["columns"].map { |column| column["id"] } + @elements
+    copy_ids = [ copy["id"] ] + copy["columns"].map { |column| column["id"] } + copy["columns"].flat_map { |column| column["elements"].map { |element| element["id"] } }
+    assert_equal [ 6, [] ], [ copy_ids.uniq.size, copy_ids & original_ids ]
+  end
+
   private
 
   def element_ids(document)

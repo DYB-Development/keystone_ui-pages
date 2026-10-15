@@ -35,9 +35,17 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     visit "/pages/manage/pages/#{page_record.id}"
     palette_item = find("[data-element-palette] [data-element-key='button']")
 
+    across, down = page.evaluate_script(<<~JS)
+      (() => {
+        const from = document.querySelector("[data-element-palette] [data-element-key='button']").getBoundingClientRect()
+        const to = document.querySelector("[data-column-id]").getBoundingClientRect()
+        return [Math.round((to.left + to.width / 2 - from.left - from.width / 2) / 10), Math.round((to.top + to.height / 2 - from.top - from.height / 2) / 10)]
+      })()
+    JS
+
     palette_item.send_keys(:space)
-    40.times { palette_item.send_keys(:arrow_right) }
-    5.times { palette_item.send_keys(:arrow_down) }
+    across.abs.times { palette_item.send_keys(across.positive? ? :arrow_right : :arrow_left) }
+    down.abs.times { palette_item.send_keys(down.positive? ? :arrow_down : :arrow_up) }
     palette_item.send_keys(:space)
 
     assert_selector "[data-column-id] [data-element-id] .ks-button"
@@ -123,7 +131,9 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     find("[data-element-fields] label", text: "Address").click
     assert_selector "[data-element-id] .ks-button", text: "Get a quote"
 
+    page.execute_script("document.body.dataset.beforePublish = ''")
     click_on "Publish"
+    assert_no_selector "body[data-before-publish]"
     visit "/pages/pricing"
 
     assert_selector ".ks-pages-column .ks-button", text: "Get a quote"
@@ -225,16 +235,6 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
         return color
       })()
     JS
-  end
-
-  def touched(source, target)
-    actions = page.driver.browser.action
-    finger = actions.add_pointer_input(:touch, "finger")
-    actions
-      .move_to(source.native, device: "finger").pointer_down(:left, device: "finger").pause(device: finger, duration: 0.3)
-      .move_by(10, 10, device: "finger").pause(device: finger, duration: 0.1)
-      .move_to(target.native, device: "finger").pause(device: finger, duration: 0.1)
-      .pointer_up(:left, device: "finger").perform
   end
 
   def dragged(source, target)

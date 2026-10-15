@@ -18,6 +18,13 @@ module KeystoneUi
         column: { "wide" => WIDTHS, "narrow" => WIDTHS, "align" => %w[top center bottom] },
         element: { "align" => %w[stretch start center end] }
       }.freeze
+      DEFAULTS = {
+        section: { "spacing" => "md" },
+        row: { "gap" => "md" },
+        column: { "narrow" => "1/1", "align" => "top" },
+        element: { "align" => "stretch" }
+      }.freeze
+      SHARES = { 1 => "1/1", 2 => "1/2", 3 => "1/3", 4 => "1/4" }.freeze
 
       module_function
 
@@ -113,6 +120,21 @@ module KeystoneUi
 
         parent = node(document, parent_id)
         parent["rows"] || parent["columns"] || parent["elements"]
+      end
+
+      def duplicate(document, node_id:)
+        present(document, node_id)
+        copied(document).tap do |changed|
+          siblings = parent_list(changed, node_id)
+          original = siblings.find { |child| child["id"] == node_id }
+          siblings.insert(siblings.index(original) + 1, renewed(copied(original)))
+        end
+      end
+
+      def renewed(node)
+        node.merge("id" => SecureRandom.uuid).tap do |copy|
+          %w[rows columns elements].each { |list| copy[list] = copy[list].map { |child| renewed(child) } if copy.key?(list) }
+        end
       end
 
       def remove(document, node_id:)

@@ -16,4 +16,15 @@ class KeystoneUi::Pages::NodeMovingTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [], [ element_id ] ], page.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["elements"].map { |element| element["id"] } }
   end
+
+  test "duplicating a node through the builder's endpoint saves a copy right after it" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "button", column_id: column_id))
+    element_id = page.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+
+    post "/pages/manage/pages/#{page.id}/nodes/#{element_id}/duplicate", as: :json
+
+    assert_equal [ 2, element_id ], [ page.reload.document["sections"][0]["rows"][0]["columns"][0]["elements"].size, page.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"] ]
+  end
 end

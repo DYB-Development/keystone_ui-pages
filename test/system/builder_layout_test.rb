@@ -50,10 +50,10 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     find("[data-column-id]").click
 
     select "1/2", from: "Width on wide screens"
-    assert_selector "[data-column-id].sm\\:col-span-6"
+    assert_selector "[data-column-id].\\@sm\\:col-span-6"
     select "1/3", from: "Width on narrow screens"
 
-    assert_selector "[data-column-id].col-span-4.sm\\:col-span-6"
+    assert_selector "[data-column-id].col-span-4.\\@sm\\:col-span-6"
   end
 
   test "an editor sets a row's gap from keystone_ui's spacing sizes" do
@@ -124,10 +124,10 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     visit "/pages/manage/pages/#{page_record.id}"
     all("[data-column-id]").first.click
     select "2/3", from: "Width on wide screens"
-    assert_selector "[data-column-id].sm\\:col-span-8"
+    assert_selector "[data-column-id].\\@sm\\:col-span-8"
     all("[data-column-id]").last.click
 
-    select "1/2", from: "Width on wide screens"
+    select "3/4", from: "Width on wide screens"
 
     assert_selector "[data-layout-refusal]", text: "Row 1 of section 1 is wider than the page on wide screens"
   end
@@ -144,7 +144,114 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_no_selector "[data-element-id]"
   end
 
+  test "an editor drags the selected column before another by the move control on its toolbar with a mouse" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    first, second = page_record.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id='#{second}']").click
+
+    redrawn do
+      page.driver.browser.action.click_and_hold(find("[data-move-handle]").native).move_by(10, 10).pause(duration: 0.1)
+        .move_to(find("[data-column-id='#{first}']").native, -100, 0).pause(duration: 0.2).move_by(-2, 0).pause(duration: 0.1).release.perform
+    end
+
+    assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+  end
+
+  test "an editor drags the selected column before another by the move control on its toolbar with a finger" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    first, second = page_record.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id='#{second}']").click
+
+    redrawn { touched(find("[data-move-handle]"), find("[data-column-id='#{first}']")) }
+
+    assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+  end
+
+  test "an editor drags the selected section above another by the move control on its toolbar" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_section(page_record.document))
+    first, second = page_record.document["sections"].map { |section| section["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    all("[data-column-id]").last.click
+    click_on "Select row"
+    click_on "Select section"
+
+    redrawn do
+      page.driver.browser.action.click_and_hold(find("[data-move-handle]").native).move_by(10, 10).pause(duration: 0.1)
+        .move_to(find("[data-section-id='#{first}']").native, 0, -20).pause(duration: 0.2).move_by(0, -2).pause(duration: 0.1).release.perform
+    end
+
+    assert_equal [ second, first ], page_record.reload.document["sections"].map { |section| section["id"] }
+  end
+
+  test "an editor moves the selected column before another from the keyboard, starting at the move control on its toolbar" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    first, second = page_record.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id='#{second}']").click
+    handle = find("[data-move-handle]")
+
+    redrawn do
+      handle.send_keys(:space)
+      50.times { handle.send_keys(:arrow_left) }
+      handle.send_keys(:space)
+    end
+
+    assert_equal [ second, first ], page_record.reload.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+  end
+
+  test "while the selected column is dragged the builder shows where it will land before it is dropped" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    first, second = page_record.document["sections"][0]["rows"][0]["columns"].map { |column| column["id"] }
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id='#{second}']").click
+
+    page.driver.browser.action.click_and_hold(find("[data-move-handle]").native).move_by(10, 10).pause(duration: 0.1)
+      .move_to(find("[data-column-id='#{first}']").native, -100, 0).pause(duration: 0.3).perform
+
+    assert_selector "[data-row-id] > [data-column-id='#{second}']:first-child"
+  end
+
+  test "duplicating the selected element from its toolbar places a copy right after it" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] .ks-button").click
+
+    within("[data-selection-toolbar]") { click_on "Duplicate" }
+
+    assert_selector "[data-column-id] [data-element-id]", count: 2
+  end
+
+  test "the settings panel shows the layout values in use, including defaults the editor has not changed" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    row_id = page_record.document["sections"][0]["rows"][0]["id"]
+    page_record.update!(document: KeystoneUi::Pages::Operations.add_column(page_record.document, row_id: row_id))
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    all("[data-column-id]").first.click
+
+    assert_equal %w[1/2 1/1 top], [ find_field("Width on wide screens").value, find_field("Width on narrow screens").value, find_field("Vertical alignment").value ]
+  end
+
   private
+
+  def redrawn
+    page.execute_script("document.querySelectorAll('[data-page-canvas] *').forEach((node) => { node.dataset.stale = '' })")
+    yield
+    assert_selector "[data-page-canvas] [data-section-id]:not([data-stale])", visible: :all
+  end
 
   def layout_classes
     assert_selector ".ks-pages-column", visible: :all

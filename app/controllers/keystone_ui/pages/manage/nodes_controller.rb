@@ -14,6 +14,10 @@ module KeystoneUi
           changed(Operations.move(page.document, node_id: params[:id], into: params[:into].presence, position: params.require(:position)))
         end
 
+        def duplicate
+          changed(Operations.duplicate(page.document, node_id: params[:id]))
+        end
+
         def destroy
           changed(Operations.remove(page.document, node_id: params[:id]))
         end
