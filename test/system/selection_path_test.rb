@@ -16,4 +16,12 @@ class KeystoneUi::Pages::SelectionPathTest < KeystoneUi::Pages::ApplicationSyste
 
     assert_equal %w[Section Row Column Button], all("[data-selection-path] button").map(&:text)
   end
+
+  test "with an element selected, choosing Column in the path selects the column that holds it" do
+    find("[data-element-id] .ks-button").click
+
+    within("[data-selection-path]") { click_on "Column" }
+
+    assert_selector "[data-column-id][data-selected]"
+  end
 end

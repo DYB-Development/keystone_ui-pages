@@ -136,6 +136,17 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     return [{ kind, id: holder.dataset[key], label: label ?? elements.find((offered) => offered.key === placed?.key)?.name ?? "Element" }]
   })
 
+  const choosePart = ({ kind, id }) => {
+    setRefusal(null)
+    if (kind === "element") {
+      setNode(null)
+      return setSelected(id)
+    }
+    const holder = page.current.querySelector(`[data-${kind}-id="${id}"]`)
+    setSelected(null)
+    setNode({ kind, id, rowId: holder.closest("[data-row-id]")?.dataset.rowId, sectionId: holder.closest("[data-section-id]")?.dataset.sectionId })
+  }
+
   const selectedId = selected ?? node?.id
 
   useEffect(() => {
@@ -198,7 +209,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
           </div>
         </main>
         <aside data-settings-panel className={`${openPanel === "settings" ? "max-lg:block" : "max-lg:hidden"} w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-white p-4 max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:shadow-xl dark:bg-(--ks-color-surface-dark,black)`}>
-          <SelectionPath path={selectionPath} onChoose={() => {}} />
+          <SelectionPath path={selectionPath} onChoose={choosePart} />
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
           {node && <LayoutPanel node={node} values={inUse(node)} arrangements={arrangements}
             onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
