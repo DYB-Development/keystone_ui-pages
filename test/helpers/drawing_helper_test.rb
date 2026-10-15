@@ -121,4 +121,17 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-alert-message", text: "Something worth knowing."
   end
+
+  test "every element in the default catalog shows visible content as soon as it is dropped" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    defaults = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }.elements.map(&:key)
+    keys = defaults & KeystoneUi::Pages.catalog.elements.map(&:key)
+
+    blank = keys.select do |key|
+      html = drawn_document(KeystoneUi::Pages::Operations.add(@document, key, column_id: column_id))
+      Nokogiri::HTML(html).at_css(".ks-pages-element").text.strip.empty?
+    end
+
+    assert_equal [], blank
+  end
 end

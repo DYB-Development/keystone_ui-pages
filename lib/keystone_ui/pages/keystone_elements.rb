@@ -9,13 +9,13 @@ module KeystoneUi
         catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics",
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
-          fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text } ])
+          fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
         catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text",
           fields: [ { key: :message, label: "Message", kind: :long_text, default: "Something worth knowing." }, { key: :title, label: "Title", kind: :text },
                     { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error], default: "info" },
                     { key: :dismissible, label: "Can be dismissed", kind: :yes_or_no } ])
         catalog.register(key: :code, name: "Code", component: :ui_code, icon: :code, group: "Text", body: :code,
-          fields: [ { key: :code, label: "Code", kind: :long_text }, { key: :language, label: "Language", kind: :text },
+          fields: [ { key: :code, label: "Code", kind: :long_text, default: "puts \"Hello\"" }, { key: :language, label: "Language", kind: :text },
                     { key: :caption, label: "Caption", kind: :text } ])
         catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text",
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
