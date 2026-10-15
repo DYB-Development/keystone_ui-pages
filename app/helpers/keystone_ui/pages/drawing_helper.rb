@@ -60,6 +60,8 @@ module KeystoneUi
         return value.map { |entry| entry.is_a?(Hash) ? entry.symbolize_keys : entry } if field[:kind] == :data && value.is_a?(Array)
         return value.map { |entry| Keystone::Ui::Column.new(entry["key"].to_s.to_sym, entry["label"], align: entry["align"].presence&.to_sym) } if field[:as] == :pairs && value.is_a?(Array)
         return value.map { |entry| entry_with_defaults(field, entry) } if field[:kind] == :list && value.is_a?(Array)
+        return [] if (field[:kind] == :list || (field[:kind] == :data && field[:default].is_a?(Array))) && value.blank?
+        return nil if field[:kind] == :data && value.blank?
         return value if value.blank?
         return value.to_sym if field[:as] == :key
         return value.to_s == "true" if field[:kind] == :yes_or_no
