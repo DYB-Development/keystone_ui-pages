@@ -6,6 +6,7 @@ const ICONS = {
   tag: "M3 7v6l8 8 8-8-8-8H5a2 2 0 0 0-2 2zM7.5 7.5h.01",
   copy: "M8 8h11v11H8zM5 16V5h11",
   heading: "M6 4v16M18 4v16M6 12h12",
+  text: "M4 6h16M4 12h16M4 18h10",
   info: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01",
   code: "M8 6l-6 6 6 6M16 6l6 6-6 6",
   alert: "M12 3l10 18H2zM12 10v4M12 17h.01",
