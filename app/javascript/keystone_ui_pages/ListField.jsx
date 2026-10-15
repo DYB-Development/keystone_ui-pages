@@ -19,6 +19,9 @@ export default function ListField({ field, entries, onChange }) {
                   saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: event.target.value } : kept)))} />
             </div>
           ))}
+          <div className="flex gap-2">
+            <Button type="button" size="sm" variant="danger" onClick={() => saved(entries.filter((_kept, place) => place !== index))}>Remove item</Button>
+          </div>
         </fieldset>
       ))}
       <Button type="button" size="sm" variant="secondary" onClick={() => saved([...entries, {}])}>Add item</Button>

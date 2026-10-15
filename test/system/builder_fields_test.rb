@@ -100,6 +100,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-accordion-item", text: "Is it free?"
   end
 
+  test "an editor removes an entry from a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    within(all("[data-list-entry]").first) { click_on "Remove item" }
+
+    assert_selector "[data-element-id] .ks-accordion-item", count: 1, text: "How does it work?"
+  end
+
   private
 
   def selected(key, drawn)
