@@ -138,6 +138,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_operator width, :<, 40
   end
 
+  test "an editor aligns a table column to the end from a choice in the builder" do
+    selected("data_table", "tbody tr:first-child td:first-child")
+
+    find("#ks-pages-columns-0-align").select("end")
+
+    assert_selector "[data-element-id] thead th:first-child.text-right"
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 
