@@ -63,7 +63,7 @@ module KeystoneUi
       def filled(stored)
         return stored.presence unless stored.is_a?(Hash)
 
-        (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence
+        (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence || ""
       end
 
       def component_for(element)
