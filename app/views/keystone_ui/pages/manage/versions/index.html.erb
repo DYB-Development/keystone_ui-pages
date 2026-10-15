@@ -1,0 +1,20 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "#{@page.name} history") %>
+
+  <div class="ks-table overflow-x-auto">
+    <table class="min-w-full">
+      <thead>
+        <tr><th class="text-left">Version</th><th class="text-left">Status</th><th class="text-left">Published</th></tr>
+      </thead>
+      <tbody>
+        <% @versions.each do |version| %>
+          <tr data-version="<%= version.number %>">
+            <td><%= version.number %></td>
+            <td><%= version.status %></td>
+            <td><%= version.created_at.to_date.to_fs(:long) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

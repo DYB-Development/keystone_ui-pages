@@ -16,6 +16,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       end
       resource :document, only: %i[update]
       post :sample, to: "samples#update"
+      resources :versions, only: %i[index]
     end
   end
 
