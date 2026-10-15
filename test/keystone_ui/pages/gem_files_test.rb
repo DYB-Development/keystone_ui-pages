@@ -32,4 +32,10 @@ class KeystoneUi::Pages::GemFilesTest < ActiveSupport::TestCase
 
     refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.44.0"))
   end
+
+  test "the gem requires a keystone_ui with the bar chart drawn on the server" do
+    spec = Gem::Specification.load(KeystoneUi::Pages::Engine.root.join("keystone_ui-pages.gemspec").to_s)
+
+    refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.45.0"))
+  end
 end
