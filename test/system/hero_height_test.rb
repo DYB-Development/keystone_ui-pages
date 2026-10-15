@@ -46,4 +46,24 @@ class KeystoneUi::Pages::HeroHeightTest < KeystoneUi::Pages::ApplicationSystemTe
       })()
     JS
   end
+
+  test "the builder shows a hero at the same height as the live page at phone and desktop width" do
+    @page_record.update!(document: @document)
+    @page_record.publish
+    hero_height = -> { page.evaluate_script("Math.round(document.querySelector('.ks-hero').getBoundingClientRect().height)") }
+
+    visit "/pages/manage/pages/#{@page_record.id}"
+    desktop_builder = hero_height.call
+    click_on "Phone"
+    phone_builder = hero_height.call
+    visit "/pages/home"
+    desktop_live = hero_height.call
+    page.current_window.resize_to(390, 844)
+    visit "/pages/home"
+    phone_live = hero_height.call
+
+    assert_equal [ desktop_live, phone_live ], [ desktop_builder, phone_builder ]
+  ensure
+    page.current_window.resize_to(1400, 1000)
+  end
 end
