@@ -32,6 +32,16 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal 2, @printed
   end
 
+  test "a newly published version makes a new PDF rather than returning the old one" do
+    printing do
+      KeystoneUi::Pages.pdf(@page, values: {})
+      @page.publish
+      KeystoneUi::Pages.pdf(@page.reload, values: {})
+    end
+
+    assert_equal 2, @printed
+  end
+
   private
 
   def printing(&)
