@@ -24,3 +24,5 @@ export const moveNode = (url, token, nodeId, into, position) => sent(`${url}/${n
 export const duplicateNode = (url, token, nodeId) => sent(`${url}/${nodeId}/duplicate`, token, "POST")
 
 export const bindField = (url, token, elementId, field, name, fallback) => sent(`${url}/${elementId}/bind`, token, "POST", { field, name, fallback })
+
+export const chooseSample = (url, token, choice) => sent(url, token, "POST", { choice })

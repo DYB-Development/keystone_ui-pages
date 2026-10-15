@@ -2,12 +2,13 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, bindField, duplicateNode, moveNode, removeNode, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
 import ElementPalette from "./ElementPalette"
 import SelectionPath from "./SelectionPath"
+import SampleChoice from "./SampleChoice"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
 
@@ -24,7 +25,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, samples = [], sample, samples_url, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
@@ -199,7 +200,10 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
           <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "elements"} onClick={() => toggled("elements")}>Elements</Button>
           <h1 className="truncate text-base font-semibold">{name}</h1>
         </div>
-        <div className="max-lg:hidden"><DeviceWidth chosen={device} onChoose={setDevice} /></div>
+        <div className="flex items-center gap-4 max-lg:hidden">
+          <DeviceWidth chosen={device} onChoose={setDevice} />
+          <SampleChoice samples={samples} chosen={sample} onChoose={(choice) => chooseSample(samples_url, token, choice).then(shown, refused)} />
+        </div>
         <div className="flex items-center gap-2">
         <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "settings"} onClick={() => toggled("settings")}>Settings</Button>
         <form method="post" action={publish_url}>

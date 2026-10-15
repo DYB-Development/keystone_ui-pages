@@ -26,4 +26,12 @@ class KeystoneUi::Pages::BuilderSamplesTest < KeystoneUi::Pages::ApplicationSyst
 
     assert_selector "[data-element-id] .ks-button", text: "Acme"
   end
+
+  test "an editor chooses which sample the builder draws bound fields with" do
+    visit "/pages/manage/pages/#{@page_record.id}"
+
+    select "Globex", from: "Preview with"
+
+    assert_selector "[data-element-id] .ks-button", text: "Globex"
+  end
 end
