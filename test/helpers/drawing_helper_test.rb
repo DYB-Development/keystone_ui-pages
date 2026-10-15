@@ -293,6 +293,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-pages-element", count: 1
   end
 
+  test "the builder still draws an element its sample hides, marked as hidden" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(added, editing: true, values: { "audience" => "client" })
+
+    assert_select ".ks-pages-element[data-hidden]", count: 1
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)

@@ -49,7 +49,7 @@ module KeystoneUi
       end
 
       def edited_element(element)
-        wrapped_element(element, data: { element_id: element["id"] })
+        wrapped_element(element, data: { element_id: element["id"], hidden: hidden?(element) || nil }.compact)
       end
 
       def drawn_element(element)
