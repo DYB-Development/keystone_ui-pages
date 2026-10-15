@@ -22,7 +22,7 @@ export default function ListField({ field, entries, onChange }) {
             <div key={part.key} className="flex flex-col gap-1">
               <Label htmlFor={`ks-pages-${field.key}-${index}-${part.key}`}>{part.label}</Label>
               {part.kind === "yes_or_no"
-                ? <Checkbox id={`ks-pages-${field.key}-${index}-${part.key}`} defaultChecked={entry[part.key] === "true"}
+                ? <Checkbox id={`ks-pages-${field.key}-${index}-${part.key}`} className="self-start" defaultChecked={entry[part.key] === "true"}
                     onChange={(event) => saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: String(event.target.checked) } : kept)))} />
                 : <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? part.default ?? ""}
                     onBlur={(event) => event.target.value !== (entry[part.key] ?? part.default ?? "") &&

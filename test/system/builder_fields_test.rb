@@ -130,6 +130,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal "N/A", find("#ks-pages-rows-0-fallback").value
   end
 
+  test "a value list row's total box sits at the left under its label instead of stretching across the panel" do
+    selected("value_list", ".ks-value-list")
+
+    width = evaluate_script("document.querySelector('#ks-pages-rows-0-total').getBoundingClientRect().width")
+
+    assert_operator width, :<, 40
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 
