@@ -135,6 +135,24 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal [], backgrounds.select { |color| color == "rgb(255, 255, 255)" }
   end
 
+  test "in dark mode the builder draws its top bar and width choice borders in the theme's dark border colour" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    borders = page.evaluate_script(<<~JS)
+      (() => {
+        const probe = document.createElement("div")
+        probe.style.color = "var(--ks-color-border-dark)"
+        document.body.append(probe)
+        const dark = getComputedStyle(probe).color
+        return [getComputedStyle(document.querySelector("[data-builder-top-bar]")).borderBottomColor, getComputedStyle(document.querySelector("[data-device-width]")).borderTopColor].map((color) => color === dark)
+      })()
+    JS
+
+    assert_equal [ true, true ], borders
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 

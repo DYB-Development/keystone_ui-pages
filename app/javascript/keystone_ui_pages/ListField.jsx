@@ -17,7 +17,7 @@ export default function ListField({ field, entries, onChange }) {
   return (
     <div data-list-field={field.key} className="flex flex-col gap-2">
       {entries.map((entry, index) => (
-        <fieldset key={`${index}-${JSON.stringify(entry)}`} data-list-entry className="flex flex-col gap-2 rounded-md border border-(--ks-color-border) p-2">
+        <fieldset key={`${index}-${JSON.stringify(entry)}`} data-list-entry className="flex flex-col gap-2 rounded-md border border-(--ks-color-border) dark:border-(--ks-color-border-dark) p-2">
           {parts.map((part) => (
             <div key={part.key} className="flex flex-col gap-1">
               <Label htmlFor={`ks-pages-${field.key}-${index}-${part.key}`}>{part.label}</Label>

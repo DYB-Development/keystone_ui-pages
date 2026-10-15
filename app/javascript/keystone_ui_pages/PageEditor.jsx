@@ -197,7 +197,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
 
   return (
     <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface) text-(--ks-color-text) dark:bg-(--ks-color-surface-dark) dark:text-(--ks-color-text-dark)">
-      <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) px-4">
+      <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) dark:border-(--ks-color-border-dark) px-4">
         <div className="flex min-w-0 items-center gap-2">
           <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "elements"} onClick={() => toggled("elements")}>Elements</Button>
           <h1 className="truncate text-base font-semibold">{name}</h1>
