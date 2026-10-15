@@ -17,6 +17,10 @@ module KeystoneUi
         catalog.register(key: :code, name: "Code", component: :ui_code, icon: :code, group: "Text", body: :code,
           fields: [ { key: :code, label: "Code", kind: :long_text, default: "puts \"Hello\"" }, { key: :language, label: "Language", kind: :text },
                     { key: :caption, label: "Caption", kind: :text } ])
+        catalog.register(key: :heading, name: "Heading", component: :ui_heading, icon: :heading, group: "Text",
+          fields: [ { key: :text, label: "Text", kind: :text, default: "Heading" },
+                    { key: :size, label: "Size", kind: :one_of, options: %w[sm md lg], default: "md" },
+                    { key: :note, label: "Note", kind: :text } ])
         catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text",
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
                     { key: :subtitle, label: "Subtitle", kind: :long_text },
