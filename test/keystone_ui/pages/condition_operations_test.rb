@@ -15,4 +15,10 @@ class KeystoneUi::Pages::ConditionOperationsTest < Minitest::Test
 
     assert_equal({ "value" => "audience", "equals" => "internal" }, shown["sections"][0]["rows"][0]["show_when"])
   end
+
+  def test_a_column_cannot_be_given_a_condition
+    assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.show_when(@document, node_id: @row["columns"][0]["id"], name: "audience", equals: "internal")
+    end
+  end
 end

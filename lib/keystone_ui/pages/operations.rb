@@ -154,6 +154,8 @@ module KeystoneUi
       end
 
       def show_when(document, node_id:, name:, equals:)
+        raise InvalidDocument, "A column cannot be shown or hidden by a value" if kind(document, node_id) == :column
+
         copied(document).tap do |changed|
           node(changed, node_id)["show_when"] = { "value" => name.to_s, "equals" => equals.to_s }
         end
