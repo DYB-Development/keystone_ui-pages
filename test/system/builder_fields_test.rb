@@ -171,6 +171,18 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     KeystoneUi::Pages::Values.names = {}
   end
 
+  test "the builder fades an element its sample hides so an editor can see it is hidden" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+    page_record.update!(document: added)
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_operator page.evaluate_script("Number(getComputedStyle(document.querySelector('[data-element-id][data-hidden]')).opacity)"), :<, 1
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 
