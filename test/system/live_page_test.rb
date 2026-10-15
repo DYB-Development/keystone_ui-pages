@@ -60,4 +60,12 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
     KeystoneUi.configuration.looks.clear
     KeystoneUi.configuration.default_look = nil
   end
+
+  test "a live page in dark mode tells the browser it is dark, so its default background turns dark behind light text" do
+    visit "/pages/pricing"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "dark")
+    visit "/pages/pricing"
+
+    assert_equal "dark", page.evaluate_script("getComputedStyle(document.documentElement).colorScheme")
+  end
 end
