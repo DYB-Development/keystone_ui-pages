@@ -18,7 +18,7 @@ module KeystoneUi
         transaction do
           live_version&.update!(status: :superseded)
           versions.create!(number: next_number, document: document, status: :live)
-        end
+        end.tap { PdfJob.perform_later(self, {}) }
       end
 
       def live_version
