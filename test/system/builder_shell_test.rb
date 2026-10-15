@@ -36,6 +36,23 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     JS
   end
 
+  test "the page is drawn on the page colour the host app's theme sets" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    assert_selector "[data-page-canvas]", visible: :all
+
+    color = page.evaluate_script(<<~JS)
+      (() => {
+        const look = document.createElement("style")
+        look.textContent = ":root { --ks-color-page: rgb(1, 2, 3); }"
+        document.head.append(look)
+        return getComputedStyle(document.querySelector("[data-page-canvas]")).backgroundColor
+      })()
+    JS
+
+    assert_equal "rgb(1, 2, 3)", color
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
