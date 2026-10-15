@@ -161,4 +161,14 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
   ensure
     page.current_window.resize_to(1400, 1000)
   end
+
+  test "the builder's top bar opens the page's history of published versions" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page_record.publish
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    within("[data-builder-top-bar]") { click_on "History" }
+
+    assert_selector "[data-version='1']"
+  end
 end
