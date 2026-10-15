@@ -23,4 +23,14 @@ class KeystoneUi::Pages::HeroHeightTest < KeystoneUi::Pages::ApplicationSystemTe
       })()
     JS
   end
+
+  test "an editor chooses a hero's height from a short list in the settings panel" do
+    @page_record.update!(document: @document)
+    visit "/pages/manage/pages/#{@page_record.id}"
+    find("[data-element-id] .ks-hero h1").click
+
+    select "content", from: "Height"
+
+    assert_equal [ %w[content tall full_screen], true ], [ all("#ks-pages-field-height option").map(&:value), has_css?("[data-element-id][class~='[&_.ks-hero]:min-h-0']") ]
+  end
 end
