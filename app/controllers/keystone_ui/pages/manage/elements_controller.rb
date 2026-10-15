@@ -10,6 +10,10 @@ module KeystoneUi
           changed(Operations.add(page.document, params.require(:key), column_id: params.require(:column_id)))
         end
 
+        def bind
+          changed(Operations.bind(page.document, element_id: params[:id], field: params.require(:field), name: params.require(:name), fallback: params[:fallback].presence))
+        end
+
         def update
           changed(Operations.set(page.document, element_id: params[:id], field: params.require(:field), value: params[:value].to_s))
         end
