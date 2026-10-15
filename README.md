@@ -30,3 +30,28 @@ A live page is drawn inside the host's layout, and the builder inside the host's
 - links the host's stylesheet, which carries keystone_ui-styles, the host's looks and colours, and the host's own styles.
 
 The builder opens in the editor's own mode and look. Its top bar has a Mode choice of light, dark and system, plus custom for an editor in custom mode, and a Look choice of the looks the host registers. Each choice redraws the page in the builder, so an editor can see every version a visitor may get, and neither is saved.
+
+## Printing and PDFs
+
+A printed page has a white background, keeps the colours of its charts and shaded cells, and does not split a section, a table row or a label and value row across pages. The builder's Print choice previews that layout.
+
+A host gets a published page as a PDF, drawn with the values it passes, and gets back a record whose `file` is kept in Active Storage:
+
+```ruby
+pdf = KeystoneUi::Pages.pdf(page, values: { "client_name" => "Acme" })
+pdf.file # an Active Storage attachment, ready to download, link or email
+```
+
+Asking again for the same published version and values returns the kept file without printing it again. A newly published version, or different values, makes a new one. To have it ready before anyone downloads it, such as when an invoice is created, make it in a background job:
+
+```ruby
+KeystoneUi::Pages.prepare_pdf(page, values: { "client_name" => "Acme" })
+```
+
+Publishing a page that uses no host values makes its PDF straight away, since it looks the same for everyone.
+
+The PDF is printed by Chrome or Chromium on the server, from the page drawn with the host's compiled stylesheet, so it looks exactly as the page does. The host needs:
+
+- Active Storage set up, which keeps the files.
+- Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`.
+- Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`.

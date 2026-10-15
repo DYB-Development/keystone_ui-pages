@@ -9,8 +9,8 @@ require "keystone_ui/pages/engine"
 module KeystoneUi
   module Pages
     class << self
-      attr_writer :base_controller, :layout, :editor_layout
-      attr_accessor :edit_check_method, :view_check_method, :owner_method, :refusal_method
+      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet
+      attr_accessor :edit_check_method, :view_check_method, :owner_method, :refusal_method, :chrome_path
 
       def base_controller
         @base_controller || "ActionController::Base"
@@ -23,6 +23,19 @@ module KeystoneUi
       def editor_layout
         @editor_layout || "application"
       end
+
+      def pdf_stylesheet
+        @pdf_stylesheet || "tailwind.css"
+      end
+    end
+
+    def self.pdf(page, values: {})
+      require "keystone_ui/pages/pdfs"
+      Pdfs.for(page, values: values)
+    end
+
+    def self.prepare_pdf(page, values: {})
+      PdfJob.perform_later(page, values.to_h.stringify_keys)
     end
 
     def self.catalog

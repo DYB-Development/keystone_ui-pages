@@ -18,6 +18,14 @@ module KeystoneUi
         transaction do
           live_version&.update!(status: :superseded)
           versions.create!(number: next_number, document: document, status: :live)
+        end.tap { PdfJob.perform_later(self, {}) unless uses_host_values? }
+      end
+
+      def uses_host_values?(node = document)
+        case node
+        when Hash then node.key?("show_when") || (node.key?("value") && node.key?("fallback")) || node.values.any? { |child| uses_host_values?(child) }
+        when Array then node.any? { |child| uses_host_values?(child) }
+        else false
         end
       end
 
