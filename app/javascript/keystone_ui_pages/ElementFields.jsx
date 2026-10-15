@@ -58,7 +58,8 @@ export default function ElementFields({ element, definition, alignments, valueNa
             <ValueChoice field={field} stored={element.fields[field.key]} valueNames={valueNames} onChange={onChange} onBind={onBind} />}
           {field.kind === "list" && !isBound(element.fields[field.key]) &&
             <ListField field={field} entries={element.fields[field.key] ?? field.default ?? []} onChange={onChange} />}
-          {field.kind !== "list" && <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
+          {field.kind === "data" && <p className="ks-hint">Filled with data the host supplies on a template page</p>}
+          {field.kind !== "list" && field.kind !== "data" && <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
             value={isBound(element.fields[field.key]) ? element.fields[field.key].fallback ?? "" : element.fields[field.key]}
             onChange={(key, text) => (isBound(element.fields[key]) ? onBind(key, element.fields[key].value, text) : onChange(key, text))} />}
           {isBound(element.fields[field.key]) &&

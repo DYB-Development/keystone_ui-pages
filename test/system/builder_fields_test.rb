@@ -116,6 +116,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-accordion-item:first-child", text: "How does it work?"
   end
 
+  test "a data field says the host fills it instead of offering a text box" do
+    selected("data_table", "tbody tr:first-child td:first-child")
+
+    assert_equal [ false, true ], [ has_field?("Rows"), has_css?("[data-element-fields]", text: "Filled with data the host supplies on a template page") ]
+  end
+
   private
 
   def selected(key, drawn)
