@@ -62,7 +62,7 @@ module KeystoneUi
       end
 
       def wrapped_element(element, data: {})
-        tag.div(component_for(element), class: "ks-pages-element print:[&_tr]:break-inside-avoid #{wrapper_classes(element)} #{ELEMENT_ALIGNMENTS.fetch(element["align"] || KeystoneUi::Pages.catalog.find(element["key"])&.align || Operations::DEFAULTS[:element]["align"])}", data: data)
+        tag.div(component_for(element), class: "ks-pages-element print:[&_tr]:break-inside-avoid print:[&_.ks-value-list-row]:break-inside-avoid #{wrapper_classes(element)} #{ELEMENT_ALIGNMENTS.fetch(element["align"] || KeystoneUi::Pages.catalog.find(element["key"])&.align || Operations::DEFAULTS[:element]["align"])}", data: data)
       end
 
       def field_value(field, value)
