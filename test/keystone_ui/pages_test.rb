@@ -87,7 +87,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_every_keystone_ui_element_has_an_icon_and_belongs_to_a_group
     elements = keystone_elements.elements
     groups = elements.group_by(&:group).to_h { |group, members| [ group, members.map(&:key).sort ] }
-    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[figure progress stat_card], "Text" => %i[alert code hero info] }
+    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[figure progress stat_card], "Text" => %i[accordion alert code hero info] }
 
     assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
   end
@@ -102,6 +102,12 @@ class KeystoneUi::PagesTest < Minitest::Test
     grid = keystone_elements.find(:feature_grid)
 
     assert_equal [ :ui_feature_grid, :list, %i[title description] ], [ grid.component, grid.fields.find { |field| field[:key] == :features }[:kind], grid.fields.find { |field| field[:key] == :features }[:entry].reject { |field| field[:hidden] }.map { |field| field[:key] } ]
+  end
+
+  def test_the_catalog_offers_keystone_ui_accordion_filled_from_a_list_field
+    accordion = keystone_elements.find(:accordion)
+
+    assert_equal [ :ui_accordion, :list, %i[question answer] ], [ accordion.component, accordion.fields.first[:kind], accordion.fields.first[:entry].map { |field| field[:key] } ]
   end
 
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors

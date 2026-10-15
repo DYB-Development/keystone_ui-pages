@@ -58,6 +58,11 @@ module KeystoneUi
                       default: [ { "title" => "Fast", "description" => "Pages load quickly." },
                                  { "title" => "Clear", "description" => "Every page reads plainly." },
                                  { "title" => "Yours", "description" => "Built from your own components." } ] } ])
+        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
+          fields: [ { key: :items, label: "Questions", kind: :list,
+                      entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],
+                      default: [ { "question" => "What is this?", "answer" => "A question visitors often ask." },
+                                 { "question" => "How does it work?", "answer" => "The answer opens below its question." } ] } ])
       end
     end
   end
