@@ -24,4 +24,12 @@ class KeystoneUi::Pages::SelectionPathTest < KeystoneUi::Pages::ApplicationSyste
 
     assert_selector "[data-column-id][data-selected]"
   end
+
+  test "selecting a column that holds an element shows the column's toolbar and its settings" do
+    find("[data-element-id] .ks-button").click
+
+    within("[data-selection-path]") { click_on "Column" }
+
+    assert_equal [ true, true ], [ has_css?("[data-selection-toolbar]:not([hidden])"), has_field?("Width on wide screens") ]
+  end
 end
