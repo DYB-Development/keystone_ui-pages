@@ -14,6 +14,7 @@ const ICONS = {
   card: "M3 5h18v14H3zM3 10h18",
   megaphone: "M3 11v2l13 5V6zM16 9a3 3 0 0 1 0 6M6 14l1 5h3l-1-4",
   chart: "M4 20V10M10 20V4M16 20v-7M22 20H2",
+  bars: "M3 21h18M6 17v-6h3v6M11 17V7h3v10M16 17v-4h3v4",
   number: "M10 3L8 21M16 3l-2 18M4 9h17M3 15h17",
   progress: "M3 12h18M3 12h10",
   box: "M3 3h18v18H3z"
