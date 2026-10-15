@@ -79,6 +79,15 @@ module KeystoneUi
                     { key: :columns, label: "Columns", kind: :list, as: :pairs,
                       entry: [ { key: :key, label: "Key", kind: :text }, { key: :label, label: "Heading", kind: :text } ],
                       default: [ { "key" => "name", "label" => "Name" }, { "key" => "status", "label" => "Status" } ] } ])
+        catalog.register(key: :value_list, name: "Label and value list", component: :ui_value_list, icon: :list, group: "Data",
+          fields: [ { key: :rows, label: "Rows", kind: :list,
+                      entry: [ { key: :label, label: "Label", kind: :text }, { key: :value, label: "Value", kind: :text },
+                               { key: :note, label: "Note", kind: :text }, { key: :total, label: "Total", kind: :yes_or_no },
+                               { key: :fallback, label: "When missing", kind: :text, default: "N/A" } ],
+                      default: [ { "label" => "Prepared by", "value" => "Your team" },
+                                 { "label" => "Prepared for", "value" => "Your client" },
+                                 { "label" => "Issued", "value" => "1 October" } ] },
+                    { key: :align, label: "Values", kind: :one_of, options: %w[start end], default: "start" } ])
         catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data",
           fields: [ { key: :series, label: "Series", kind: :data, default: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ] },
                     { key: :labels, label: "Labels", kind: :data, default: %w[Mon Tue Wed Thu] } ])
