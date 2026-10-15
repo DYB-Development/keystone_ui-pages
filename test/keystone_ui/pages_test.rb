@@ -10,7 +10,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_the_catalog_offers_a_keystone_ui_button_with_a_label_and_an_address_by_default
     button = keystone_elements.find(:button)
 
-    assert_equal [ :ui_button, [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ] ], [ button.component, button.fields ]
+    assert_equal [ :ui_button, [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ] ], [ button.component, button.fields ]
   end
 
   def test_the_catalog_offers_a_keystone_ui_progress_bar_with_number_fields

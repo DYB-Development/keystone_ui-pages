@@ -107,6 +107,7 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     visit "/pages/manage/pages/#{page_record.id}"
 
     dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+    find("[data-builder-top-bar] h1").hover
 
     assert_equal color_of_variable("--ks-color-accent"), background_of("[data-element-id] .ks-button")
   end
