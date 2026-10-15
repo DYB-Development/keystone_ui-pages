@@ -20,4 +20,10 @@ class KeystoneUi::Pages::GemFilesTest < ActiveSupport::TestCase
 
     refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.43.0"))
   end
+
+  test "the gem requires a keystone_ui-styles that tells the browser a dark page is dark" do
+    spec = Gem::Specification.load(KeystoneUi::Pages::Engine.root.join("keystone_ui-pages.gemspec").to_s)
+
+    assert_equal false, spec.dependencies.find { |dependency| dependency.name == "keystone_ui-styles" }&.requirement&.satisfied_by?(Gem::Version.new("0.20.0"))
+  end
 end
