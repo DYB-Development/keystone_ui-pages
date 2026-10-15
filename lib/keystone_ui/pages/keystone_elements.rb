@@ -48,6 +48,16 @@ module KeystoneUi
         catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start",
           fields: [ { key: :text, label: "Text to copy", kind: :text },
                     { key: :label, label: "Label", kind: :text, default: "Copy" } ])
+        catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content",
+          fields: [ { key: :title, label: "Title", kind: :text, default: "Why teams choose us" },
+                    { key: :subtitle, label: "Subtitle", kind: :text },
+                    { key: :features, label: "Features", kind: :list,
+                      entry: [ { key: :title, label: "Title", kind: :text }, { key: :description, label: "Description", kind: :long_text },
+                               { key: :icon, label: "Icon", kind: :text, hidden: true,
+                                 default: '<svg viewBox="0 0 24 24" class="size-6 fill-none stroke-current stroke-2"><path d="M5 12l5 5L20 7"/></svg>' } ],
+                      default: [ { "title" => "Fast", "description" => "Pages load quickly." },
+                                 { "title" => "Clear", "description" => "Every page reads plainly." },
+                                 { "title" => "Yours", "description" => "Built from your own components." } ] } ])
       end
     end
   end
