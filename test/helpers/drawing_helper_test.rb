@@ -113,4 +113,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-button", text: "Button"
   end
+
+  test "a newly dropped alert shows a message" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+
+    render html: drawn_document(KeystoneUi::Pages::Operations.add(@document, "alert", column_id: column_id))
+
+    assert_select ".ks-alert-message", text: "Something worth knowing."
+  end
 end
