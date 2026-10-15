@@ -255,6 +255,18 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Order", %w[A-1 A-2] ], [ css_select("th").map { |cell| cell.text.strip }.first, css_select("td").map { |cell| cell.text.strip } ]
   end
 
+  test "a data table column the editor aligned to the end draws its cells right" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+    fields = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]
+    fields["items"] = { "value" => "work", "fallback" => nil }
+    fields["columns"] = [ { "key" => "hours", "label" => "Hours", "align" => "end" }, { "key" => "task", "label" => "Task" } ]
+
+    render html: drawn_document(added, values: { "work" => [ { "task" => "Export", "hours" => "2.0" } ] })
+
+    assert_select "td.text-right", text: "2.0"
+  end
+
   test "a line chart draws the series and labels the host supplies" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "line_chart", column_id: column_id)

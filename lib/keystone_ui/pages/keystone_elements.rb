@@ -77,7 +77,8 @@ module KeystoneUi
           fields: [ { key: :items, label: "Rows", kind: :data,
                       default: [ { "name" => "First row", "status" => "Open" }, { "name" => "Second row", "status" => "Closed" } ] },
                     { key: :columns, label: "Columns", kind: :list, as: :pairs,
-                      entry: [ { key: :key, label: "Key", kind: :text }, { key: :label, label: "Heading", kind: :text } ],
+                      entry: [ { key: :key, label: "Key", kind: :text }, { key: :label, label: "Heading", kind: :text },
+                               { key: :align, label: "Align", kind: :one_of, options: %w[start end] } ],
                       default: [ { "key" => "name", "label" => "Name" }, { "key" => "status", "label" => "Status" } ] } ])
         catalog.register(key: :value_list, name: "Label and value list", component: :ui_value_list, icon: :list, group: "Data",
           fields: [ { key: :rows, label: "Rows", kind: :list,
