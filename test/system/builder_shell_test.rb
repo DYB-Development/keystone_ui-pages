@@ -123,6 +123,18 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     KeystoneUi.configuration.default_look = nil
   end
 
+  test "in dark mode the builder draws its own top bar and element buttons dark" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    backgrounds = page.evaluate_script(<<~JS)
+      ["[data-builder]", "[data-element-palette] [data-element-key]"].map((selector) => getComputedStyle(document.querySelector(selector)).backgroundColor)
+    JS
+    assert_equal [], backgrounds.select { |color| color == "rgb(255, 255, 255)" }
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 

@@ -196,7 +196,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const removeSelected = () => removeNode(nodes_url, token, selectedId).then((answer) => { shown(answer); setNode(null); setSelected(null) }, refused)
 
   return (
-    <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface,white)">
+    <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface) text-(--ks-color-text) dark:bg-(--ks-color-surface-dark) dark:text-(--ks-color-text-dark)">
       <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) px-4">
         <div className="flex min-w-0 items-center gap-2">
           <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "elements"} onClick={() => toggled("elements")}>Elements</Button>
@@ -227,7 +227,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
             <SelectionToolbar ref={moveHandle} place={toolbarPlace} onRemove={removeSelected} onDuplicate={() => duplicateNode(nodes_url, token, selectedId).then(shown, refused)} />
           </div>
         </main>
-        <aside data-settings-panel className={`${openPanel === "settings" ? "max-lg:block" : "max-lg:hidden"} w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-white p-4 max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:shadow-xl dark:bg-(--ks-color-surface-dark,black)`}>
+        <aside data-settings-panel className={`${openPanel === "settings" ? "max-lg:block" : "max-lg:hidden"} w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:shadow-xl dark:bg-(--ks-color-surface-dark)`}>
           <SelectionPath path={selectionPath} onChoose={choosePart} />
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
           {node && <LayoutPanel node={node} values={inUse(node)} arrangements={arrangements}
