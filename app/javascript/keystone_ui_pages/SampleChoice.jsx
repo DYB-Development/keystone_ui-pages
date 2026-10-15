@@ -6,7 +6,7 @@ export default function SampleChoice({ samples, chosen, onChoose }) {
 
   return (
     <label className="flex items-center gap-2 text-sm">
-      <span>Preview with</span>
+      <span className="whitespace-nowrap">Preview with</span>
       <Select defaultValue={chosen ?? ""} onChange={(event) => onChoose(event.target.value)} className="py-1">
         {samples.map(([label, value]) => <option key={value} value={value}>{label}</option>)}
       </Select>
