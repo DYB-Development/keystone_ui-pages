@@ -14,4 +14,10 @@ class KeystoneUi::Pages::GemFilesTest < ActiveSupport::TestCase
 
     refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.41.0"))
   end
+
+  test "the gem requires a keystone_ui with the value list component" do
+    spec = Gem::Specification.load(KeystoneUi::Pages::Engine.root.join("keystone_ui-pages.gemspec").to_s)
+
+    refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.43.0"))
+  end
 end
