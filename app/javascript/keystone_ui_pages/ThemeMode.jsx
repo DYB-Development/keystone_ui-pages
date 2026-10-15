@@ -10,12 +10,13 @@ const shown = (mode) => {
 
 export default function ThemeMode() {
   const current = document.documentElement.dataset.theme ?? "system"
+  const offered = current === "custom" ? [...MODES, ["custom", "Custom"]] : MODES
 
   return (
     <label className="flex items-center gap-2 text-sm">
       <span>Mode</span>
       <Select data-theme-mode defaultValue={current} onChange={(event) => shown(event.target.value)} className="py-1">
-        {MODES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        {offered.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </Select>
     </label>
   )

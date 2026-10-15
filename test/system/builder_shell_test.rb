@@ -82,6 +82,17 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_nil page.evaluate_script("document.documentElement.getAttribute('data-theme')")
   end
 
+  test "an editor in custom mode is offered custom mode, chosen, beside the other modes" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "custom")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    mode = find("[data-builder-top-bar] [data-theme-mode]")
+
+    assert_equal [ %w[Light Dark System Custom], "custom" ], [ mode.all("option").map(&:text), mode.value ]
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
