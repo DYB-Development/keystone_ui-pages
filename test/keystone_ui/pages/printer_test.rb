@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "selenium-webdriver"
+require "minitest/mock"
 require "keystone_ui/pages/printer"
 
 class KeystoneUi::Pages::PrinterTest < Minitest::Test
@@ -33,6 +34,17 @@ class KeystoneUi::Pages::PrinterTest < Minitest::Test
     ENV["CHROME_BIN"] = "/opt/chrome/chrome"
 
     assert_equal "/opt/chrome/chrome", KeystoneUi::Pages::Printer.chrome
+  ensure
+    ENV["CHROME_BIN"] = original
+  end
+
+  def test_finds_chromium_in_its_usual_place_when_nothing_names_chrome
+    KeystoneUi::Pages.chrome_path = nil
+    original = ENV.delete("CHROME_BIN")
+
+    found = File.stub(:executable?, ->(place) { place == "/usr/bin/chromium" }) { KeystoneUi::Pages::Printer.chrome }
+
+    assert_equal "/usr/bin/chromium", found
   ensure
     ENV["CHROME_BIN"] = original
   end

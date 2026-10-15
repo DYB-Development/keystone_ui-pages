@@ -9,6 +9,11 @@ module KeystoneUi
     class PrintFailed < StandardError; end
 
     module Printer
+      USUAL_PLACES = [
+        "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium", "/usr/bin/chromium-browser",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Chromium.app/Contents/MacOS/Chromium"
+      ].freeze
+
       module_function
 
       def pdf(html)
@@ -22,7 +27,7 @@ module KeystoneUi
       end
 
       def chrome
-        Pages.chrome_path.presence || ENV["CHROME_BIN"].presence
+        Pages.chrome_path.presence || ENV["CHROME_BIN"].presence || USUAL_PLACES.find { |place| File.executable?(place) }
       end
 
       def printed_by_chrome(page, printed)
