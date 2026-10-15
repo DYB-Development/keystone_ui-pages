@@ -63,6 +63,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal "start", find_field("Horizontal alignment").value
   end
 
+  test "an editor changes a button from its starting alignment to stretch" do
+    selected("button", ".ks-button")
+
+    select "stretch", from: "Horizontal alignment"
+
+    assert_selector "[data-element-id].flex-col"
+  end
+
   private
 
   def selected(key, drawn)
