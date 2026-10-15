@@ -32,4 +32,12 @@ class KeystoneUi::Pages::ConditionOperationsTest < Minitest::Test
       KeystoneUi::Pages::Operations.show_when(@document, node_id: @row["id"], name: "mood", equals: "happy")
     end
   end
+
+  def test_clearing_a_condition_shows_the_row_always_again
+    shown = KeystoneUi::Pages::Operations.show_when(@document, node_id: @row["id"], name: "audience", equals: "internal")
+
+    cleared = KeystoneUi::Pages::Operations.show_when(shown, node_id: @row["id"], name: nil, equals: nil)
+
+    refute cleared["sections"][0]["rows"][0].key?("show_when")
+  end
 end
