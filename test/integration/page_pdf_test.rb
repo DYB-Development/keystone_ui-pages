@@ -5,6 +5,8 @@ require "minitest/mock"
 require "keystone_ui/pages/printer"
 
 class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   setup do
     @page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
     @page.publish
@@ -40,6 +42,12 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     end
 
     assert_equal 2, @printed
+  end
+
+  test "a host can have the PDF made ahead of time so a later download is already made" do
+    printing { perform_enqueued_jobs { KeystoneUi::Pages.prepare_pdf(@page, values: { "client_name" => "Acme" }) } }
+
+    assert_equal 1, KeystoneUi::Pages::Pdf.count
   end
 
   private

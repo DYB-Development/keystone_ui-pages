@@ -34,6 +34,10 @@ module KeystoneUi
       Pdfs.for(page, values: values)
     end
 
+    def self.prepare_pdf(page, values: {})
+      PdfJob.perform_later(page, values.to_h.stringify_keys)
+    end
+
     def self.catalog
       @catalog ||= Catalog.new.tap { |catalog| KeystoneElements.register(catalog) }
     end
