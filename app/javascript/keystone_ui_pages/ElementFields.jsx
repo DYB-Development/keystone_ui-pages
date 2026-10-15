@@ -30,13 +30,34 @@ const FieldInput = ({ field, value, onChange }) => {
   return <Input {...shared} type="text" />
 }
 
-export default function ElementFields({ element, definition, alignments, onChange, onArrange, onRemove }) {
+const BINDABLE = ["text", "long_text", "address", "number", undefined]
+
+const ValueChoice = ({ field, stored, valueNames, onChange, onBind }) => {
+  const bound = stored && typeof stored === "object" ? stored : null
+  const typed = bound ? bound.fallback ?? "" : stored ?? field.default ?? ""
+
+  return (
+    <Select id={`ks-pages-value-${field.key}`} aria-label={`${field.label} value`} value={bound?.value ?? ""}
+      onChange={(event) => (event.target.value ? onBind(field.key, event.target.value, typed) : onChange(field.key, typed))}>
+      <option value="">Typed text</option>
+      {Object.entries(valueNames).map(([name, label]) => <option key={name} value={name}>{label}</option>)}
+    </Select>
+  )
+}
+
+export default function ElementFields({ element, definition, alignments, valueNames = {}, onChange, onArrange, onBind, onRemove }) {
   return (
     <aside data-element-fields className="flex flex-col gap-3">
       {definition.fields.map((field) => (
         <div key={`${element.id}-${field.key}`} className="flex flex-col gap-1">
           <Label htmlFor={`ks-pages-field-${field.key}`}>{field.label}</Label>
-          <FieldInput field={field} value={element.fields[field.key]} onChange={onChange} />
+          {BINDABLE.includes(field.kind) && Object.keys(valueNames).length > 0 &&
+            <ValueChoice field={field} stored={element.fields[field.key]} valueNames={valueNames} onChange={onChange} onBind={onBind} />}
+          <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
+            value={typeof element.fields[field.key] === "object" && element.fields[field.key] ? element.fields[field.key].fallback ?? "" : element.fields[field.key]}
+            onChange={(key, text) => (typeof element.fields[key] === "object" && element.fields[key] ? onBind(key, element.fields[key].value, text) : onChange(key, text))} />
+          {typeof element.fields[field.key] === "object" && element.fields[field.key] &&
+            <p className="ks-hint">Shows {valueNames[element.fields[field.key].value] ?? element.fields[field.key].value}, or this text when it has no value</p>}
         </div>
       ))}
       <div className="flex flex-col gap-1">

@@ -2,6 +2,7 @@
 
 require "keystone_ui/pages/version"
 require "keystone_ui/pages/catalog"
+require "keystone_ui/pages/values"
 require "keystone_ui/pages/keystone_elements"
 require "keystone_ui/pages/engine"
 

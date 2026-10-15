@@ -71,6 +71,18 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id].flex-col"
   end
 
+  test "an editor binds a field to one of the host's named values instead of typed text" do
+    KeystoneUi::Pages::Values.names = { "client_name" => "Client name" }
+    selected("button", ".ks-button")
+
+    find("#ks-pages-value-label").select("Client name")
+
+    assert_selector "[data-element-fields]", text: "Shows Client name, or this text when it has no value"
+    assert_equal({ "value" => "client_name", "fallback" => "Button" }, KeystoneUi::Pages::Page.last.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"])
+  ensure
+    KeystoneUi::Pages::Values.names = {}
+  end
+
   private
 
   def selected(key, drawn)

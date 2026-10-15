@@ -10,7 +10,8 @@ module KeystoneUi
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
 
-      def drawn_document(document, editing: false)
+      def drawn_document(document, editing: false, values: {})
+        @drawn_values = values.to_h.stringify_keys
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
       end
 
@@ -59,9 +60,15 @@ module KeystoneUi
         value.to_s.include?(".") ? value.to_f : value.to_i
       end
 
+      def filled(stored)
+        return stored.presence unless stored.is_a?(Hash)
+
+        (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence || ""
+      end
+
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
-        values = definition.fields.to_h { |field| [ field[:key].to_sym, field_value(field, element["fields"][field[:key].to_s].presence || field[:default]) ] }
+        values = definition.fields.to_h { |field| [ field[:key].to_sym, field_value(field, filled(element["fields"][field[:key].to_s]) || field[:default]) ] }
         return send(definition.component, **values) unless definition.body
 
         body = values.delete(definition.body)

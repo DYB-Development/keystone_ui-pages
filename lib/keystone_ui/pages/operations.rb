@@ -5,6 +5,7 @@ require "json"
 require "securerandom"
 require "keystone_ui/pages"
 require "keystone_ui/pages/document"
+require "keystone_ui/pages/values"
 
 module KeystoneUi
   module Pages
@@ -150,6 +151,16 @@ module KeystoneUi
         return node["elements"].size if node.key?("elements")
 
         (node["rows"] || node["columns"]).sum { |child| held_elements(child) }
+      end
+
+      def bind(document, element_id:, field:, name:, fallback: nil, catalog: Pages.catalog)
+        raise InvalidDocument, "No value is named #{name}" unless Values.label(name)
+
+        copied(document).tap do |changed|
+          element = element(changed, element_id)
+          offered(defined(catalog, element["key"]), field)
+          element["fields"][field.to_s] = { "value" => name.to_s, "fallback" => fallback }
+        end
       end
 
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)

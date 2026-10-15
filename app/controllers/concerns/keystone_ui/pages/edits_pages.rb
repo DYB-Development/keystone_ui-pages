@@ -21,7 +21,7 @@ module KeystoneUi
 
       def changed(document)
         page.update!(document: document)
-        render json: { canvas: helpers.drawn_document(page.document, editing: true), document: page.document }
+        render json: { canvas: helpers.editor_canvas(page), document: page.document }
       end
     end
   end

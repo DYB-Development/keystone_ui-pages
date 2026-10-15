@@ -8,7 +8,7 @@ module KeystoneUi
       def editor_props(page)
         {
           elements: KeystoneUi::Pages.catalog.elements.map { |element| element.to_h.slice(:key, :name, :fields, :icon, :group, :align) },
-          canvas: drawn_document(page.document, editing: true),
+          canvas: editor_canvas(page),
           document: page.document,
           elements_url: manage_page_elements_path(page),
           sections_url: manage_page_sections_path(page),
@@ -18,8 +18,20 @@ module KeystoneUi
           arrangements: Operations::ARRANGEMENTS,
           defaults: Operations::DEFAULTS,
           shares: Operations::SHARES,
+          value_names: Values.names,
+          samples: Values.samples_for(page),
+          sample: chosen_sample(page),
+          samples_url: manage_page_sample_path(page),
           token: form_authenticity_token
         }
+      end
+
+      def editor_canvas(page)
+        drawn_document(page.document, editing: true, values: Values.sample(page, chosen_sample(page)))
+      end
+
+      def chosen_sample(page)
+        session.dig(:keystone_ui_pages_samples, page.id.to_s) || Values.samples_for(page).first&.last
       end
     end
   end
