@@ -83,6 +83,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     KeystoneUi::Pages::Values.names = {}
   end
 
+  test "an editor adds an entry to a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    within("[data-list-field='items']") { click_on "Add item" }
+
+    assert_selector "[data-element-id] .ks-accordion-item", count: 3
+  end
+
   private
 
   def selected(key, drawn)

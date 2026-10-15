@@ -5,6 +5,7 @@ import Textarea from "keystone_ui-react/src/Textarea.jsx"
 import Checkbox from "keystone_ui-react/src/Checkbox.jsx"
 import Button from "keystone_ui-react/src/Button.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
+import ListField from "./ListField"
 
 const FieldInput = ({ field, value, onChange }) => {
   const shown = value ?? field.default ?? ""
@@ -30,10 +31,12 @@ const FieldInput = ({ field, value, onChange }) => {
   return <Input {...shared} type="text" />
 }
 
-const BINDABLE = ["text", "long_text", "address", "number", undefined]
+const BINDABLE = ["text", "long_text", "address", "number", "list", "data", undefined]
+
+const isBound = (stored) => Boolean(stored) && typeof stored === "object" && !Array.isArray(stored) && "value" in stored
 
 const ValueChoice = ({ field, stored, valueNames, onChange, onBind }) => {
-  const bound = stored && typeof stored === "object" ? stored : null
+  const bound = isBound(stored) ? stored : null
   const typed = bound ? bound.fallback ?? "" : stored ?? field.default ?? ""
 
   return (
@@ -53,10 +56,12 @@ export default function ElementFields({ element, definition, alignments, valueNa
           <Label htmlFor={`ks-pages-field-${field.key}`}>{field.label}</Label>
           {BINDABLE.includes(field.kind) && Object.keys(valueNames).length > 0 &&
             <ValueChoice field={field} stored={element.fields[field.key]} valueNames={valueNames} onChange={onChange} onBind={onBind} />}
-          <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
-            value={typeof element.fields[field.key] === "object" && element.fields[field.key] ? element.fields[field.key].fallback ?? "" : element.fields[field.key]}
-            onChange={(key, text) => (typeof element.fields[key] === "object" && element.fields[key] ? onBind(key, element.fields[key].value, text) : onChange(key, text))} />
-          {typeof element.fields[field.key] === "object" && element.fields[field.key] &&
+          {field.kind === "list" && !isBound(element.fields[field.key]) &&
+            <ListField field={field} entries={element.fields[field.key] ?? field.default ?? []} onChange={onChange} />}
+          {field.kind !== "list" && <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
+            value={isBound(element.fields[field.key]) ? element.fields[field.key].fallback ?? "" : element.fields[field.key]}
+            onChange={(key, text) => (isBound(element.fields[key]) ? onBind(key, element.fields[key].value, text) : onChange(key, text))} />}
+          {isBound(element.fields[field.key]) &&
             <p className="ks-hint">Shows {valueNames[element.fields[field.key].value] ?? element.fields[field.key].value}, or this text when it has no value</p>}
         </div>
       ))}
