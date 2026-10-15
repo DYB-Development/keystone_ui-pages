@@ -19,6 +19,9 @@ module KeystoneUi
           defaults: Operations::DEFAULTS,
           shares: Operations::SHARES,
           value_names: Values.names,
+          samples: Values.samples_for(page),
+          sample: chosen_sample(page),
+          samples_url: manage_page_sample_path(page),
           token: form_authenticity_token
         }
       end

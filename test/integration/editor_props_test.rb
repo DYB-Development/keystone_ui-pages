@@ -41,4 +41,16 @@ class KeystoneUi::Pages::EditorPropsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages::Values.names = {}
   end
+
+  test "the builder hands the editor the samples to choose from and the one in use" do
+    KeystoneUi::Pages::Values.chooser = ->(_page) { [ [ "Acme", "acme" ], [ "Globex", "globex" ] ] }
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    props = JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])
+    assert_equal [ [ [ "Acme", "acme" ], [ "Globex", "globex" ] ], "acme" ], [ props["samples"], props["sample"] ]
+  ensure
+    KeystoneUi::Pages::Values.chooser = nil
+  end
 end
