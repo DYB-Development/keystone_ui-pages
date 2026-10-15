@@ -9,7 +9,7 @@ export default function LookChoice({ looks }) {
   return (
     <label className="flex items-center gap-2 text-sm">
       <span>Look</span>
-      <Select data-look-choice defaultValue={document.documentElement.dataset.look} className="py-1">
+      <Select data-look-choice defaultValue={document.documentElement.dataset.look} onChange={(event) => { document.documentElement.dataset.look = event.target.value }} className="py-1">
         {looks.map((name) => <option key={name} value={name}>{titled(name)}</option>)}
       </Select>
     </label>

@@ -108,6 +108,21 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     KeystoneUi.configuration.default_look = nil
   end
 
+  test "choosing a look in the top bar draws the page in that look" do
+    KeystoneUi.configuration.register_look :plain, "plain.css"
+    KeystoneUi.configuration.register_look :bold, "bold.css"
+    KeystoneUi.configuration.default_look = :plain
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-look-choice]").select("Bold")
+
+    assert_equal "bold", page.evaluate_script("document.documentElement.dataset.look")
+  ensure
+    KeystoneUi.configuration.looks.clear
+    KeystoneUi.configuration.default_look = nil
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
