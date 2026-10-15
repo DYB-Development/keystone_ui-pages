@@ -257,6 +257,61 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Portal", "" ], css_select("tbody tr[data-table-group] th").map { |cell| cell.text.strip }
   end
 
+  test "an element shown only for another value of a host value is not drawn on the live page" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(added, values: { "audience" => "client" })
+
+    assert_select ".ks-pages-element", count: 0
+  end
+
+  test "a row shown only for another value of a host value is not drawn on the live page" do
+    @document["sections"][0]["rows"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(@document, values: { "audience" => "client" })
+
+    assert_select ".ks-pages-row", count: 0
+  end
+
+  test "a section shown only for another value of a host value is not drawn on the live page" do
+    @document["sections"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(@document, values: { "audience" => "client" })
+
+    assert_select ".ks-pages-section", count: 0
+  end
+
+  test "an element shown only for a value of a host value is drawn on the live page when the host supplies that value" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(added, values: { "audience" => "internal" })
+
+    assert_select ".ks-pages-element", count: 1
+  end
+
+  test "the builder still draws an element its sample hides, marked as hidden" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(added, editing: true, values: { "audience" => "client" })
+
+    assert_select ".ks-pages-element[data-hidden]", count: 1
+  end
+
+  test "the builder still draws a row and a section their sample hides, marked as hidden" do
+    @document["sections"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+    @document["sections"][0]["rows"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+
+    render html: drawn_document(@document, editing: true, values: { "audience" => "client" })
+
+    assert_select ".ks-pages-section[data-hidden] .ks-pages-row[data-hidden]", count: 1
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)

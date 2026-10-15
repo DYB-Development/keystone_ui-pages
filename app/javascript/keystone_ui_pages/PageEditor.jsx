@@ -2,13 +2,14 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
 import ElementPalette from "./ElementPalette"
 import SelectionPath from "./SelectionPath"
 import SampleChoice from "./SampleChoice"
+import ShowWhen from "./ShowWhen"
 import ThemeMode from "./ThemeMode"
 import LookChoice from "./LookChoice"
 import ElementFields from "./ElementFields"
@@ -223,7 +224,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </ElementPalette>
         <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-surface-200 p-8 dark:bg-surface-900">
           <div ref={sheet} data-page-sheet style={{ width: DEVICES.find((choice) => choice.key === device).width }} className="relative mx-auto min-h-full max-w-full bg-[Canvas] shadow-lg ring-1 ring-black/5">
-            <div ref={page} data-page-canvas className="@container min-h-full px-6 bg-(--ks-color-page) text-(--ks-color-on-page) dark:bg-(--ks-color-page-dark) dark:text-(--ks-color-on-page-dark) [&_[data-selected]]:relative [&_[data-selected]]:outline-2 [&_[data-selected]]:outline-(--ks-color-accent) [&_[data-hovered]]:relative [&_[data-hovered]]:outline-1 [&_[data-hovered]]:outline-(--ks-color-accent) [&_[data-hovered]]:before:absolute [&_[data-hovered]]:before:-top-5 [&_[data-hovered]]:before:left-0 [&_[data-hovered]]:before:z-10 [&_[data-hovered]]:before:rounded-t [&_[data-hovered]]:before:bg-(--ks-color-accent) [&_[data-hovered]]:before:px-1.5 [&_[data-hovered]]:before:text-xs [&_[data-hovered]]:before:leading-5 [&_[data-hovered]]:before:text-white [&_[data-hovered]]:before:content-[attr(data-kind)] [&_[data-column-id]:empty]:min-h-16 [&_[data-column-id]:empty]:items-center [&_[data-column-id]:empty]:justify-center [&_[data-column-id]:empty]:rounded-md [&_[data-column-id]:empty]:border-2 [&_[data-column-id]:empty]:border-dashed [&_[data-column-id]:empty]:border-(--ks-color-border-strong) [&_[data-column-id]:empty]:after:text-sm [&_[data-column-id]:empty]:after:text-(--ks-color-icon) [&_[data-column-id]:empty]:after:content-['Drop_an_element_here'] [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} onMouseOver={hovered} onMouseLeave={() => page.current.querySelectorAll("[data-hovered]").forEach((node) => delete node.dataset.hovered)} />
+            <div ref={page} data-page-canvas className="@container min-h-full px-6 [&_[data-hidden]]:opacity-40 bg-(--ks-color-page) text-(--ks-color-on-page) dark:bg-(--ks-color-page-dark) dark:text-(--ks-color-on-page-dark) [&_[data-selected]]:relative [&_[data-selected]]:outline-2 [&_[data-selected]]:outline-(--ks-color-accent) [&_[data-hovered]]:relative [&_[data-hovered]]:outline-1 [&_[data-hovered]]:outline-(--ks-color-accent) [&_[data-hovered]]:before:absolute [&_[data-hovered]]:before:-top-5 [&_[data-hovered]]:before:left-0 [&_[data-hovered]]:before:z-10 [&_[data-hovered]]:before:rounded-t [&_[data-hovered]]:before:bg-(--ks-color-accent) [&_[data-hovered]]:before:px-1.5 [&_[data-hovered]]:before:text-xs [&_[data-hovered]]:before:leading-5 [&_[data-hovered]]:before:text-white [&_[data-hovered]]:before:content-[attr(data-kind)] [&_[data-column-id]:empty]:min-h-16 [&_[data-column-id]:empty]:items-center [&_[data-column-id]:empty]:justify-center [&_[data-column-id]:empty]:rounded-md [&_[data-column-id]:empty]:border-2 [&_[data-column-id]:empty]:border-dashed [&_[data-column-id]:empty]:border-(--ks-color-border-strong) [&_[data-column-id]:empty]:after:text-sm [&_[data-column-id]:empty]:after:text-(--ks-color-icon) [&_[data-column-id]:empty]:after:content-['Drop_an_element_here'] [&_[data-drop-target]]:outline-2 [&_[data-drop-target]]:outline-dashed [&_[data-drop-target]]:outline-(--ks-color-accent)" onClick={select} onMouseOver={hovered} onMouseLeave={() => page.current.querySelectorAll("[data-hovered]").forEach((node) => delete node.dataset.hovered)} />
             <SelectionToolbar ref={moveHandle} place={toolbarPlace} onRemove={removeSelected} onDuplicate={() => duplicateNode(nodes_url, token, selectedId).then(shown, refused)} />
           </div>
         </main>
@@ -243,6 +244,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
             valueNames={value_names}
             onBind={(field, name, fallback) => bindField(elements_url, token, element.id, field, name, fallback).then(shown, refused)}
             onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
+          {(element || (node && node.kind !== "column")) &&
+            <ShowWhen key={element?.id ?? node.id} condition={(element ?? nodeIn(document, node.id))?.show_when} valueNames={value_names}
+              onChange={(name, equals) => showWhen(nodes_url, token, element?.id ?? node.id, name, equals).then(shown, refused)} />}
         </aside>
       </div>
     </div>

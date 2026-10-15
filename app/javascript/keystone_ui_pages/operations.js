@@ -26,3 +26,5 @@ export const duplicateNode = (url, token, nodeId) => sent(`${url}/${nodeId}/dupl
 export const bindField = (url, token, elementId, field, name, fallback) => sent(`${url}/${elementId}/bind`, token, "POST", { field, name, fallback })
 
 export const chooseSample = (url, token, choice) => sent(url, token, "POST", { choice })
+
+export const showWhen = (url, token, nodeId, name, equals) => sent(`${url}/${nodeId}/condition`, token, "POST", { name, equals })

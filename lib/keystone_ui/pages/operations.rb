@@ -153,6 +153,17 @@ module KeystoneUi
         (node["rows"] || node["columns"]).sum { |child| held_elements(child) }
       end
 
+      def show_when(document, node_id:, name:, equals:)
+        raise InvalidDocument, "A column cannot be shown or hidden by a value" if kind(document, node_id) == :column
+        return copied(document).tap { |changed| node(changed, node_id).delete("show_when") } if name.blank?
+
+        raise InvalidDocument, "No value is named #{name}" unless Values.label(name)
+
+        copied(document).tap do |changed|
+          node(changed, node_id)["show_when"] = { "value" => name.to_s, "equals" => equals.to_s }
+        end
+      end
+
       def bind(document, element_id:, field:, name:, fallback: nil, catalog: Pages.catalog)
         raise InvalidDocument, "No value is named #{name}" unless Values.label(name)
 

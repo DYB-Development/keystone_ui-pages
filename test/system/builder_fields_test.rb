@@ -158,6 +158,46 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-value-list", visible: :all
   end
 
+  test "an editor sets an element to show only when a host value equals a chosen value" do
+    KeystoneUi::Pages::Values.names = { "audience" => "Audience" }
+    selected("button", ".ks-button")
+
+    find("#ks-pages-show-when-value").select("Audience")
+    fill_in "ks-pages-show-when-equals", with: "internal"
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id][data-hidden] .ks-button"
+  ensure
+    KeystoneUi::Pages::Values.names = {}
+  end
+
+  test "the builder fades an element its sample hides so an editor can see it is hidden" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+    page_record.update!(document: added)
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_operator page.evaluate_script("Number(getComputedStyle(document.querySelector('[data-element-id][data-hidden]')).opacity)"), :<, 1
+  end
+
+  test "an editor selects and edits an element its sample hides" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "audience", "equals" => "internal" }
+    page_record.update!(document: added)
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-element-id][data-hidden] .ks-button").click
+    fill_in "Label", with: "Cost of goods"
+    find("[data-element-fields] label", text: "Address").click
+
+    assert_selector "[data-element-id][data-hidden] .ks-button", text: "Cost of goods"
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 
