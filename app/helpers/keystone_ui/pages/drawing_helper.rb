@@ -29,6 +29,8 @@ module KeystoneUi
       end
 
       def drawn_row(row, editing)
+        return if hidden?(row) && !editing
+
         gap = Keystone::Ui::GridComponent::GAP_CLASSES.fetch((row["gap"] || Operations::DEFAULTS[:row]["gap"]).to_sym)
         share = Operations::SHARES.fetch(row["columns"].size, "1/1")
         columns = row["columns"].map { |column| drawn_column(column, editing, share) }
