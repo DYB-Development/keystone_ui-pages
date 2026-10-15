@@ -39,4 +39,12 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
       })()
     JS
   end
+
+  test "a live page opens in the mode its visitor chose in the host app" do
+    visit "/pages/pricing"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "dark")
+    visit "/pages/pricing"
+
+    assert_equal "dark", page.evaluate_script("document.documentElement.dataset.theme")
+  end
 end
