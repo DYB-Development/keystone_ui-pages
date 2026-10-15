@@ -173,6 +173,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-heading-row .ks-heading-note", text: "12.5 billable hours"
   end
 
+  test "a typed value list row whose total switch is off is not drawn as a total" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "value_list", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["rows"] = [ { "label" => "Rate", "value" => "$150.00", "total" => "false" } ]
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-value-list-total", count: 0
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
