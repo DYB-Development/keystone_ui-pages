@@ -73,6 +73,15 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal "dark", page.evaluate_script("document.documentElement.dataset.theme")
   end
 
+  test "choosing system mode in the top bar lets the page follow the device" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-theme-mode]").select("System")
+
+    assert_nil page.evaluate_script("document.documentElement.getAttribute('data-theme')")
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 

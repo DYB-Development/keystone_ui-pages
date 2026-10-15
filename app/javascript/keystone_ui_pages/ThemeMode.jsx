@@ -4,7 +4,8 @@ import Select from "keystone_ui-react/src/Select.jsx"
 const MODES = [["light", "Light"], ["dark", "Dark"], ["system", "System"]]
 
 const shown = (mode) => {
-  document.documentElement.dataset.theme = mode
+  if (mode === "system") delete document.documentElement.dataset.theme
+  else document.documentElement.dataset.theme = mode
 }
 
 export default function ThemeMode() {
