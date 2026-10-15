@@ -1,0 +1,7 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "#{@page.name}, version #{@version.number}") %>
+
+  <div class="@container" data-version-drawing>
+    <%= drawn_document(@version.document) %>
+  </div>
+<% end %>

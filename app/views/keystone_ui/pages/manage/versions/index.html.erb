@@ -4,7 +4,7 @@
   <div class="ks-table overflow-x-auto">
     <table class="min-w-full">
       <thead>
-        <tr><th class="text-left">Version</th><th class="text-left">Status</th><th class="text-left">Published</th></tr>
+        <tr><th class="text-left">Version</th><th class="text-left">Status</th><th class="text-left">Published</th><th></th></tr>
       </thead>
       <tbody>
         <% @versions.each do |version| %>
@@ -12,6 +12,7 @@
             <td><%= version.number %></td>
             <td><%= version.status %></td>
             <td><%= version.created_at.to_date.to_fs(:long) %></td>
+            <td><%= link_to "View", manage_page_version_path(@page, version) %></td>
           </tr>
         <% end %>
       </tbody>
