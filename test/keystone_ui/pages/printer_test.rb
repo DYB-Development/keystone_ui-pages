@@ -18,4 +18,12 @@ class KeystoneUi::Pages::PrinterTest < Minitest::Test
 
     assert_equal "%PDF", pdf[0, 4]
   end
+
+  def test_says_which_chrome_failed_when_it_cannot_print
+    KeystoneUi::Pages.chrome_path = "/no/such/chrome"
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { KeystoneUi::Pages::Printer.pdf("<p>Hi</p>") }
+
+    assert_includes error.message, "/no/such/chrome"
+  end
 end
