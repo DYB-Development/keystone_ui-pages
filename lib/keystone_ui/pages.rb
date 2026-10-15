@@ -29,6 +29,11 @@ module KeystoneUi
       end
     end
 
+    def self.pdf(page, values: {})
+      require "keystone_ui/pages/pdfs"
+      Pdfs.for(page, values: values)
+    end
+
     def self.catalog
       @catalog ||= Catalog.new.tap { |catalog| KeystoneElements.register(catalog) }
     end
