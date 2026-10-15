@@ -24,7 +24,11 @@ module KeystoneUi
       end
 
       def editor_canvas(page)
-        drawn_document(page.document, editing: true)
+        drawn_document(page.document, editing: true, values: Values.sample(page, chosen_sample(page)))
+      end
+
+      def chosen_sample(page)
+        session.dig(:keystone_ui_pages_samples, page.id.to_s) || Values.samples_for(page).first&.last
       end
     end
   end
