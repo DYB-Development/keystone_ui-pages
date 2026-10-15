@@ -26,7 +26,7 @@ module KeystoneUi
         return if hidden?(section) && !editing
 
         spacing = Keystone::Ui::SectionComponent::SPACING_CLASSES.fetch((section["spacing"] || Operations::DEFAULTS[:section]["spacing"]).to_sym)
-        data = editing ? { section_id: section["id"] } : {}
+        data = editing ? { section_id: section["id"], hidden: hidden?(section) || nil }.compact : {}
         tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 #{spacing}", data: data)
       end
 
@@ -36,7 +36,7 @@ module KeystoneUi
         gap = Keystone::Ui::GridComponent::GAP_CLASSES.fetch((row["gap"] || Operations::DEFAULTS[:row]["gap"]).to_sym)
         share = Operations::SHARES.fetch(row["columns"].size, "1/1")
         columns = row["columns"].map { |column| drawn_column(column, editing, share) }
-        data = editing ? { row_id: row["id"] } : {}
+        data = editing ? { row_id: row["id"], hidden: hidden?(row) || nil }.compact : {}
         tag.div(safe_join(columns), class: "ks-pages-row grid grid-cols-12 #{gap}", data: data)
       end
 
