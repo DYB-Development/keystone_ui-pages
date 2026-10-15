@@ -18,6 +18,7 @@ module KeystoneUi
           arrangements: Operations::ARRANGEMENTS,
           defaults: Operations::DEFAULTS,
           shares: Operations::SHARES,
+          value_names: Values.names,
           token: form_authenticity_token
         }
       end
