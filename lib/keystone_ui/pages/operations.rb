@@ -152,6 +152,14 @@ module KeystoneUi
         (node["rows"] || node["columns"]).sum { |child| held_elements(child) }
       end
 
+      def bind(document, element_id:, field:, name:, fallback: nil, catalog: Pages.catalog)
+        copied(document).tap do |changed|
+          element = element(changed, element_id)
+          offered(defined(catalog, element["key"]), field)
+          element["fields"][field.to_s] = { "value" => name.to_s, "fallback" => fallback }
+        end
+      end
+
       def set(document, element_id:, field:, value:, catalog: Pages.catalog)
         copied(document).tap do |changed|
           element = element(changed, element_id)
