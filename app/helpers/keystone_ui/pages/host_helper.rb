@@ -10,7 +10,7 @@ module KeystoneUi
         version = page.live_version
         return if version.nil?
 
-        tag.div(drawn_document(version.document, values: values), class: "@container")
+        tag.div(drawn_version(version, values: values), class: "@container")
       end
     end
   end
