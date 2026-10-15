@@ -181,4 +181,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-button", text: ""
   end
+
+  test "a list field bound to a host value draws the rows the host supplies" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "feature_grid", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["features"] = { "value" => "highlights", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "highlights" => [ { "title" => "Uptime" }, { "title" => "Support" } ] })
+
+    assert_equal %w[Uptime Support], css_select("h3").map { |heading| heading.text.strip }
+  end
 end
