@@ -47,4 +47,17 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
 
     assert_equal "dark", page.evaluate_script("document.documentElement.dataset.theme")
   end
+
+  test "a live page opens in the look the host app gives its visitor" do
+    KeystoneUi.configuration.register_look :plain, "plain.css"
+    KeystoneUi.configuration.register_look :bold, "bold.css"
+    KeystoneUi.configuration.default_look = :bold
+
+    visit "/pages/pricing"
+
+    assert_equal "bold", page.evaluate_script("document.documentElement.dataset.look")
+  ensure
+    KeystoneUi.configuration.looks.clear
+    KeystoneUi.configuration.default_look = nil
+  end
 end
