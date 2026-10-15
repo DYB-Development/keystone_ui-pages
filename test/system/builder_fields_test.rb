@@ -42,6 +42,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal [ "Headline", "split" ], [ find_field("Title").value, find_field("Layout").value ]
   end
 
+  test "the settings panel shows a new alert's placeholder message as the field's current value" do
+    selected("alert", ".ks-alert")
+
+    assert_equal "Something worth knowing.", find_field("Message").value
+  end
+
   private
 
   def selected(key, drawn)
