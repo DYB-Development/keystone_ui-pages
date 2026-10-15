@@ -124,6 +124,12 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-value-list-total .ks-value-list-label", text: "Issued"
   end
 
+  test "a value list row's fallback box shows the fallback in use when the editor has not changed it" do
+    selected("value_list", ".ks-value-list")
+
+    assert_equal "N/A", find("#ks-pages-rows-0-fallback").value
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 

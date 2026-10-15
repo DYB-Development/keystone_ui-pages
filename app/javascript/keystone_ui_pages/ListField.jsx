@@ -24,8 +24,8 @@ export default function ListField({ field, entries, onChange }) {
               {part.kind === "yes_or_no"
                 ? <Checkbox id={`ks-pages-${field.key}-${index}-${part.key}`} defaultChecked={entry[part.key] === "true"}
                     onChange={(event) => saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: String(event.target.checked) } : kept)))} />
-                : <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? ""}
-                    onBlur={(event) => event.target.value !== (entry[part.key] ?? "") &&
+                : <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? part.default ?? ""}
+                    onBlur={(event) => event.target.value !== (entry[part.key] ?? part.default ?? "") &&
                       saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: event.target.value } : kept)))} />}
             </div>
           ))}
