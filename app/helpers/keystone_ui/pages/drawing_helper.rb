@@ -23,6 +23,8 @@ module KeystoneUi
       private
 
       def drawn_section(section, editing)
+        return if hidden?(section) && !editing
+
         spacing = Keystone::Ui::SectionComponent::SPACING_CLASSES.fetch((section["spacing"] || Operations::DEFAULTS[:section]["spacing"]).to_sym)
         data = editing ? { section_id: section["id"] } : {}
         tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 #{spacing}", data: data)
