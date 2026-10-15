@@ -312,6 +312,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-pages-section[data-hidden] .ks-pages-row[data-hidden]", count: 1
   end
 
+  test "a section is kept on one printed page" do
+    render html: drawn_document(@document)
+
+    assert_select ".ks-pages-section.print\\:break-inside-avoid", count: 1
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)

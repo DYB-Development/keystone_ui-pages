@@ -27,7 +27,7 @@ module KeystoneUi
 
         spacing = Keystone::Ui::SectionComponent::SPACING_CLASSES.fetch((section["spacing"] || Operations::DEFAULTS[:section]["spacing"]).to_sym)
         data = editing ? { section_id: section["id"], hidden: hidden?(section) || nil }.compact : {}
-        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 #{spacing}", data: data)
+        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 print:break-inside-avoid #{spacing}", data: data)
       end
 
       def drawn_row(row, editing)
