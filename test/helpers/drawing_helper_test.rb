@@ -142,4 +142,13 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select "div.ks-pages-element.flex.justify-start > .ks-button"
   end
+
+  test "a newly dropped card, alert, hero or code block still fills its column" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = %w[card alert hero code].reduce(@document) { |filled, key| KeystoneUi::Pages::Operations.add(filled, key, column_id: column_id) }
+
+    render html: drawn_document(document)
+
+    assert_select "div.ks-pages-element.flex.flex-col", count: 4
+  end
 end
