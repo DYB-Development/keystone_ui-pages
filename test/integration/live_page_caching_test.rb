@@ -24,4 +24,15 @@ class KeystoneUi::Pages::LivePageCachingTest < ActionDispatch::IntegrationTest
 
     assert_equal first, response.body
   end
+
+  test "publishing a new version means the next request draws the new version, not the cached old one" do
+    get "/pages/pricing"
+    element_id = @page.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+    @page.update!(document: KeystoneUi::Pages::Operations.set(@page.document, element_id: element_id, field: "label", value: "Book a call"))
+    @page.publish
+
+    get "/pages/pricing"
+
+    assert_equal "Book a call", Nokogiri::HTML(response.body).at_css(".ks-button").text.strip
+  end
 end
