@@ -6,7 +6,11 @@ module KeystoneUi
       module_function
 
       def html(version, values: {})
-        KeystoneUi::Pages::PagesController.render(template: "keystone_ui/pages/pdfs/show", layout: false, assigns: { version: version, values: values })
+        KeystoneUi::Pages::PagesController.render(template: "keystone_ui/pages/pdfs/show", layout: false, assigns: { version: version, values: values, stylesheet: stylesheet })
+      end
+
+      def stylesheet
+        Rails.application.assets.load_path.find(Pages.pdf_stylesheet)&.content.to_s
       end
     end
   end

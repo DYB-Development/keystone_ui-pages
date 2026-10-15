@@ -19,4 +19,10 @@ class KeystoneUi::Pages::PdfDocumentTest < ActiveSupport::TestCase
 
     assert_includes html, ">Acme<"
   end
+
+  test "a PDF document carries the host's stylesheet, so Chrome prints it with the host's styles" do
+    html = KeystoneUi::Pages::PdfDocument.html(@page.versions.live.first, values: {})
+
+    assert_match(/<style>.*\.ks-button/m, html)
+  end
 end
