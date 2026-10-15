@@ -5,6 +5,7 @@ require "json"
 require "securerandom"
 require "keystone_ui/pages"
 require "keystone_ui/pages/document"
+require "keystone_ui/pages/values"
 
 module KeystoneUi
   module Pages
@@ -153,6 +154,8 @@ module KeystoneUi
       end
 
       def bind(document, element_id:, field:, name:, fallback: nil, catalog: Pages.catalog)
+        raise InvalidDocument, "No value is named #{name}" unless Values.label(name)
+
         copied(document).tap do |changed|
           element = element(changed, element_id)
           offered(defined(catalog, element["key"]), field)

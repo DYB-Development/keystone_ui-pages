@@ -23,4 +23,12 @@ class KeystoneUi::Pages::BindOperationsTest < Minitest::Test
 
     assert_equal({ "value" => "client_name", "fallback" => "Our client" }, bound["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"])
   end
+
+  def test_binding_a_field_to_a_value_the_host_does_not_offer_is_refused_naming_it
+    refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
+      KeystoneUi::Pages::Operations.bind(@document, element_id: @element_id, field: "label", name: "salary")
+    end
+
+    assert_equal "No value is named salary", refusal.message
+  end
 end
