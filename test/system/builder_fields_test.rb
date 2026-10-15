@@ -158,6 +158,19 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-value-list", visible: :all
   end
 
+  test "an editor sets an element to show only when a host value equals a chosen value" do
+    KeystoneUi::Pages::Values.names = { "audience" => "Audience" }
+    selected("button", ".ks-button")
+
+    find("#ks-pages-show-when-value").select("Audience")
+    fill_in "ks-pages-show-when-equals", with: "internal"
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id][data-hidden] .ks-button"
+  ensure
+    KeystoneUi::Pages::Values.names = {}
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 

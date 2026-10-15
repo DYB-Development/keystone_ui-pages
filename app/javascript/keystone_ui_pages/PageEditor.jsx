@@ -2,13 +2,14 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
 import ElementPalette from "./ElementPalette"
 import SelectionPath from "./SelectionPath"
 import SampleChoice from "./SampleChoice"
+import ShowWhen from "./ShowWhen"
 import ThemeMode from "./ThemeMode"
 import LookChoice from "./LookChoice"
 import ElementFields from "./ElementFields"
@@ -243,6 +244,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
             valueNames={value_names}
             onBind={(field, name, fallback) => bindField(elements_url, token, element.id, field, name, fallback).then(shown, refused)}
             onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
+          {(element || (node && node.kind !== "column")) &&
+            <ShowWhen key={element?.id ?? node.id} condition={(element ?? nodeIn(document, node.id))?.show_when} valueNames={value_names}
+              onChange={(name, equals) => showWhen(nodes_url, token, element?.id ?? node.id, name, equals).then(shown, refused)} />}
         </aside>
       </div>
     </div>
