@@ -163,6 +163,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-button", text: "Acme"
   end
 
+  test "a heading's note bound to a host value shows that value" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "heading", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["note"] = { "value" => "hours", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "hours" => "12.5 billable hours" })
+
+    assert_select ".ks-heading-row .ks-heading-note", text: "12.5 billable hours"
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
