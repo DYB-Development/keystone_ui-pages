@@ -69,8 +69,10 @@ module KeystoneUi
       end
 
       def entry_with_defaults(field, entry)
-        defaults = Array(field[:entry]).to_h { |part| [ part[:key], part[:default] ] }.compact
-        defaults.merge(entry.to_h.symbolize_keys.compact_blank)
+        parts = Array(field[:entry]).index_by { |part| part[:key] }
+        defaults = parts.transform_values { |part| part[:default] }.compact
+        given = entry.to_h.symbolize_keys.to_h { |key, value| [ key, parts[key] ? field_value(parts[key], value) : value ] }
+        defaults.merge(given.compact_blank)
       end
 
       def filled(stored)

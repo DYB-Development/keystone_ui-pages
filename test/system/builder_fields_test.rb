@@ -116,6 +116,28 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-accordion-item:first-child", text: "How does it work?"
   end
 
+  test "an editor marks a value list row as the total by ticking its total box" do
+    selected("value_list", ".ks-value-list")
+
+    find("#ks-pages-rows-2-total").click
+
+    assert_selector "[data-element-id] .ks-value-list-total .ks-value-list-label", text: "Issued"
+  end
+
+  test "a value list row's fallback box shows the fallback in use when the editor has not changed it" do
+    selected("value_list", ".ks-value-list")
+
+    assert_equal "N/A", find("#ks-pages-rows-0-fallback").value
+  end
+
+  test "a value list row's total box sits at the left under its label instead of stretching across the panel" do
+    selected("value_list", ".ks-value-list")
+
+    width = evaluate_script("document.querySelector('#ks-pages-rows-0-total').getBoundingClientRect().width")
+
+    assert_operator width, :<, 40
+  end
+
   test "a data field says the host fills it instead of offering a text box" do
     selected("data_table", "tbody tr:first-child td:first-child")
 
