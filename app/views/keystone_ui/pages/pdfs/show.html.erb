@@ -5,7 +5,7 @@
     <style><%= raw @stylesheet %></style>
   </head>
   <body>
-    <div class="@container">
+    <div class="@container print:bg-white print:[print-color-adjust:exact]">
       <%= drawn_version(@version, values: @values) %>
     </div>
   </body>

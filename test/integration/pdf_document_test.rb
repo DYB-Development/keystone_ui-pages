@@ -25,4 +25,10 @@ class KeystoneUi::Pages::PdfDocumentTest < ActiveSupport::TestCase
 
     assert_match(/<style>.*\.ks-button/m, html)
   end
+
+  test "a PDF document wraps the page as a printed live page is wrapped, on white with its colours kept" do
+    html = KeystoneUi::Pages::PdfDocument.html(@page.versions.live.first, values: {})
+
+    assert_includes html, %(class="@container print:bg-white print:[print-color-adjust:exact]")
+  end
 end
