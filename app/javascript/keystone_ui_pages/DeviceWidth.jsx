@@ -3,7 +3,8 @@ import React from "react"
 export const DEVICES = [
   { key: "phone", label: "Phone", width: "390px" },
   { key: "tablet", label: "Tablet", width: "768px" },
-  { key: "desktop", label: "Desktop", width: "100%" }
+  { key: "desktop", label: "Desktop", width: "100%" },
+  { key: "print", label: "Print", width: "794px", theme: "light" }
 ]
 
 export default function DeviceWidth({ chosen, onChoose }) {

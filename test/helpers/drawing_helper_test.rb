@@ -312,6 +312,30 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-pages-section[data-hidden] .ks-pages-row[data-hidden]", count: 1
   end
 
+  test "a section is kept on one printed page" do
+    render html: drawn_document(@document)
+
+    assert_select ".ks-pages-section.print\\:break-inside-avoid", count: 1
+  end
+
+  test "an element keeps each table row on one printed page" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+
+    render html: drawn_document(added)
+
+    assert_includes css_select(".ks-pages-element").first["class"].split, "print:[&_tr]:break-inside-avoid"
+  end
+
+  test "an element keeps each label and value row on one printed page" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "value_list", column_id: column_id)
+
+    render html: drawn_document(added)
+
+    assert_includes css_select(".ks-pages-element").first["class"].split, "print:[&_.ks-value-list-row]:break-inside-avoid"
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
