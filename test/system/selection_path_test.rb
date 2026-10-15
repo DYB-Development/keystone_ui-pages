@@ -43,4 +43,12 @@ class KeystoneUi::Pages::SelectionPathTest < KeystoneUi::Pages::ApplicationSyste
 
     assert_equal [ true, true ], [ row_selected, has_css?("[data-section-id][data-selected]") ]
   end
+
+  test "pressing Escape selects the item that holds the current selection" do
+    find("[data-element-id] .ks-button").click
+
+    find("body").send_keys(:escape)
+
+    assert_selector "[data-column-id][data-selected]"
+  end
 end

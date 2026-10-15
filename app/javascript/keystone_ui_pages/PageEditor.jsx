@@ -147,6 +147,16 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     setNode({ kind, id, rowId: holder.closest("[data-row-id]")?.dataset.rowId, sectionId: holder.closest("[data-section-id]")?.dataset.sectionId })
   }
 
+  useEffect(() => {
+    const parent = selectionPath[selectionPath.length - 2]
+    const escaped = (event) => {
+      if (event.key !== "Escape" || !parent || event.target.closest("input, textarea, select")) return
+      choosePart(parent)
+    }
+    window.document.addEventListener("keydown", escaped)
+    return () => window.document.removeEventListener("keydown", escaped)
+  }, [selectionPath])
+
   const selectedId = selected ?? node?.id
 
   useEffect(() => {
