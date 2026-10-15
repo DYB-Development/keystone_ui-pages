@@ -10,6 +10,11 @@ module KeystoneUi
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
 
+      def drawn_version(version, values: {})
+        key = [ "keystone_ui_pages", version.id, Operations.digest(values.to_h.stringify_keys) ]
+        Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
+      end
+
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
