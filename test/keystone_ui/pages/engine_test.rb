@@ -17,4 +17,10 @@ class KeystoneUi::Pages::EngineTest < ActiveSupport::TestCase
 
     assert_includes KeystoneUi.configuration.tailwind_sources, source
   end
+
+  test "the element definitions are handed to the host's Tailwind build" do
+    source = KeystoneUi::Pages::Engine.root.join("lib/keystone_ui/pages/**/*.rb").to_s
+
+    assert_includes KeystoneUi.configuration.tailwind_sources, source
+  end
 end
