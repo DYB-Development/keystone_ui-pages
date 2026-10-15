@@ -10,6 +10,10 @@ module KeystoneUi
     class Engine < ::Rails::Engine
       isolate_namespace KeystoneUi::Pages
 
+      initializer "keystone_ui_pages.host_helper" do
+        ActiveSupport.on_load(:action_view) { include KeystoneUi::Pages::HostHelper }
+      end
+
       initializer "keystone_ui_pages.tailwind" do
         KeystoneUi.configuration.tailwind_sources << root.join("app/views/**/*.erb").to_s
         KeystoneUi.configuration.tailwind_sources << root.join("app/helpers/**/*.rb").to_s
