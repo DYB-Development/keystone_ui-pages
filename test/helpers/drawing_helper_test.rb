@@ -267,6 +267,19 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "td.text-right", text: "2.0"
   end
 
+  test "a data table groups the host's rows under headings named by the key the editor gave" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+    fields = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]
+    fields["items"] = { "value" => "work", "fallback" => nil }
+    fields["columns"] = [ { "key" => "task", "label" => "Task" } ]
+    fields["group_by"] = "project"
+
+    render html: drawn_document(added, values: { "work" => [ { "project" => "Portal", "task" => "Export" }, { "project" => "Reporting", "task" => "Charts" } ] })
+
+    assert_equal %w[Portal Export Reporting Charts], css_select("tbody tr").map { |row| row.text.strip }
+  end
+
   test "a line chart draws the series and labels the host supplies" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "line_chart", column_id: column_id)
