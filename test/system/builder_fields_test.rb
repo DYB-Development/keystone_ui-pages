@@ -108,6 +108,14 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-accordion-item", count: 1, text: "How does it work?"
   end
 
+  test "an editor reorders the entries of a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    within(all("[data-list-entry]").last) { click_on "Move up" }
+
+    assert_selector "[data-element-id] .ks-accordion-item:first-child", text: "How does it work?"
+  end
+
   private
 
   def selected(key, drawn)
