@@ -223,6 +223,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-value-list-row", count: 0
   end
 
+  test "a data table bound to a host value the host does not supply draws with no rows" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["items"] = { "value" => "work", "fallback" => nil }
+
+    render html: drawn_document(added, values: {})
+
+    assert_select "tbody td", count: 0
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
