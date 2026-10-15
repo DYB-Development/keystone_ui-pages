@@ -32,4 +32,15 @@ class KeystoneUi::Pages::SelectionPathTest < KeystoneUi::Pages::ApplicationSyste
 
     assert_equal [ true, true ], [ has_css?("[data-selection-toolbar]:not([hidden])"), has_field?("Width on wide screens") ]
   end
+
+  test "with a column selected the path selects its row, and from the row its section" do
+    find("[data-element-id] .ks-button").click
+    within("[data-selection-path]") { click_on "Column" }
+
+    within("[data-selection-path]") { click_on "Row" }
+    row_selected = has_css?("[data-row-id][data-selected]")
+    within("[data-selection-path]") { click_on "Section" }
+
+    assert_equal [ true, true ], [ row_selected, has_css?("[data-section-id][data-selected]") ]
+  end
 end
