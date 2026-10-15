@@ -105,4 +105,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-pages-element", text: /puts 1/
   end
+
+  test "a newly dropped button shows a label" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+
+    render html: drawn_document(KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id))
+
+    assert_select ".ks-button", text: "Button"
+  end
 end

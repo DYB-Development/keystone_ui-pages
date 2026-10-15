@@ -7,7 +7,7 @@ module KeystoneUi
 
       def register(catalog)
         catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics",
-          fields: [ { key: :label, label: "Label" }, { key: :href, label: "Address" } ])
+          fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text } ])
         catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text",
