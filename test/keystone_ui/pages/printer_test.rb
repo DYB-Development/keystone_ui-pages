@@ -26,4 +26,14 @@ class KeystoneUi::Pages::PrinterTest < Minitest::Test
 
     assert_includes error.message, "/no/such/chrome"
   end
+
+  def test_uses_the_chrome_named_by_chrome_bin_when_no_path_is_set
+    KeystoneUi::Pages.chrome_path = nil
+    original = ENV["CHROME_BIN"]
+    ENV["CHROME_BIN"] = "/opt/chrome/chrome"
+
+    assert_equal "/opt/chrome/chrome", KeystoneUi::Pages::Printer.chrome
+  ensure
+    ENV["CHROME_BIN"] = original
+  end
 end
