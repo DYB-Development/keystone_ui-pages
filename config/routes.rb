@@ -15,6 +15,7 @@ KeystoneUi::Pages::Engine.routes.draw do
         post :duplicate, on: :member
       end
       resource :document, only: %i[update]
+      post :sample, to: "samples#update"
     end
   end
 
