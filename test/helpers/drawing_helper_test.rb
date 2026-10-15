@@ -352,6 +352,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Total", "2.0" ], css_select("tfoot th").map { |cell| cell.text.strip }
   end
 
+  test "a bar chart draws the bars the host supplies, shading the ones the host marks as shaded" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "bar_chart", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["bars"] = { "value" => "hours", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "hours" => [ { "label" => "Fri", "value" => "2.5" }, { "label" => "Sat", "value" => "1", "shaded" => true } ] })
+
+    assert_equal [ false, true ], css_select("rect.ks-bar-chart-bar").map { |bar| bar["class"].split.include?("ks-bar-chart-bar-shaded") }
+  end
+
   test "a line chart draws the series and labels the host supplies" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "line_chart", column_id: column_id)
