@@ -15,7 +15,14 @@ module KeystoneUi
         end
 
         def update
-          changed(Operations.set(page.document, element_id: params[:id], field: params.require(:field), value: params[:value].to_s))
+          changed(Operations.set(page.document, element_id: params[:id], field: params.require(:field), value: field_value))
+        end
+
+        private
+
+        def field_value
+          value = params.to_unsafe_h["value"]
+          value.is_a?(Array) ? value.map { |entry| entry.to_h.stringify_keys } : value.to_s
         end
       end
     end
