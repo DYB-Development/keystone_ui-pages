@@ -53,6 +53,17 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal "rgb(1, 2, 3)", color
   end
 
+  test "the top bar offers light, dark and system modes and opens on the editor's own mode" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "dark")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    mode = find("[data-builder-top-bar] [data-theme-mode]")
+
+    assert_equal [ %w[Light Dark System], "dark" ], [ mode.all("option").map(&:text), mode.value ]
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 

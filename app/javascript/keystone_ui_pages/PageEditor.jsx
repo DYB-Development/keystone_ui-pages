@@ -9,6 +9,7 @@ import SelectionToolbar from "./SelectionToolbar"
 import ElementPalette from "./ElementPalette"
 import SelectionPath from "./SelectionPath"
 import SampleChoice from "./SampleChoice"
+import ThemeMode from "./ThemeMode"
 import ElementFields from "./ElementFields"
 import { elementIn, nodeIn } from "./document"
 
@@ -202,6 +203,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </div>
         <div className="flex items-center gap-4 max-lg:hidden">
           <DeviceWidth chosen={device} onChoose={setDevice} />
+          <ThemeMode />
           <SampleChoice samples={samples} chosen={sample} onChoose={(choice) => chooseSample(samples_url, token, choice).then(shown, refused)} />
         </div>
         <div className="flex items-center gap-2">
