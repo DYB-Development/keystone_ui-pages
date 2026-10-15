@@ -10,7 +10,7 @@ module KeystoneUi
   module Pages
     class << self
       attr_writer :base_controller, :layout, :editor_layout
-      attr_accessor :edit_check_method, :view_check_method, :owner_method, :refusal_method
+      attr_accessor :edit_check_method, :view_check_method, :owner_method, :refusal_method, :chrome_path
 
       def base_controller
         @base_controller || "ActionController::Base"
