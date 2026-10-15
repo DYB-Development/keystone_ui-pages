@@ -1,0 +1,28 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "#{@page.name} history") %>
+
+  <div class="mb-6"><%= ui_button(label: "Back to builder", href: manage_page_path(@page), variant: :secondary) %></div>
+
+  <div class="ks-table overflow-x-auto">
+    <table class="relative min-w-full divide-y divide-gray-300 dark:divide-white/15">
+      <thead class="ks-table-head">
+        <tr>
+          <th class="ks-table-header ks-table-header-first text-left text-sm">Version</th>
+          <th class="ks-table-header ks-table-header-middle text-left text-sm">Status</th>
+          <th class="ks-table-header ks-table-header-middle text-left text-sm">Published</th>
+          <th class="ks-table-header ks-table-header-last text-right text-sm"><span class="sr-only">Open</span></th>
+        </tr>
+      </thead>
+      <tbody class="ks-table-body">
+        <% @versions.each do |version| %>
+          <tr data-version="<%= version.number %>">
+            <td class="ks-table-cell-first text-sm whitespace-nowrap"><%= version.number %></td>
+            <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: version.status, variant: version.live? ? :success : :neutral) %></td>
+            <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= version.created_at.to_date.to_fs(:long) %></td>
+            <td class="ks-table-cell-middle text-sm whitespace-nowrap text-right"><%= link_to "View", manage_page_version_path(@page, version) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

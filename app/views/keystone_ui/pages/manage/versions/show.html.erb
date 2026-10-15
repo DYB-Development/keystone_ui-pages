@@ -1,0 +1,11 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "#{@page.name}, version #{@version.number}") %>
+
+  <%= ui_form(action: restore_manage_page_version_path(@page, @version), method: :post) do %>
+    <%= ui_button(label: "Restore this version as the draft", type: :submit, variant: :secondary) %>
+  <% end %>
+
+  <div class="@container" data-version-drawing>
+    <%= drawn_document(@version.document) %>
+  </div>
+<% end %>
