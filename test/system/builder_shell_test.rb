@@ -248,7 +248,7 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     visit "/pages/manage/pages/#{page_record.id}"
 
     data = find("[data-element-palette] [data-element-group='Data']")
-    assert_equal [ "data", %w[progress stat_card figure data_table value_list line_chart] ], [ data.find("h2").text.downcase, data.all("[data-element-key]").map { |item| item["data-element-key"] } ]
+    assert_equal [ "data", %w[progress stat_card figure data_table value_list bar_chart line_chart] ], [ data.find("h2").text.downcase, data.all("[data-element-key]").map { |item| item["data-element-key"] } ]
   end
 
   test "a search box in the element panel filters the list of elements" do

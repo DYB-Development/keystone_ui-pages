@@ -94,6 +94,12 @@ class KeystoneUi::PagesTest < Minitest::Test
       [ element.component, rows[:kind], rows[:entry].map { |part| part[:key] }, rows[:entry].map { |part| part[:kind] }, align[:options] ]
   end
 
+  def test_the_catalog_offers_keystone_ui_bar_chart_filled_from_the_host_with_a_choice_to_show_values
+    element = keystone_elements.find(:bar_chart)
+
+    assert_equal [ :ui_bar_chart, [ [ :bars, :data ], [ :show_values, :yes_or_no ] ] ], [ element.component, element.fields.map { |field| [ field[:key], field[:kind] ] } ]
+  end
+
   def test_the_catalog_offers_keystone_ui_info
     element = keystone_elements.find(:info)
 
@@ -115,7 +121,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_every_keystone_ui_element_has_an_icon_and_belongs_to_a_group
     elements = keystone_elements.elements
     groups = elements.group_by(&:group).to_h { |group, members| [ group, members.map(&:key).sort ] }
-    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[data_table figure line_chart progress stat_card value_list], "Text" => %i[accordion alert code heading hero info label paragraph] }
+    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[bar_chart data_table figure line_chart progress stat_card value_list], "Text" => %i[accordion alert code heading hero info label paragraph] }
 
     assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
   end
