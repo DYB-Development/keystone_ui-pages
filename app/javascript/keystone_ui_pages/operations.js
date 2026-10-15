@@ -22,3 +22,5 @@ export const removeNode = (url, token, nodeId) => sent(`${url}/${nodeId}`, token
 export const moveNode = (url, token, nodeId, into, position) => sent(`${url}/${nodeId}/move`, token, "POST", { into, position })
 
 export const duplicateNode = (url, token, nodeId) => sent(`${url}/${nodeId}/duplicate`, token, "POST")
+
+export const bindField = (url, token, elementId, field, name, fallback) => sent(`${url}/${elementId}/bind`, token, "POST", { field, name, fallback })

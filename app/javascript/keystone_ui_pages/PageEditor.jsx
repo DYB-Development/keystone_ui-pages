@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, duplicateNode, moveNode, removeNode, setField } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, duplicateNode, moveNode, removeNode, setField } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
@@ -24,7 +24,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
@@ -231,6 +231,8 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
           {definition && <ElementFields element={element} definition={definition} alignments={arrangements.element.align}
             onRemove={(id) => removeNode(nodes_url, token, id).then((answer) => { shown(answer); setSelected(null) })}
             onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown)}
+            valueNames={value_names}
+            onBind={(field, name, fallback) => bindField(elements_url, token, element.id, field, name, fallback).then(shown, refused)}
             onChange={(field, value) => setField(elements_url, token, element.id, field, value).then(shown)} />}
         </aside>
       </div>
