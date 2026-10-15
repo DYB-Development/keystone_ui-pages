@@ -49,7 +49,12 @@ module KeystoneUi
       end
 
       def drawn_element(element)
-        wrapped_element(element)
+        wrapped_element(element) unless hidden?(element)
+      end
+
+      def hidden?(node)
+        condition = node["show_when"]
+        condition && (@drawn_values || {})[condition["value"]].to_s != condition["equals"].to_s
       end
 
       def wrapped_element(element, data: {})
