@@ -14,7 +14,9 @@ export default function ListField({ field, entries, onChange }) {
           {parts.map((part) => (
             <div key={part.key} className="flex flex-col gap-1">
               <Label htmlFor={`ks-pages-${field.key}-${index}-${part.key}`}>{part.label}</Label>
-              <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? ""} />
+              <Input id={`ks-pages-${field.key}-${index}-${part.key}`} type="text" defaultValue={entry[part.key] ?? ""}
+                onBlur={(event) => event.target.value !== (entry[part.key] ?? "") &&
+                  saved(entries.map((kept, place) => (place === index ? { ...kept, [part.key]: event.target.value } : kept)))} />
             </div>
           ))}
         </fieldset>

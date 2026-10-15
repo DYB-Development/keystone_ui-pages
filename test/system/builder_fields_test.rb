@@ -91,6 +91,15 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-accordion-item", count: 3
   end
 
+  test "an editor edits an entry of a list field from the builder" do
+    selected("accordion", ".ks-accordion")
+
+    fill_in "ks-pages-items-0-question", with: "Is it free?"
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-accordion-item", text: "Is it free?"
+  end
+
   private
 
   def selected(key, drawn)
