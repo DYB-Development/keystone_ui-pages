@@ -33,4 +33,17 @@ class KeystoneUi::Pages::HeroHeightTest < KeystoneUi::Pages::ApplicationSystemTe
 
     assert_equal [ %w[content tall full_screen], true ], [ all("#ks-pages-field-height option").map(&:value), has_css?("[data-element-id][class~='[&_.ks-hero]:min-h-0']") ]
   end
+
+  test "a new hero starts at a height that leaves room for the page below it" do
+    @page_record.update!(document: @document)
+
+    visit "/pages/manage/pages/#{@page_record.id}"
+
+    assert_equal true, page.evaluate_script(<<~JS)
+      (() => {
+        const hero = document.querySelector("[data-element-id] .ks-hero")
+        return hero.getBoundingClientRect().height <= window.innerHeight * 0.6
+      })()
+    JS
+  end
 end
