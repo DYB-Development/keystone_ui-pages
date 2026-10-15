@@ -17,6 +17,12 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal "%PDF-printed", pdf.file.download
   end
 
+  test "asking again for the same values returns the kept PDF without printing it again" do
+    printing { 2.times { KeystoneUi::Pages.pdf(@page, values: { "client_name" => "Acme" }) } }
+
+    assert_equal 1, @printed
+  end
+
   private
 
   def printing(&)
