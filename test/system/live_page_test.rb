@@ -39,4 +39,33 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
       })()
     JS
   end
+
+  test "a live page opens in the mode its visitor chose in the host app" do
+    visit "/pages/pricing"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "dark")
+    visit "/pages/pricing"
+
+    assert_equal "dark", page.evaluate_script("document.documentElement.dataset.theme")
+  end
+
+  test "a live page opens in the look the host app gives its visitor" do
+    KeystoneUi.configuration.register_look :plain, "plain.css"
+    KeystoneUi.configuration.register_look :bold, "bold.css"
+    KeystoneUi.configuration.default_look = :bold
+
+    visit "/pages/pricing"
+
+    assert_equal "bold", page.evaluate_script("document.documentElement.dataset.look")
+  ensure
+    KeystoneUi.configuration.looks.clear
+    KeystoneUi.configuration.default_look = nil
+  end
+
+  test "a live page in dark mode tells the browser it is dark, so its default background turns dark behind light text" do
+    visit "/pages/pricing"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "dark")
+    visit "/pages/pricing"
+
+    assert_equal "dark", page.evaluate_script("getComputedStyle(document.documentElement).colorScheme")
+  end
 end

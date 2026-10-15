@@ -36,6 +36,123 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     JS
   end
 
+  test "the page is drawn on the page colour the host app's theme sets" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    assert_selector "[data-page-canvas]", visible: :all
+
+    color = page.evaluate_script(<<~JS)
+      (() => {
+        const look = document.createElement("style")
+        look.textContent = ":root { --ks-color-page: rgb(1, 2, 3); }"
+        document.head.append(look)
+        return getComputedStyle(document.querySelector("[data-page-canvas]")).backgroundColor
+      })()
+    JS
+
+    assert_equal "rgb(1, 2, 3)", color
+  end
+
+  test "the top bar offers light, dark and system modes and opens on the editor's own mode" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "dark")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    mode = find("[data-builder-top-bar] [data-theme-mode]")
+
+    assert_equal [ %w[Light Dark System], "dark" ], [ mode.all("option").map(&:text), mode.value ]
+  end
+
+  test "choosing dark mode in the top bar draws the page in the dark mode" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    assert_equal "dark", page.evaluate_script("document.documentElement.dataset.theme")
+  end
+
+  test "choosing system mode in the top bar lets the page follow the device" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-theme-mode]").select("System")
+
+    assert_nil page.evaluate_script("document.documentElement.getAttribute('data-theme')")
+  end
+
+  test "an editor in custom mode is offered custom mode, chosen, beside the other modes" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    page.driver.browser.manage.add_cookie(name: "keystone_theme", value: "custom")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    mode = find("[data-builder-top-bar] [data-theme-mode]")
+
+    assert_equal [ %w[Light Dark System Custom], "custom" ], [ mode.all("option").map(&:text), mode.value ]
+  end
+
+  test "the top bar offers the looks the host app registers and opens on the editor's own look" do
+    KeystoneUi.configuration.register_look :plain, "plain.css"
+    KeystoneUi.configuration.register_look :bold, "bold.css"
+    KeystoneUi.configuration.default_look = :bold
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    look = find("[data-builder-top-bar] [data-look-choice]")
+
+    assert_equal [ %w[Plain Bold], "bold" ], [ look.all("option").map(&:text), look.value ]
+  ensure
+    KeystoneUi.configuration.looks.clear
+    KeystoneUi.configuration.default_look = nil
+  end
+
+  test "choosing a look in the top bar draws the page in that look" do
+    KeystoneUi.configuration.register_look :plain, "plain.css"
+    KeystoneUi.configuration.register_look :bold, "bold.css"
+    KeystoneUi.configuration.default_look = :plain
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-look-choice]").select("Bold")
+
+    assert_equal "bold", page.evaluate_script("document.documentElement.dataset.look")
+  ensure
+    KeystoneUi.configuration.looks.clear
+    KeystoneUi.configuration.default_look = nil
+  end
+
+  test "in dark mode the builder draws its own top bar and element buttons dark" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    backgrounds = page.evaluate_script(<<~JS)
+      ["[data-builder]", "[data-element-palette] [data-element-key]"].map((selector) => getComputedStyle(document.querySelector(selector)).backgroundColor)
+    JS
+    assert_equal [], backgrounds.select { |color| color == "rgb(255, 255, 255)" }
+  end
+
+  test "in dark mode the builder draws its top bar and width choice borders in the theme's dark border colour" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-builder-top-bar] [data-theme-mode]").select("Dark")
+
+    borders = page.evaluate_script(<<~JS)
+      (() => {
+        const probe = document.createElement("div")
+        probe.style.color = "var(--ks-color-border-dark)"
+        document.body.append(probe)
+        const dark = getComputedStyle(probe).color
+        return [getComputedStyle(document.querySelector("[data-builder-top-bar]")).borderBottomColor, getComputedStyle(document.querySelector("[data-device-width]")).borderTopColor].map((color) => color === dark)
+      })()
+    JS
+
+    assert_equal [ true, true ], borders
+  end
+
   test "the top bar shows the page's name, a choice of phone, tablet and desktop width, and the Publish button" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
