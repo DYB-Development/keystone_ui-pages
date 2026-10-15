@@ -92,6 +92,12 @@ class KeystoneUi::PagesTest < Minitest::Test
     assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
   end
 
+  def test_buttons_badges_and_copy_buttons_start_at_the_start_of_their_column
+    starting = keystone_elements.elements.select { |element| element.align == "start" }.map(&:key)
+
+    assert_equal %i[badge button copy_button], starting.sort
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
