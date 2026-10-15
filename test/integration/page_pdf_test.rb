@@ -23,6 +23,15 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal 1, @printed
   end
 
+  test "different values make a new PDF rather than returning the kept one" do
+    printing do
+      KeystoneUi::Pages.pdf(@page, values: { "client_name" => "Acme" })
+      KeystoneUi::Pages.pdf(@page, values: { "client_name" => "Globex" })
+    end
+
+    assert_equal 2, @printed
+  end
+
   private
 
   def printing(&)
