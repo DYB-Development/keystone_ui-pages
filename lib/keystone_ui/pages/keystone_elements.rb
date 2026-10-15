@@ -69,6 +69,9 @@ module KeystoneUi
                     { key: :columns, label: "Columns", kind: :list, as: :pairs,
                       entry: [ { key: :key, label: "Key", kind: :text }, { key: :label, label: "Heading", kind: :text } ],
                       default: [ { "key" => "name", "label" => "Name" }, { "key" => "status", "label" => "Status" } ] } ])
+        catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data",
+          fields: [ { key: :series, label: "Series", kind: :data, default: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ] },
+                    { key: :labels, label: "Labels", kind: :data, default: %w[Mon Tue Wed Thu] } ])
       end
     end
   end

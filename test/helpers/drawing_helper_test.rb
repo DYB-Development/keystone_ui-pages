@@ -129,7 +129,8 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     blank = keys.select do |key|
       html = drawn_document(KeystoneUi::Pages::Operations.add(@document, key, column_id: column_id))
-      Nokogiri::HTML(html).at_css(".ks-pages-element").text.strip.empty?
+      drawn = Nokogiri::HTML(html).at_css(".ks-pages-element")
+      drawn.text.strip.empty? && drawn.at_css("canvas").nil?
     end
 
     assert_equal [], blank
@@ -202,5 +203,18 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     render html: drawn_document(added, values: { "orders" => [ { "number" => "A-1" }, { "number" => "A-2" } ] })
 
     assert_equal [ "Order", %w[A-1 A-2] ], [ css_select("th").map { |cell| cell.text.strip }.first, css_select("td").map { |cell| cell.text.strip } ]
+  end
+
+  test "a line chart draws the series and labels the host supplies" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "line_chart", column_id: column_id)
+    fields = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]
+    fields["series"] = { "value" => "scores", "fallback" => nil }
+    fields["labels"] = { "value" => "weeks", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "scores" => [ { "name" => "Score", "data" => [ 60, 72 ] } ], "weeks" => %w[W1 W2] })
+
+    chart = JSON.parse(css_select("[data-line-chart-data-value]").first["data-line-chart-data-value"])
+    assert_equal [ %w[W1 W2], "Score", [ 60, 72 ] ], [ chart["labels"], chart["datasets"][0]["label"], chart["datasets"][0]["data"] ]
   end
 end

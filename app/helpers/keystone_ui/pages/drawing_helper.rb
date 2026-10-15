@@ -52,7 +52,7 @@ module KeystoneUi
       end
 
       def field_value(field, value)
-        return value.map { |entry| entry.to_h.symbolize_keys } if field[:kind] == :data && value.is_a?(Array)
+        return value.map { |entry| entry.is_a?(Hash) ? entry.symbolize_keys : entry } if field[:kind] == :data && value.is_a?(Array)
         return value.map { |entry| { entry["key"].to_s.to_sym => entry["label"] } } if field[:as] == :pairs && value.is_a?(Array)
         return value.map { |entry| entry_with_defaults(field, entry) } if field[:kind] == :list && value.is_a?(Array)
         return value if value.blank?

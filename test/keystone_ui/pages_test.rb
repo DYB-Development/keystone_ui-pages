@@ -87,7 +87,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_every_keystone_ui_element_has_an_icon_and_belongs_to_a_group
     elements = keystone_elements.elements
     groups = elements.group_by(&:group).to_h { |group, members| [ group, members.map(&:key).sort ] }
-    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[data_table figure progress stat_card], "Text" => %i[accordion alert code hero info] }
+    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[data_table figure line_chart progress stat_card], "Text" => %i[accordion alert code hero info] }
 
     assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
   end
