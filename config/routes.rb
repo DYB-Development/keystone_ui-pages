@@ -13,6 +13,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       resources :nodes, only: %i[update destroy] do
         post :move, on: :member
         post :duplicate, on: :member
+        post :condition, on: :member
       end
       resource :document, only: %i[update]
       post :sample, to: "samples#update"

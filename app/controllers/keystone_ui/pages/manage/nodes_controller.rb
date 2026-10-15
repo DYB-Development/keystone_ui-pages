@@ -14,6 +14,10 @@ module KeystoneUi
           changed(Operations.move(page.document, node_id: params[:id], into: params[:into].presence, position: params.require(:position)))
         end
 
+        def condition
+          changed(Operations.show_when(page.document, node_id: params[:id], name: params[:name], equals: params[:equals]))
+        end
+
         def duplicate
           changed(Operations.duplicate(page.document, node_id: params[:id]))
         end
