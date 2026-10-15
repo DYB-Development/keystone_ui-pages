@@ -243,6 +243,20 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "tfoot", count: 0
   end
 
+  test "a grouped data table whose subtotals are bound to a host value the host does not supply draws its group headings without subtotals" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "data_table", column_id: column_id)
+    fields = added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]
+    fields["items"] = { "value" => "work", "fallback" => nil }
+    fields["columns"] = [ { "key" => "task", "label" => "Task" }, { "key" => "hours", "label" => "Hours" } ]
+    fields["group_by"] = "project"
+    fields["group_totals"] = { "value" => "subtotals", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "work" => [ { "project" => "Portal", "task" => "Export", "hours" => "2.0" } ] })
+
+    assert_equal [ "Portal", "" ], css_select("tbody tr[data-table-group] th").map { |cell| cell.text.strip }
+  end
+
   test "a bound field whose value is missing draws its fallback" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
