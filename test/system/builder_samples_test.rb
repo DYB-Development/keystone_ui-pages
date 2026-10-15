@@ -34,4 +34,16 @@ class KeystoneUi::Pages::BuilderSamplesTest < KeystoneUi::Pages::ApplicationSyst
 
     assert_selector "[data-element-id] .ks-button", text: "Globex"
   end
+
+  test "choosing another sample marks the items that sample hides" do
+    document = @page_record.document
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["show_when"] = { "value" => "client_name", "equals" => "Acme" }
+    @page_record.update!(document: document)
+    visit "/pages/manage/pages/#{@page_record.id}"
+    assert_no_selector "[data-element-id][data-hidden]"
+
+    select "Globex", from: "Preview with"
+
+    assert_selector "[data-element-id][data-hidden] .ks-button", text: "Globex"
+  end
 end
