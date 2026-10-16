@@ -132,12 +132,11 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     find("[data-element-fields] label", text: "Address").click
     assert_selector "[data-element-id] .ks-button", text: "Get a quote"
 
-    page.execute_script("document.body.dataset.beforePublish = ''")
     click_on "Publish"
-    assert_no_selector "body[data-before-publish]"
+    within("[data-builder-top-bar]") { assert_link "View live" }
     visit "/pages/pricing"
 
-    assert_selector ".ks-pages-column .ks-button", text: "Get a quote"
+    assert_selector "[data-live-page] .ks-pages-column .ks-button", text: "Get a quote"
   end
 
   test "the builder offers an element the host draws with its own component next to keystone_ui's" do
