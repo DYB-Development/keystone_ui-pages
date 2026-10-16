@@ -28,7 +28,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
@@ -211,6 +211,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </div>
         <div className="flex items-center gap-2">
         <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "settings"} onClick={() => toggled("settings")}>Settings</Button>
+        {live_url && <a href={live_url} className="text-sm hover:underline">View live</a>}
         <a href={history_url} className="text-sm hover:underline">History</a>
         <form method="post" action={publish_url}>
           <input type="hidden" name="authenticity_token" value={token} />
