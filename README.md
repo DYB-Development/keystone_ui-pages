@@ -31,6 +31,8 @@ A live page is drawn inside the host's layout, and the builder inside the host's
 
 A host links an editor to the builder at `/pages/manage/pages/:id`, and can add `return_to` with an address on its own site, such as `?return_to=/admin/marketing`. The builder's Back link returns there, even after the builder reloads from Publish. With no `return_to`, or one on another site, Back goes to the list of pages.
 
+The builder's ↶ Undo and ↷ Redo buttons step through the page's edits one at a time. The history is kept with the page, so it survives a reload and a publish, and a new edit after an undo clears what can be redone. It needs the engine's edit history migration, which a host installs with its other migrations.
+
 The builder opens in the editor's own mode and look. Its top bar has a Mode choice of light, dark and system, plus custom for an editor in custom mode, and a Look choice of the looks the host registers. Each choice redraws the page in the builder, so an editor can see every version a visitor may get, and neither is saved.
 
 ## Printing and PDFs
