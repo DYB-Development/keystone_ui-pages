@@ -12,4 +12,12 @@ class KeystoneUi::Pages::BuilderLiveLinkTest < KeystoneUi::Pages::ApplicationSys
 
     assert_current_path "/pages/manage/pages/#{page_record.id}/live"
   end
+
+  test "the builder's top bar has no link to a published version when the page has never been published" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_equal [ true, false ], [ has_link?("History"), has_link?("View live", wait: 0) ]
+  end
 end
