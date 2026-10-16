@@ -10,7 +10,7 @@ module KeystoneUi
     class Engine < ::Rails::Engine
       isolate_namespace KeystoneUi::Pages
 
-      initializer "keystone_ui_pages.host_helper" do
+      config.to_prepare do
         ActiveSupport.on_load(:action_view) { include KeystoneUi::Pages::HostHelper }
       end
 
