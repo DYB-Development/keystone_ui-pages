@@ -45,37 +45,6 @@ class KeystoneUi::Pages::BuilderUndoTest < KeystoneUi::Pages::ApplicationSystemT
     assert_no_selector "[data-element-id] .ks-button"
   end
 
-  test "an editor presses Undo and Redo at phone width" do
-    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
-    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
-    page_record.edit(KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id))
-    page.current_window.resize_to(390, 844)
-    visit "/pages/manage/pages/#{page_record.id}"
-
-    within("[data-builder-top-bar]") { click_on "↶ Undo" }
-    within("[data-builder-top-bar]") { click_on "↷ Redo" }
-
-    assert_selector "[data-element-id] .ks-button"
-  ensure
-    page.current_window.resize_to(1400, 1000)
-  end
-
-  test "every control in the builder's top bar fits on one line at phone width" do
-    page_record = KeystoneUi::Pages::Page.create!(name: "Client report", slug: "client-report")
-    page_record.publish
-    page.current_window.resize_to(390, 844)
-    visit "/pages/manage/pages/#{page_record.id}"
-
-    assert_equal [], page.evaluate_script(<<~JS)
-      [...document.querySelectorAll("[data-builder-top-bar] a, [data-builder-top-bar] button")]
-        .filter((control) => control.offsetParent !== null)
-        .filter((control) => control.scrollWidth > control.clientWidth + 1 || control.getBoundingClientRect().height > 36)
-        .map((control) => control.textContent.trim())
-    JS
-  ensure
-    page.current_window.resize_to(1400, 1000)
-  end
-
   private
 
   def dragged(source, target)

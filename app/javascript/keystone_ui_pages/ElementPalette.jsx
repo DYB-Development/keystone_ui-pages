@@ -39,12 +39,12 @@ const PaletteItem = ({ element, shown }) => (
   </button>
 )
 
-const ElementPalette = forwardRef(function ElementPalette({ elements, open, children }, palette) {
+const ElementPalette = forwardRef(function ElementPalette({ elements, children }, palette) {
   const [search, setSearch] = useState("")
   const matches = (element) => element.name.toLowerCase().includes(search.trim().toLowerCase())
 
   return (
-    <aside ref={palette} data-element-palette className={`${open ? "max-lg:flex" : "max-lg:hidden"} flex w-64 shrink-0 flex-col gap-5 overflow-y-auto border-r border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) max-lg:absolute max-lg:inset-y-0 max-lg:left-0 max-lg:z-30 max-lg:shadow-xl dark:bg-(--ks-color-surface-dark)`}>
+    <aside ref={palette} data-element-palette className="flex w-64 shrink-0 flex-col gap-5 overflow-y-auto border-r border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) dark:bg-(--ks-color-surface-dark)">
       <Input type="search" aria-label="Search elements" placeholder="Search elements" value={search} onChange={(event) => setSearch(event.target.value)} />
       {grouped(elements).map(([group, members]) => (
         <section key={group} data-element-group={group} hidden={!members.some(matches)} className="flex flex-col gap-2">
