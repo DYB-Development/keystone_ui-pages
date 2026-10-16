@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
+require "keystone_ui/pages/printer"
+
 module KeystoneUi
   module Pages
     module Manage
       class PagesController < BaseController
         def index
           @pages = owned_pages.order(:name)
+          @printable = Printer.chrome.present?
         end
 
         def new
