@@ -25,7 +25,7 @@ module KeystoneUi
       end
 
       def shown
-        render json: { canvas: helpers.editor_canvas(page), document: page.document }
+        render json: { canvas: helpers.editor_canvas(page), document: page.document, undoable: page.undo_history.any?, redoable: page.undone_changes.any? }
       end
     end
   end
