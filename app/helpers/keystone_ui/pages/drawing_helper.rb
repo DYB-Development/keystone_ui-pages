@@ -9,6 +9,9 @@ module KeystoneUi
       WIDE_SPANS = { "1/1" => "@sm:col-span-12", "3/4" => "@sm:col-span-9", "2/3" => "@sm:col-span-8", "1/2" => "@sm:col-span-6", "1/3" => "@sm:col-span-4", "1/4" => "@sm:col-span-3" }.freeze
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
+      PLAIN_FIGURE_DIVIDER = "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-l-(length:--ks-border-width) " \
+                             "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border) " \
+                             "dark:@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border-dark)"
 
       def drawn_version(version, values: {})
         key = [ "keystone_ui_pages", version.id, Operations.digest(values.to_h.stringify_keys) ]
@@ -42,7 +45,7 @@ module KeystoneUi
 
       def drawn_column(column, editing, share)
         elements = safe_join(column["elements"].map { |element| editing ? edited_element(element) : drawn_element(element) })
-        spans = "#{NARROW_SPANS.fetch(column["narrow"] || Operations::DEFAULTS[:column]["narrow"])} #{WIDE_SPANS.fetch(column['wide'] || share)} #{COLUMN_ALIGNMENTS.fetch(column["align"] || Operations::DEFAULTS[:column]["align"])}"
+        spans = "#{PLAIN_FIGURE_DIVIDER} #{NARROW_SPANS.fetch(column["narrow"] || Operations::DEFAULTS[:column]["narrow"])} #{WIDE_SPANS.fetch(column['wide'] || share)} #{COLUMN_ALIGNMENTS.fetch(column["align"] || Operations::DEFAULTS[:column]["align"])}"
         return tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans}") unless editing
 
         tag.div(elements, class: "ks-pages-column flex flex-col gap-4 #{spans}", data: { column_id: column["id"] })

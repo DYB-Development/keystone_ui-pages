@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = [ "lib" ]
 
   spec.add_dependency "rails", ">= 7.1"
-  spec.add_dependency "keystone_ui", ">= 0.46.0"
+  spec.add_dependency "keystone_ui", ">= 0.49.0"
   spec.add_dependency "keystone_ui-styles", ">= 0.24.0"
   spec.add_dependency "keystone_ui-react", ">= 0.1.3"
 end
