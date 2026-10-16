@@ -7,7 +7,8 @@
         <tr>
           <th class="ks-table-header ks-table-header-first text-left text-sm">Name</th>
           <th class="ks-table-header ks-table-header-middle text-left text-sm">Status</th>
-          <th class="ks-table-header ks-table-header-last text-left text-sm">Last published</th>
+          <th class="ks-table-header ks-table-header-middle text-left text-sm">Last published</th>
+          <th class="ks-table-header ks-table-header-last text-right text-sm"><span class="sr-only">Open</span></th>
         </tr>
       </thead>
       <tbody class="ks-table-body">
@@ -17,6 +18,9 @@
             <td class="ks-table-cell-first text-sm whitespace-nowrap"><%= page.name %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: live ? "Published" : "Draft", variant: live ? :success : :neutral) %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= live&.created_at&.to_date&.to_fs(:long) %></td>
+            <td class="ks-table-cell-middle text-sm whitespace-nowrap text-right">
+              <%= link_to "Edit", manage_page_path(page) %>
+            </td>
           </tr>
         <% end %>
       </tbody>
