@@ -24,6 +24,7 @@ module KeystoneUi
           sample: chosen_sample(page),
           samples_url: manage_page_sample_path(page),
           history_url: manage_page_versions_path(page),
+          back_url: params[:return_to],
           live_url: (manage_page_live_path(page) if page.live_version),
           token: form_authenticity_token
         }
