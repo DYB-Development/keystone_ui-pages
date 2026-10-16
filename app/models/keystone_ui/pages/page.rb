@@ -32,7 +32,7 @@ module KeystoneUi
       end
 
       def edit(changed_document)
-        update!(document: changed_document, undo_history: undo_history + [ document ])
+        update!(document: changed_document, undo_history: undo_history + [ document ], undone_changes: [])
       end
 
       def undo

@@ -27,4 +27,13 @@ class KeystoneUi::Pages::PageEditHistoryTest < ActiveSupport::TestCase
 
     assert_equal @with_button, @page.reload.document
   end
+
+  test "a new edit after undoing clears what can be redone" do
+    @page.edit(@with_button)
+    @page.undo
+
+    @page.edit(@with_button)
+
+    assert_equal [], @page.reload.undone_changes
+  end
 end
