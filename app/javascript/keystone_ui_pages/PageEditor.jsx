@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen, stepHistory } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
@@ -28,8 +28,10 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, back_url, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, back_url, undo_url, redo_url, undoable: couldUndo, redoable: couldRedo, token }) {
   const [canvas, setCanvas] = useState(drawn)
+  const [undoable, setUndoable] = useState(couldUndo)
+  const [redoable, setRedoable] = useState(couldRedo)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
   const [node, setNode] = useState(null)
@@ -45,10 +47,12 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const palette = useRef(null)
   const page = useRef(null)
 
-  const shown = ({ canvas, document }) => {
+  const shown = ({ canvas, document, undoable, redoable }) => {
     setRefusal(null)
     setCanvas(canvas)
     setDocument(document)
+    if (undoable !== undefined) setUndoable(undoable)
+    if (redoable !== undefined) setRedoable(redoable)
   }
 
   const refused = ({ error }) => setRefusal(error)
@@ -212,6 +216,8 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </div>
         <div className="flex items-center gap-2">
         <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "settings"} onClick={() => toggled("settings")}>Settings</Button>
+        <Button type="button" size="sm" variant="secondary" disabled={!undoable} title={undoable ? "Undo the last change" : "Nothing to undo"} onClick={() => stepHistory(undo_url, token).then(shown, refused)}>↶ Undo</Button>
+        <Button type="button" size="sm" variant="secondary" disabled={!redoable} title={redoable ? "Redo the change you undid" : "Nothing to redo"} onClick={() => stepHistory(redo_url, token).then(shown, refused)}>↷ Redo</Button>
         {live_url && <a href={live_url} className="text-sm hover:underline">View live</a>}
         <a href={history_url} className="text-sm hover:underline">History</a>
         <form method="post" action={publish_url}>
