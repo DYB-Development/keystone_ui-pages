@@ -11,4 +11,16 @@ class KeystoneUi::Pages::BuilderBackLinkTest < KeystoneUi::Pages::ApplicationSys
 
     assert_current_path "/pages/manage/pages/#{page_record.id}/versions"
   end
+
+  test "an editor goes back from the builder at phone width" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.current_window.resize_to(390, 844)
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    within("[data-builder-top-bar]") { click_on "Back" }
+
+    assert_current_path "/pages/manage/pages"
+  ensure
+    page.current_window.resize_to(1400, 1000)
+  end
 end
