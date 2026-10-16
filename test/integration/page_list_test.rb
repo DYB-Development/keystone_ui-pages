@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
+require "keystone_ui/pages/printer"
 
 class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
   test "the page list shows each page's name, whether it is published and when it was last published" do
@@ -28,5 +30,15 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
     get "/pages/manage/pages"
 
     assert_equal "/pages/manage/pages/#{page.id}/live", Nokogiri::HTML(response.body).at_css("[data-page='pricing'] a:contains('View live')")&.[]("href")
+  end
+
+  test "an editor downloads a published page's PDF from the page list" do
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
+    get "/pages/manage/pages"
+    link = Nokogiri::HTML(response.body).at_css("[data-page='pricing'] a:contains('PDF')")&.[]("href")
+
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { "%PDF-printed" }) { get link.to_s }
+
+    assert_equal [ "application/pdf", "%PDF-printed" ], [ response.media_type, response.body ]
   end
 end

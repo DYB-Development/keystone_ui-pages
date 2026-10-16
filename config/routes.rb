@@ -18,6 +18,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       resource :document, only: %i[update]
       post :sample, to: "samples#update"
       resource :live, only: %i[show]
+      resource :pdf, only: %i[show]
       resources :versions, only: %i[index show] do
         post :restore, on: :member
       end
