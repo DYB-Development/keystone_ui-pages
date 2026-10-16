@@ -31,6 +31,8 @@ module KeystoneUi
       end
 
       def printed_by_chrome(page, printed)
+        raise PrintFailed, "No Chrome or Chromium was found to print the PDF. Install one, or name it with KeystoneUi::Pages.chrome_path or CHROME_BIN." if chrome.nil?
+
         _output, errors, _status = Open3.capture3(chrome.to_s, "--headless=new", "--disable-gpu", "--use-mock-keychain", "--password-store=basic", "--no-pdf-header-footer", "--print-to-pdf=#{printed}", "file://#{page}")
         raise PrintFailed, "Chrome at #{chrome} could not print the page: #{errors.strip}" unless File.size?(printed)
       rescue SystemCallError => error

@@ -48,4 +48,15 @@ class KeystoneUi::Pages::PrinterTest < Minitest::Test
   ensure
     ENV["CHROME_BIN"] = original
   end
+
+  def test_says_no_chrome_was_found_and_how_to_name_one_when_none_is_installed
+    KeystoneUi::Pages.chrome_path = nil
+    original = ENV.delete("CHROME_BIN")
+
+    error = File.stub(:executable?, false) { assert_raises(KeystoneUi::Pages::PrintFailed) { KeystoneUi::Pages::Printer.pdf("<p>Hi</p>") } }
+
+    assert_equal "No Chrome or Chromium was found to print the PDF. Install one, or name it with KeystoneUi::Pages.chrome_path or CHROME_BIN.", error.message
+  ensure
+    ENV["CHROME_BIN"] = original
+  end
 end
