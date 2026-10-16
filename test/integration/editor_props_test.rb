@@ -53,4 +53,33 @@ class KeystoneUi::Pages::EditorPropsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages::Values.chooser = nil
   end
+
+  test "the builder's Back link goes to the list of pages when the host app names no return address" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    assert_equal "/pages/manage/pages", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
+  end
+
+  test "the builder's Back link keeps the host app's return address after the builder reloads from Publish" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    get "/pages/manage/pages/#{page.id}", params: { return_to: "/admin/marketing" }
+
+    post "/pages/manage/pages/#{page.id}/publish"
+    follow_redirect!
+
+    assert_equal "/admin/marketing", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
+  end
+
+  test "the builder's Back link goes to the list of pages instead of a return address on another site" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    back_urls = [ "https://evil.example/", "//evil.example/", "javascript:alert(1)" ].map do |address|
+      get "/pages/manage/pages/#{page.id}", params: { return_to: address }
+      JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
+    end
+
+    assert_equal [ "/pages/manage/pages" ] * 3, back_urls
+  end
 end

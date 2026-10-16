@@ -29,6 +29,8 @@ A live page is drawn inside the host's layout, and the builder inside the host's
 - marks its `html` tag with `<%= keystone_theme_attributes %>`, which sets the mode and the look for the person viewing it, and
 - links the host's stylesheet, which carries keystone_ui-styles, the host's looks and colours, and the host's own styles.
 
+A host links an editor to the builder at `/pages/manage/pages/:id`, and can add `return_to` with an address on its own site, such as `?return_to=/admin/marketing`. The builder's Back link returns there, even after the builder reloads from Publish. With no `return_to`, or one on another site, Back goes to the list of pages.
+
 The builder opens in the editor's own mode and look. Its top bar has a Mode choice of light, dark and system, plus custom for an editor in custom mode, and a Look choice of the looks the host registers. Each choice redraws the page in the builder, so an editor can see every version a visitor may get, and neither is saved.
 
 ## Printing and PDFs

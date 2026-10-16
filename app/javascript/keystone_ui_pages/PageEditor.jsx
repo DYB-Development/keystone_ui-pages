@@ -28,7 +28,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, back_url, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
@@ -200,6 +200,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
     <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface) text-(--ks-color-text) dark:bg-(--ks-color-surface-dark) dark:text-(--ks-color-text-dark)">
       <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) dark:border-(--ks-color-border-dark) px-4">
         <div className="flex min-w-0 items-center gap-2">
+          <a href={back_url} className="text-sm hover:underline">Back</a>
           <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "elements"} onClick={() => toggled("elements")}>Elements</Button>
           <h1 className="truncate text-base font-semibold">{name}</h1>
         </div>

@@ -21,12 +21,19 @@ module KeystoneUi
 
         def show
           @page = owned_pages.find(params[:id])
+          (session[:keystone_ui_pages_return_to] ||= {})[@page.id.to_s] = params[:return_to] if local_address?(params[:return_to])
         end
 
         def publish
           page = owned_pages.find(params[:id])
           page.publish
           redirect_to manage_page_path(page)
+        end
+
+        private
+
+        def local_address?(address)
+          address.to_s.match?(%r{\A/(?![/\\])})
         end
       end
     end
