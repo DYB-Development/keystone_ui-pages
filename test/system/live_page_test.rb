@@ -51,6 +51,15 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
     page.current_window.resize_to(1400, 1000)
   end
 
+  test "the sample app draws a live page at phone width without sideways scrolling" do
+    page.current_window.resize_to(390, 844)
+    visit "/pages/pricing"
+
+    assert_equal true, page.evaluate_script("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
+  ensure
+    page.current_window.resize_to(1400, 1000)
+  end
+
   private
 
   def color_of_variable(name)
