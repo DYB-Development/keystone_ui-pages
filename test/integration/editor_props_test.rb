@@ -53,4 +53,12 @@ class KeystoneUi::Pages::EditorPropsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages::Values.chooser = nil
   end
+
+  test "the builder's Back link goes to the list of pages when the host app names no return address" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    assert_equal "/pages/manage/pages", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
+  end
 end
