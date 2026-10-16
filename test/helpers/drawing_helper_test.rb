@@ -173,6 +173,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-heading-row .ks-heading-note", text: "12.5 billable hours"
   end
 
+  test "a stat's note bound to a host value shows that value under the stat" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "stat_card", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["note"] = { "value" => "hours_note", "fallback" => nil }
+
+    render html: drawn_document(added, values: { "hours_note" => "Across 6 days" })
+
+    assert_select ".ks-stat-card-note", text: "Across 6 days"
+  end
+
   test "a typed value list row whose total switch is off is not drawn as a total" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "value_list", column_id: column_id)
