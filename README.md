@@ -53,5 +53,5 @@ Publishing a page that uses no host values makes its PDF straight away, since it
 The PDF is printed by Chrome or Chromium on the server, from the page drawn with the host's compiled stylesheet, so it looks exactly as the page does. The host needs:
 
 - Active Storage set up, which keeps the files.
-- Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`.
+- Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`. Chrome runs hidden on the server, so nobody needs it as their browser. When none is found, the page list leaves out its PDF links and asking for a PDF raises an error saying how to name one.
 - Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`.
