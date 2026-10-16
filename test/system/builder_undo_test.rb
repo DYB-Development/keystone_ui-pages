@@ -32,6 +32,18 @@ class KeystoneUi::Pages::BuilderUndoTest < KeystoneUi::Pages::ApplicationSystemT
     assert_selector "[data-builder-top-bar] button[disabled][title='Nothing to redo']", text: "↷ Redo"
   end
 
+  test "an editor undoes an edit after reloading the builder" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    dragged(find("[data-element-palette] [data-element-key='button']"), find("[data-column-id]"))
+    assert_selector "[data-element-id] .ks-button"
+
+    visit "/pages/manage/pages/#{page_record.id}"
+    within("[data-builder-top-bar]") { click_on "↶ Undo" }
+
+    assert_no_selector "[data-element-id] .ks-button"
+  end
+
   private
 
   def dragged(source, target)
