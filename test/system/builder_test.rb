@@ -134,10 +134,11 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
 
     page.execute_script("document.body.dataset.beforePublish = ''")
     click_on "Publish"
-    assert_no_selector "body[data-before-publish]"
+    reloaded = "!('beforePublish' in document.body.dataset) && document.querySelector('[data-builder-top-bar] a[href$=\"/live\"]') !== null"
+    page.document.synchronize { raise Capybara::ExpectationNotMet unless page.evaluate_script(reloaded) }
     visit "/pages/pricing"
 
-    assert_selector ".ks-pages-column .ks-button", text: "Get a quote"
+    assert_selector "[data-live-page] .ks-pages-column .ks-button", text: "Get a quote"
   end
 
   test "the builder offers an element the host draws with its own component next to keystone_ui's" do
