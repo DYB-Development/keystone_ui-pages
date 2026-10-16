@@ -26,4 +26,17 @@ class KeystoneUi::Pages::EditorLiveViewTest < ActionDispatch::IntegrationTest
 
     assert_equal "Globex", Nokogiri::HTML(response.body).at_css("[data-live-page] .ks-value-list-value")&.text&.strip
   end
+
+  test "a page that uses no values from the app opens from the builder exactly as its public address shows it" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "stat_card", column_id: column_id))
+    page.publish
+    get "/pages/pricing"
+    public_page = Nokogiri::HTML(response.body).at_css("[data-live-page]").to_html
+
+    get "/pages/manage/pages/#{page.id}/live"
+
+    assert_equal public_page, Nokogiri::HTML(response.body).at_css("[data-live-page]").to_html
+  end
 end
