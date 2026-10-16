@@ -36,4 +36,15 @@ class KeystoneUi::Pages::PageEditHistoryTest < ActiveSupport::TestCase
 
     assert_equal [], @page.reload.undone_changes
   end
+
+  test "each edit is its own undo step" do
+    column_id = @blank["sections"][0]["rows"][0]["columns"][0]["id"]
+    with_two = KeystoneUi::Pages::Operations.add(@with_button, "button", column_id: column_id)
+    with_three = KeystoneUi::Pages::Operations.add(with_two, "button", column_id: column_id)
+    [ @with_button, with_two, with_three ].each { |document| @page.edit(document) }
+
+    2.times { @page.undo }
+
+    assert_equal @with_button, @page.reload.document
+  end
 end
