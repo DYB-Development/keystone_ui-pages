@@ -20,4 +20,13 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
 
     assert_equal "/pages/manage/pages/#{page.id}", Nokogiri::HTML(response.body).at_css("[data-page='pricing'] a:contains('Edit')")&.[]("href")
   end
+
+  test "an editor opens a published page's live version from the page list" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.publish
+
+    get "/pages/manage/pages"
+
+    assert_equal "/pages/manage/pages/#{page.id}/live", Nokogiri::HTML(response.body).at_css("[data-page='pricing'] a:contains('View live')")&.[]("href")
+  end
 end

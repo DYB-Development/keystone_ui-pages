@@ -20,6 +20,9 @@
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= live&.created_at&.to_date&.to_fs(:long) %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap text-right">
               <%= link_to "Edit", manage_page_path(page) %>
+              <% if live %>
+                <%= link_to "View live", manage_page_live_path(page), class: "ml-4" %>
+              <% end %>
             </td>
           </tr>
         <% end %>
