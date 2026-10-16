@@ -5,6 +5,7 @@ gemspec
 gem "minitest", "~> 5.0"
 gem "rake"
 gem "rubocop-rails-omakase", require: false
+gem "the_local", "~> 0.4"
 
 gem "sqlite3"
 

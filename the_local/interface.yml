@@ -1,0 +1,56 @@
+scope: Pages — building, publishing and printing pages drawn with Keystone UI
+
+install:
+  - bin/rails keystone_ui_pages:install:migrations
+  - bin/rails active_storage:install
+  - mount KeystoneUi::Pages::Engine
+
+develop:
+  - KeystoneUi::Pages.base_controller
+  - KeystoneUi::Pages.owner_method
+  - KeystoneUi::Pages.view_check_method
+  - KeystoneUi::Pages.edit_check_method
+  - KeystoneUi::Pages.refusal_method
+  - KeystoneUi::Pages.layout
+  - KeystoneUi::Pages.editor_layout
+  - KeystoneUi::Pages.chrome_path
+  - KeystoneUi::Pages.pdf_stylesheet
+  - KeystoneUi::Pages::Values.names
+  - KeystoneUi::Pages::Values.chooser
+  - KeystoneUi::Pages::Values.provider
+  - keystone_ui_page
+  - KeystoneUi::Pages.pdf
+  - KeystoneUi::Pages.prepare_pdf
+  - KeystoneUi::Pages.catalog.register
+  - KeystoneUi::Pages.catalog.leave_out
+  - /manage/pages
+
+sources:
+  - README.md
+  - config/routes.rb
+  - lib/keystone_ui/pages.rb
+  - lib/keystone_ui/pages/engine.rb
+  - lib/keystone_ui/pages/values.rb
+  - lib/keystone_ui/pages/catalog.rb
+  - lib/keystone_ui/pages/keystone_elements.rb
+  - lib/keystone_ui/pages/pdfs.rb
+  - lib/keystone_ui/pages/pdf_document.rb
+  - lib/keystone_ui/pages/printer.rb
+  - app/helpers/keystone_ui/pages/host_helper.rb
+  - app/helpers/keystone_ui/pages/drawing_helper.rb
+  - app/helpers/keystone_ui/pages/editor_helper.rb
+  - app/controllers/concerns/keystone_ui/pages/host_checks.rb
+  - app/controllers/keystone_ui/pages/pages_controller.rb
+  - app/controllers/keystone_ui/pages/manage/base_controller.rb
+  - app/controllers/keystone_ui/pages/manage/pages_controller.rb
+  - app/controllers/keystone_ui/pages/manage/lives_controller.rb
+  - app/controllers/keystone_ui/pages/manage/pdfs_controller.rb
+  - app/controllers/keystone_ui/pages/manage/versions_controller.rb
+  - app/controllers/keystone_ui/pages/manage/edit_history_controller.rb
+  - app/models/keystone_ui/pages/page.rb
+  - app/models/keystone_ui/pages/pdf.rb
+  - app/jobs/keystone_ui/pages/pdf_job.rb
+  - db/migrate/20261014120000_create_keystone_ui_pages_pages.rb
+  - db/migrate/20261014120001_create_keystone_ui_pages_versions.rb
+  - db/migrate/20261015130000_create_keystone_ui_pages_pdfs.rb
+  - db/migrate/20261016120000_add_edit_history_to_keystone_ui_pages_pages.rb

@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.2.0"
 
-  spec.files = Dir["lib/**/*", "app/**/*", "config/**/*", "db/**/*"] + [ "LICENSE" ]
+  spec.files = Dir["lib/**/*", "app/**/*", "config/**/*", "db/**/*", "the_local/**/*"] + [ "LICENSE" ]
   spec.require_paths = [ "lib" ]
 
   spec.add_dependency "rails", ">= 7.1"
