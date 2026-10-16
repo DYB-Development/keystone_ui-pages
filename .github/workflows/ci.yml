@@ -44,6 +44,19 @@ jobs:
       - name: Lint
         run: bin/rubocop -f github
 
+  locals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Check committed locals
+        run: bundle exec rake the_local:check
+
   editor_script:
     runs-on: ubuntu-latest
     steps:
