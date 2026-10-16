@@ -24,6 +24,14 @@ class KeystoneUi::Pages::BuilderUndoTest < KeystoneUi::Pages::ApplicationSystemT
     assert_selector "[data-builder-top-bar] button[disabled][title='Nothing to undo']", text: "↶ Undo"
   end
 
+  test "the Redo button is greyed out with a hint when there is nothing to redo" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    assert_selector "[data-builder-top-bar] button[disabled][title='Nothing to redo']", text: "↷ Redo"
+  end
+
   private
 
   def dragged(source, target)
