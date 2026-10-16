@@ -132,8 +132,10 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
     find("[data-element-fields] label", text: "Address").click
     assert_selector "[data-element-id] .ks-button", text: "Get a quote"
 
+    page.execute_script("document.body.dataset.beforePublish = ''")
     click_on "Publish"
-    within("[data-builder-top-bar]") { assert_link "View live" }
+    reloaded = "!('beforePublish' in document.body.dataset) && document.querySelector('[data-builder-top-bar] a[href$=\"/live\"]') !== null"
+    page.document.synchronize { raise Capybara::ExpectationNotMet unless page.evaluate_script(reloaded) }
     visit "/pages/pricing"
 
     assert_selector "[data-live-page] .ks-pages-column .ks-button", text: "Get a quote"
