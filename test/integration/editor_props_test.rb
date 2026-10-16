@@ -61,4 +61,14 @@ class KeystoneUi::Pages::EditorPropsTest < ActionDispatch::IntegrationTest
 
     assert_equal "/pages/manage/pages", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
   end
+
+  test "the builder's Back link keeps the host app's return address after the builder reloads from Publish" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    get "/pages/manage/pages/#{page.id}", params: { return_to: "/admin/marketing" }
+
+    post "/pages/manage/pages/#{page.id}/publish"
+    follow_redirect!
+
+    assert_equal "/admin/marketing", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
+  end
 end

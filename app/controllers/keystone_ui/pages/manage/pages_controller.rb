@@ -21,6 +21,7 @@ module KeystoneUi
 
         def show
           @page = owned_pages.find(params[:id])
+          (session[:keystone_ui_pages_return_to] ||= {})[@page.id.to_s] = params[:return_to] if params[:return_to].present?
         end
 
         def publish
