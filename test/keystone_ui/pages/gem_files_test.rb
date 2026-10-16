@@ -44,4 +44,10 @@ class KeystoneUi::Pages::GemFilesTest < ActiveSupport::TestCase
 
     refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui-styles" }.requirement.satisfied_by?(Gem::Version.new("0.23.0"))
   end
+
+  test "the gem requires a keystone_ui whose stat card takes a note, a plain style and a fallback" do
+    spec = Gem::Specification.load(KeystoneUi::Pages::Engine.root.join("keystone_ui-pages.gemspec").to_s)
+
+    refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.48.0"))
+  end
 end
