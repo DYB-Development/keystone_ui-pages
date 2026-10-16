@@ -4,6 +4,10 @@ module KeystoneUi
   module Pages
     module Manage
       class PagesController < BaseController
+        def index
+          @pages = owned_pages.order(:name)
+        end
+
         def new
         end
 

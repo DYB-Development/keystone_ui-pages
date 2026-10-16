@@ -2,7 +2,7 @@
 
 KeystoneUi::Pages::Engine.routes.draw do
   namespace :manage do
-    resources :pages, only: %i[new create show] do
+    resources :pages, only: %i[index new create show] do
       post :publish, on: :member
       resources :elements, only: %i[create update] do
         post :bind, on: :member
