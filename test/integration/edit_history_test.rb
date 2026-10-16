@@ -26,4 +26,10 @@ class KeystoneUi::Pages::EditHistoryTest < ActionDispatch::IntegrationTest
 
     assert_equal edited, @page.reload.document
   end
+
+  test "choosing a sample in the builder is not an edit that can be undone" do
+    post "/pages/manage/pages/#{@page.id}/sample", params: { choice: "acme" }, as: :json
+
+    assert_equal [], @page.reload.undo_history
+  end
 end
