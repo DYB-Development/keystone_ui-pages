@@ -216,9 +216,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </div>
         <div className="flex items-center gap-2">
         <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "settings"} onClick={() => toggled("settings")}>Settings</Button>
-        <Button type="button" size="sm" variant="secondary" disabled={!undoable} title={undoable ? "Undo the last change" : "Nothing to undo"} onClick={() => stepHistory(undo_url, token).then(shown, refused)}>↶ Undo</Button>
-        <Button type="button" size="sm" variant="secondary" disabled={!redoable} title={redoable ? "Redo the change you undid" : "Nothing to redo"} onClick={() => stepHistory(redo_url, token).then(shown, refused)}>↷ Redo</Button>
-        {live_url && <a href={live_url} className="text-sm hover:underline">View live</a>}
+        <Button type="button" size="sm" variant="secondary" disabled={!undoable} title={undoable ? "Undo the last change" : "Nothing to undo"} onClick={() => stepHistory(undo_url, token).then(shown, refused)}><span>↶<span className="max-lg:sr-only"> Undo</span></span></Button>
+        <Button type="button" size="sm" variant="secondary" disabled={!redoable} title={redoable ? "Redo the change you undid" : "Nothing to redo"} onClick={() => stepHistory(redo_url, token).then(shown, refused)}><span>↷<span className="max-lg:sr-only"> Redo</span></span></Button>
+        {live_url && <a href={live_url} className="text-sm whitespace-nowrap hover:underline">View live</a>}
         <a href={history_url} className="text-sm hover:underline">History</a>
         <form method="post" action={publish_url}>
           <input type="hidden" name="authenticity_token" value={token} />
