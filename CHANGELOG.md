@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- A host app that loads Action View while it starts, such as one with an initializer that names `ActionView::Base`, now boots with the engine installed.
+
 ## [0.1.0] - 2026-10-16
 
 ### Added
