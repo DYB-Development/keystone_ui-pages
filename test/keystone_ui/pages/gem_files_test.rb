@@ -50,4 +50,10 @@ class KeystoneUi::Pages::GemFilesTest < ActiveSupport::TestCase
 
     refute spec.dependencies.find { |dependency| dependency.name == "keystone_ui" }.requirement.satisfied_by?(Gem::Version.new("0.48.0"))
   end
+
+  test "the gem ships its the_local notes for host apps' coding agents" do
+    spec = Gem::Specification.load(KeystoneUi::Pages::Engine.root.join("keystone_ui-pages.gemspec").to_s)
+
+    assert_equal [], %w[the_local/interface.yml the_local/agents/keystone_ui-pages-info.md the_local/agents/keystone_ui-pages-install.md the_local/agents/keystone_ui-pages-develop.md] - spec.files
+  end
 end
