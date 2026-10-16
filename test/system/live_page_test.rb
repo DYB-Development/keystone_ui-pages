@@ -37,6 +37,20 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
     JS
   end
 
+  test "the sample app draws a live page at phone width with space on both sides" do
+    page.current_window.resize_to(390, 844)
+    visit "/pages/pricing"
+
+    assert_equal [ true, true ], page.evaluate_script(<<~JS)
+      (() => {
+        const box = document.querySelector("[data-live-page]").getBoundingClientRect()
+        return [box.left >= 16, document.documentElement.clientWidth - box.right >= 16]
+      })()
+    JS
+  ensure
+    page.current_window.resize_to(1400, 1000)
+  end
+
   private
 
   def color_of_variable(name)
