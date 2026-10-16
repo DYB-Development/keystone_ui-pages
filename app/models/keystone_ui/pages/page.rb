@@ -11,6 +11,8 @@ module KeystoneUi
       has_many :versions, -> { order(:number) }, class_name: "KeystoneUi::Pages::Version", dependent: :destroy, inverse_of: :page
 
       attribute :document, :json, default: -> { Document.blank }
+      attribute :undo_history, :json, default: -> { [] }
+      attribute :undone_changes, :json, default: -> { [] }
 
       validates :name, :slug, presence: true
 
@@ -27,6 +29,18 @@ module KeystoneUi
         when Array then node.any? { |child| uses_host_values?(child) }
         else false
         end
+      end
+
+      def edit(changed_document)
+        update!(document: changed_document, undo_history: undo_history + [ document ], undone_changes: [])
+      end
+
+      def undo
+        update!(document: undo_history.last, undo_history: undo_history[0...-1], undone_changes: undone_changes + [ document ])
+      end
+
+      def redo
+        update!(document: undone_changes.last, undone_changes: undone_changes[0...-1], undo_history: undo_history + [ document ])
       end
 
       def live_version

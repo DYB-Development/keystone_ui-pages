@@ -275,25 +275,6 @@ class KeystoneUi::Pages::BuilderShellTest < KeystoneUi::Pages::ApplicationSystem
     assert_equal %w[card], all("[data-element-palette] [data-element-key]").map { |item| item["data-element-key"] }
   end
 
-  test "on a phone-width screen the element panel opens over the page" do
-    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
-    page.current_window.resize_to(390, 844)
-    visit "/pages/manage/pages/#{page_record.id}"
-    assert_no_selector "[data-element-palette]"
-
-    click_on "Elements"
-
-    assert_equal [ true, true ], page.evaluate_script(<<~JS)
-      (() => {
-        const panel = document.querySelector("[data-element-palette]").getBoundingClientRect()
-        const frame = document.querySelector("[data-page-frame]").getBoundingClientRect()
-        return [panel.left < frame.right && panel.right > frame.left, frame.width >= window.innerWidth - 1]
-      })()
-    JS
-  ensure
-    page.current_window.resize_to(1400, 1000)
-  end
-
   test "the builder's top bar opens the page's history of published versions" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
     page_record.publish

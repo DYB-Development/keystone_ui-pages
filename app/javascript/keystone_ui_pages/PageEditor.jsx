@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen, stepHistory } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
@@ -28,15 +28,15 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, back_url, token }) {
+export default function PageEditor({ name, publish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, history_url, live_url, back_url, undo_url, redo_url, undoable: couldUndo, redoable: couldRedo, token }) {
   const [canvas, setCanvas] = useState(drawn)
+  const [undoable, setUndoable] = useState(couldUndo)
+  const [redoable, setRedoable] = useState(couldRedo)
   const [document, setDocument] = useState(saved)
   const [selected, setSelected] = useState(null)
   const [node, setNode] = useState(null)
   const [refusal, setRefusal] = useState(null)
   const [device, setDevice] = useState("desktop")
-  const [openPanel, setOpenPanel] = useState(null)
-  const toggled = (panel) => setOpenPanel((current) => (current === panel ? null : panel))
   const sheet = useRef(null)
   const moveHandle = useRef(null)
   const [toolbarPlace, setToolbarPlace] = useState(null)
@@ -45,10 +45,12 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
   const palette = useRef(null)
   const page = useRef(null)
 
-  const shown = ({ canvas, document }) => {
+  const shown = ({ canvas, document, undoable, redoable }) => {
     setRefusal(null)
     setCanvas(canvas)
     setDocument(document)
+    if (undoable !== undefined) setUndoable(undoable)
+    if (redoable !== undefined) setRedoable(redoable)
   }
 
   const refused = ({ error }) => setRefusal(error)
@@ -201,7 +203,6 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
       <header data-builder-top-bar className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-(--ks-color-border) dark:border-(--ks-color-border-dark) px-4">
         <div className="flex min-w-0 items-center gap-2">
           <a href={back_url} className="text-sm hover:underline">Back</a>
-          <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "elements"} onClick={() => toggled("elements")}>Elements</Button>
           <h1 className="truncate text-base font-semibold">{name}</h1>
         </div>
         <div className="flex items-center gap-4 max-lg:hidden">
@@ -211,8 +212,9 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
           <SampleChoice samples={samples} chosen={sample} onChoose={(choice) => chooseSample(samples_url, token, choice).then(shown, refused)} />
         </div>
         <div className="flex items-center gap-2">
-        <Button type="button" size="sm" variant="secondary" className="lg:hidden" aria-pressed={openPanel === "settings"} onClick={() => toggled("settings")}>Settings</Button>
-        {live_url && <a href={live_url} className="text-sm hover:underline">View live</a>}
+        <Button type="button" size="sm" variant="secondary" disabled={!undoable} title={undoable ? "Undo the last change" : "Nothing to undo"} onClick={() => stepHistory(undo_url, token).then(shown, refused)}>↶ Undo</Button>
+        <Button type="button" size="sm" variant="secondary" disabled={!redoable} title={redoable ? "Redo the change you undid" : "Nothing to redo"} onClick={() => stepHistory(redo_url, token).then(shown, refused)}>↷ Redo</Button>
+        {live_url && <a href={live_url} className="text-sm whitespace-nowrap hover:underline">View live</a>}
         <a href={history_url} className="text-sm hover:underline">History</a>
         <form method="post" action={publish_url}>
           <input type="hidden" name="authenticity_token" value={token} />
@@ -221,7 +223,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
         </div>
       </header>
       <div className="relative flex min-h-0 flex-1">
-        <ElementPalette ref={palette} elements={elements} open={openPanel === "elements"}>
+        <ElementPalette ref={palette} elements={elements}>
           <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
         </ElementPalette>
         <main data-page-frame className="min-w-0 flex-1 overflow-auto bg-surface-200 p-8 dark:bg-surface-900">
@@ -232,7 +234,7 @@ export default function PageEditor({ name, publish_url, elements, canvas: drawn,
             <SelectionToolbar ref={moveHandle} place={toolbarPlace} onRemove={removeSelected} onDuplicate={() => duplicateNode(nodes_url, token, selectedId).then(shown, refused)} />
           </div>
         </main>
-        <aside data-settings-panel className={`${openPanel === "settings" ? "max-lg:block" : "max-lg:hidden"} w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:shadow-xl dark:bg-(--ks-color-surface-dark)`}>
+        <aside data-settings-panel className="w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) dark:bg-(--ks-color-surface-dark)">
           <SelectionPath path={selectionPath} onChoose={choosePart} />
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
           {node && <LayoutPanel node={node} values={inUse(node)} arrangements={arrangements}

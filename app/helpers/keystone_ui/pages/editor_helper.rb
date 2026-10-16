@@ -24,6 +24,10 @@ module KeystoneUi
           sample: chosen_sample(page),
           samples_url: manage_page_sample_path(page),
           history_url: manage_page_versions_path(page),
+          undo_url: manage_page_undo_path(page),
+          redo_url: manage_page_redo_path(page),
+          undoable: page.undo_history.any?,
+          redoable: page.undone_changes.any?,
           back_url: session.dig(:keystone_ui_pages_return_to, page.id.to_s) || manage_pages_path,
           live_url: (manage_page_live_path(page) if page.live_version),
           token: form_authenticity_token

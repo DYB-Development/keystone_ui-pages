@@ -20,8 +20,12 @@ module KeystoneUi
       end
 
       def changed(document)
-        page.update!(document: document)
-        render json: { canvas: helpers.editor_canvas(page), document: page.document }
+        page.edit(document) unless document == page.document
+        shown
+      end
+
+      def shown
+        render json: { canvas: helpers.editor_canvas(page), document: page.document, undoable: page.undo_history.any?, redoable: page.undone_changes.any? }
       end
     end
   end
