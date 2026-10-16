@@ -183,6 +183,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-stat-card-note", text: "Across 6 days"
   end
 
+  test "a stat whose plain switch is on is drawn as a plain figure" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "stat_card", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["plain"] = "true"
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-metric-plain"
+  end
+
   test "a typed value list row whose total switch is off is not drawn as a total" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "value_list", column_id: column_id)
