@@ -48,6 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.json "undo_history"
+    t.json "undone_changes"
     t.index ["owner_type", "owner_id", "slug"], name: "index_keystone_ui_pages_pages_on_owner_and_slug", unique: true
     t.index ["owner_type", "owner_id"], name: "index_keystone_ui_pages_pages_on_owner"
   end

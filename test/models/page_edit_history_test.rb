@@ -18,4 +18,13 @@ class KeystoneUi::Pages::PageEditHistoryTest < ActiveSupport::TestCase
 
     assert_equal @blank, @page.reload.document
   end
+
+  test "redoing an undone edit puts that edit back" do
+    @page.edit(@with_button)
+    @page.undo
+
+    @page.redo
+
+    assert_equal @with_button, @page.reload.document
+  end
 end
