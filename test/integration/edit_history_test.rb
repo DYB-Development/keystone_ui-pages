@@ -16,4 +16,14 @@ class KeystoneUi::Pages::EditHistoryTest < ActionDispatch::IntegrationTest
 
     assert_equal @blank, @page.reload.document
   end
+
+  test "an undone builder edit is put back through the builder's redo endpoint" do
+    post "/pages/manage/pages/#{@page.id}/elements", params: { key: "button", column_id: @column_id }, as: :json
+    edited = @page.reload.document
+    post "/pages/manage/pages/#{@page.id}/undo", as: :json
+
+    post "/pages/manage/pages/#{@page.id}/redo", as: :json
+
+    assert_equal edited, @page.reload.document
+  end
 end

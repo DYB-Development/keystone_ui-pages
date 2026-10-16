@@ -10,6 +10,11 @@ module KeystoneUi
           page.undo
           shown
         end
+
+        def redo
+          page.redo
+          shown
+        end
       end
     end
   end

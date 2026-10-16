@@ -18,6 +18,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       resource :document, only: %i[update]
       post :sample, to: "samples#update"
       post :undo, to: "edit_history#undo"
+      post :redo, to: "edit_history#redo"
       resource :live, only: %i[show]
       resource :pdf, only: %i[show]
       resources :versions, only: %i[index show] do
