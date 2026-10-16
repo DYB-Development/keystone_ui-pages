@@ -41,4 +41,13 @@ class KeystoneUi::Pages::EditHistoryTest < ActionDispatch::IntegrationTest
 
     assert_equal [ { "undoable" => true, "redoable" => false }, { "undoable" => false, "redoable" => true } ], [ after_edit, response.parsed_body.slice("undoable", "redoable") ]
   end
+
+  test "publishing does not change what can be undone" do
+    post "/pages/manage/pages/#{@page.id}/elements", params: { key: "button", column_id: @column_id }, as: :json
+
+    post "/pages/manage/pages/#{@page.id}/publish"
+    post "/pages/manage/pages/#{@page.id}/undo", as: :json
+
+    assert_equal @blank, @page.reload.document
+  end
 end
