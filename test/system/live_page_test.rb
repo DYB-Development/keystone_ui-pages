@@ -25,6 +25,18 @@ class KeystoneUi::Pages::LivePageTest < KeystoneUi::Pages::ApplicationSystemTest
     assert_equal color_of_variable("--ks-color-accent"), page.evaluate_script("getComputedStyle(document.querySelector('.ks-button')).backgroundColor")
   end
 
+  test "the sample app draws a live page at desktop width at a limited width, centred with space on both sides" do
+    visit "/pages/pricing"
+
+    assert_equal [ true, true ], page.evaluate_script(<<~JS)
+      (() => {
+        const box = document.querySelector("[data-live-page]").getBoundingClientRect()
+        const right = document.documentElement.clientWidth - box.right
+        return [box.left > 0, Math.abs(box.left - right) <= 1]
+      })()
+    JS
+  end
+
   private
 
   def color_of_variable(name)
