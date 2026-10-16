@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "application_system_test_case"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::BuilderUndoTest < KeystoneUi::Pages::ApplicationSystemTestCase
   test "an editor undoes adding an element and redoes it from the builder's top bar" do
@@ -42,6 +43,21 @@ class KeystoneUi::Pages::BuilderUndoTest < KeystoneUi::Pages::ApplicationSystemT
     within("[data-builder-top-bar]") { click_on "↶ Undo" }
 
     assert_no_selector "[data-element-id] .ks-button"
+  end
+
+  test "an editor presses Undo and Redo at phone width" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page_record.edit(KeystoneUi::Pages::Operations.add(page_record.document, "button", column_id: column_id))
+    page.current_window.resize_to(390, 844)
+    visit "/pages/manage/pages/#{page_record.id}"
+
+    within("[data-builder-top-bar]") { click_on "↶ Undo" }
+    within("[data-builder-top-bar]") { click_on "↷ Redo" }
+
+    assert_selector "[data-element-id] .ks-button"
+  ensure
+    page.current_window.resize_to(1400, 1000)
   end
 
   private
