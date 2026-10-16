@@ -1,0 +1,19 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class KeystoneUi::Pages::EditHistoryTest < ActionDispatch::IntegrationTest
+  setup do
+    @page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    @blank = @page.document
+    @column_id = @blank["sections"][0]["rows"][0]["columns"][0]["id"]
+  end
+
+  test "an edit made in the builder is undone through the builder's undo endpoint" do
+    post "/pages/manage/pages/#{@page.id}/elements", params: { key: "button", column_id: @column_id }, as: :json
+
+    post "/pages/manage/pages/#{@page.id}/undo", as: :json
+
+    assert_equal @blank, @page.reload.document
+  end
+end

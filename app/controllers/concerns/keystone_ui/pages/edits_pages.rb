@@ -20,7 +20,11 @@ module KeystoneUi
       end
 
       def changed(document)
-        page.update!(document: document)
+        page.edit(document) unless document == page.document
+        shown
+      end
+
+      def shown
         render json: { canvas: helpers.editor_canvas(page), document: page.document }
       end
     end
