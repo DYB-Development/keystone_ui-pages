@@ -57,7 +57,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_the_catalog_offers_keystone_ui_stat_card
     element = keystone_elements.find(:stat_card)
 
-    assert_equal [ :ui_stat_card, [ :text, :text, :text, :one_of, :text, :yes_or_no ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
+    assert_equal [ :ui_stat_card, [ :text, :text, :text, :one_of, :text, :yes_or_no, :text ] ], [ element.component, element.fields.map { |field| field[:kind] } ]
   end
 
   def test_the_catalog_offers_keystone_ui_figure

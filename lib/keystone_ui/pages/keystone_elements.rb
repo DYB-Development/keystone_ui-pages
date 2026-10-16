@@ -47,7 +47,8 @@ module KeystoneUi
                     { key: :suffix, label: "Suffix", kind: :text },
                     { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" },
                     { key: :note, label: "Note", kind: :text },
-                    { key: :plain, label: "Plain", kind: :yes_or_no } ])
+                    { key: :plain, label: "Plain", kind: :yes_or_no },
+                    { key: :fallback, label: "When missing", kind: :text, default: "N/A" } ])
         catalog.register(key: :figure, name: "Figure", component: :ui_figure, icon: :number, group: "Data",
           fields: [ { key: :text, label: "Text", kind: :text, default: "0" },
                     { key: :tone, label: "Tone", kind: :one_of, options: %w[neutral success danger], default: "neutral" } ])
