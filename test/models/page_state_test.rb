@@ -33,4 +33,13 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal 2, @page.versions.count
   end
+
+  test "an unpublished page can be published again" do
+    @page.publish
+    @page.unpublish
+
+    @page.publish
+
+    assert_equal :published, @page.state
+  end
 end
