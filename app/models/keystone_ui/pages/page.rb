@@ -50,7 +50,10 @@ module KeystoneUi
       end
 
       def archive
-        update!(archived_at: Time.current)
+        transaction do
+          unpublish
+          update!(archived_at: Time.current)
+        end
       end
 
       def state

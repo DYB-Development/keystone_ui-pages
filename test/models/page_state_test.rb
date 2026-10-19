@@ -48,4 +48,12 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal :archived, @page.state
   end
+
+  test "archiving a published page takes its live version down" do
+    @page.publish
+
+    @page.archive
+
+    assert_nil @page.live_version
+  end
 end
