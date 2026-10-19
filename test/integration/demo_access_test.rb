@@ -8,4 +8,10 @@ class KeystoneUi::Pages::DemoAccessTest < ActiveSupport::TestCase
 
     assert_not DemoAccess.allows?(page, "visitor")
   end
+
+  test "the demo shows a client portal page to a signed-in client" do
+    page = KeystoneUi::Pages::Page.new(place: "client_portal")
+
+    assert DemoAccess.allows?(page, "signed_in_client")
+  end
 end
