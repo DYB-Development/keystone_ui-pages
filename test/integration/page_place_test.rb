@@ -33,4 +33,13 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "a visitor the host's view check allows sees the page in that place" do
+    KeystoneUi::Pages.view_check_method = :may_view_place?
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "client_portal").publish
+
+    get "/pages/pricing", headers: { "X-Client" => "acme" }
+
+    assert_response :ok
+  end
 end
