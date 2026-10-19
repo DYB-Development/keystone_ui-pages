@@ -45,6 +45,10 @@ module KeystoneUi
         update!(document: undone_changes.last, undone_changes: undone_changes[0...-1], undo_history: undo_history + [ document ])
       end
 
+      def state
+        :draft
+      end
+
       def live_version
         versions.find_by(status: :live)
       end
