@@ -14,4 +14,10 @@ class KeystoneUi::Pages::DemoAccessTest < ActiveSupport::TestCase
 
     assert DemoAccess.allows?(page, "signed_in_client")
   end
+
+  test "the demo shows a client portal page with the public preview exception to an anonymous visitor" do
+    page = KeystoneUi::Pages::Page.new(place: "client_portal", access_exception: "public_preview")
+
+    assert DemoAccess.allows?(page, "visitor")
+  end
 end
