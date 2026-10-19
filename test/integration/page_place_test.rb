@@ -9,6 +9,7 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
 
   teardown do
     KeystoneUi::Pages.places = nil
+    KeystoneUi::Pages.view_check_method = nil
   end
 
   test "the new page form offers the places the host names" do
@@ -22,5 +23,14 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
     post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "pricing", place: "client_portal" } }
 
     assert_equal "client_portal", KeystoneUi::Pages::Page.find_by(slug: "pricing").place
+  end
+
+  test "the host's view check reads the place of the page it receives" do
+    KeystoneUi::Pages.view_check_method = :may_view_place?
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "client_portal").publish
+
+    get "/pages/pricing"
+
+    assert_response :not_found
   end
 end
