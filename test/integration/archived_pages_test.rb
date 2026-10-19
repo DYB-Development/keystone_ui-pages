@@ -13,4 +13,13 @@ class KeystoneUi::Pages::ArchivedPagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "pricing" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row["data-page"] }
   end
+
+  test "an editor shows archived pages in the page list" do
+    get "/pages/manage/pages"
+    link = Nokogiri::HTML(response.body).at_css("a:contains('Show archived')")&.[]("href")
+
+    get link.to_s
+
+    assert_equal [ "old-offer" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row["data-page"] }
+  end
 end

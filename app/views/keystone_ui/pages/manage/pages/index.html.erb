@@ -1,5 +1,9 @@
 <%= ui_page(max_width: :xl) do %>
-  <%= ui_page_header(title: "Pages") %>
+  <%= ui_page_header(title: @archived ? "Archived pages" : "Pages") %>
+
+  <p class="mb-4 text-sm">
+    <%= @archived ? link_to("Show current pages", manage_pages_path) : link_to("Show archived", manage_pages_path(archived: 1)) %>
+  </p>
 
   <div class="ks-table overflow-x-auto">
     <table class="relative min-w-full divide-y divide-gray-300 dark:divide-white/15">
