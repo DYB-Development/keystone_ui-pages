@@ -33,6 +33,14 @@ class KeystoneUi::Pages::DemoVisitorValuesTest < ActionDispatch::IntegrationTest
     assert_equal [ "Open", "Claim client discount" ], buttons
   end
 
+  test "an anonymous visitor sees Buy but neither Open nor the client offer" do
+    get "/demo/visitor/visitor"
+
+    get "/pages/course"
+
+    assert_equal [ "Buy" ], buttons
+  end
+
   private
 
   def buttons
