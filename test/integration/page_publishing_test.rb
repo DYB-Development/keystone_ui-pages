@@ -20,4 +20,13 @@ class KeystoneUi::Pages::PagePublishingTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "a visitor cannot see a page after an editor archives it, even once it was cached" do
+    get "/pages/pricing"
+
+    post "/pages/manage/pages/#{@page.id}/archive"
+    get "/pages/pricing"
+
+    assert_response :not_found
+  end
 end

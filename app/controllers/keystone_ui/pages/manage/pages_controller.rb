@@ -36,6 +36,11 @@ module KeystoneUi
           redirect_to manage_page_path(page)
         end
 
+        def archive
+          owned_pages.find(params[:id]).archive
+          redirect_to manage_pages_path
+        end
+
         private
 
         def local_address?(address)
