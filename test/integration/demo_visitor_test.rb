@@ -19,4 +19,13 @@ class KeystoneUi::Pages::DemoVisitorTest < ActionDispatch::IntegrationTest
 
     assert_response :ok
   end
+
+  test "a developer switching back to an anonymous visitor is refused a client portal page" do
+    get "/demo/visitor/signed_in_client"
+    get "/demo/visitor/visitor"
+
+    get "/pages/account"
+
+    assert_response :not_found
+  end
 end
