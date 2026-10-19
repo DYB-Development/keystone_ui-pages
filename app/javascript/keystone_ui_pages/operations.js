@@ -27,6 +27,8 @@ export const bindField = (url, token, elementId, field, name, fallback) => sent(
 
 export const chooseSample = (url, token, choice) => sent(url, token, "POST", { choice })
 
+export const chooseAccessException = (url, token, accessException) => sent(url, token, "POST", { access_exception: accessException })
+
 export const showWhen = (url, token, nodeId, name, equals) => sent(`${url}/${nodeId}/condition`, token, "POST", { name, equals })
 
 export const stepHistory = (url, token) => sent(url, token, "POST")
