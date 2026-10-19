@@ -56,4 +56,12 @@ class KeystoneUi::Pages::VisitorValuesTest < ActionDispatch::IntegrationTest
   ensure
     Rails.cache = cache
   end
+
+  test "with no values method a published page is drawn with no values" do
+    KeystoneUi::Pages.values_method = nil
+
+    get "/pages/course", headers: { "X-Owner" => "yes" }
+
+    assert_select "[data-live-page] .ks-button", count: 0
+  end
 end
