@@ -9,7 +9,7 @@ require "keystone_ui/pages/engine"
 module KeystoneUi
   module Pages
     class << self
-      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet
+      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet, :places, :access_exceptions
       attr_accessor :edit_check_method, :view_check_method, :owner_method, :refusal_method, :chrome_path
 
       def base_controller
@@ -26,6 +26,14 @@ module KeystoneUi
 
       def pdf_stylesheet
         @pdf_stylesheet || "tailwind.css"
+      end
+
+      def places
+        @places || {}
+      end
+
+      def access_exceptions
+        @access_exceptions || {}
       end
     end
 

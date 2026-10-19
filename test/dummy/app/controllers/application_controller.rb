@@ -17,6 +17,10 @@ class ApplicationController < ActionController::Base
     request.headers["X-Visitor"] != "blocked"
   end
 
+  def may_view_place?(page)
+    page.access_exception == "public_preview" || page.place != "client_portal" || request.headers["X-Client"].present?
+  end
+
   def may_edit_pages?
     request.headers["X-Editor"] != "refused"
   end
