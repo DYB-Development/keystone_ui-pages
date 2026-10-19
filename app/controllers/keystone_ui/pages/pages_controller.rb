@@ -11,10 +11,16 @@ module KeystoneUi
       def show
         page = owned_pages.find_by(slug: params[:slug])
         @version = page&.live_version
-        refuse if @version.nil? || !viewable?(page)
+        return refuse if @version.nil? || !viewable?(page)
+
+        @values = visitor_values(page)
       end
 
       private
+
+      def visitor_values(page)
+        send(KeystoneUi::Pages.values_method, page) if KeystoneUi::Pages.values_method
+      end
 
       def viewable?(page)
         return true unless KeystoneUi::Pages.view_check_method

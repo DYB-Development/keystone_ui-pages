@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - An editor sets or clears a page's access exception in the builder, from the exceptions a host app names with `KeystoneUi::Pages.access_exceptions`.
 - The host app's view check reads a page's place and access exception, and the page list shows both.
 - An editor unpublishes a page from the builder, and archives or restores a page from the page list, which shows each page as Draft, Published, Unpublished or Archived.
+- A published page at the engine's own address is drawn with the values a host app gives for the current visitor, through the controller method it names with `KeystoneUi::Pages.values_method`, so show-when conditions and bound text work there.
 
 ## [0.1.1] - 2026-10-16
 
