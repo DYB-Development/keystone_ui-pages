@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- The page list offers Create, so an editor can make a page without knowing the New page form's address.
+
 ### Added
 - A page records the place it belongs to, from the places a host app names with `KeystoneUi::Pages.places`, chosen when the page is created.
 - An editor sets or clears a page's access exception in the builder, from the exceptions a host app names with `KeystoneUi::Pages.access_exceptions`.

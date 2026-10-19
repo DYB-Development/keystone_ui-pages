@@ -51,4 +51,10 @@ class KeystoneUi::Pages::ArchivedPagesTest < ActionDispatch::IntegrationTest
 
     assert_equal "Unpublished", Nokogiri::HTML(response.body).css("[data-page='launch'] td")[1].text.strip
   end
+
+  test "the archived pages list does not offer Create" do
+    get "/pages/manage/pages", params: { archived: 1 }
+
+    assert_nil Nokogiri::HTML(response.body).at_css("a[href='/pages/manage/pages/new']")
+  end
 end
