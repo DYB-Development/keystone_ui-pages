@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
   end
 
   def visitor_page_values(_page)
-    { "owner" => request.headers["X-Owner"] }.compact
+    { "owner" => request.headers["X-Owner"], "client_name" => request.headers["X-Client-Name"] }.compact
   end
 
   def may_edit_pages?

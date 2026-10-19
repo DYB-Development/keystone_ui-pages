@@ -31,4 +31,17 @@ class KeystoneUi::Pages::VisitorValuesTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-live-page] .ks-button", count: 0
   end
+
+  test "a published page shows the visitor's value in a text setting bound to it" do
+    page = KeystoneUi::Pages::Page.create!(name: "Welcome", slug: "welcome")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page.document, "button", column_id: column_id)
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"] = { "value" => "client_name", "fallback" => nil }
+    page.update!(document: document)
+    page.publish
+
+    get "/pages/welcome", headers: { "X-Client-Name" => "Acme" }
+
+    assert_select "[data-live-page] .ks-button", text: "Acme"
+  end
 end
