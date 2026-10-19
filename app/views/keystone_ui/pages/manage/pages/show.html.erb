@@ -4,5 +4,5 @@
 <% end %>
 
 <div data-page-builder>
-  <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, publish_url: publish_manage_page_path(@page))) %>
+  <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, publish_url: publish_manage_page_path(@page), unpublish_url: (unpublish_manage_page_path(@page) if @page.live_version))) %>
 </div>
