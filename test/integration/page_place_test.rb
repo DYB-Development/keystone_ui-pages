@@ -51,4 +51,15 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
 
     assert_response :ok
   end
+
+  test "the page list shows each page's place and access exception" do
+    KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "client_portal", access_exception: "public_preview")
+
+    get "/pages/manage/pages"
+
+    assert_equal [ "Client portal", "Public preview" ], Nokogiri::HTML(response.body).css("[data-page='pricing'] [data-access]").map { |cell| cell.text.strip }
+  ensure
+    KeystoneUi::Pages.access_exceptions = nil
+  end
 end

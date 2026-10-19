@@ -8,6 +8,12 @@
           <th class="ks-table-header ks-table-header-first text-left text-sm">Name</th>
           <th class="ks-table-header ks-table-header-middle text-left text-sm">Status</th>
           <th class="ks-table-header ks-table-header-middle text-left text-sm">Last published</th>
+          <% if KeystoneUi::Pages.places.any? %>
+            <th class="ks-table-header ks-table-header-middle text-left text-sm">Place</th>
+          <% end %>
+          <% if KeystoneUi::Pages.access_exceptions.any? %>
+            <th class="ks-table-header ks-table-header-middle text-left text-sm">Access exception</th>
+          <% end %>
           <th class="ks-table-header ks-table-header-last text-right text-sm"><span class="sr-only">Open</span></th>
         </tr>
       </thead>
@@ -18,6 +24,12 @@
             <td class="ks-table-cell-first text-sm whitespace-nowrap"><%= page.name %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: live ? "Published" : "Draft", variant: live ? :success : :neutral) %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= live&.created_at&.to_date&.to_fs(:long) %></td>
+            <% if KeystoneUi::Pages.places.any? %>
+              <td data-access class="ks-table-cell-middle text-sm whitespace-nowrap"><%= KeystoneUi::Pages.places[page.place] %></td>
+            <% end %>
+            <% if KeystoneUi::Pages.access_exceptions.any? %>
+              <td data-access class="ks-table-cell-middle text-sm whitespace-nowrap"><%= KeystoneUi::Pages.access_exceptions[page.access_exception] %></td>
+            <% end %>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap text-right">
               <%= link_to "Edit", manage_page_path(page) %>
               <% if live %>
