@@ -58,6 +58,15 @@ class KeystoneUi::Pages::DemoVisitorValuesTest < ActionDispatch::IntegrationTest
     assert_equal [ "Acme" ], buttons
   end
 
+  test "an anonymous visitor sees the fallback in text bound to the client's name" do
+    welcome_page
+    get "/demo/visitor/visitor"
+
+    get "/pages/welcome"
+
+    assert_equal [ "Welcome" ], buttons
+  end
+
   private
 
   def welcome_page
