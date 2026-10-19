@@ -20,4 +20,10 @@ class KeystoneUi::Pages::DemoAccessTest < ActiveSupport::TestCase
 
     assert DemoAccess.allows?(page, "visitor")
   end
+
+  test "the demo refuses a paid content page to a signed-in client who has not purchased" do
+    page = KeystoneUi::Pages::Page.new(place: "paid_content")
+
+    assert_not DemoAccess.allows?(page, "signed_in_client")
+  end
 end
