@@ -42,4 +42,10 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal :published, @page.state
   end
+
+  test "archiving a page makes it archived" do
+    @page.archive
+
+    assert_equal :archived, @page.state
+  end
 end

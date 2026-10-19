@@ -49,7 +49,12 @@ module KeystoneUi
         live_version&.update!(status: :superseded)
       end
 
+      def archive
+        update!(archived_at: Time.current)
+      end
+
       def state
+        return :archived if archived_at
         return :published if live_version
         return :unpublished if versions.exists?
 
