@@ -29,6 +29,14 @@ class KeystoneUi::Pages::BuilderAccessExceptionTest < KeystoneUi::Pages::Applica
     assert_nil saved_access_exception(nil)
   end
 
+  test "the builder offers no access exception when the host names none" do
+    KeystoneUi::Pages.access_exceptions = nil
+    visit "/pages/manage/pages/#{@page_record.id}"
+
+    find("[data-builder-top-bar]")
+    assert_no_text "Access exception"
+  end
+
   private
 
   def saved_access_exception(expected)
