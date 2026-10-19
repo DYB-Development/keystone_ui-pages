@@ -15,6 +15,7 @@ module KeystoneUi
       attribute :undone_changes, :json, default: -> { [] }
 
       validates :name, :slug, presence: true
+      validates :place, inclusion: { in: -> { KeystoneUi::Pages.places.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.places.any? }
 
       def publish
         transaction do

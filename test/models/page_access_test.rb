@@ -8,4 +8,14 @@ class KeystoneUi::Pages::PageAccessTest < ActiveSupport::TestCase
 
     assert_equal "client_portal", page.reload.place
   end
+
+  test "a page cannot be created with a place the host does not name" do
+    KeystoneUi::Pages.places = { "client_portal" => "Client portal" }
+
+    page = KeystoneUi::Pages::Page.new(name: "Pricing", slug: "pricing", place: "intranet")
+
+    assert_not page.valid?
+  ensure
+    KeystoneUi::Pages.places = nil
+  end
 end
