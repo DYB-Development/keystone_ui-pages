@@ -15,6 +15,14 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
     assert_equal [ [ "Draft", "Draft", "" ], [ "Pricing", "Published", Date.current.to_fs(:long) ] ], rows
   end
 
+  test "the page list has no place or access exception columns when the host names neither" do
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    get "/pages/manage/pages"
+
+    assert_equal [ "Name", "Status", "Last published", "Open" ], Nokogiri::HTML(response.body).css("th").map { |cell| cell.text.strip }
+  end
+
   test "an editor opens a page in the builder from the page list" do
     page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
