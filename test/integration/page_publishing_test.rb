@@ -10,7 +10,10 @@ class KeystoneUi::Pages::PagePublishingTest < ActionDispatch::IntegrationTest
     @page.publish
   end
 
-  teardown { Rails.cache = @cache }
+  teardown do
+    Rails.cache = @cache
+    KeystoneUi::Pages.refusal_method = nil
+  end
 
   test "a visitor cannot see a page after an editor unpublishes it, even once it was cached" do
     get "/pages/pricing"
@@ -28,5 +31,14 @@ class KeystoneUi::Pages::PagePublishingTest < ActionDispatch::IntegrationTest
     get "/pages/pricing"
 
     assert_response :not_found
+  end
+
+  test "a visitor refused because a page is unpublished gets the host's refusal" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    @page.unpublish
+
+    get "/pages/pricing"
+
+    assert_equal [ 403, "This page is not available" ], [ response.status, response.body ]
   end
 end
