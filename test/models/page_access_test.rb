@@ -24,4 +24,14 @@ class KeystoneUi::Pages::PageAccessTest < ActiveSupport::TestCase
 
     assert_equal "public_preview", page.reload.access_exception
   end
+
+  test "a page cannot be given an access exception the host does not name" do
+    KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }
+
+    page = KeystoneUi::Pages::Page.new(name: "Pricing", slug: "pricing", access_exception: "everyone")
+
+    assert_not page.valid?
+  ensure
+    KeystoneUi::Pages.access_exceptions = nil
+  end
 end
