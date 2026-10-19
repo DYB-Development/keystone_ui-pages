@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-19
+
 ### Fixed
 - The page list offers Create, so an editor can make a page without knowing the New page form's address.
 
