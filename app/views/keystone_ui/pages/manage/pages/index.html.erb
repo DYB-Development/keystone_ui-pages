@@ -42,13 +42,17 @@
                   <%= link_to "PDF", manage_page_pdf_path(page), class: "ml-4" %>
                 <% end %>
               <% end %>
-              <% if page.archived_at %>
-                <div class="ml-4 inline-block">
+              <div class="ml-4 inline-block">
+                <% if page.archived_at %>
                   <%= ui_form(action: restore_manage_page_path(page), method: :post) do %>
                     <%= ui_button(label: "Restore", type: :submit, variant: :secondary, size: :sm) %>
                   <% end %>
-                </div>
-              <% end %>
+                <% else %>
+                  <%= ui_form(action: archive_manage_page_path(page), method: :post) do %>
+                    <%= ui_button(label: "Archive", type: :submit, variant: :secondary, size: :sm) %>
+                  <% end %>
+                <% end %>
+              </div>
             </td>
           </tr>
         <% end %>

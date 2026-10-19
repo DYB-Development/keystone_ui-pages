@@ -32,4 +32,13 @@ class KeystoneUi::Pages::ArchivedPagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "old-offer", "pricing" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row["data-page"] }
   end
+
+  test "an editor archives a page from the page list" do
+    get "/pages/manage/pages"
+    action = Nokogiri::HTML(response.body).at_css("[data-page='pricing'] form:has(button:contains('Archive'))")&.[]("action")
+
+    post action.to_s
+
+    assert_equal :archived, KeystoneUi::Pages::Page.find_by(slug: "pricing").state
+  end
 end
