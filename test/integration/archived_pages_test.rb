@@ -22,4 +22,14 @@ class KeystoneUi::Pages::ArchivedPagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "old-offer" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row["data-page"] }
   end
+
+  test "an editor restores an archived page from the archived pages list" do
+    get "/pages/manage/pages", params: { archived: 1 }
+    action = Nokogiri::HTML(response.body).at_css("[data-page='old-offer'] form:has(button:contains('Restore'))")&.[]("action")
+
+    post action.to_s
+    get "/pages/manage/pages"
+
+    assert_equal [ "old-offer", "pricing" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row["data-page"] }
+  end
 end

@@ -6,6 +6,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       post :publish, on: :member
       post :unpublish, on: :member
       post :archive, on: :member
+      post :restore, on: :member
       resources :elements, only: %i[create update] do
         post :bind, on: :member
       end
