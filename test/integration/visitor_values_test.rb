@@ -25,4 +25,10 @@ class KeystoneUi::Pages::VisitorValuesTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-live-page] .ks-button", text: "Open"
   end
+
+  test "a published page hides an element whose show-when does not match the visitor's values" do
+    get "/pages/course", headers: { "X-Owner" => "no" }
+
+    assert_select "[data-live-page] .ks-button", count: 0
+  end
 end
