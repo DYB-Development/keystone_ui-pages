@@ -1,5 +1,9 @@
 <%= ui_page(max_width: :xl) do %>
-  <%= ui_page_header(title: "Pages") %>
+  <%= ui_page_header(title: @archived ? "Archived pages" : "Pages") %>
+
+  <p class="mb-4 text-sm">
+    <%= @archived ? link_to("Show current pages", manage_pages_path) : link_to("Show archived", manage_pages_path(archived: 1)) %>
+  </p>
 
   <div class="ks-table overflow-x-auto">
     <table class="relative min-w-full divide-y divide-gray-300 dark:divide-white/15">
@@ -22,7 +26,7 @@
           <% live = page.live_version %>
           <tr data-page="<%= page.slug %>">
             <td class="ks-table-cell-first text-sm whitespace-nowrap"><%= page.name %></td>
-            <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: live ? "Published" : "Draft", variant: live ? :success : :neutral) %></td>
+            <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: page.state.to_s.capitalize, variant: live ? :success : :neutral) %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= live&.created_at&.to_date&.to_fs(:long) %></td>
             <% if KeystoneUi::Pages.places.any? %>
               <td data-access class="ks-table-cell-middle text-sm whitespace-nowrap"><%= KeystoneUi::Pages.places[page.place] %></td>
@@ -38,6 +42,17 @@
                   <%= link_to "PDF", manage_page_pdf_path(page), class: "ml-4" %>
                 <% end %>
               <% end %>
+              <div class="ml-4 inline-block">
+                <% if page.archived_at %>
+                  <%= ui_form(action: restore_manage_page_path(page), method: :post) do %>
+                    <%= ui_button(label: "Restore", type: :submit, variant: :secondary, size: :sm) %>
+                  <% end %>
+                <% else %>
+                  <%= ui_form(action: archive_manage_page_path(page), method: :post) do %>
+                    <%= ui_button(label: "Archive", type: :submit, variant: :secondary, size: :sm) %>
+                  <% end %>
+                <% end %>
+              </div>
             </td>
           </tr>
         <% end %>

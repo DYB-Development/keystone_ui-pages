@@ -14,11 +14,16 @@ module KeystoneUi
       attribute :undo_history, :json, default: -> { [] }
       attribute :undone_changes, :json, default: -> { [] }
 
+      scope :archived, -> { where.not(archived_at: nil) }
+      scope :current, -> { where(archived_at: nil) }
+
       validates :name, :slug, presence: true
       validates :place, inclusion: { in: -> { KeystoneUi::Pages.places.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.places.any? }
       validates :access_exception, inclusion: { in: -> { KeystoneUi::Pages.access_exceptions.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.access_exceptions.any? }
 
       def publish
+        return if archived_at
+
         transaction do
           live_version&.update!(status: :superseded)
           versions.create!(number: next_number, document: document, status: :live)
@@ -43,6 +48,29 @@ module KeystoneUi
 
       def redo
         update!(document: undone_changes.last, undone_changes: undone_changes[0...-1], undo_history: undo_history + [ document ])
+      end
+
+      def unpublish
+        live_version&.update!(status: :superseded)
+      end
+
+      def archive
+        transaction do
+          unpublish
+          update!(archived_at: Time.current)
+        end
+      end
+
+      def restore
+        update!(archived_at: nil)
+      end
+
+      def state
+        return :archived if archived_at
+        return :published if live_version
+        return :unpublished if versions.exists?
+
+        :draft
       end
 
       def live_version

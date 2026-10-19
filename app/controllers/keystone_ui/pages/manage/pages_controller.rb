@@ -7,7 +7,8 @@ module KeystoneUi
     module Manage
       class PagesController < BaseController
         def index
-          @pages = owned_pages.order(:name)
+          @archived = params[:archived].present?
+          @pages = owned_pages.public_send(@archived ? :archived : :current).order(:name)
           @printable = Printer.chrome.present?
         end
 
@@ -28,6 +29,22 @@ module KeystoneUi
           page = owned_pages.find(params[:id])
           page.publish
           redirect_to manage_page_path(page)
+        end
+
+        def unpublish
+          page = owned_pages.find(params[:id])
+          page.unpublish
+          redirect_to manage_page_path(page)
+        end
+
+        def archive
+          owned_pages.find(params[:id]).archive
+          redirect_to manage_pages_path
+        end
+
+        def restore
+          owned_pages.find(params[:id]).restore
+          redirect_to manage_pages_path
         end
 
         private
