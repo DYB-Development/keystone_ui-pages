@@ -22,7 +22,15 @@ class ApplicationController < ActionController::Base
   end
 
   def may_view_demo_page?(page)
-    DemoAccess.allows?(page, session[:demo_visitor] || "visitor")
+    DemoAccess.allows?(page, demo_visitor)
+  end
+
+  def demo_page_values(_page)
+    DemoValues.for(demo_visitor)
+  end
+
+  def demo_visitor
+    session[:demo_visitor] || "visitor"
   end
 
   def visitor_page_values(_page)
