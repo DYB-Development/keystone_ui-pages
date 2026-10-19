@@ -24,4 +24,13 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal :unpublished, @page.state
   end
+
+  test "unpublishing keeps the page's earlier versions" do
+    @page.publish
+    @page.publish
+
+    @page.unpublish
+
+    assert_equal 2, @page.versions.count
+  end
 end
