@@ -17,4 +17,10 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
     options = Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| [ option.text, option["value"] ] }
     assert_equal [ [ "Marketing site", "marketing" ], [ "Client portal", "client_portal" ] ], options
   end
+
+  test "a page created from the new page form keeps the place the editor chose" do
+    post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "pricing", place: "client_portal" } }
+
+    assert_equal "client_portal", KeystoneUi::Pages::Page.find_by(slug: "pricing").place
+  end
 end

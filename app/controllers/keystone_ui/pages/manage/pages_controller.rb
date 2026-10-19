@@ -15,7 +15,7 @@ module KeystoneUi
         end
 
         def create
-          page = Page.create!(params.require(:page).permit(:name, :slug).merge(owner: page_owner))
+          page = Page.create!(params.require(:page).permit(:name, :slug, :place).merge(owner: page_owner))
           redirect_to manage_page_path(page)
         end
 
