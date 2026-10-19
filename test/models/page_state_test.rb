@@ -10,4 +10,10 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
   test "a page never published is a draft" do
     assert_equal :draft, @page.state
   end
+
+  test "publishing makes a page published" do
+    @page.publish
+
+    assert_equal :published, @page.state
+  end
 end

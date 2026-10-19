@@ -46,7 +46,7 @@ module KeystoneUi
       end
 
       def state
-        :draft
+        live_version ? :published : :draft
       end
 
       def live_version
