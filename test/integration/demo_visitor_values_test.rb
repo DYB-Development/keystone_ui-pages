@@ -49,7 +49,25 @@ class KeystoneUi::Pages::DemoVisitorValuesTest < ActionDispatch::IntegrationTest
     assert_equal [ "Buy", "Claim client discount" ], buttons
   end
 
+  test "a signed-in client sees their name in text bound to the client's name" do
+    welcome_page
+    get "/demo/visitor/signed_in_client"
+
+    get "/pages/welcome"
+
+    assert_equal [ "Acme" ], buttons
+  end
+
   private
+
+  def welcome_page
+    page = KeystoneUi::Pages::Page.create!(name: "Welcome", slug: "welcome")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page.document, "button", column_id: column_id)
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"] = { "value" => "client_name", "fallback" => "Welcome" }
+    page.update!(document: document)
+    page.publish
+  end
 
   def buttons
     css_select("[data-live-page] .ks-button").map { |button| button.text.strip }
