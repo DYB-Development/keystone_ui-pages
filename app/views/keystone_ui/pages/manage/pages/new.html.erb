@@ -8,6 +8,11 @@
     <label class="ks-label mb-1">Address</label>
     <%= ui_input(name: "page[slug]", placeholder: "e.g. pricing") %>
 
+    <% if KeystoneUi::Pages.places.any? %>
+      <label class="ks-label mb-1">Place</label>
+      <%= ui_select(name: "page[place]", options: KeystoneUi::Pages.places.invert.to_a) %>
+    <% end %>
+
     <%= ui_button(label: "Create", type: :submit) %>
   <% end %>
 <% end %>
