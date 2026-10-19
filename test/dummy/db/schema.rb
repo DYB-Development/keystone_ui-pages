@@ -50,6 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_120000) do
     t.json "undo_history"
     t.json "undone_changes"
     t.string "place"
+    t.string "access_exception"
     t.index ["owner_type", "owner_id", "slug"], name: "index_keystone_ui_pages_pages_on_owner_and_slug", unique: true
     t.index ["owner_type", "owner_id"], name: "index_keystone_ui_pages_pages_on_owner"
   end
