@@ -17,6 +17,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       end
       resource :document, only: %i[update]
       post :sample, to: "samples#update"
+      post :access_exception, to: "access_exceptions#update"
       post :undo, to: "edit_history#undo"
       post :redo, to: "edit_history#redo"
       resource :live, only: %i[show]
