@@ -7,7 +7,7 @@ module KeystoneUi
         include EditsPages
 
         def update
-          page.update!(access_exception: params[:access_exception])
+          page.update!(access_exception: params[:access_exception].presence)
           head :no_content
         end
       end

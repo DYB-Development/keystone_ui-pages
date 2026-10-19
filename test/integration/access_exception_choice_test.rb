@@ -18,4 +18,12 @@ class KeystoneUi::Pages::AccessExceptionChoiceTest < ActionDispatch::Integration
 
     assert_equal "public_preview", page.reload.access_exception
   end
+
+  test "an editor clears a page's access exception from the builder" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", access_exception: "public_preview")
+
+    post "/pages/manage/pages/#{page.id}/access_exception", params: { access_exception: "" }, as: :json
+
+    assert_nil page.reload.access_exception
+  end
 end
