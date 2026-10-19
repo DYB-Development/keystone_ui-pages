@@ -26,4 +26,8 @@ class KeystoneUi::Pages::DemoAccessTest < ActiveSupport::TestCase
 
     assert_not DemoAccess.allows?(page, "signed_in_client")
   end
+
+  test "the test environment leaves out the demo's places, exceptions and view check" do
+    assert_equal [ {}, {}, nil ], [ KeystoneUi::Pages.places, KeystoneUi::Pages.access_exceptions, KeystoneUi::Pages.view_check_method ]
+  end
 end
