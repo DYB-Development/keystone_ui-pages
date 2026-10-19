@@ -42,4 +42,13 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
 
     assert_response :ok
   end
+
+  test "the host's view check reads the access exception of the page it receives" do
+    KeystoneUi::Pages.view_check_method = :may_view_place?
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "client_portal", access_exception: "public_preview").publish
+
+    get "/pages/pricing"
+
+    assert_response :ok
+  end
 end

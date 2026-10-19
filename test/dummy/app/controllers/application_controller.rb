@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
   end
 
   def may_view_place?(page)
-    page.place != "client_portal" || request.headers["X-Client"].present?
+    page.access_exception == "public_preview" || page.place != "client_portal" || request.headers["X-Client"].present?
   end
 
   def may_edit_pages?
