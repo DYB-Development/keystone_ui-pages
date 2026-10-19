@@ -16,4 +16,12 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal :published, @page.state
   end
+
+  test "unpublishing a published page makes it unpublished" do
+    @page.publish
+
+    @page.unpublish
+
+    assert_equal :unpublished, @page.state
+  end
 end

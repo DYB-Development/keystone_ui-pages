@@ -45,8 +45,15 @@ module KeystoneUi
         update!(document: undone_changes.last, undone_changes: undone_changes[0...-1], undo_history: undo_history + [ document ])
       end
 
+      def unpublish
+        live_version&.update!(status: :superseded)
+      end
+
       def state
-        live_version ? :published : :draft
+        return :published if live_version
+        return :unpublished if versions.exists?
+
+        :draft
       end
 
       def live_version
