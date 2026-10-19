@@ -7,7 +7,7 @@ module KeystoneUi
     module Manage
       class PagesController < BaseController
         def index
-          @pages = owned_pages.order(:name)
+          @pages = owned_pages.where(archived_at: nil).order(:name)
           @printable = Printer.chrome.present?
         end
 
