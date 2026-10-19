@@ -7,8 +7,11 @@ module KeystoneUi
         include EditsPages
 
         def update
-          page.update!(access_exception: params[:access_exception].presence)
-          head :no_content
+          if page.update(access_exception: params[:access_exception].presence)
+            shown
+          else
+            render json: { error: page.errors.full_messages.to_sentence }, status: :unprocessable_entity
+          end
         end
       end
     end

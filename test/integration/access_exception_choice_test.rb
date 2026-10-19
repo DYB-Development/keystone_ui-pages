@@ -34,4 +34,12 @@ class KeystoneUi::Pages::AccessExceptionChoiceTest < ActionDispatch::Integration
 
     assert_response :unprocessable_entity
   end
+
+  test "a refused access exception answers with a sentence the builder can show" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    post "/pages/manage/pages/#{page.id}/access_exception", params: { access_exception: "everyone" }, as: :json
+
+    assert_equal "Access exception is not included in the list", response.parsed_body["error"]
+  end
 end
