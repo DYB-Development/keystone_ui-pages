@@ -29,6 +29,12 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
     assert_equal "/pages/manage/pages/new", Nokogiri::HTML(response.body).at_css("a:contains('Create')")&.[]("href")
   end
 
+  test "a page created from the new page form opens in the builder" do
+    post "/pages/manage/pages", params: { page: { name: "Home", slug: "home" } }
+
+    assert_redirected_to "/pages/manage/pages/#{KeystoneUi::Pages::Page.find_by(slug: "home").id}"
+  end
+
   test "an editor opens a page in the builder from the page list" do
     page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
