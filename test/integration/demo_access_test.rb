@@ -30,4 +30,8 @@ class KeystoneUi::Pages::DemoAccessTest < ActiveSupport::TestCase
   test "the test environment leaves out the demo's places, exceptions and view check" do
     assert_equal [ {}, {}, nil ], [ KeystoneUi::Pages.places, KeystoneUi::Pages.access_exceptions, KeystoneUi::Pages.view_check_method ]
   end
+
+  test "the test environment gives no visitor values" do
+    assert_nil KeystoneUi::Pages.values_method
+  end
 end

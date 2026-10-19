@@ -85,4 +85,23 @@ Each published page is at `http://localhost:3100/pages/<address>`, and the links
 | Unpublishing takes a page down | Choose Unpublish in the builder and reload the page's address | A refusal |
 | Archiving hides a page | Choose Archive in the page list, then Show archived and Restore | The page leaves the list and comes back as Unpublished |
 
-None of this applies in the test environment or to a host app, which names its own places, exceptions and view check.
+### Showing different content to each visitor
+
+The test app also gives each published page values for whoever you are acting as: `signed_in` and `purchased`, each `yes` or `no`, and `client_name` for a client. To build a page that changes with them:
+
+1. Add a Button labelled Buy and set its Show when to Purchased equals `no`.
+2. Add a Button labelled Open and set its Show when to Purchased equals `yes`.
+3. Add a section holding a client offer and set its Show when to Signed in equals `yes`.
+4. Bind a text setting to Client name and give it a fallback such as `Welcome`.
+
+The builder's Preview with choice offers the same three visitors, so the canvas shows each version before you publish.
+
+| Acting as | Buttons | Client offer | Bound text |
+|---|---|---|---|
+| Anonymous visitor | Buy | Hidden | The fallback |
+| Signed-in client | Buy | Shown | Acme |
+| Client who purchased | Open | Shown | Acme |
+
+An anonymous visitor never sees Open, since nobody can know what an anonymous visitor owns.
+
+None of this applies in the test environment or to a host app, which names its own places, exceptions, view check and visitor values.
