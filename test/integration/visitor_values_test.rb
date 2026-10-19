@@ -44,4 +44,16 @@ class KeystoneUi::Pages::VisitorValuesTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-live-page] .ks-button", text: "Acme"
   end
+
+  test "a visitor is never shown the cached version drawn for another visitor" do
+    cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    get "/pages/course", headers: { "X-Owner" => "yes" }
+
+    get "/pages/course", headers: { "X-Owner" => "no" }
+
+    assert_select "[data-live-page] .ks-button", count: 0
+  ensure
+    Rails.cache = cache
+  end
 end
