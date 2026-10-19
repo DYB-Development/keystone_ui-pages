@@ -46,14 +46,32 @@ inherit from the base controller, so define it there.
 - `KeystoneUi::Pages.view_check_method = :may_view_page?` — a method taking the
   page and returning true when the current visitor may see the published page
   at `/pages/:slug`. Unset, every published page is shown.
+- `KeystoneUi::Pages.places = { "marketing" => "Marketing site" }` — a hash of
+  the places a page can belong to, each stored value to the label editors see.
+  When it is not empty, the New page form offers them, a page with a place not
+  in it is refused, and the page list shows each page's place. The view check
+  reads it as `page.place`. Unset, pages have no place.
+- `KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }`
+  — a hash of the exceptions an editor can set on a page, each stored value to
+  its label. When it is not empty, the builder's top bar has an Access exception
+  choice that sets or clears one, an exception not in it is refused, and the page
+  list shows each page's exception. The view check reads it as
+  `page.access_exception`. Unset, the choice is not shown.
+- `KeystoneUi::Pages.values_method = :page_values` — a method taking the page
+  and returning a hash of value names to values for the current visitor. The
+  engine calls it each time it draws a published page at `/pages/:slug`, so
+  bound fields and show-when conditions follow the visitor there. The drawing is
+  cached per version and per set of values, so no visitor gets a copy drawn for
+  other values. Unset, published pages draw with no values.
 - `KeystoneUi::Pages.edit_check_method = :may_edit_pages?` — a method with no
   arguments returning true when the current user may use the editor's screens:
   the page list, the builder, View live, History and the PDF link. It runs
   before every one of those requests. Unset, everyone may.
 - `KeystoneUi::Pages.refusal_method = :refuse_page` — a method with no
   arguments that renders the response when a request is refused: a failed view
-  or edit check, an unknown slug, or a page with no live version. Unset, the
-  response is an empty 404.
+  or edit check, an unknown slug, or a page with no live version, which covers a
+  draft, an unpublished page and an archived page. Unset, the response is an
+  empty 404.
 - `KeystoneUi::Pages.layout = "application"` — the host layout published pages
   and View live are drawn in. Defaults to `"application"`.
 - `KeystoneUi::Pages.editor_layout = "editor"` — the host layout the page
@@ -186,9 +204,10 @@ The catalog offers these Keystone UI components by default: `button`,
 
    The drawing is kept in `Rails.cache` under the version and the values, so
    the same version and values are drawn once. A page that uses host values
-   should be drawn this way, since the published address `/pages/:slug` draws
-   it with no values: bound fields show their fallback text there, and
-   conditions on a value hide what they guard unless they compare against blank.
+   should be drawn this way unless the host sets `values_method`, since without
+   it the published address `/pages/:slug` draws with no values: bound fields
+   show their fallback text there, and conditions on a value hide what they
+   guard unless they compare against blank.
 
 6. To make a PDF:
 
@@ -254,9 +273,18 @@ The catalog offers these Keystone UI components by default: `button`,
   `values:` passed to the helper and to PDFs all use the same names. The gem
   turns symbol keys into strings, so either works, but the names must match.
 - **The editor's page list** at `/pages/manage/pages` shows each page's name,
-  whether it is published or a draft, and when it was last published. Each row
-  links to Edit, and a published page also links to View live and, when Chrome
-  or Chromium is found, to its PDF.
+  its state, and when it was last published, plus its place and access
+  exception when the host names any. Each row links to Edit and has an Archive
+  button, and a published page also links to View live and, when Chrome or
+  Chromium is found, to its PDF. Show archived lists archived pages instead,
+  each with a Restore button.
+- **A page's state** is Draft before its first publish, Published while it has
+  a live version, Unpublished once that version is taken down, and Archived.
+  The builder's Unpublish button, shown next to Publish on a published page,
+  takes the live version down and keeps the page's history. Archiving takes the
+  live version down too and hides the page from the list. An archived page
+  cannot be published, and restoring it returns it to Draft or Unpublished,
+  never straight to Published. Visitors are refused every state but Published.
 - **View live** draws the live version in `KeystoneUi::Pages.layout` with the
   values of the sample chosen in the builder, behind the edit check. It is
   linked from the page list and from the builder's top bar once the page is
