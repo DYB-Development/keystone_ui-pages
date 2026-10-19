@@ -8,11 +8,12 @@ Rails.application.config.after_initialize do
 end
 
 if Rails.env.development?
-  KeystoneUi::Pages::Values.names = { "client_name" => "Client name", "score" => "Score" }
-  KeystoneUi::Pages::Values.chooser = ->(_page) { [ [ "Acme report", "acme" ], [ "Globex report", "globex" ] ] }
+  KeystoneUi::Pages::Values.names = { "client_name" => "Client name", "score" => "Score", "signed_in" => "Signed in", "purchased" => "Purchased" }
+  KeystoneUi::Pages::Values.chooser = ->(_page) { [ [ "Acme report", "acme" ], [ "Globex report", "globex" ], [ "Anonymous visitor", "visitor" ], [ "Signed-in client", "signed_in_client" ], [ "Client who purchased", "purchased_client" ] ] }
   KeystoneUi::Pages.places = { "marketing" => "Marketing site", "client_portal" => "Client portal", "paid_content" => "Paid content" }
   KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }
   KeystoneUi::Pages.view_check_method = :may_view_demo_page?
   KeystoneUi::Pages.refusal_method = :refuse_page
-  KeystoneUi::Pages::Values.provider = ->(_page, choice) { { "acme" => { "client_name" => "Acme", "score" => "82" }, "globex" => { "client_name" => "Globex", "score" => "64" } }[choice] }
+  KeystoneUi::Pages.values_method = :demo_page_values
+  KeystoneUi::Pages::Values.provider = ->(_page, choice) { { "acme" => { "client_name" => "Acme", "score" => "82" }, "globex" => { "client_name" => "Globex", "score" => "64" } }.fetch(choice) { DemoValues.for(choice) } }
 end
