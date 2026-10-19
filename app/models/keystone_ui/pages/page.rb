@@ -22,6 +22,8 @@ module KeystoneUi
       validates :access_exception, inclusion: { in: -> { KeystoneUi::Pages.access_exceptions.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.access_exceptions.any? }
 
       def publish
+        return if archived_at
+
         transaction do
           live_version&.update!(status: :superseded)
           versions.create!(number: next_number, document: document, status: :live)

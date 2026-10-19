@@ -73,4 +73,12 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal :unpublished, @page.state
   end
+
+  test "an archived page cannot be published" do
+    @page.archive
+
+    @page.publish
+
+    assert_nil @page.live_version
+  end
 end
