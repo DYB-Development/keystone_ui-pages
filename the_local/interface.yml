@@ -9,6 +9,9 @@ develop:
   - KeystoneUi::Pages.base_controller
   - KeystoneUi::Pages.owner_method
   - KeystoneUi::Pages.view_check_method
+  - KeystoneUi::Pages.places
+  - KeystoneUi::Pages.access_exceptions
+  - KeystoneUi::Pages.values_method
   - KeystoneUi::Pages.edit_check_method
   - KeystoneUi::Pages.refusal_method
   - KeystoneUi::Pages.layout
