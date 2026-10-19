@@ -30,6 +30,12 @@ module KeystoneUi
           redirect_to manage_page_path(page)
         end
 
+        def unpublish
+          page = owned_pages.find(params[:id])
+          page.unpublish
+          redirect_to manage_page_path(page)
+        end
+
         private
 
         def local_address?(address)
