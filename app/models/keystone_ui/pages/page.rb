@@ -59,6 +59,10 @@ module KeystoneUi
         end
       end
 
+      def restore
+        update!(archived_at: nil)
+      end
+
       def state
         return :archived if archived_at
         return :published if live_version

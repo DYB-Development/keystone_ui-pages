@@ -56,4 +56,12 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_nil @page.live_version
   end
+
+  test "restoring an archived page that was never published makes it a draft" do
+    @page.archive
+
+    @page.restore
+
+    assert_equal :draft, @page.state
+  end
 end
