@@ -41,4 +41,14 @@ class KeystoneUi::Pages::ArchivedPagesTest < ActionDispatch::IntegrationTest
 
     assert_equal :archived, KeystoneUi::Pages::Page.find_by(slug: "pricing").state
   end
+
+  test "the page list shows an unpublished page as unpublished" do
+    unpublished = KeystoneUi::Pages::Page.create!(name: "Launch", slug: "launch")
+    unpublished.publish
+    unpublished.unpublish
+
+    get "/pages/manage/pages"
+
+    assert_equal "Unpublished", Nokogiri::HTML(response.body).css("[data-page='launch'] td")[1].text.strip
+  end
 end

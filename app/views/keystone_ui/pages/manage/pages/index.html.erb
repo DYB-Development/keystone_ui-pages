@@ -26,7 +26,7 @@
           <% live = page.live_version %>
           <tr data-page="<%= page.slug %>">
             <td class="ks-table-cell-first text-sm whitespace-nowrap"><%= page.name %></td>
-            <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: live ? "Published" : "Draft", variant: live ? :success : :neutral) %></td>
+            <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= ui_badge(label: page.state.to_s.capitalize, variant: live ? :success : :neutral) %></td>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap"><%= live&.created_at&.to_date&.to_fs(:long) %></td>
             <% if KeystoneUi::Pages.places.any? %>
               <td data-access class="ks-table-cell-middle text-sm whitespace-nowrap"><%= KeystoneUi::Pages.places[page.place] %></td>
