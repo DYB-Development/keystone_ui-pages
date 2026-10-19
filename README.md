@@ -59,3 +59,30 @@ The PDF is printed by Chrome or Chromium on the server, from the page drawn with
 - Active Storage set up, which keeps the files.
 - Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`. Chrome runs hidden on the server, so nobody needs it as their browser. When none is found, the page list leaves out its PDF links and asking for a PDF raises an error saying how to name one.
 - Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`.
+
+## Trying it locally
+
+The test app runs the builder in development with sample places, access exceptions and a view check, so each case below can be shown without a host app:
+
+```sh
+npm ci
+cd test/dummy
+bin/rails db:prepare
+bin/rails tailwindcss:build
+bin/rails server -p 3100
+```
+
+Open `http://localhost:3100/pages/manage/pages` and create pages with Create, choosing a place for each: Marketing site, Client portal or Paid content. Publish each one from the builder.
+
+Each published page is at `http://localhost:3100/pages/<address>`, and the links above it switch who you are acting as. A page that refuses you shows only a refusal, so switch from another page or go to `/demo/visitor/visitor`, `/demo/visitor/signed_in_client` or `/demo/visitor/purchased_client`.
+
+| Case | Do this | You see |
+|---|---|---|
+| A visitor is refused a client portal page | Act as Anonymous visitor and open a Client portal page | "This page is not available" |
+| A signed-in client sees it | Act as Signed-in client and open the same page | The page |
+| Paid content needs a purchase | Act as Signed-in client, then Client who purchased, and open a Paid content page | A refusal, then the page |
+| An exception lets a page through | Choose Public preview under Access exception in the builder, then act as Anonymous visitor | The page |
+| Unpublishing takes a page down | Choose Unpublish in the builder and reload the page's address | A refusal |
+| Archiving hides a page | Choose Archive in the page list, then Show archived and Restore | The page leaves the list and comes back as Unpublished |
+
+None of this applies in the test environment or to a host app, which names its own places, exceptions and view check.
