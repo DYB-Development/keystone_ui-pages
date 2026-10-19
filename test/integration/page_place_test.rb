@@ -62,4 +62,12 @@ class KeystoneUi::Pages::PagePlaceTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages.access_exceptions = nil
   end
+
+  test "the new page form has no place choice when the host names no places" do
+    KeystoneUi::Pages.places = nil
+
+    get "/pages/manage/pages/new"
+
+    assert_nil Nokogiri::HTML(response.body).at_css("select[name='page[place]']")
+  end
 end
