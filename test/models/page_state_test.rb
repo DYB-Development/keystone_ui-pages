@@ -64,4 +64,13 @@ class KeystoneUi::Pages::PageStateTest < ActiveSupport::TestCase
 
     assert_equal :draft, @page.state
   end
+
+  test "restoring an archived page that was published makes it unpublished, not published" do
+    @page.publish
+    @page.archive
+
+    @page.restore
+
+    assert_equal :unpublished, @page.state
+  end
 end
