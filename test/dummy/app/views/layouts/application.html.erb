@@ -12,6 +12,14 @@
   </head>
 
   <body data-host-layout>
+    <% if Rails.env.development? %>
+      <nav class="mx-auto flex max-w-5xl gap-4 px-4 pt-4 text-sm" data-demo-visitor>
+        <span>Acting as:</span>
+        <% { "visitor" => "Anonymous visitor", "signed_in_client" => "Signed-in client", "purchased_client" => "Client who purchased" }.each do |visitor, label| %>
+          <%= link_to label, main_app.demo_visitor_path(visitor), class: (session[:demo_visitor] || "visitor") == visitor ? "font-semibold underline" : "hover:underline" %>
+        <% end %>
+      </nav>
+    <% end %>
     <main class="mx-auto max-w-5xl px-4 py-8">
       <%= yield %>
     </main>
