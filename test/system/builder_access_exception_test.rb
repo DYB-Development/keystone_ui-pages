@@ -20,6 +20,15 @@ class KeystoneUi::Pages::BuilderAccessExceptionTest < KeystoneUi::Pages::Applica
     assert_equal "public_preview", saved_access_exception("public_preview")
   end
 
+  test "an editor clears a page's access exception in the builder" do
+    @page_record.update!(access_exception: "public_preview")
+    visit "/pages/manage/pages/#{@page_record.id}"
+
+    select "None", from: "Access exception"
+
+    assert_nil saved_access_exception(nil)
+  end
+
   private
 
   def saved_access_exception(expected)
