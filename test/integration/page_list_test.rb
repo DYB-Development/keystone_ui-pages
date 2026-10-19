@@ -23,6 +23,12 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
     assert_equal [ "Name", "Status", "Last published", "Open" ], Nokogiri::HTML(response.body).css("th").map { |cell| cell.text.strip }
   end
 
+  test "an editor with no pages opens the new page form from the page list" do
+    get "/pages/manage/pages"
+
+    assert_equal "/pages/manage/pages/new", Nokogiri::HTML(response.body).at_css("a:contains('Create')")&.[]("href")
+  end
+
   test "an editor opens a page in the builder from the page list" do
     page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 
