@@ -41,6 +41,14 @@ class KeystoneUi::Pages::DemoVisitorValuesTest < ActionDispatch::IntegrationTest
     assert_equal [ "Buy" ], buttons
   end
 
+  test "a signed-in client who has not purchased sees Buy and the client offer but not Open" do
+    get "/demo/visitor/signed_in_client"
+
+    get "/pages/course"
+
+    assert_equal [ "Buy", "Claim client discount" ], buttons
+  end
+
   private
 
   def buttons
