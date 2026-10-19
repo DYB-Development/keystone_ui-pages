@@ -26,4 +26,12 @@ class KeystoneUi::Pages::AccessExceptionChoiceTest < ActionDispatch::Integration
 
     assert_nil page.reload.access_exception
   end
+
+  test "the builder is refused an access exception the host does not name" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    post "/pages/manage/pages/#{page.id}/access_exception", params: { access_exception: "everyone" }, as: :json
+
+    assert_response :unprocessable_entity
+  end
 end
