@@ -544,4 +544,20 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-pages-element[class~='[&_.ks-hero]:min-h-0'] .ks-hero"
   end
+
+  test "a paragraph stored as rich text draws its words with each link going to its address" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>Founded by <a href=\"/about\">Tyler</a> in 2020</p>" }))
+
+    paragraph = css_select("p.ks-paragraph").first
+    assert_equal [ "Founded by Tyler in 2020", "/about" ], [ paragraph.text, paragraph.at_css("a")&.[]("href") ]
+  end
+
+  private
+
+  def paragraph_document(text)
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    KeystoneUi::Pages::Operations.add(@document, "paragraph", column_id: column_id).tap do |added|
+      added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = text
+    end
+  end
 end

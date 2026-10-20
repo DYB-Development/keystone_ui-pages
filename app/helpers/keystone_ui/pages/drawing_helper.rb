@@ -21,7 +21,9 @@ module KeystoneUi
       end
 
       def pages_paragraph(text:)
-        ui_paragraph(text: text)
+        return ui_paragraph(text: text) unless text.is_a?(Hash)
+
+        rich_paragraphs(text["html"].to_s)
       end
 
       def drawn_document(document, editing: false, values: {})
@@ -30,6 +32,12 @@ module KeystoneUi
       end
 
       private
+
+      def rich_paragraphs(html)
+        fragment = Nokogiri::HTML5.fragment(Rails::HTML5::SafeListSanitizer.new.sanitize(html, tags: %w[p br a], attributes: %w[href]))
+        fragment.css("p").each { |paragraph| paragraph["class"] = "ks-paragraph" }
+        fragment.to_html.html_safe
+      end
 
       def drawn_section(section, editing)
         return if hidden?(section) && !editing
@@ -107,7 +115,7 @@ module KeystoneUi
       end
 
       def filled(stored)
-        return stored.presence unless stored.is_a?(Hash)
+        return stored.presence unless stored.is_a?(Hash) && stored.key?("value")
 
         (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence || ""
       end
