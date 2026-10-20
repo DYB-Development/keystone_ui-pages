@@ -22,7 +22,10 @@ module KeystoneUi
 
         def field_value
           value = params.to_unsafe_h["value"]
-          value.is_a?(Array) ? value.map { |entry| entry.to_h.stringify_keys } : value.to_s
+          return value.map { |entry| entry.to_h.stringify_keys } if value.is_a?(Array)
+          return { "html" => value["html"].to_s } if value.is_a?(Hash) && value.key?("html")
+
+          value.to_s
         end
       end
     end
