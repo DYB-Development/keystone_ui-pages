@@ -278,6 +278,12 @@ The catalog offers these Keystone UI components by default: `button`,
   an Archive button, and a published page also links to View live and, when
   Chrome or Chromium is found, to its PDF. Show archived lists archived pages
   instead, each with a Restore button.
+- **A page's title** is set in the builder's settings panel when nothing is
+  selected, and reaches visitors when the page is published. The engine's
+  public address sets it with `content_for(:title)`, so a host layout that
+  shows `content_for(:title)` in its `<title>` gets it. A host drawing a page
+  in its own view reads `page.live_version&.title`, which is nil when the page
+  has none.
 - **A paragraph's text is rich text.** Editors type it in the builder and
   link selected words with the Link button, and pasted text keeps only its
   words and links. It is stored as `{ "html" => "..." }` and cleaned each time
