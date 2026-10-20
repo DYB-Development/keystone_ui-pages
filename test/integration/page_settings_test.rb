@@ -79,4 +79,15 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages.places = nil
   end
+
+  test "after its slug changes a published page shows at its new address and not its old one" do
+    @page.publish
+
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing", slug: "plans" } }
+    get "/pages/plans"
+    new_address = response.status
+    get "/pages/pricing"
+
+    assert_equal [ 200, 404 ], [ new_address, response.status ]
+  end
 end
