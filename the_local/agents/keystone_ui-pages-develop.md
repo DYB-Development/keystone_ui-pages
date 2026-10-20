@@ -156,7 +156,7 @@ inherit from the base controller, so define it there.
 Each entry in `fields:` is a hash. Its `key:` is the keyword the component
 receives and its `label:` is the label in the builder's field panel. Its
 `kind:` is one of `:text` (the default when no kind is given), `:long_text`,
-`:address`, `:number`, `:one_of`, `:yes_or_no`, `:list` or `:data`. A number
+`:address`, `:number`, `:one_of`, `:yes_or_no`, `:list`, `:data` or `:rich_text`. A number
 arrives as an Integer, or a Float when it has a decimal point, a `:one_of`
 arrives as a symbol, and a `:yes_or_no` as true or false. Its `default:` is the
 value used until the editor sets one. A `:one_of` field takes `options:`, the
@@ -278,6 +278,12 @@ The catalog offers these Keystone UI components by default: `button`,
   an Archive button, and a published page also links to View live and, when
   Chrome or Chromium is found, to its PDF. Show archived lists archived pages
   instead, each with a Restore button.
+- **A paragraph's text is rich text.** Editors type it in the builder and
+  link selected words with the Link button, and pasted text keeps only its
+  words and links. It is stored as `{ "html" => "..." }` and cleaned each time
+  it is drawn, keeping paragraphs, line breaks and links with safe addresses.
+  A link to an `http` or `https` address opens in a new tab. A paragraph saved
+  earlier as a plain string still draws as escaped text.
 - **A feature grid's icons** are typed per feature in the builder, usually as
   an emoji. A typed icon is drawn as text, so markup or a script in it is shown
   and never run. A feature left without an icon shows the check mark.
