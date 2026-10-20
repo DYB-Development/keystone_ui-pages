@@ -28,6 +28,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "section.ks-pages-section.bg-\\(color\\:--ks-color-fill-muted\\).dark\\:bg-\\(color\\:--ks-color-fill-muted-dark\\)"
   end
 
+  test "a section with a width set holds its rows at keystone_ui's page width of that name with its page side padding" do
+    @document["sections"][0]["width"] = "lg"
+
+    render html: drawn_document(@document)
+
+    assert_select "section.ks-pages-section > div.ks-page.ks-page-lg > div.ks-pages-row"
+  end
+
   test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
     @document["sections"][0]["rows"][0]["gap"] = "xl"
 
