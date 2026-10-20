@@ -18,6 +18,7 @@ module KeystoneUi
       scope :current, -> { where(archived_at: nil) }
 
       validates :name, :slug, presence: true
+      validates :slug, uniqueness: { scope: %i[owner_type owner_id] }
       validates :place, inclusion: { in: -> { KeystoneUi::Pages.places.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.places.any? }
       validates :access_exception, inclusion: { in: -> { KeystoneUi::Pages.access_exceptions.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.access_exceptions.any? }
 
