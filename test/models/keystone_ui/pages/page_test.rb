@@ -46,4 +46,16 @@ class KeystoneUi::Pages::PageTest < ActiveSupport::TestCase
 
     assert_equal "Plans and prices", page.live_version.title
   end
+
+  test "a title changed after publishing stays off the live version until the page is published again" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.update!(document: KeystoneUi::Pages::Operations.title(page.document, "Plans"))
+    page.publish
+
+    page.edit(KeystoneUi::Pages::Operations.title(page.document, "New plans"))
+    before = page.live_version.title
+    page.publish
+
+    assert_equal [ "Plans", "New plans" ], [ before, page.reload.live_version.title ]
+  end
 end
