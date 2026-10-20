@@ -12,5 +12,7 @@
       <label class="ks-label mb-1">Place</label>
       <%= ui_select(name: "page[place]", options: KeystoneUi::Pages.places.invert.to_a, selected: @page.place) %>
     <% end %>
+
+    <%= ui_button(label: "Save", type: :submit) %>
   <% end %>
 <% end %>

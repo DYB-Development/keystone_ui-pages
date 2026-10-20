@@ -36,4 +36,10 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
 
     assert_equal "plans", @page.reload.slug
   end
+
+  test "the settings page has a Save button" do
+    get "/pages/manage/pages/#{@page.id}/edit"
+
+    assert_equal "Save", Nokogiri::HTML(response.body).at_css("form button[type='submit']")&.text&.strip
+  end
 end
