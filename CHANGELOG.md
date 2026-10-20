@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-10-20
+## [0.3.0] - 2026-10-19
 
 ### Added
 - An editor changes a page's name, slug and place on the page's settings page, opened from the page list, and a slug another page of the same owner already uses is refused with a message.
