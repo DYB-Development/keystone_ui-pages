@@ -1,3 +1,4 @@
+<% content_for(:title, @version.title) if @version.title %>
 <div data-live-page class="@container print:bg-white print:[print-color-adjust:exact]">
   <%= drawn_version(@version, values: @values.to_h) %>
 </div>
