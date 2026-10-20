@@ -134,4 +134,14 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "a page belonging to another owner cannot be changed from the settings" do
+    KeystoneUi::Pages.owner_method = :current_team
+    Team.create!(name: "Acme")
+    other = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", owner: Team.create!(name: "Globex"))
+
+    patch "/pages/manage/pages/#{other.id}", params: { page: { name: "Pricing", slug: "plans" } }, headers: { "X-Team" => "Acme" }
+
+    assert_equal [ 404, "pricing" ], [ response.status, other.reload.slug ]
+  end
 end
