@@ -34,7 +34,9 @@ module KeystoneUi
       private
 
       def rich_paragraphs(html)
-        fragment = Nokogiri::HTML5.fragment(Rails::HTML5::SafeListSanitizer.new.sanitize(html, tags: %w[p br a], attributes: %w[href]))
+        stored = Nokogiri::HTML5.fragment(html)
+        stored.css("script, style").each(&:remove)
+        fragment = Nokogiri::HTML5.fragment(Rails::HTML5::SafeListSanitizer.new.sanitize(stored.to_html, tags: %w[p br a], attributes: %w[href]))
         fragment.css("p").each { |paragraph| paragraph["class"] = "ks-paragraph" }
         fragment.css("a[href^='http://'], a[href^='https://']").each { |link| link["target"], link["rel"] = "_blank", "noopener noreferrer" }
         fragment.to_html.html_safe

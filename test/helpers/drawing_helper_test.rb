@@ -565,6 +565,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ 2, 1 ], [ css_select("p.ks-paragraph").size, css_select("p.ks-paragraph br").size ]
   end
 
+  test "a rich paragraph never draws a script, a style or a tag other than a paragraph, a line break or a link" do
+    render html: drawn_document(paragraph_document({ "html" => "<p onclick=\"steal()\">Hi <script>steal()</script><style>p{}</style><b>bold</b> <img src=x onerror=steal()></p>" }))
+
+    assert_equal [ [], "Hi bold", nil ], [ css_select("p.ks-paragraph *").map(&:name), css_select("p.ks-paragraph").first.text.strip, css_select("p.ks-paragraph").first["onclick"] ]
+  end
+
   private
 
   def paragraph_document(text)
