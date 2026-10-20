@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-20
+
 ### Added
 - An editor gives a page a title for the browser tab, which reaches visitors when the page is published, and a host reads it from the live version.
 - An editor writes a paragraph as rich text and links selected words, and visitors see only its paragraphs, line breaks and links with safe addresses, with links to other sites opening in a new tab.
