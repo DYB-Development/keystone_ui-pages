@@ -20,6 +20,10 @@ module KeystoneUi
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
 
+      def pages_paragraph(text:)
+        ui_paragraph(text: text)
+      end
+
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
