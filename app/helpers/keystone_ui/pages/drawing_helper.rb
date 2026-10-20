@@ -9,6 +9,7 @@ module KeystoneUi
       WIDE_SPANS = { "1/1" => "@sm:col-span-12", "3/4" => "@sm:col-span-9", "2/3" => "@sm:col-span-8", "1/2" => "@sm:col-span-6", "1/3" => "@sm:col-span-4", "1/4" => "@sm:col-span-3" }.freeze
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
+      SIZED_SECTION_PADDING = "py-[calc(var(--ks-spacing)*16)] lg:py-[calc(var(--ks-spacing)*24)]"
       SHADED_CLASSES = "bg-(color:--ks-color-fill-muted) dark:bg-(color:--ks-color-fill-muted-dark)"
       PLAIN_FIGURE_DIVIDER = "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-l-(length:--ks-border-width) " \
                              "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border) " \
@@ -40,7 +41,7 @@ module KeystoneUi
         width = section["width"]
         return rows if width.nil? || width == "none"
 
-        tag.div(rows, class: "ks-page #{Keystone::Ui::PageComponent::MAX_WIDTH_CLASSES.fetch(width.to_sym)} w-full flex flex-col gap-6")
+        tag.div(rows, class: "ks-page #{Keystone::Ui::PageComponent::MAX_WIDTH_CLASSES.fetch(width.to_sym)} w-full flex flex-col gap-6 #{SIZED_SECTION_PADDING}")
       end
 
       def drawn_row(row, editing)

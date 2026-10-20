@@ -36,6 +36,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "section.ks-pages-section > div.ks-page.ks-page-lg > div.ks-pages-row"
   end
 
+  test "a section with a width set is padded above and below by an amount built from keystone_ui's spacing value" do
+    @document["sections"][0]["width"] = "lg"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-page.py-\\[calc\\(var\\(--ks-spacing\\)\\*16\\)\\].lg\\:py-\\[calc\\(var\\(--ks-spacing\\)\\*24\\)\\]"
+  end
+
   test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
     @document["sections"][0]["rows"][0]["gap"] = "xl"
 
