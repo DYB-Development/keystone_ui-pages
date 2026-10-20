@@ -230,6 +230,19 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-paragraph a[href='https://ty-ler.com']", text: "Tyler"
   end
 
+  test "an editor removes a link from a paragraph and keeps its words" do
+    selected_paragraph_with_link
+    find("[data-rich-text-field] [contenteditable] a").click
+
+    within("[data-rich-text-field]") do
+      click_on "Link"
+      click_on "Remove link"
+    end
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-paragraph:not(:has(a))", text: "Made by Tyler"
+  end
+
   private
 
   def selected(key, drawn)
@@ -238,5 +251,15 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, key, column_id: column_id))
     visit "/pages/manage/pages/#{page_record.id}"
     find("[data-element-id] #{drawn}").click
+  end
+
+  def selected_paragraph_with_link
+    page_record = KeystoneUi::Pages::Page.create!(name: "Fields", slug: "fields")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page_record.document, "paragraph", column_id: column_id)
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = { "html" => "<p>Made by <a href=\"https://ty-ler.com\">Tyler</a></p>" }
+    page_record.update!(document: document)
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] .ks-paragraph").click
   end
 end
