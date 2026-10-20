@@ -1,6 +1,10 @@
 <%= ui_page(max_width: :xl) do %>
   <%= ui_page_header(title: "Settings") %>
 
+  <% if @page.errors.any? %>
+    <%= ui_alert(message: @page.errors.full_messages.to_sentence, type: :error) %>
+  <% end %>
+
   <%= ui_form(action: manage_page_path(@page), method: :patch) do %>
     <label class="ks-label mb-1">Name</label>
     <%= ui_input(name: "page[name]", value: @page.name) %>
