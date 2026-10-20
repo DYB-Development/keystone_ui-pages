@@ -21,4 +21,12 @@ class KeystoneUi::Pages::PageTitleTest < ActionDispatch::IntegrationTest
 
     assert_select "title", text: "Dummy"
   end
+
+  test "setting a page's title through the builder's endpoint saves it to the draft" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    post "/pages/manage/pages/#{page.id}/title", params: { title: "Plans and prices" }, as: :json
+
+    assert_equal "Plans and prices", page.reload.document["title"]
+  end
 end
