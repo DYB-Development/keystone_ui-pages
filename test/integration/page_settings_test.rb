@@ -50,4 +50,12 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 422, "Slug has already been taken" ], [ response.status, Nokogiri::HTML(response.body).at_css("[role='alert']")&.text&.strip ]
   end
+
+  test "saving a slug another page already uses changes nothing" do
+    KeystoneUi::Pages::Page.create!(name: "Plans", slug: "plans")
+
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing page", slug: "plans" } }
+
+    assert_equal [ "Pricing", "pricing" ], @page.reload.slice(:name, :slug).values
+  end
 end
