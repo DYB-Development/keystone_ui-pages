@@ -14,13 +14,13 @@ module KeystoneUi
     module Operations
       WIDTHS = %w[1/1 3/4 2/3 1/2 1/3 1/4].freeze
       ARRANGEMENTS = {
-        section: { "spacing" => %w[sm md lg] },
+        section: { "spacing" => %w[sm md lg], "background" => %w[plain shaded] },
         row: { "gap" => %w[sm md lg xl] },
         column: { "wide" => WIDTHS, "narrow" => WIDTHS, "align" => %w[top center bottom] },
         element: { "align" => %w[stretch start center end] }
       }.freeze
       DEFAULTS = {
-        section: { "spacing" => "md" },
+        section: { "spacing" => "md", "background" => "plain" },
         row: { "gap" => "md" },
         column: { "narrow" => "1/1", "align" => "top" },
         element: { "align" => "stretch" }
