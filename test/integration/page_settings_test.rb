@@ -7,6 +7,12 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
     @page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
   end
 
+  teardown do
+    KeystoneUi::Pages.refusal_method = nil
+    KeystoneUi::Pages.edit_check_method = nil
+    KeystoneUi::Pages.owner_method = nil
+  end
+
   test "the page list links each page to its settings" do
     get "/pages/manage/pages"
 
@@ -89,5 +95,15 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
     get "/pages/pricing"
 
     assert_equal [ 200, 404 ], [ new_address, response.status ]
+  end
+
+  test "a person the edit check allows can open and save the settings" do
+    KeystoneUi::Pages.edit_check_method = :may_edit_pages?
+
+    get "/pages/manage/pages/#{@page.id}/edit", headers: { "X-Editor" => "allowed" }
+    opened = response.status
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing", slug: "plans" } }, headers: { "X-Editor" => "allowed" }
+
+    assert_equal [ 200, "plans" ], [ opened, @page.reload.slug ]
   end
 end
