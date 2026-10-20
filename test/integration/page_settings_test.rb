@@ -115,4 +115,13 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, "This page is not available" ], [ response.status, response.body ]
   end
+
+  test "a person the edit check refuses gets the host's refusal when saving the settings" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages.edit_check_method = :may_edit_pages?
+
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing", slug: "plans" } }, headers: { "X-Editor" => "refused" }
+
+    assert_equal [ 403, "pricing" ], [ response.status, @page.reload.slug ]
+  end
 end
