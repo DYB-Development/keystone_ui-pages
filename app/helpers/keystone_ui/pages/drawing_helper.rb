@@ -79,7 +79,14 @@ module KeystoneUi
       end
 
       def edited_element(element)
+        return missing_element(element) unless KeystoneUi::Pages.catalog.find(element["key"])
+
         wrapped_element(element, data: { element_id: element["id"], hidden: hidden?(element) || nil }.compact)
+      end
+
+      def missing_element(element)
+        tag.div("No longer offered: #{element["key"]}", class: "ks-pages-element ks-hint rounded-md border-2 border-dashed border-(--ks-color-border-strong) p-3",
+          data: { element_id: element["id"], missing_element: true })
       end
 
       def drawn_element(element)

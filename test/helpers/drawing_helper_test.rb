@@ -594,6 +594,15 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ 1, "Still here" ], [ css_select(".ks-pages-element").size, css_select(".ks-pages-element").first.text.strip ]
   end
 
+
+  test "the editor marks an element whose kind is no longer offered" do
+    @document["sections"][0]["rows"][0]["columns"][0]["elements"] = [ { "id" => "gone", "key" => "retired_widget", "fields" => {} } ]
+
+    render html: drawn_document(@document, editing: true)
+
+    assert_select "[data-element-id='gone'][data-missing-element]", text: "No longer offered: retired_widget"
+  end
+
   private
 
   def paragraph_document(text)
