@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- A page holding an element the catalog no longer offers draws its other elements instead of failing, marks the missing one in the editor, and reports the page through Rails' error reporter.
+
 ## [0.4.0] - 2026-10-20
 
 ### Added

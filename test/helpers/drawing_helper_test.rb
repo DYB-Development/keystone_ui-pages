@@ -584,6 +584,42 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Use <b> for bold & <a> for links", [] ], [ paragraph.text, paragraph.element_children.to_a ]
   end
 
+
+  test "a page draws every other element when one element's kind is no longer offered" do
+    column = @document["sections"][0]["rows"][0]["columns"][0]
+    column["elements"] = [ { "id" => "gone", "key" => "retired_widget", "fields" => {} }, { "id" => "kept", "key" => "heading", "fields" => { "text" => "Still here" } } ]
+
+    render html: drawn_document(@document)
+
+    assert_equal [ 1, "Still here" ], [ css_select(".ks-pages-element").size, css_select(".ks-pages-element").first.text.strip ]
+  end
+
+
+  test "the editor marks an element whose kind is no longer offered" do
+    @document["sections"][0]["rows"][0]["columns"][0]["elements"] = [ { "id" => "gone", "key" => "retired_widget", "fields" => {} } ]
+
+    render html: drawn_document(@document, editing: true)
+
+    assert_select "[data-element-id='gone'][data-missing-element]", text: "No longer offered: retired_widget"
+  end
+
+
+  test "drawing a published page reports which page holds an element that is no longer offered" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.document["sections"][0]["rows"][0]["columns"][0]["elements"] = [ { "id" => "gone", "key" => "retired_widget", "fields" => {} } ]
+    page.save!
+    page.publish
+    reports = []
+    subscriber = Object.new.tap { |listener| listener.define_singleton_method(:report) { |_error, context:, **| reports << context } }
+    Rails.error.subscribe(subscriber)
+
+    render html: drawn_version(page.live_version)
+
+    assert_equal [ { page_id: page.id, element_key: "retired_widget" } ], reports.map { |context| context.slice(:page_id, :element_key) }
+  ensure
+    Rails.error.unsubscribe(subscriber)
+  end
+
   private
 
   def paragraph_document(text)
