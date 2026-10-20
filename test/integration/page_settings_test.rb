@@ -19,4 +19,15 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
     fields = Nokogiri::HTML(response.body).css("input[name='page[name]'], input[name='page[slug]']").map { |field| field["value"] }
     assert_equal [ "Pricing", "pricing" ], fields
   end
+
+  test "the settings page shows the page's place as the chosen place" do
+    KeystoneUi::Pages.places = { "marketing" => "Marketing site", "client_portal" => "Client portal" }
+    @page.update!(place: "client_portal")
+
+    get "/pages/manage/pages/#{@page.id}/edit"
+
+    assert_equal "client_portal", Nokogiri::HTML(response.body).at_css("select[name='page[place]'] option[selected]")&.[]("value")
+  ensure
+    KeystoneUi::Pages.places = nil
+  end
 end
