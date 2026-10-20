@@ -156,7 +156,7 @@ inherit from the base controller, so define it there.
 Each entry in `fields:` is a hash. Its `key:` is the keyword the component
 receives and its `label:` is the label in the builder's field panel. Its
 `kind:` is one of `:text` (the default when no kind is given), `:long_text`,
-`:address`, `:number`, `:one_of`, `:yes_or_no`, `:list`, `:data` or `:rich_text`. A number
+`:address`, `:number`, `:one_of`, `:yes_or_no`, `:list` or `:data`. A number
 arrives as an Integer, or a Float when it has a decimal point, a `:one_of`
 arrives as a symbol, and a `:yes_or_no` as true or false. Its `default:` is the
 value used until the editor sets one. A `:one_of` field takes `options:`, the
