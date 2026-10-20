@@ -30,4 +30,10 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages.places = nil
   end
+
+  test "saving the settings changes the page's slug" do
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing", slug: "plans" } }
+
+    assert_equal "plans", @page.reload.slug
+  end
 end

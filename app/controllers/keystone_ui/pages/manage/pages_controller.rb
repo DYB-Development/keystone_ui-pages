@@ -29,6 +29,11 @@ module KeystoneUi
           @page = owned_pages.find(params[:id])
         end
 
+        def update
+          owned_pages.find(params[:id]).update!(params.require(:page).permit(:name, :slug, :place))
+          redirect_to manage_pages_path
+        end
+
         def publish
           page = owned_pages.find(params[:id])
           page.publish
