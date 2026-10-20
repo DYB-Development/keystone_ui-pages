@@ -25,6 +25,10 @@ module KeystoneUi
           (session[:keystone_ui_pages_return_to] ||= {})[@page.id.to_s] = params[:return_to] if local_address?(params[:return_to])
         end
 
+        def edit
+          @page = owned_pages.find(params[:id])
+        end
+
         def publish
           page = owned_pages.find(params[:id])
           page.publish

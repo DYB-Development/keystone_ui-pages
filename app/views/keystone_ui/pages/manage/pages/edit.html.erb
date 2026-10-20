@@ -1,0 +1,11 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "Settings") %>
+
+  <%= ui_form(action: manage_page_path(@page), method: :patch) do %>
+    <label class="ks-label mb-1">Name</label>
+    <%= ui_input(name: "page[name]", value: @page.name) %>
+
+    <label class="ks-label mb-1">Address</label>
+    <%= ui_input(name: "page[slug]", value: @page.slug) %>
+  <% end %>
+<% end %>
