@@ -571,6 +571,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ [], "Hi bold", nil ], [ css_select("p.ks-paragraph *").map(&:name), css_select("p.ks-paragraph").first.text.strip, css_select("p.ks-paragraph").first["onclick"] ]
   end
 
+  test "a rich paragraph draws a link whose address would run script as plain words" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>Click <a href=\"javascript:steal()\">here</a></p>" }))
+
+    assert_equal [ [], "Click here" ], [ css_select("p.ks-paragraph a").to_a, css_select("p.ks-paragraph").first.text ]
+  end
+
   private
 
   def paragraph_document(text)
