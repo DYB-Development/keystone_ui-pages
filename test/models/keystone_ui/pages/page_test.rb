@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::PageTest < ActiveSupport::TestCase
   test "publishing a page makes the next numbered version, holding a copy of the draft, the live one" do
@@ -35,5 +36,14 @@ class KeystoneUi::Pages::PageTest < ActiveSupport::TestCase
     page = KeystoneUi::Pages::Page.new(name: "Plans", slug: "pricing")
 
     assert_equal [ "has already been taken" ], page.tap(&:validate).errors[:slug]
+  end
+
+  test "a published version gives the page's title to a host" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.update!(document: KeystoneUi::Pages::Operations.title(page.document, "Plans and prices"))
+
+    page.publish
+
+    assert_equal "Plans and prices", page.live_version.title
   end
 end

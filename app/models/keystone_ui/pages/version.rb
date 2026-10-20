@@ -8,6 +8,10 @@ module KeystoneUi
       enum :status, { live: "live", superseded: "superseded" }
 
       belongs_to :page, class_name: "KeystoneUi::Pages::Page", inverse_of: :versions
+
+      def title
+        document["title"]
+      end
     end
   end
 end
