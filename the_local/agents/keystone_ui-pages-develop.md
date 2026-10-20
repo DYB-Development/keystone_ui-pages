@@ -257,8 +257,11 @@ The catalog offers these Keystone UI components by default: `button`,
 
    The method must be reachable in the engine's views and in any host view that
    calls `keystone_ui_page`. A `helper_method` on the base controller covers
-   both. Leaving out an element that pages already use makes those pages fail
-   to draw, so search the pages' documents for its key before leaving it out.
+   both. A page that holds an element the catalog no longer offers still
+   draws its other elements for visitors, marks the missing one in the editor
+   as no longer offered, and reports the page's id and the element's key
+   through `Rails.error`, so search the pages' documents for its key before
+   leaving it out.
 
 ## Conventions
 
