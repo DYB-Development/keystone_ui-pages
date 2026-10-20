@@ -577,6 +577,13 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ [], "Click here" ], [ css_select("p.ks-paragraph a").to_a, css_select("p.ks-paragraph").first.text ]
   end
 
+  test "a paragraph saved as plain text with angle brackets draws as the same escaped text" do
+    render html: drawn_document(paragraph_document("Use <b> for bold & <a> for links"))
+
+    paragraph = css_select("p.ks-paragraph").first
+    assert_equal [ "Use <b> for bold & <a> for links", [] ], [ paragraph.text, paragraph.element_children.to_a ]
+  end
+
   private
 
   def paragraph_document(text)
