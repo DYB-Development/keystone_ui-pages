@@ -68,4 +68,15 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages.places = nil
   end
+
+  test "saving a place the host does not allow changes nothing" do
+    KeystoneUi::Pages.places = { "marketing" => "Marketing site" }
+    @page.update!(place: "marketing")
+
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing page", slug: "pricing", place: "client_portal" } }
+
+    assert_equal [ "Pricing", "marketing" ], @page.reload.slice(:name, :place).values
+  ensure
+    KeystoneUi::Pages.places = nil
+  end
 end
