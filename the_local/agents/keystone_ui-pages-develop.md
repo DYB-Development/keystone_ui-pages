@@ -274,10 +274,15 @@ The catalog offers these Keystone UI components by default: `button`,
   turns symbol keys into strings, so either works, but the names must match.
 - **The editor's page list** at `/pages/manage/pages` shows each page's name,
   its state, and when it was last published, plus its place and access
-  exception when the host names any. Each row links to Edit and has an Archive
-  button, and a published page also links to View live and, when Chrome or
-  Chromium is found, to its PDF. Show archived lists archived pages instead,
-  each with a Restore button.
+  exception when the host names any. Each row links to Edit and Settings and has
+  an Archive button, and a published page also links to View live and, when
+  Chrome or Chromium is found, to its PDF. Show archived lists archived pages
+  instead, each with a Restore button.
+- **A page's settings** at `/pages/manage/pages/:id/edit` change its name, slug
+  and place after it is created. A slug another page of the same owner uses, or
+  a place the host does not name, is refused with a message and changes nothing.
+  A changed slug moves the published page to its new address, and the old
+  address is not redirected.
 - **A page's state** is Draft before its first publish, Published while it has
   a live version, Unpublished once that version is taken down, and Archived.
   The builder's Unpublish button, shown next to Publish on a published page,
