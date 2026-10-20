@@ -257,6 +257,22 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-paragraph a[href='https://dyb.example']", text: "Tyler"
   end
 
+  test "text pasted into a paragraph keeps its words and links and loses other formatting" do
+    selected("paragraph", ".ks-paragraph")
+    text = find("[data-rich-text-field] [contenteditable]")
+    text.click
+    text.send_keys([ :command, "a" ], [ :control, "a" ])
+
+    page.execute_script(<<~JS, text)
+      const data = new DataTransfer()
+      data.setData("text/html", '<p><b>Bold</b> <i>slanted</i> <span style="color:red">red</span> <a href="https://dyb.example">site</a></p>')
+      data.setData("text/plain", "Bold slanted red site")
+      arguments[0].dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
+    JS
+
+    assert_selector "[data-rich-text-field] [contenteditable]:not(:has(strong, b, em, i, [style*='color'])) a[href='https://dyb.example']", text: "site"
+  end
+
   private
 
   def selected(key, drawn)
