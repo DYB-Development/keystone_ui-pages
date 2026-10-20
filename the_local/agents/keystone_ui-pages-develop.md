@@ -278,6 +278,14 @@ The catalog offers these Keystone UI components by default: `button`,
   an Archive button, and a published page also links to View live and, when
   Chrome or Chromium is found, to its PDF. Show archived lists archived pages
   instead, each with a Restore button.
+- **A section's background and width** are set in the builder's layout panel.
+  A shaded section fills the full width of the page with keystone_ui's
+  `--ks-color-fill-muted` colour, and its dark value in a dark theme. A section
+  with a width of `sm`, `md`, `lg` or `xl` holds its rows at keystone_ui's
+  page width of that name with its page side padding, padded above and below
+  from `--ks-spacing`. The page builder has no setting of its own for these:
+  a host changes them through its keystone_ui theme values. A section saved
+  without either draws as it did before.
 - **A page's settings** at `/pages/manage/pages/:id/edit` change its name, slug
   and place after it is created. A slug another page of the same owner uses, or
   a place the host does not name, is refused with a message and changes nothing.
