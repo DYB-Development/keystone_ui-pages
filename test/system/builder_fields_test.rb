@@ -213,6 +213,23 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal [ false, true ], [ has_field?("Rows"), has_css?("[data-element-fields]", text: "Filled with data the host supplies on a template page") ]
   end
 
+  test "an editor adds a link to the selected words of a paragraph" do
+    selected("paragraph", ".ks-paragraph")
+    text = find("[data-rich-text-field] [contenteditable]")
+    text.click
+    text.send_keys([ :command, "a" ], [ :control, "a" ], "Tyler")
+    text.send_keys([ :command, "a" ], [ :control, "a" ])
+
+    within("[data-rich-text-field]") do
+      click_on "Link"
+      fill_in "Link address", with: "https://ty-ler.com"
+      click_on "Save link"
+    end
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-paragraph a[href='https://ty-ler.com']", text: "Tyler"
+  end
+
   private
 
   def selected(key, drawn)

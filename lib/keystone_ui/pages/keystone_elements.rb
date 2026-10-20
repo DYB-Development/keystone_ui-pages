@@ -24,7 +24,7 @@ module KeystoneUi
         catalog.register(key: :label, name: "Label", component: :ui_caption, icon: :tag, group: "Text",
           fields: [ { key: :text, label: "Text", kind: :text, default: "Label" } ])
         catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text",
-          fields: [ { key: :text, label: "Text", kind: :long_text, default: "Write the text of this paragraph here." } ])
+          fields: [ { key: :text, label: "Text", kind: :rich_text, default: "Write the text of this paragraph here." } ])
         catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text",
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
                     { key: :subtitle, label: "Subtitle", kind: :long_text },
