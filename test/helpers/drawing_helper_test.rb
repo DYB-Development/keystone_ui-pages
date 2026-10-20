@@ -44,6 +44,13 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "div.ks-page.py-\\[calc\\(var\\(--ks-spacing\\)\\*16\\)\\].lg\\:py-\\[calc\\(var\\(--ks-spacing\\)\\*24\\)\\]"
   end
 
+  test "a section saved without a background or width draws as it did before either existed" do
+    render html: drawn_document(@document)
+
+    section = css_select("section.ks-pages-section").first
+    assert_equal [ "ks-pages-section flex flex-col gap-6 print:break-inside-avoid ks-section-md", "ks-pages-row" ], [ section["class"], section.element_children.first["class"].split.first ]
+  end
+
   test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
     @document["sections"][0]["rows"][0]["gap"] = "xl"
 
