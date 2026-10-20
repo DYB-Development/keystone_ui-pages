@@ -417,6 +417,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select ".ks-button", text: ""
   end
 
+  test "a feature with no icon set shows the check mark" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    added = KeystoneUi::Pages::Operations.add(@document, "feature_grid", column_id: column_id)
+    added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["features"] = [ { "title" => "Fast", "description" => "Quick", "icon" => "" } ]
+
+    render html: drawn_document(added)
+
+    assert_select ".ks-feature-card-icon svg path[d='M5 12l5 5L20 7']"
+  end
+
   test "a list field bound to a host value draws the rows the host supplies" do
     column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
     added = KeystoneUi::Pages::Operations.add(@document, "feature_grid", column_id: column_id)
