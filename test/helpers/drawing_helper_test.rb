@@ -552,6 +552,13 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Founded by Tyler in 2020", "/about" ], [ paragraph.text, paragraph.at_css("a")&.[]("href") ]
   end
 
+  test "a rich paragraph's link to another site opens in a new tab" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>Made by <a href=\"https://ty-ler.com\">Tyler</a></p>" }))
+
+    link = css_select("p.ks-paragraph a").first
+    assert_equal [ "_blank", "noopener noreferrer" ], [ link["target"], link["rel"] ]
+  end
+
   private
 
   def paragraph_document(text)
