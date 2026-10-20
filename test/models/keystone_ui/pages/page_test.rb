@@ -28,4 +28,12 @@ class KeystoneUi::Pages::PageTest < ActiveSupport::TestCase
       page.versions.create!(number: 2, document: page.document, status: :live)
     end
   end
+
+  test "a page cannot take a slug another page of the same owner already uses" do
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    page = KeystoneUi::Pages::Page.new(name: "Plans", slug: "pricing")
+
+    assert_equal [ "has already been taken" ], page.tap(&:validate).errors[:slug]
+  end
 end

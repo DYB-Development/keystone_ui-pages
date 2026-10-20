@@ -1,0 +1,22 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "Settings") %>
+
+  <% if @page.errors.any? %>
+    <%= ui_alert(message: @page.errors.full_messages.to_sentence, type: :error) %>
+  <% end %>
+
+  <%= ui_form(action: manage_page_path(@page), method: :patch) do %>
+    <label class="ks-label mb-1">Name</label>
+    <%= ui_input(name: "page[name]", value: @page.name) %>
+
+    <label class="ks-label mb-1">Address</label>
+    <%= ui_input(name: "page[slug]", value: @page.slug) %>
+
+    <% if KeystoneUi::Pages.places.any? %>
+      <label class="ks-label mb-1">Place</label>
+      <%= ui_select(name: "page[place]", options: KeystoneUi::Pages.places.invert.to_a, selected: @page.place) %>
+    <% end %>
+
+    <%= ui_button(label: "Save", type: :submit) %>
+  <% end %>
+<% end %>

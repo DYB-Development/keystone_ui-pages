@@ -38,6 +38,7 @@
             <% end %>
             <td class="ks-table-cell-middle text-sm whitespace-nowrap text-right">
               <%= link_to "Edit", manage_page_path(page) %>
+              <%= link_to "Settings", edit_manage_page_path(page), class: "ml-4" %>
               <% if live %>
                 <%= link_to "View live", manage_page_live_path(page), class: "ml-4" %>
                 <% if @printable %>
