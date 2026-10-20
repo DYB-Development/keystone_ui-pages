@@ -243,6 +243,20 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-paragraph:not(:has(a))", text: "Made by Tyler"
   end
 
+  test "an editor changes the address of a link in a paragraph" do
+    selected_paragraph_with_link
+    find("[data-rich-text-field] [contenteditable] a").click
+
+    within("[data-rich-text-field]") do
+      click_on "Link"
+      fill_in "Link address", with: "https://dyb.example"
+      click_on "Save link"
+    end
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-paragraph a[href='https://dyb.example']", text: "Tyler"
+  end
+
   private
 
   def selected(key, drawn)
