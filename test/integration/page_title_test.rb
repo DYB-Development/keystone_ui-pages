@@ -13,4 +13,12 @@ class KeystoneUi::Pages::PageTitleTest < ActionDispatch::IntegrationTest
 
     assert_select "title", text: "Plans and prices"
   end
+
+  test "a visitor sees the host's default tab title on a page with no title" do
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
+
+    get "/pages/pricing"
+
+    assert_select "title", text: "Dummy"
+  end
 end
