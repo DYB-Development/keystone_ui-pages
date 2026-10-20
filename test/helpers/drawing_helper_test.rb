@@ -559,6 +559,12 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "_blank", "noopener noreferrer" ], [ link["target"], link["rel"] ]
   end
 
+  test "a rich paragraph keeps the line breaks and separate paragraphs typed into it" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>First line<br>Second line</p><p>Next paragraph</p>" }))
+
+    assert_equal [ 2, 1 ], [ css_select("p.ks-paragraph").size, css_select("p.ks-paragraph br").size ]
+  end
+
   private
 
   def paragraph_document(text)
