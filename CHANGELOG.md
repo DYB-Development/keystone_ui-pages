@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- An editor writes a paragraph as rich text and links selected words, and visitors see only its paragraphs, line breaks and links with safe addresses, with links to other sites opening in a new tab.
 - An editor types each feature's icon in a feature grid, such as an emoji, and a typed icon is drawn as text so a script in it never runs.
 - An editor sets a section's background to shaded, filling the page's width in keystone_ui's muted fill colour, and its width to one of keystone_ui's page widths, with padding from keystone_ui's spacing value.
 
