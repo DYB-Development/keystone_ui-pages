@@ -36,6 +36,10 @@ module KeystoneUi
         end
       end
 
+      def title(document, text)
+        copied(document).tap { |changed| changed["title"] = text.to_s.strip.presence }
+      end
+
       def add_section(document)
         copied(document).tap { |changed| changed["sections"] << Document.section }
       end

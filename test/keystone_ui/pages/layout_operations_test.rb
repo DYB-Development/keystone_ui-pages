@@ -48,6 +48,12 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
     assert_equal "lg", arranged["sections"][0]["width"]
   end
 
+  def test_titling_a_document_stores_its_title
+    titled = KeystoneUi::Pages::Operations.title(@document, "Software you can trust")
+
+    assert_equal "Software you can trust", titled["title"]
+  end
+
   def test_arranging_a_node_with_a_value_it_does_not_offer_is_refused
     refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
       KeystoneUi::Pages::Operations.arrange(@document, node_id: @section["id"], setting: "spacing", value: "huge")
