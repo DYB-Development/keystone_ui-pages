@@ -278,6 +278,9 @@ The catalog offers these Keystone UI components by default: `button`,
   an Archive button, and a published page also links to View live and, when
   Chrome or Chromium is found, to its PDF. Show archived lists archived pages
   instead, each with a Restore button.
+- **A feature grid's icons** are typed per feature in the builder, usually as
+  an emoji. A typed icon is drawn as text, so markup or a script in it is shown
+  and never run. A feature left without an icon shows the check mark.
 - **A section's background and width** are set in the builder's layout panel.
   A shaded section fills the full width of the page with keystone_ui's
   `--ks-color-fill-muted` colour, and its dark value in a dark theme. A section

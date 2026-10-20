@@ -135,7 +135,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_the_catalog_offers_keystone_ui_feature_grid_filled_from_a_list_field
     grid = keystone_elements.find(:feature_grid)
 
-    assert_equal [ :ui_feature_grid, :list, %i[title description] ], [ grid.component, grid.fields.find { |field| field[:key] == :features }[:kind], grid.fields.find { |field| field[:key] == :features }[:entry].reject { |field| field[:hidden] }.map { |field| field[:key] } ]
+    assert_equal [ :ui_feature_grid, :list, %i[title description icon] ], [ grid.component, grid.fields.find { |field| field[:key] == :features }[:kind], grid.fields.find { |field| field[:key] == :features }[:entry].reject { |field| field[:hidden] }.map { |field| field[:key] } ]
   end
 
   def test_the_catalog_offers_keystone_ui_accordion_filled_from_a_list_field

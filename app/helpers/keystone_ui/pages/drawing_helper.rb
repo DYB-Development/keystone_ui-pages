@@ -86,6 +86,7 @@ module KeystoneUi
         return [] if (field[:kind] == :list || (field[:kind] == :data && field[:default].is_a?(Array))) && value.blank?
         return nil if field[:kind] == :data && value.blank?
         return value if value.blank?
+        return ERB::Util.html_escape(value) if field[:as] == :escaped_text
         return value.to_sym if field[:as] == :key
         return value.to_s == "true" if field[:kind] == :yes_or_no
         return value.to_sym if field[:kind] == :one_of
