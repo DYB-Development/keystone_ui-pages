@@ -124,4 +124,14 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, "pricing" ], [ response.status, @page.reload.slug ]
   end
+
+  test "a page belonging to another owner cannot be opened in the settings" do
+    KeystoneUi::Pages.owner_method = :current_team
+    Team.create!(name: "Acme")
+    other = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", owner: Team.create!(name: "Globex"))
+
+    get "/pages/manage/pages/#{other.id}/edit", headers: { "X-Team" => "Acme" }
+
+    assert_response :not_found
+  end
 end
