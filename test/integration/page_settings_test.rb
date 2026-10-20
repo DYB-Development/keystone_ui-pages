@@ -58,4 +58,14 @@ class KeystoneUi::Pages::PageSettingsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Pricing", "pricing" ], @page.reload.slice(:name, :slug).values
   end
+
+  test "saving a place the host does not allow shows a validation message" do
+    KeystoneUi::Pages.places = { "marketing" => "Marketing site" }
+
+    patch "/pages/manage/pages/#{@page.id}", params: { page: { name: "Pricing", slug: "pricing", place: "client_portal" } }
+
+    assert_equal [ 422, "Place is not included in the list" ], [ response.status, Nokogiri::HTML(response.body).at_css("[role='alert']")&.text&.strip ]
+  ensure
+    KeystoneUi::Pages.places = nil
+  end
 end
