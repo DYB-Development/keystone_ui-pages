@@ -66,7 +66,7 @@ module KeystoneUi
                     { key: :subtitle, label: "Subtitle", kind: :text },
                     { key: :features, label: "Features", kind: :list,
                       entry: [ { key: :title, label: "Title", kind: :text }, { key: :description, label: "Description", kind: :long_text },
-                               { key: :icon, label: "Icon", kind: :text, hidden: true,
+                               { key: :icon, label: "Icon", kind: :text,
                                  default: '<svg viewBox="0 0 24 24" class="size-6 fill-none stroke-current stroke-2"><path d="M5 12l5 5L20 7"/></svg>' } ],
                       default: [ { "title" => "Fast", "description" => "Pages load quickly." },
                                  { "title" => "Clear", "description" => "Every page reads plainly." },

@@ -91,6 +91,15 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-element-id] .ks-accordion-item", count: 3
   end
 
+  test "an editor sets a feature's icon in a feature grid from the builder" do
+    selected("feature_grid", "h2")
+
+    fill_in "ks-pages-features-0-icon", with: "✨"
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-feature-card-icon", text: "✨"
+  end
+
   test "an editor edits an entry of a list field from the builder" do
     selected("accordion", ".ks-accordion")
 
