@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- An editor sets a section's background to shaded, filling the page's width in keystone_ui's muted fill colour, and its width to one of keystone_ui's page widths, with padding from keystone_ui's spacing value.
+
 ## [0.3.0] - 2026-10-19
 
 ### Added

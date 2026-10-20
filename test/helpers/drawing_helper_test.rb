@@ -20,6 +20,37 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "section.ks-pages-section.ks-section-lg"
   end
 
+  test "a shaded section is drawn with keystone_ui's muted fill colour in light and dark themes" do
+    @document["sections"][0]["background"] = "shaded"
+
+    render html: drawn_document(@document)
+
+    assert_select "section.ks-pages-section.bg-\\(color\\:--ks-color-fill-muted\\).dark\\:bg-\\(color\\:--ks-color-fill-muted-dark\\)"
+  end
+
+  test "a section with a width set holds its rows at keystone_ui's page width of that name with its page side padding" do
+    @document["sections"][0]["width"] = "lg"
+
+    render html: drawn_document(@document)
+
+    assert_select "section.ks-pages-section > div.ks-page.ks-page-lg > div.ks-pages-row"
+  end
+
+  test "a section with a width set is padded above and below by an amount built from keystone_ui's spacing value" do
+    @document["sections"][0]["width"] = "lg"
+
+    render html: drawn_document(@document)
+
+    assert_select "div.ks-page.py-\\[calc\\(var\\(--ks-spacing\\)\\*16\\)\\].lg\\:py-\\[calc\\(var\\(--ks-spacing\\)\\*24\\)\\]"
+  end
+
+  test "a section saved without a background or width draws as it did before either existed" do
+    render html: drawn_document(@document)
+
+    section = css_select("section.ks-pages-section").first
+    assert_equal [ "ks-pages-section flex flex-col gap-6 print:break-inside-avoid ks-section-md", "ks-pages-row" ], [ section["class"], section.element_children.first["class"].split.first ]
+  end
+
   test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
     @document["sections"][0]["rows"][0]["gap"] = "xl"
 

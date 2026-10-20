@@ -5,7 +5,7 @@ import Alert from "keystone_ui-react/src/Alert.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
 
 const LABELS = {
-  section: { spacing: "Section spacing" },
+  section: { spacing: "Section spacing", background: "Section background", width: "Section width" },
   row: { gap: "Row gap" },
   column: { wide: "Width on wide screens", narrow: "Width on narrow screens", align: "Vertical alignment" }
 }
