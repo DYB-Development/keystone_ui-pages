@@ -91,6 +91,18 @@ class KeystoneUi::Pages::BuilderLayoutTest < KeystoneUi::Pages::ApplicationSyste
     assert_selector "[data-section-id].bg-\\(color\\:--ks-color-fill-muted\\)"
   end
 
+  test "an editor sets a section's width from keystone_ui's page widths" do
+    page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-column-id]").click
+    click_on "Select row"
+
+    click_on "Select section"
+    select "lg", from: "Section width"
+
+    assert_selector "[data-section-id] > .ks-page.ks-page-lg"
+  end
+
   test "an editor sets a column's vertical alignment" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
     visit "/pages/manage/pages/#{page_record.id}"
