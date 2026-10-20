@@ -42,6 +42,12 @@ class KeystoneUi::Pages::LayoutOperationsTest < Minitest::Test
     assert_equal "shaded", arranged["sections"][0]["background"]
   end
 
+  def test_arranging_a_section_stores_one_of_keystone_uis_page_widths
+    arranged = KeystoneUi::Pages::Operations.arrange(@document, node_id: @section["id"], setting: "width", value: "lg")
+
+    assert_equal "lg", arranged["sections"][0]["width"]
+  end
+
   def test_arranging_a_node_with_a_value_it_does_not_offer_is_refused
     refusal = assert_raises(KeystoneUi::Pages::InvalidDocument) do
       KeystoneUi::Pages::Operations.arrange(@document, node_id: @section["id"], setting: "spacing", value: "huge")
