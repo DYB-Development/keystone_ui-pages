@@ -18,6 +18,8 @@ module KeystoneUi
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
 
+      SHADED_CLASSES = "bg-(color:--ks-color-fill-muted) dark:bg-(color:--ks-color-fill-muted-dark)"
+
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
@@ -30,7 +32,8 @@ module KeystoneUi
 
         spacing = Keystone::Ui::SectionComponent::SPACING_CLASSES.fetch((section["spacing"] || Operations::DEFAULTS[:section]["spacing"]).to_sym)
         data = editing ? { section_id: section["id"], hidden: hidden?(section) || nil }.compact : {}
-        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: "ks-pages-section flex flex-col gap-6 print:break-inside-avoid #{spacing}", data: data)
+        shading = SHADED_CLASSES if section["background"] == "shaded"
+        tag.section(safe_join(section["rows"].map { |row| drawn_row(row, editing) }), class: [ "ks-pages-section flex flex-col gap-6 print:break-inside-avoid #{spacing}", shading ].compact.join(" "), data: data)
       end
 
       def drawn_row(row, editing)

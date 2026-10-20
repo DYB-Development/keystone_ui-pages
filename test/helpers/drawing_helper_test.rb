@@ -20,6 +20,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "section.ks-pages-section.ks-section-lg"
   end
 
+  test "a shaded section is drawn with keystone_ui's muted fill colour in light and dark themes" do
+    @document["sections"][0]["background"] = "shaded"
+
+    render html: drawn_document(@document)
+
+    assert_select "section.ks-pages-section.bg-\\(color\\:--ks-color-fill-muted\\).dark\\:bg-\\(color\\:--ks-color-fill-muted-dark\\)"
+  end
+
   test "a row is drawn as a twelve-column grid with keystone_ui's class for its gap" do
     @document["sections"][0]["rows"][0]["gap"] = "xl"
 
