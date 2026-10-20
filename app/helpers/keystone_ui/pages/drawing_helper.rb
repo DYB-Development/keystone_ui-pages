@@ -83,6 +83,8 @@ module KeystoneUi
       end
 
       def drawn_element(element)
+        return unless KeystoneUi::Pages.catalog.find(element["key"])
+
         wrapped_element(element) unless hidden?(element)
       end
 

@@ -584,6 +584,16 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_equal [ "Use <b> for bold & <a> for links", [] ], [ paragraph.text, paragraph.element_children.to_a ]
   end
 
+
+  test "a page draws every other element when one element's kind is no longer offered" do
+    column = @document["sections"][0]["rows"][0]["columns"][0]
+    column["elements"] = [ { "id" => "gone", "key" => "retired_widget", "fields" => {} }, { "id" => "kept", "key" => "heading", "fields" => { "text" => "Still here" } } ]
+
+    render html: drawn_document(@document)
+
+    assert_equal [ 1, "Still here" ], [ css_select(".ks-pages-element").size, css_select(".ks-pages-element").first.text.strip ]
+  end
+
   private
 
   def paragraph_document(text)
