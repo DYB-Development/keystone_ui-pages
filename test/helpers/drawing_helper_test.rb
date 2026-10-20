@@ -603,6 +603,23 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
     assert_select "[data-element-id='gone'][data-missing-element]", text: "No longer offered: retired_widget"
   end
 
+
+  test "drawing a published page reports which page holds an element that is no longer offered" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.document["sections"][0]["rows"][0]["columns"][0]["elements"] = [ { "id" => "gone", "key" => "retired_widget", "fields" => {} } ]
+    page.save!
+    page.publish
+    reports = []
+    subscriber = Object.new.tap { |listener| listener.define_singleton_method(:report) { |_error, context:, **| reports << context } }
+    Rails.error.subscribe(subscriber)
+
+    render html: drawn_version(page.live_version)
+
+    assert_equal [ { page_id: page.id, element_key: "retired_widget" } ], reports.map { |context| context.slice(:page_id, :element_key) }
+  ensure
+    Rails.error.unsubscribe(subscriber)
+  end
+
   private
 
   def paragraph_document(text)

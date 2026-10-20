@@ -17,6 +17,7 @@ module KeystoneUi
 
       def drawn_version(version, values: {})
         key = [ "keystone_ui_pages", version.id, Operations.digest(values.to_h.stringify_keys) ]
+        @drawn_page_id = version.page_id
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
 
@@ -84,13 +85,19 @@ module KeystoneUi
         wrapped_element(element, data: { element_id: element["id"], hidden: hidden?(element) || nil }.compact)
       end
 
+      def reported_missing(element)
+        Rails.error.report(InvalidDocument.new("No element is registered as #{element["key"]}"), handled: true,
+          context: { page_id: @drawn_page_id, element_key: element["key"] })
+        nil
+      end
+
       def missing_element(element)
         tag.div("No longer offered: #{element["key"]}", class: "ks-pages-element ks-hint rounded-md border-2 border-dashed border-(--ks-color-border-strong) p-3",
           data: { element_id: element["id"], missing_element: true })
       end
 
       def drawn_element(element)
-        return unless KeystoneUi::Pages.catalog.find(element["key"])
+        return reported_missing(element) unless KeystoneUi::Pages.catalog.find(element["key"])
 
         wrapped_element(element) unless hidden?(element)
       end
