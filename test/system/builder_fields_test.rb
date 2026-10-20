@@ -213,6 +213,66 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     assert_equal [ false, true ], [ has_field?("Rows"), has_css?("[data-element-fields]", text: "Filled with data the host supplies on a template page") ]
   end
 
+  test "an editor adds a link to the selected words of a paragraph" do
+    selected("paragraph", ".ks-paragraph")
+    text = find("[data-rich-text-field] [contenteditable]")
+    text.click
+    text.send_keys([ :command, "a" ], [ :control, "a" ], "Tyler")
+    text.send_keys([ :command, "a" ], [ :control, "a" ])
+
+    within("[data-rich-text-field]") do
+      click_on "Link"
+      fill_in "Link address", with: "https://ty-ler.com"
+      click_on "Save link"
+    end
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-paragraph a[href='https://ty-ler.com']", text: "Tyler"
+  end
+
+  test "an editor removes a link from a paragraph and keeps its words" do
+    selected_paragraph_with_link
+    find("[data-rich-text-field] [contenteditable] a").click
+
+    within("[data-rich-text-field]") do
+      click_on "Link"
+      click_on "Remove link"
+    end
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-paragraph:not(:has(a))", text: "Made by Tyler"
+  end
+
+  test "an editor changes the address of a link in a paragraph" do
+    selected_paragraph_with_link
+    find("[data-rich-text-field] [contenteditable] a").click
+
+    within("[data-rich-text-field]") do
+      click_on "Link"
+      fill_in "Link address", with: "https://dyb.example"
+      click_on "Save link"
+    end
+    find("[data-element-fields] label", text: "Horizontal alignment").click
+
+    assert_selector "[data-element-id] .ks-paragraph a[href='https://dyb.example']", text: "Tyler"
+  end
+
+  test "text pasted into a paragraph keeps its words and links and loses other formatting" do
+    selected("paragraph", ".ks-paragraph")
+    text = find("[data-rich-text-field] [contenteditable]")
+    text.click
+    text.send_keys([ :command, "a" ], [ :control, "a" ])
+
+    page.execute_script(<<~JS, text)
+      const data = new DataTransfer()
+      data.setData("text/html", '<p><b>Bold</b> <i>slanted</i> <span style="color:red">red</span> <a href="https://dyb.example">site</a></p>')
+      data.setData("text/plain", "Bold slanted red site")
+      arguments[0].dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
+    JS
+
+    assert_selector "[data-rich-text-field] [contenteditable]:not(:has(strong, b, em, i, [style*='color'])) a[href='https://dyb.example']", text: "site"
+  end
+
   private
 
   def selected(key, drawn)
@@ -221,5 +281,15 @@ class KeystoneUi::Pages::BuilderFieldsTest < KeystoneUi::Pages::ApplicationSyste
     page_record.update!(document: KeystoneUi::Pages::Operations.add(page_record.document, key, column_id: column_id))
     visit "/pages/manage/pages/#{page_record.id}"
     find("[data-element-id] #{drawn}").click
+  end
+
+  def selected_paragraph_with_link
+    page_record = KeystoneUi::Pages::Page.create!(name: "Fields", slug: "fields")
+    column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page_record.document, "paragraph", column_id: column_id)
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = { "html" => "<p>Made by <a href=\"https://ty-ler.com\">Tyler</a></p>" }
+    page_record.update!(document: document)
+    visit "/pages/manage/pages/#{page_record.id}"
+    find("[data-element-id] .ks-paragraph").click
   end
 end

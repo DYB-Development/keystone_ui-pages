@@ -83,7 +83,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_the_catalog_offers_keystone_ui_paragraph_for_running_text
     element = keystone_elements.find(:paragraph)
 
-    assert_equal [ :ui_paragraph, [ [ :text, :long_text ] ] ], [ element.component, element.fields.map { |field| [ field[:key], field[:kind] ] } ]
+    assert_equal [ :pages_paragraph, [ [ :text, :rich_text ] ] ], [ element.component, element.fields.map { |field| [ field[:key], field[:kind] ] } ]
   end
 
   def test_the_catalog_offers_keystone_ui_value_list_whose_rows_carry_a_label_value_note_total_and_fallback

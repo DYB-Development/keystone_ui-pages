@@ -20,12 +20,28 @@ module KeystoneUi
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
 
+      def pages_paragraph(text:)
+        return ui_paragraph(text: text) unless text.is_a?(Hash)
+
+        rich_paragraphs(text["html"].to_s)
+      end
+
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
       end
 
       private
+
+      def rich_paragraphs(html)
+        stored = Nokogiri::HTML5.fragment(html)
+        stored.css("script, style").each(&:remove)
+        fragment = Nokogiri::HTML5.fragment(Rails::HTML5::SafeListSanitizer.new.sanitize(stored.to_html, tags: %w[p br a], attributes: %w[href]))
+        fragment.css("a:not([href])").each { |link| link.replace(link.children) }
+        fragment.css("p").each { |paragraph| paragraph["class"] = "ks-paragraph" }
+        fragment.css("a[href^='http://'], a[href^='https://']").each { |link| link["target"], link["rel"] = "_blank", "noopener noreferrer" }
+        fragment.to_html.html_safe
+      end
 
       def drawn_section(section, editing)
         return if hidden?(section) && !editing
@@ -103,7 +119,7 @@ module KeystoneUi
       end
 
       def filled(stored)
-        return stored.presence unless stored.is_a?(Hash)
+        return stored.presence unless stored.is_a?(Hash) && stored.key?("value")
 
         (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence || ""
       end

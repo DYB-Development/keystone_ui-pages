@@ -6,6 +6,7 @@ import Checkbox from "keystone_ui-react/src/Checkbox.jsx"
 import Button from "keystone_ui-react/src/Button.jsx"
 import { Label } from "keystone_ui-react/src/FieldText.jsx"
 import ListField from "./ListField"
+import RichTextField from "./RichTextField"
 
 const FieldInput = ({ field, value, onChange }) => {
   const shown = value ?? field.default ?? ""
@@ -59,7 +60,9 @@ export default function ElementFields({ element, definition, alignments, valueNa
           {field.kind === "list" && !isBound(element.fields[field.key]) &&
             <ListField field={field} entries={element.fields[field.key] ?? field.default ?? []} onChange={onChange} />}
           {field.kind === "data" && <p className="ks-hint">Filled with data the host supplies on a template page</p>}
-          {field.kind !== "list" && field.kind !== "data" && <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
+          {field.kind === "rich_text" &&
+            <RichTextField key={JSON.stringify(element.fields[field.key] ?? null)} field={field} value={element.fields[field.key]} onChange={onChange} />}
+          {field.kind !== "list" && field.kind !== "data" && field.kind !== "rich_text" && <FieldInput key={JSON.stringify(element.fields[field.key] ?? null)} field={field}
             value={isBound(element.fields[field.key]) ? element.fields[field.key].fallback ?? "" : element.fields[field.key]}
             onChange={(key, text) => (isBound(element.fields[key]) ? onBind(key, element.fields[key].value, text) : onChange(key, text))} />}
           {isBound(element.fields[field.key]) &&

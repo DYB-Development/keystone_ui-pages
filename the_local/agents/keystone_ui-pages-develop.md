@@ -278,6 +278,12 @@ The catalog offers these Keystone UI components by default: `button`,
   an Archive button, and a published page also links to View live and, when
   Chrome or Chromium is found, to its PDF. Show archived lists archived pages
   instead, each with a Restore button.
+- **A paragraph's text is rich text.** Editors type it in the builder and
+  link selected words with the Link button, and pasted text keeps only its
+  words and links. It is stored as `{ "html" => "..." }` and cleaned each time
+  it is drawn, keeping paragraphs, line breaks and links with safe addresses.
+  A link to an `http` or `https` address opens in a new tab. A paragraph saved
+  earlier as a plain string still draws as escaped text.
 - **A feature grid's icons** are typed per feature in the builder, usually as
   an emoji. A typed icon is drawn as text, so markup or a script in it is shown
   and never run. A feature left without an icon shows the check mark.

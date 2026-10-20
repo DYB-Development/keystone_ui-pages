@@ -544,4 +544,52 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
 
     assert_select ".ks-pages-element[class~='[&_.ks-hero]:min-h-0'] .ks-hero"
   end
+
+  test "a paragraph stored as rich text draws its words with each link going to its address" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>Founded by <a href=\"/about\">Tyler</a> in 2020</p>" }))
+
+    paragraph = css_select("p.ks-paragraph").first
+    assert_equal [ "Founded by Tyler in 2020", "/about" ], [ paragraph.text, paragraph.at_css("a")&.[]("href") ]
+  end
+
+  test "a rich paragraph's link to another site opens in a new tab" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>Made by <a href=\"https://ty-ler.com\">Tyler</a></p>" }))
+
+    link = css_select("p.ks-paragraph a").first
+    assert_equal [ "_blank", "noopener noreferrer" ], [ link["target"], link["rel"] ]
+  end
+
+  test "a rich paragraph keeps the line breaks and separate paragraphs typed into it" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>First line<br>Second line</p><p>Next paragraph</p>" }))
+
+    assert_equal [ 2, 1 ], [ css_select("p.ks-paragraph").size, css_select("p.ks-paragraph br").size ]
+  end
+
+  test "a rich paragraph never draws a script, a style or a tag other than a paragraph, a line break or a link" do
+    render html: drawn_document(paragraph_document({ "html" => "<p onclick=\"steal()\">Hi <script>steal()</script><style>p{}</style><b>bold</b> <img src=x onerror=steal()></p>" }))
+
+    assert_equal [ [], "Hi bold", nil ], [ css_select("p.ks-paragraph *").map(&:name), css_select("p.ks-paragraph").first.text.strip, css_select("p.ks-paragraph").first["onclick"] ]
+  end
+
+  test "a rich paragraph draws a link whose address would run script as plain words" do
+    render html: drawn_document(paragraph_document({ "html" => "<p>Click <a href=\"javascript:steal()\">here</a></p>" }))
+
+    assert_equal [ [], "Click here" ], [ css_select("p.ks-paragraph a").to_a, css_select("p.ks-paragraph").first.text ]
+  end
+
+  test "a paragraph saved as plain text with angle brackets draws as the same escaped text" do
+    render html: drawn_document(paragraph_document("Use <b> for bold & <a> for links"))
+
+    paragraph = css_select("p.ks-paragraph").first
+    assert_equal [ "Use <b> for bold & <a> for links", [] ], [ paragraph.text, paragraph.element_children.to_a ]
+  end
+
+  private
+
+  def paragraph_document(text)
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    KeystoneUi::Pages::Operations.add(@document, "paragraph", column_id: column_id).tap do |added|
+      added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = text
+    end
+  end
 end
