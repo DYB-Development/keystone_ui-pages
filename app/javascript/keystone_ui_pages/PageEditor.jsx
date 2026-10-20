@@ -2,13 +2,14 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { DragDropManager, Draggable, Droppable, KeyboardSensor, PointerSensor } from "@dnd-kit/dom"
 import { Sortable } from "@dnd-kit/dom/sortable"
 import Button from "keystone_ui-react/src/Button.jsx"
-import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseAccessException, chooseSample, duplicateNode, moveNode, removeNode, setField, showWhen, stepHistory } from "./operations"
+import { addColumn, addElement, addRow, addSection, arrange, bindField, chooseAccessException, chooseSample, duplicateNode, moveNode, removeNode, setField, setTitle, showWhen, stepHistory } from "./operations"
 import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
 import ElementPalette from "./ElementPalette"
 import SelectionPath from "./SelectionPath"
 import SampleChoice from "./SampleChoice"
+import PageTitle from "./PageTitle"
 import AccessExceptionChoice from "./AccessExceptionChoice"
 import ShowWhen from "./ShowWhen"
 import ThemeMode from "./ThemeMode"
@@ -29,7 +30,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, unpublish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, access_exceptions = [], access_exception, access_exception_url, history_url, live_url, back_url, undo_url, redo_url, undoable: couldUndo, redoable: couldRedo, token }) {
+export default function PageEditor({ name, publish_url, unpublish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, title_url, access_exceptions = [], access_exception, access_exception_url, history_url, live_url, back_url, undo_url, redo_url, undoable: couldUndo, redoable: couldRedo, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [undoable, setUndoable] = useState(couldUndo)
   const [redoable, setRedoable] = useState(couldRedo)
@@ -245,6 +246,7 @@ export default function PageEditor({ name, publish_url, unpublish_url, elements,
         <aside data-settings-panel className="w-72 shrink-0 overflow-y-auto border-l border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) dark:bg-(--ks-color-surface-dark)">
           <SelectionPath path={selectionPath} onChoose={choosePart} />
           {!node && !definition && <p className="ks-hint">Select something on the page to change it.</p>}
+          {!node && !definition && <PageTitle key={document.title ?? ""} title={document.title} onChange={(title) => setTitle(title_url, token, title).then(shown, refused)} />}
           {node && <LayoutPanel node={node} values={inUse(node)} arrangements={arrangements}
             onArrange={(id, setting, value) => arrange(nodes_url, token, id, setting, value).then(shown, refused)}
             refusal={refusal}

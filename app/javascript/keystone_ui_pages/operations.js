@@ -7,6 +7,8 @@ const sent = (url, token, method, body = {}) =>
 
 export const addElement = (url, token, key, columnId) => sent(url, token, "POST", { key, column_id: columnId })
 
+export const setTitle = (url, token, title) => sent(url, token, "POST", { title })
+
 export const setField = (url, token, elementId, field, value) => sent(`${url}/${elementId}`, token, "PATCH", { field, value })
 
 export const addSection = (url, token) => sent(url, token, "POST", {})

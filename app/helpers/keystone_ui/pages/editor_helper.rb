@@ -23,6 +23,7 @@ module KeystoneUi
           samples: Values.samples_for(page),
           sample: chosen_sample(page),
           samples_url: manage_page_sample_path(page),
+          title_url: manage_page_title_path(page),
           access_exceptions: KeystoneUi::Pages.access_exceptions.invert.to_a,
           access_exception: page.access_exception,
           access_exception_url: manage_page_access_exception_path(page),
