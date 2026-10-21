@@ -33,6 +33,20 @@ class KeystoneUi::Pages::HostHelperTest < ActiveSupport::TestCase
     assert_equal "First", Nokogiri::HTML(html).at_css(".ks-button").text.strip
   end
 
+  test "a host draws the published version it names of an archived page" do
+    page = KeystoneUi::Pages::Page.create!(name: "Summary", slug: "summary")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page.document, "button", column_id: column_id)
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"] = "First"
+    page.update!(document: document)
+    page.publish
+    page.archive
+
+    html = ApplicationController.new.view_context.keystone_ui_page(page, version: 1)
+
+    assert_equal "First", Nokogiri::HTML(html).at_css(".ks-button").text.strip
+  end
+
   test "a host page is drawn once per version and set of values" do
     cache = Rails.cache
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
