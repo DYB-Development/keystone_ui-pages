@@ -3,6 +3,7 @@
 require "test_helper"
 require "minitest/mock"
 require "keystone_ui/pages/printer"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -50,7 +51,49 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal 1, KeystoneUi::Pages::Pdf.count
   end
 
+  test "a host gets the PDF of the published version it names after a later one is published" do
+    labelled("First")
+    labelled("Second")
+    printed = nil
+
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(html) { printed = html; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page, version: 2) }
+
+    assert_equal "First", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
+  end
+
+  test "asking again for the same named version and values returns the kept PDF without printing it again" do
+    @page.publish
+    printing { 2.times { KeystoneUi::Pages.pdf(@page, version: 1, values: { "client_name" => "Acme" }) } }
+
+    assert_equal 1, @printed
+  end
+
+  test "a host can have a named version's PDF made ahead of time" do
+    @page.publish
+    printing { perform_enqueued_jobs { KeystoneUi::Pages.prepare_pdf(@page, version: 1, values: { "client_name" => "Acme" }) } }
+
+    assert_equal [ 1 ], KeystoneUi::Pages::Pdf.all.map { |pdf| pdf.version.number }
+  end
+
+  test "a host that names no version gets the PDF of the live version" do
+    labelled("First")
+    labelled("Second")
+    printed = nil
+
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(html) { printed = html; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page.reload) }
+
+    assert_equal "Second", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
+  end
+
   private
+
+  def labelled(label)
+    column_id = @page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = @page.document["sections"][0]["rows"][0]["columns"][0]["elements"].empty? ? KeystoneUi::Pages::Operations.add(@page.document, "button", column_id: column_id) : @page.document
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"] = label
+    @page.update!(document: document)
+    @page.publish
+  end
 
   def printing(&)
     KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { @printed += 1; "%PDF-printed" }, &)

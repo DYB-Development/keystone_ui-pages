@@ -120,15 +120,17 @@ inherit from the base controller, so define it there.
   unpublished or archived. It returns nil when the page has no version with
   that number. A record made from a page keeps the number it was made with
   and passes it here, so it keeps drawing the same way after later publishes.
-- `KeystoneUi::Pages.pdf(page, values: {})` — returns a
+- `KeystoneUi::Pages.pdf(page, values: {}, version: nil)` — returns a
   `KeystoneUi::Pages::Pdf` record for the page's live version drawn with the
   values given. Its `file` is an Active Storage attachment, ready to download,
-  link or email. The same live version and values return the record already
+  link or email. The same version and values return the record already
   kept, and a newly published version or different values print a new one.
-  When nothing is kept it prints in the current request.
-- `KeystoneUi::Pages.prepare_pdf(page, values: {})` — queues
+  When nothing is kept it prints in the current request. `version:` takes a
+  published version's number and prints that version instead, live or
+  superseded, the same way `keystone_ui_page` draws it.
+- `KeystoneUi::Pages.prepare_pdf(page, values: {}, version: nil)` — queues
   `KeystoneUi::Pages::PdfJob`, which calls `KeystoneUi::Pages.pdf` with the same
-  page and values, so the file is kept before anyone asks for it.
+  page, values and version, so the file is kept before anyone asks for it.
 
 ### The builder and the editor's screens
 
@@ -276,8 +278,8 @@ The catalog offers these Keystone UI components by default: `button`,
   layout and print rules together.
 - **Only the live version leaves the builder.** The draft is what editors
   change. Visitors, `keystone_ui_page` and PDFs show the live version, so an
-  unpublished change shows nowhere else. `keystone_ui_page` with `version:`
-  shows an earlier published version, never the draft.
+  unpublished change shows nowhere else. `keystone_ui_page` and PDFs with
+  `version:` show an earlier published version, never the draft.
 - **Value names are strings.** `Values.names`, the provider's hash and the
   `values:` passed to the helper and to PDFs all use the same names. The gem
   turns symbol keys into strings, so either works, but the names must match.
