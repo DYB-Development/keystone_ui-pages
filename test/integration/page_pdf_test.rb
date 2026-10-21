@@ -75,6 +75,16 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal [ 1 ], KeystoneUi::Pages::Pdf.all.map { |pdf| pdf.version.number }
   end
 
+  test "a host that names no version gets the PDF of the live version" do
+    labelled("First")
+    labelled("Second")
+    printed = nil
+
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(html) { printed = html; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page.reload) }
+
+    assert_equal "Second", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
+  end
+
   private
 
   def labelled(label)
