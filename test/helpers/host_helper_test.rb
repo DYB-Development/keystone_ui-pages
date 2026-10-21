@@ -61,6 +61,16 @@ class KeystoneUi::Pages::HostHelperTest < ActiveSupport::TestCase
     assert_equal "Acme", Nokogiri::HTML(html).at_css(".ks-button").text.strip
   end
 
+  test "a host draws nothing for an unpublished page when it names no version" do
+    page = KeystoneUi::Pages::Page.create!(name: "Summary", slug: "summary")
+    page.publish
+    page.unpublish
+
+    html = ApplicationController.new.view_context.keystone_ui_page(page)
+
+    assert_nil html
+  end
+
   test "a host page is drawn once per version and set of values" do
     cache = Rails.cache
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
