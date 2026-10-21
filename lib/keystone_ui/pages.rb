@@ -37,9 +37,9 @@ module KeystoneUi
       end
     end
 
-    def self.pdf(page, values: {})
+    def self.pdf(page, values: {}, version: nil)
       require "keystone_ui/pages/pdfs"
-      Pdfs.for(page, values: values)
+      Pdfs.for(page, values: values, version: version)
     end
 
     def self.prepare_pdf(page, values: {})
