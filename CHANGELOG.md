@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-21
+
 ### Added
 - `keystone_ui_page(page, version:)` draws the published version with that number, live or superseded, so a record made from an older version keeps drawing the way it did.
 
