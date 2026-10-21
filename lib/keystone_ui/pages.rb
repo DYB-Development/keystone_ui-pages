@@ -42,8 +42,8 @@ module KeystoneUi
       Pdfs.for(page, values: values, version: version)
     end
 
-    def self.prepare_pdf(page, values: {})
-      PdfJob.perform_later(page, values.to_h.stringify_keys)
+    def self.prepare_pdf(page, values: {}, version: nil)
+      PdfJob.perform_later(page, values.to_h.stringify_keys, version)
     end
 
     def self.catalog

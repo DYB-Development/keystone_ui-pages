@@ -68,6 +68,13 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal 1, @printed
   end
 
+  test "a host can have a named version's PDF made ahead of time" do
+    @page.publish
+    printing { perform_enqueued_jobs { KeystoneUi::Pages.prepare_pdf(@page, version: 1, values: { "client_name" => "Acme" }) } }
+
+    assert_equal [ 1 ], KeystoneUi::Pages::Pdf.all.map { |pdf| pdf.version.number }
+  end
+
   private
 
   def labelled(label)
