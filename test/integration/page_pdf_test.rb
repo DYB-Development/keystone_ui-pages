@@ -61,6 +61,13 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal "First", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
   end
 
+  test "asking again for the same named version and values returns the kept PDF without printing it again" do
+    @page.publish
+    printing { 2.times { KeystoneUi::Pages.pdf(@page, version: 1, values: { "client_name" => "Acme" }) } }
+
+    assert_equal 1, @printed
+  end
+
   private
 
   def labelled(label)
