@@ -78,6 +78,8 @@ events: ->(event) { PageEventJob.perform_later(event.page, event.kind, event.ele
 
 A handler that raises is reported through `Rails.error` with the page's id and the event's kind, and the browser gets the same answer as when it succeeds. A request that fails in the browser shows the visitor nothing.
 
+The handler only receives events that describe the live page. An event of any kind other than a view or a click is refused, and so is a click whose element is missing or not on the live version. A page the browser prerenders sends its view only when the visitor opens it.
+
 A page opened at its public address, or drawn with `keystone_ui_page` in a host view, sends its view from the visitor's browser once it loads. View live in the builder and a printed PDF send nothing. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The same pages send a click on any link, button or card link, including one that opens another page, and a click anywhere else sends nothing. Views and clicks are sent without a form token and the gem sets no cookie.
 
 ### Sending views and clicks to a third-party tag

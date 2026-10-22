@@ -4,6 +4,8 @@ function report(drawn, kind, details = {}) {
 }
 
 function reportViews() {
+  if (document.prerendering) return document.addEventListener("prerenderingchange", reportViews, { once: true })
+
   document.querySelectorAll("[data-page-events]:not([data-page-viewed])").forEach((drawn) => {
     drawn.dataset.pageViewed = ""
     report(drawn, "view")

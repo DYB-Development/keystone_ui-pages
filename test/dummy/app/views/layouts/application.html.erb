@@ -9,6 +9,9 @@
     <script>
       window.pageEvents = []
       window.pageErrors = []
+      <% if params[:prerendering] %>
+        Object.defineProperty(document, "prerendering", { value: true, configurable: true })
+      <% end %>
       window.addEventListener("unhandledrejection", (event) => window.pageErrors.push(String(event.reason)))
       for (const name of ["keystone-ui-pages:view", "keystone-ui-pages:click"]) {
         document.addEventListener(name, (event) => window.pageEvents.push({ name, ...event.detail }))
