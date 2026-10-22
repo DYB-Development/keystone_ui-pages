@@ -17,6 +17,19 @@ class KeystoneUi::Pages::HostViewReportingTest < KeystoneUi::Pages::ApplicationS
     assert_equal [ "view" ], wait_for { received.dup.presence }
   end
 
+  test "a host layout that emits no form token still sends the view" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event.kind })
+    KeystoneUi::Pages::Page.create!(name: "Product", slug: "product", place: "marketing").publish
+    ActionController::Base.allow_forgery_protection = true
+
+    visit "/products/product?layout=tokenless"
+
+    assert_equal [ "view" ], wait_for { received.dup.presence }
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
+
   private
 
   def wait_for
