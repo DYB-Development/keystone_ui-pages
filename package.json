@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild app/javascript/keystone_ui_pages/editor.jsx --bundle --minify --format=iife --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --alias:react=keystone_ui-react/src/react_on_page.js --alias:react-dom/client=keystone_ui-react/src/react_dom_on_page.js --alias:react-dom=keystone_ui-react/src/react_dom_on_page.js --alias:react/jsx-runtime=keystone_ui-react/src/jsx_runtime_on_page.js --outdir=app/assets/builds/keystone_ui_pages"
+    "build": "esbuild app/javascript/keystone_ui_pages/editor.jsx app/javascript/keystone_ui_pages/reporting.js --bundle --minify --format=iife --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --alias:react=keystone_ui-react/src/react_on_page.js --alias:react-dom/client=keystone_ui-react/src/react_dom_on_page.js --alias:react-dom=keystone_ui-react/src/react_dom_on_page.js --alias:react/jsx-runtime=keystone_ui-react/src/jsx_runtime_on_page.js --outdir=app/assets/builds/keystone_ui_pages"
   },
   "dependencies": {
     "@dnd-kit/dom": "0.5.0",
