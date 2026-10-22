@@ -35,4 +35,17 @@ class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 404, 404, 0 ], statuses + [ KeystoneUi::Pages::PageCount.count ]
   end
+
+  test "a view for a counted page with no live version, including an archived page, is refused and adds nothing" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", counts: true)
+    KeystoneUi::Pages::Page.create!(name: "Draft", slug: "draft", place: "marketing")
+    KeystoneUi::Pages::Page.create!(name: "Old", slug: "old", place: "marketing").tap(&:publish).archive
+
+    statuses = %w[draft old].map do |slug|
+      post "/pages/#{slug}/views"
+      response.status
+    end
+
+    assert_equal [ 404, 404, 0 ], statuses + [ KeystoneUi::Pages::PageCount.count ]
+  end
 end

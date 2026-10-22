@@ -7,7 +7,7 @@ module KeystoneUi
 
       def create
         page = owned_pages.find_by(slug: params[:slug])
-        return refuse unless page && KeystoneUi::Pages.counted?(page.place)
+        return refuse unless page&.live_version && KeystoneUi::Pages.counted?(page.place)
 
         PageCount.add(page, "view")
         head :no_content
