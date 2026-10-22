@@ -6,10 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - The New page form takes a `place` in its link, creates the page in that place, and then asks for a name only.
-- A page created with no name is named "Untitled page", and one created with no slug gets a random one.
+- A page created with no name is named with its place's word from `KeystoneUi::Pages.default_names` and the next number in that place, such as "Report template 3", or "Page 3" when the place has no word.
+- A page created with no slug gets a random one.
+- The page list takes a `place` in its link and shows only that place's pages, and its Create and archived links keep the place.
 
 ### Changed
 - Creating a page with a place the host does not name shows the New page form again instead of raising.
+- The builder's Back link and the redirects after saving settings, archiving and restoring go to the page's place list when the page has a place.
 
 ## [0.6.0] - 2026-10-21
 
