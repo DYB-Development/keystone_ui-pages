@@ -51,6 +51,11 @@ inherit from the base controller, so define it there.
   When it is not empty, the New page form offers them, a page with a place not
   in it is refused, and the page list shows each page's place. The view check
   reads it as `page.place`. Unset, pages have no place.
+- `KeystoneUi::Pages.default_names = { "client_report" => "Report template" }`
+  — the word a page created with no name starts with, per place. The page is
+  named with the word and the next number among that owner's pages in that
+  place, so "Report template 1", then "Report template 2". A place with no word,
+  and a page with no place, use "Page".
 - `KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }`
   — a hash of the exceptions an editor can set on a page, each stored value to
   its label. When it is not empty, the builder's top bar has an Access exception
@@ -312,6 +317,18 @@ The catalog offers these Keystone UI components by default: `button`,
   from `--ks-spacing`. The page builder has no setting of its own for these:
   a host changes them through its keystone_ui theme values. A section saved
   without either draws as it did before.
+- **A place's page list** at `/pages/manage/pages?place=client_report` shows
+  only that place's pages, and its Create and archived links keep the place.
+  With no place, or one the host does not name, the list shows every page. For
+  a page with a place, the redirects after saving settings, archiving and
+  restoring go to that place's list, and so does the builder's Back link unless
+  the host passed its own `return_to`.
+- **The New page form** at `/pages/manage/pages/new` saves a blank name from
+  `default_names` and a blank slug as eight random hex characters. A host
+  linking to it with `new_manage_page_path(place: "client_report")` creates the
+  page in that place, and the form then asks for a name only. A place the host
+  does not name in the link is ignored, and one posted to create is refused
+  with the form shown again.
 - **A page's settings** at `/pages/manage/pages/:id/edit` change its name, slug
   and place after it is created. A slug another page of the same owner uses, or
   a place the host does not name, is refused with a message and changes nothing.

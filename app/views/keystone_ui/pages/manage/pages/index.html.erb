@@ -1,10 +1,10 @@
 <%= ui_page(max_width: :xl) do %>
-  <%= ui_page_header(title: @archived ? "Archived pages" : "Pages", action_url: (new_manage_page_path unless @archived), action_label: "Create") do |header| %>
-    <% header.action { ui_button(label: "Create", href: new_manage_page_path) } unless @archived %>
+  <%= ui_page_header(title: @archived ? "Archived pages" : "Pages", action_url: (new_manage_page_path(place: @place) unless @archived), action_label: "Create") do |header| %>
+    <% header.action { ui_button(label: "Create", href: new_manage_page_path(place: @place)) } unless @archived %>
   <% end %>
 
   <p class="mb-4 text-sm">
-    <%= @archived ? link_to("Show current pages", manage_pages_path) : link_to("Show archived", manage_pages_path(archived: 1)) %>
+    <%= @archived ? link_to("Show current pages", manage_pages_path(place: @place)) : link_to("Show archived", manage_pages_path(archived: 1, place: @place)) %>
   </p>
 
   <div class="ks-table overflow-x-auto">

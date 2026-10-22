@@ -8,15 +8,20 @@ module KeystoneUi
       class PagesController < BaseController
         def index
           @archived = params[:archived].present?
+          @place = chosen_place
           @pages = owned_pages.public_send(@archived ? :archived : :current).order(:name)
+          @pages = @pages.where(place: @place) if @place
           @printable = Printer.chrome.present?
         end
 
         def new
+          @place = chosen_place
         end
 
         def create
-          page = Page.create!(params.require(:page).permit(:name, :slug, :place).merge(owner: page_owner))
+          page = Page.new(params.require(:page).permit(:name, :slug, :place).merge(owner: page_owner))
+          return render(:new, status: :unprocessable_entity) unless page.save
+
           redirect_to manage_page_path(page)
         end
 
@@ -33,7 +38,7 @@ module KeystoneUi
           @page = owned_pages.find(params[:id])
           return render(:edit, status: :unprocessable_entity) unless @page.update(params.require(:page).permit(:name, :slug, :place))
 
-          redirect_to manage_pages_path
+          redirect_to manage_pages_path(place: @page.place)
         end
 
         def publish
@@ -49,16 +54,22 @@ module KeystoneUi
         end
 
         def archive
-          owned_pages.find(params[:id]).archive
-          redirect_to manage_pages_path
+          page = owned_pages.find(params[:id])
+          page.archive
+          redirect_to manage_pages_path(place: page.place)
         end
 
         def restore
-          owned_pages.find(params[:id]).restore
-          redirect_to manage_pages_path
+          page = owned_pages.find(params[:id])
+          page.restore
+          redirect_to manage_pages_path(place: page.place)
         end
 
         private
+
+        def chosen_place
+          params[:place] if KeystoneUi::Pages.places.key?(params[:place])
+        end
 
         def local_address?(address)
           address.to_s.match?(%r{\A/(?![/\\])})

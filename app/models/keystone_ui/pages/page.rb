@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "securerandom"
 require "keystone_ui/pages/document"
 
 module KeystoneUi
@@ -16,6 +17,11 @@ module KeystoneUi
 
       scope :archived, -> { where.not(archived_at: nil) }
       scope :current, -> { where(archived_at: nil) }
+
+      before_validation(on: :create) do
+        self.name = default_name if name.blank?
+        self.slug = SecureRandom.hex(4) if slug.blank?
+      end
 
       validates :name, :slug, presence: true
       validates :slug, uniqueness: { scope: %i[owner_type owner_id] }
@@ -80,6 +86,12 @@ module KeystoneUi
 
       def next_number
         (versions.maximum(:number) || 0) + 1
+      end
+
+      def default_name
+        word = KeystoneUi::Pages.default_names.fetch(place, "Page")
+        used = Page.where(owner: owner, place: place).pluck(:name).filter_map { |taken| taken[/\A#{Regexp.escape(word)} (\d+)\z/, 1]&.to_i }
+        "#{word} #{(used.max || 0) + 1}"
       end
     end
   end
