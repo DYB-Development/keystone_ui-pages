@@ -238,12 +238,4 @@ class KeystoneUi::Pages::BuilderTest < KeystoneUi::Pages::ApplicationSystemTestC
       })()
     JS
   end
-
-  def dragged(source, target)
-    page.execute_script("arguments[0].scrollIntoView({ block: 'center' })", source)
-    page.driver.browser.action
-      .click_and_hold(source.native).move_by(10, 10).pause(duration: 0.1)
-      .move_to(target.native).pause(duration: 0.1).move_by(2, 2).pause(duration: 0.1)
-      .release.perform
-  end
 end
