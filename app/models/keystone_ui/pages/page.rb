@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "securerandom"
 require "keystone_ui/pages/document"
 
 module KeystoneUi
@@ -17,7 +18,10 @@ module KeystoneUi
       scope :archived, -> { where.not(archived_at: nil) }
       scope :current, -> { where(archived_at: nil) }
 
-      before_validation(on: :create) { self.name = "Untitled page" if name.blank? }
+      before_validation(on: :create) do
+        self.name = "Untitled page" if name.blank?
+        self.slug = SecureRandom.hex(4) if slug.blank?
+      end
 
       validates :name, :slug, presence: true
       validates :slug, uniqueness: { scope: %i[owner_type owner_id] }

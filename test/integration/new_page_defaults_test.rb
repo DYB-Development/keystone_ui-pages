@@ -8,4 +8,10 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
 
     assert_equal "Untitled page", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
   end
+
+  test "a page created with no address is given a random address" do
+    post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "" } }
+
+    assert_match(/\A\h{8}\z/, KeystoneUi::Pages::Page.find_by(name: "Pricing").slug)
+  end
 end
