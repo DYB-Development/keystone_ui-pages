@@ -23,6 +23,14 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     assert_equal 1, Nokogiri::HTML(response.body).css("input[name='page[slug]']").size
   end
 
+  test "a page created with no name in a place registered with no word is named Page and a number" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+
+    post "/pages/manage/pages", params: { page: { name: "", slug: "pricing", place: "marketing" } }
+
+    assert_equal "Page 1", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
+  end
+
   test "the new page form shows the name an unnamed page will get as the Name field's placeholder" do
     KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
     KeystoneUi::Pages::Page.create!(name: "Report template 1", slug: "first", place: "client_report")
