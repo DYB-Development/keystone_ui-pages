@@ -63,11 +63,14 @@ inherit from the base controller, so define it there.
   gem calls for each accepted view of the place's live pages; a place with no
   handler reports nothing. Registered places are offered alongside any set with
   `places =`, and `places = nil` clears both.
-- **Views handed to the host**: a page opened at `/pages/:slug` whose place has
-  a handler loads the reporting script, which sends its view once it loads.
+- **Views and clicks handed to the host**: a page opened at `/pages/:slug` whose place has
+  a handler loads the reporting script, which sends its view once it loads and
+  a click on any link or button with the id of the element it sits in. Each
+  element on a live drawing carries its id as `data-page-element`.
   View live and PDFs send nothing. `POST /pages/:slug/events` calls the page's
   place's `events:` handler with a `KeystoneUi::Pages::Event` holding `page`,
-  `place`, `kind` (`"view"`), `element` and `request`. The gem stores nothing;
+  `place`, `kind` (`"view"` or `"click"`), `element` (the element id for a
+  click, nil for a view) and `request`. The gem stores nothing;
   what is kept, counted or shown is the host's to decide. It needs no form
   token. It is refused the way the public page refuses a page when the page has
   no live version, is another owner's, fails the view check, or its place has

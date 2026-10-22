@@ -16,12 +16,4 @@ class KeystoneUi::Pages::PublicPageReportingBrowserTest < KeystoneUi::Pages::App
 
     assert_equal [ "view" ], wait_for { received.dup.presence }
   end
-
-  private
-
-  def wait_for
-    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Capybara.default_max_wait_time
-    sleep 0.05 until yield || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
-    yield
-  end
 end

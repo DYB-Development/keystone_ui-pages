@@ -628,4 +628,30 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
       added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = text
     end
   end
+
+  test "each element on a live drawing carries its element id" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    element_id = document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+
+    render html: drawn_document(document)
+
+    assert_select ".ks-pages-element[data-page-element='#{element_id}']"
+  end
+
+  test "a page drawn before element ids were added is drawn again rather than served from its old cached drawing" do
+    cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "button", column_id: column_id))
+    version = page.publish
+    Rails.cache.write([ "keystone_ui_pages", version.id, KeystoneUi::Pages::Operations.digest({}) ], "<div class=\"ks-pages-element\"></div>")
+
+    render html: drawn_version(version)
+
+    assert_select ".ks-pages-element[data-page-element]"
+  ensure
+    Rails.cache = cache
+  end
 end

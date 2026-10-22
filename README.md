@@ -60,17 +60,17 @@ The PDF is printed by Chrome or Chromium on the server, from the page drawn with
 - Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`. Chrome runs hidden on the server, so nobody needs it as their browser. When none is found, the page list leaves out its PDF links and asking for a PDF raises an error saying how to name one.
 - Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`.
 
-## Reporting views to the host
+## Reporting views and clicks to the host
 
-The gem keeps no record of who views a page. A host that wants to know registers a handler on the place, and the gem hands each view to it:
+The gem keeps no record of who views a page or what they click. A host that wants to know registers a handler on the place, and the gem hands each view and click to it:
 
 ```ruby
 KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { PageView.record(event) })
 ```
 
-The handler receives a `KeystoneUi::Pages::Event` holding `page`, `place`, `kind` (`"view"`), `element` and `request`. Deciding what counts as a visit, honouring Do Not Track and leaving out crawlers is the handler's job.
+The handler receives a `KeystoneUi::Pages::Event` holding `page`, `place`, `kind` (`"view"` or `"click"`), `element` and `request`. For a click, `element` is the id of the page element the clicked link or button sits in, and for a view it is nil. Deciding what counts as a visit, honouring Do Not Track and leaving out crawlers is the handler's job.
 
-A page opened at its public address, or drawn with `keystone_ui_page` in a host view, sends its view from the visitor's browser once it loads. View live in the builder and a printed PDF send nothing. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The view is sent without a form token and the gem sets no cookie.
+A page opened at its public address, or drawn with `keystone_ui_page` in a host view, sends its view from the visitor's browser once it loads. View live in the builder and a printed PDF send nothing. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The same pages send a click on any link, button or card link, including one that opens another page, and a click anywhere else sends nothing. Views and clicks are sent without a form token and the gem sets no cookie.
 
 ## Trying it locally
 
