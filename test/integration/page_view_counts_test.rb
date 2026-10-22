@@ -5,6 +5,8 @@ require "test_helper"
 class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
   teardown do
     KeystoneUi::Pages.places = nil
+    KeystoneUi::Pages.view_check_method = nil
+    KeystoneUi::Pages.refusal_method = nil
   end
 
   test "a place registered with counting on is counted and one registered without it is not" do
@@ -47,5 +49,16 @@ class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
     end
 
     assert_equal [ 404, 404, 0 ], statuses + [ KeystoneUi::Pages::PageCount.count ]
+  end
+
+  test "a view for a page the host's view check refuses gets the host's refusal and adds nothing" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", counts: true)
+    KeystoneUi::Pages.view_check_method = :may_view_page?
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
+
+    post "/pages/pricing/views", headers: { "X-Visitor" => "blocked" }
+
+    assert_equal [ 403, 0 ], [ response.status, KeystoneUi::Pages::PageCount.count ]
   end
 end
