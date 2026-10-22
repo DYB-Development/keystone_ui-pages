@@ -23,6 +23,12 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_empty Nokogiri::HTML(response.body).css("input[name='page[slug]'], select[name='page[place]']")
   end
 
+  test "a new page form opened with no place still asks for a name and an address" do
+    get "/pages/manage/pages/new"
+
+    assert_equal 2, Nokogiri::HTML(response.body).css("input[name='page[name]'], input[name='page[slug]']").size
+  end
+
   test "a page created with no name is given a default name" do
     post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
 
