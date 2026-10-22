@@ -32,4 +32,22 @@ class KeystoneUi::Pages::PageFormTest < ActionDispatch::IntegrationTest
 
     assert_equal "/pages/contact/versions/1/forms/#{@form_id}", Nokogiri::HTML(response.body).at_css("form.ks-form")&.[]("action")
   end
+
+  test "each visitor's form carries a forgery token made for that visitor, and the cached drawing holds no visitor's token" do
+    cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    ActionController::Base.allow_forgery_protection = true
+
+    tokens = Array.new(2) do
+      visitor = open_session
+      visitor.get "/pages/contact"
+      Nokogiri::HTML(visitor.response.body).css("form.ks-form input[name=authenticity_token]").map { |input| input["value"] }
+    end
+    cached = Rails.cache.instance_variable_get(:@data).values.map { |entry| entry.value.to_s }.join
+
+    assert_equal [ [ 1, 1 ], true, false ], [ tokens.map(&:size), tokens.flatten.uniq.size == 2, tokens.flatten.any? { |token| cached.include?(token) } ]
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+    Rails.cache = cache
+  end
 end
