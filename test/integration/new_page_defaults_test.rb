@@ -46,21 +46,21 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
   end
 
   test "a page created with no name in a place the host gives no word is named Page and a number" do
-    post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
+    post "/pages/manage/pages", params: { page: { name: "", slug: "pricing", place: "marketing" } }
 
     assert_equal "Page 1", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
   end
 
   test "a page created with no name takes the number after the highest default name already used" do
-    KeystoneUi::Pages::Page.create!(name: "Page 3", slug: "third")
+    KeystoneUi::Pages::Page.create!(name: "Page 3", slug: "third", place: "marketing")
 
-    post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
+    post "/pages/manage/pages", params: { page: { name: "", slug: "pricing", place: "marketing" } }
 
     assert_equal "Page 4", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
   end
 
   test "a page created with no URL slug is given a random one" do
-    post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "" } }
+    post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "", place: "marketing" } }
 
     assert_match(/\A\h{8}\z/, KeystoneUi::Pages::Page.find_by(name: "Pricing").slug)
   end
