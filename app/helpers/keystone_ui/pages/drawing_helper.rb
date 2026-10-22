@@ -9,6 +9,7 @@ module KeystoneUi
       WIDE_SPANS = { "1/1" => "@sm:col-span-12", "3/4" => "@sm:col-span-9", "2/3" => "@sm:col-span-8", "1/2" => "@sm:col-span-6", "1/3" => "@sm:col-span-4", "1/4" => "@sm:col-span-3" }.freeze
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
+      DRAWING_FORMAT = 2
       SIZED_SECTION_PADDING = "py-[calc(var(--ks-spacing)*16)] lg:py-[calc(var(--ks-spacing)*24)]"
       SHADED_CLASSES = "bg-(color:--ks-color-fill-muted) dark:bg-(color:--ks-color-fill-muted-dark)"
       PLAIN_FIGURE_DIVIDER = "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-l-(length:--ks-border-width) " \
@@ -16,7 +17,7 @@ module KeystoneUi
                              "dark:@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border-dark)"
 
       def drawn_version(version, values: {})
-        key = [ "keystone_ui_pages", version.id, Operations.digest(values.to_h.stringify_keys) ]
+        key = [ "keystone_ui_pages", DRAWING_FORMAT, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
