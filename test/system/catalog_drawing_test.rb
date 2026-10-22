@@ -24,6 +24,17 @@ class KeystoneUi::Pages::CatalogDrawingTest < KeystoneUi::Pages::ApplicationSyst
 
   def drawn_elements
     assert_selector ".ks-pages-element", visible: :all, count: KeystoneUi::Pages.catalog.elements.size
-    all(".ks-pages-element", visible: :all).map { |element| element[:innerHTML] }
+    page.evaluate_script(<<~'JS')
+      [...document.querySelectorAll(".ks-pages-element")].map((element) => {
+        const drawn = element.cloneNode(true)
+        drawn.querySelectorAll("form.ks-form").forEach((form) => {
+          const fields = document.createElement("div")
+          fields.className = form.className
+          fields.append(...[...form.childNodes].filter((child) => child.name !== "authenticity_token"))
+          form.replaceWith(fields)
+        })
+        return drawn.innerHTML.replace(/>\s+</g, "><")
+      })
+    JS
   end
 end
