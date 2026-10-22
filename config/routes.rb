@@ -32,5 +32,6 @@ KeystoneUi::Pages::Engine.routes.draw do
     end
   end
 
+  post ":slug/views", to: "views#create", as: :page_views
   get ":slug", to: "pages#show", as: :page
 end

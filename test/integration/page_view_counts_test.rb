@@ -13,4 +13,13 @@ class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ true, false ], [ KeystoneUi::Pages.counted?("marketing"), KeystoneUi::Pages.counted?("client_report") ]
   end
+
+  test "sending a view for a published page in a counted place adds one to its view total for today" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", counts: true)
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").tap(&:publish)
+
+    post "/pages/pricing/views"
+
+    assert_equal 1, page.counts.find_by(day: Date.current, kind: "view")&.total
+  end
 end

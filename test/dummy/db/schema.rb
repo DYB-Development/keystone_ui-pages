@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_165108) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_130000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "keystone_ui_pages_page_counts", force: :cascade do |t|
+    t.integer "page_id", null: false
+    t.date "day", null: false
+    t.string "kind", null: false
+    t.integer "total", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_id", "day", "kind"], name: "index_keystone_ui_pages_page_counts_on_page_day_kind", unique: true
+    t.index ["page_id"], name: "index_keystone_ui_pages_page_counts_on_page_id"
   end
 
   create_table "keystone_ui_pages_pages", force: :cascade do |t|
@@ -83,6 +94,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_130000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "keystone_ui_pages_page_counts", "keystone_ui_pages_pages", column: "page_id"
   add_foreign_key "keystone_ui_pages_pdfs", "keystone_ui_pages_versions", column: "version_id"
   add_foreign_key "keystone_ui_pages_versions", "keystone_ui_pages_pages", column: "page_id"
 end

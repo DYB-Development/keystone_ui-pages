@@ -10,6 +10,7 @@ module KeystoneUi
 
       belongs_to :owner, polymorphic: true, optional: true
       has_many :versions, -> { order(:number) }, class_name: "KeystoneUi::Pages::Version", dependent: :destroy, inverse_of: :page
+      has_many :counts, class_name: "KeystoneUi::Pages::PageCount", dependent: :destroy, inverse_of: :page
 
       attribute :document, :json, default: -> { Document.blank }
       attribute :undo_history, :json, default: -> { [] }
