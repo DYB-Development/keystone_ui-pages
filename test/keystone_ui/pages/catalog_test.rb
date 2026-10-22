@@ -10,7 +10,7 @@ class KeystoneUi::Pages::CatalogTest < Minitest::Test
 
     catalog.register(key: :card, name: "Card", component: :ui_card, fields: fields)
 
-    assert_equal KeystoneUi::Pages::Catalog::Element.new(key: :card, name: "Card", component: :ui_card, fields: fields, body: nil, icon: nil, group: nil, align: nil), catalog.find("card")
+    assert_equal KeystoneUi::Pages::Catalog::Element.new(key: :card, name: "Card", component: :ui_card, fields: fields, body: nil, icon: nil, group: nil, align: nil, placed: false), catalog.find("card")
   end
 
   def test_a_host_names_the_field_an_element_draws_as_its_content

@@ -26,4 +26,10 @@ class KeystoneUi::Pages::PageFormTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ "name", false ], [ "email", true ] ], Nokogiri::HTML(response.body).css(".ks-form-field").map { |field| [ field.at_css("input")["name"], field.at_css(".ks-required").present? ] }
   end
+
+  test "a published form posts to an address naming the version it was drawn from and which form on the page it is" do
+    get "/pages/contact"
+
+    assert_equal "/pages/contact/versions/1/forms/#{@form_id}", Nokogiri::HTML(response.body).at_css("form.ks-form")&.[]("action")
+  end
 end

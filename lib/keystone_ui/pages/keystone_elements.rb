@@ -71,7 +71,7 @@ module KeystoneUi
                       default: [ { "title" => "Fast", "description" => "Pages load quickly." },
                                  { "title" => "Clear", "description" => "Every page reads plainly." },
                                  { "title" => "Yours", "description" => "Built from your own components." } ] } ])
-        catalog.register(key: :form, name: "Form", component: :pages_form, icon: :card, group: "Content",
+        catalog.register(key: :form, name: "Form", component: :pages_form, icon: :card, group: "Content", placed: true,
           fields: [ { key: :form_name, label: "Form name", kind: :text, default: "Contact" },
                     { key: :fields, label: "Fields", kind: :list,
                       entry: [ { key: :label, label: "Label", kind: :text }, { key: :name, label: "Field name", kind: :text },

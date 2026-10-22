@@ -21,6 +21,7 @@ module KeystoneUi
       def drawn_version(version, values: {})
         key = [ "keystone_ui_pages", DRAWING_FORMAT, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
+        @drawn_version = version
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
 
@@ -39,6 +40,7 @@ module KeystoneUi
 
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
+        @drawn_version = nil if editing
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
       end
 
@@ -159,6 +161,7 @@ module KeystoneUi
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
         values = definition.fields.reject { |field| field[:classes] }.to_h { |field| [ field[:key].to_sym, field_value(field, filled(element["fields"][field[:key].to_s]) || field[:default]) ] }
+        values.merge!(element_id: element["id"], version: @drawn_version) if definition.placed
         return send(definition.component, **values) unless definition.body
 
         body = values.delete(definition.body)
