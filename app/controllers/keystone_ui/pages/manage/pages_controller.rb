@@ -38,7 +38,7 @@ module KeystoneUi
           @page = owned_pages.find(params[:id])
           return render(:edit, status: :unprocessable_entity) unless @page.update(params.require(:page).permit(:name, :slug, :place))
 
-          redirect_to manage_pages_path
+          redirect_to manage_pages_path(place: @page.place)
         end
 
         def publish

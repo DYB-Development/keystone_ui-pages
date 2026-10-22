@@ -27,6 +27,14 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
     assert_equal "/pages/manage/pages?place=client_report", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
   end
 
+  test "saving the settings of a page in a place returns to that place's page list" do
+    page = KeystoneUi::Pages::Page.find_by(slug: "invoice-report")
+
+    patch "/pages/manage/pages/#{page.id}", params: { page: { name: "Invoice", slug: "invoice-report", place: "client_report" } }
+
+    assert_redirected_to "/pages/manage/pages?place=client_report"
+  end
+
   test "the Create button on a page list opened with a place opens New page with that place" do
     get "/pages/manage/pages", params: { place: "client_report" }
 
