@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - A click on a link or button in a reporting page is handed to the place's `events:` handler with the id of the element it sits in. Each element on a live drawing carries its id, and drawings cached before this release are drawn again.
 - Reporting pages fire `keystone-ui-pages:view` and `keystone-ui-pages:click` on `document`, so a third-party analytics tag in the host layout can send them on.
 - An `events:` handler that raises is reported through `Rails.error` with the page and the event's kind, and the browser gets the same answer as when it succeeds. A failed report request in the browser shows the visitor nothing.
+- The event address refuses an event of an unknown kind and a click whose element is missing or not on the live version. A prerendered page sends its view only when the visitor opens it.
 
 ### Changed
 - When the host has registered places, a page must belong to one of them; a page with no place is refused. A host with no places is unchanged.
