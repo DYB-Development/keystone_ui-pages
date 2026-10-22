@@ -20,4 +20,10 @@ class KeystoneUi::Pages::PageFormTest < ActionDispatch::IntegrationTest
     assert_equal [ [ "Name", "Email*" ], %w[name email], "Ask us" ],
       [ form.css(".ks-form-field label").map { |label| label.text.gsub(/\s+/, "") }, form.css(".ks-form-field input").map { |input| input["name"] }, form.at_css("button[type=submit]")&.text&.strip ]
   end
+
+  test "a required field shows a required marker on the published page and an optional one does not" do
+    get "/pages/contact"
+
+    assert_equal [ [ "name", false ], [ "email", true ] ], Nokogiri::HTML(response.body).css(".ks-form-field").map { |field| [ field.at_css("input")["name"], field.at_css(".ks-required").present? ] }
+  end
 end
