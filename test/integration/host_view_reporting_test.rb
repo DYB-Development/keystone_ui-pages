@@ -16,4 +16,14 @@ class KeystoneUi::Pages::HostViewReportingTest < ActionDispatch::IntegrationTest
 
     assert_select "script[src*='keystone_ui_pages/reporting'], [data-page-events]", 0
   end
+
+  test "a request for the host view from a client that runs no script calls no handler" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event })
+    KeystoneUi::Pages::Page.create!(name: "Product", slug: "product", place: "marketing").publish
+
+    get "/products/product"
+
+    assert_empty received
+  end
 end
