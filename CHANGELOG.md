@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-22
+
 ### Added
 - `KeystoneUi::Pages.register_place(key, label:, default_name:, slug:)` adds one place with its own label, the word its unnamed pages start with, and whether its pages have a URL slug, so several parts of a host app can each register their own.
 - The New page form shows the name an unnamed page will get as the Name field's placeholder.
