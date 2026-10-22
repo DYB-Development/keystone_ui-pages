@@ -14,6 +14,12 @@ module KeystoneUi
         options.binary = chrome if chrome
       end
 
+      def wait_for
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Capybara.default_max_wait_time
+        sleep 0.05 until yield || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+        yield
+      end
+
       def touched(source, target)
         actions = page.driver.browser.action
         finger = actions.add_pointer_input(:touch, "finger")
