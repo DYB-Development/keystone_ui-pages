@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- The engine has `bin/rails`, so its migrations are made with `bin/rails g migration`.
+
 ### Fixed
 - A page in a place registered with `slug: false` is no longer served at the public page address, even when the host sets no view check.
 
