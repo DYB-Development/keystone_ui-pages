@@ -49,6 +49,15 @@ class KeystoneUi::Pages::BrowserEventsBrowserTest < KeystoneUi::Pages::Applicati
     Capybara.raise_server_errors = true
   end
 
+  test "a page from a place with no handler fires no browser event" do
+    KeystoneUi::Pages.register_place("help", label: "Help centre")
+    KeystoneUi::Pages::Page.create!(name: "Returns", slug: "returns", place: "help").publish
+
+    visit "/pages/returns"
+
+    assert_empty page_events
+  end
+
   private
 
   def page_events
