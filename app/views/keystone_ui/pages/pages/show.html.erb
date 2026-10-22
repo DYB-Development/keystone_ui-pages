@@ -1,4 +1,3 @@
 <% content_for(:title, @version.title) if @version.title %>
-<div data-live-page class="@container print:bg-white print:[print-color-adjust:exact]">
-  <%= drawn_version(@version, values: @values.to_h) %>
-</div>
+<% content_for(:head, javascript_include_tag("keystone_ui_pages/reporting", defer: true)) if @events_address %>
+<%= tag.div drawn_version(@version, values: @values.to_h), data: { live_page: "", page_events: @events_address }, class: "@container print:bg-white print:[print-color-adjust:exact]" %>
