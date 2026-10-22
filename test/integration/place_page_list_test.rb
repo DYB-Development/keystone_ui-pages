@@ -56,6 +56,12 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
     assert_equal "/pages/manage/pages?archived=1&place=client_report", Nokogiri::HTML(response.body).css("a").find { |link| link.text == "Show archived" }["href"]
   end
 
+  test "a page list opened with no place shows the pages in every place" do
+    get "/pages/manage/pages"
+
+    assert_equal %w[invoice-report pricing], Nokogiri::HTML(response.body).css("tr[data-page]").map { |row| row["data-page"] }
+  end
+
   test "the Create button on a page list opened with a place opens New page with that place" do
     get "/pages/manage/pages", params: { place: "client_report" }
 
