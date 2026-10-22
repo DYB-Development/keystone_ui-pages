@@ -27,6 +27,24 @@ class KeystoneUi::Pages::BuilderFormTest < KeystoneUi::Pages::ApplicationSystemT
       wait_for { form_fields(page_record).values_at("form_name", "submit_label", "thank_you").then { |saved| saved if saved.none?(&:nil?) } }
   end
 
+  test "an editor adds, removes and reorders a form's fields, giving each a label, a field name, a kind and whether it is required" do
+    page_record = selected_form
+
+    within("[data-list-field='fields']") { click_on "Add item" }
+    fill_in "ks-pages-fields-2-label", with: "Message"
+    find("[data-element-fields] label", text: "Form name").click
+    fill_in "ks-pages-fields-2-name", with: "message"
+    find("[data-element-fields] label", text: "Form name").click
+    select "long_text", from: "ks-pages-fields-2-kind"
+    check "ks-pages-fields-2-required"
+    within(all("[data-list-entry]").first) { click_on "Remove item" }
+    within(all("[data-list-entry]").last) { click_on "Move up" }
+
+    expected = [ { "label" => "Message", "name" => "message", "kind" => "long_text", "required" => "true" },
+                 { "label" => "Email", "name" => "email", "kind" => "email", "required" => "true" } ]
+    assert_equal expected, wait_for { form_fields(page_record)["fields"].then { |saved| saved if saved == expected } } || form_fields(page_record)["fields"]
+  end
+
   private
 
   def selected_form
