@@ -10,7 +10,7 @@ module KeystoneUi
 
       def create
         page = owned_pages.find_by(slug: params[:slug])
-        return refuse unless page&.live_version && KeystoneUi::Pages.reported?(page.place) && viewable?(page)
+        return refuse unless page&.reporting? && viewable?(page)
 
         KeystoneUi::Pages.place_settings.dig(page.place, :events).call(Event.new(page: page, place: page.place, kind: kind, element: element, request: request))
         head :no_content

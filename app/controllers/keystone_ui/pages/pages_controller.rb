@@ -14,7 +14,7 @@ module KeystoneUi
         return refuse if @version.nil? || !KeystoneUi::Pages.slugged?(page.place) || !viewable?(page)
 
         @values = visitor_values(page)
-        @reporting = { page_events: page_events_path(page.slug), page_slug: page.slug, page_place: page.place } if KeystoneUi::Pages.reported?(page.place)
+        @page = page
       end
 
       private
