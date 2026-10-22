@@ -58,6 +58,19 @@ class KeystoneUi::Pages::BrowserEventsBrowserTest < KeystoneUi::Pages::Applicati
     assert_empty page_events
   end
 
+  test "a page from a place whose handler does nothing fires both browser events" do
+    column_id = @page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(@page_record.document, "button", column_id: column_id)
+    button_id = document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+    @page_record.update!(document: KeystoneUi::Pages::Operations.set(document, element_id: button_id, field: "label", value: "Get a quote"))
+    @page_record.publish
+
+    visit "/pages/pricing"
+    click_on "Get a quote"
+
+    assert_equal [ "keystone-ui-pages:view", "keystone-ui-pages:click" ], wait_for { page_events.map { |event| event["name"] }.presence if page_events.size == 2 }
+  end
+
   private
 
   def page_events
