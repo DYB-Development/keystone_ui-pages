@@ -14,4 +14,15 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ "Client report", "client_report" ] ], Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| [ option.text, option["value"] ] }
   end
+
+  test "two places registered separately each keep their own label, word and address setting" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", address: false)
+
+    assert_equal(
+      { "marketing" => { label: "Marketing site", default_name: "Page", address: true },
+        "client_report" => { label: "Client report", default_name: "Report template", address: false } },
+      KeystoneUi::Pages.place_settings
+    )
+  end
 end
