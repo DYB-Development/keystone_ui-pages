@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `register_place` takes an `events:` handler, and `POST /pages/:slug/events` hands each view of that place's live pages to it as a `KeystoneUi::Pages::Event`. The gem stores nothing.
+
 ### Changed
 - When the host has registered places, a page must belong to one of them; a page with no place is refused. A host with no places is unchanged.
 
