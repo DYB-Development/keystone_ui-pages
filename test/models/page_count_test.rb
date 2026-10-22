@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class KeystoneUi::Pages::PageCountTest < ActiveSupport::TestCase
+  test "a view arriving after another request created today's total adds to that total" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.counts.create!(day: Date.current, kind: "view", total: 1)
+
+    KeystoneUi::Pages::PageCount.add(page, "view")
+
+    assert_equal 2, page.counts.find_by(day: Date.current, kind: "view").total
+  end
+end
