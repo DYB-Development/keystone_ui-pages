@@ -25,15 +25,15 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_equal "client_report", Nokogiri::HTML(response.body).at_css("input[type=hidden][name='page[place]']")&.[]("value")
   end
 
-  test "a new page form opened with a place whose pages have no address asks for no address and no place" do
-    KeystoneUi::Pages.register_place("client_report", label: "Client report", address: false)
+  test "a new page form opened with a place whose pages have no URL slug asks for no URL slug and no place" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", slug: false)
 
     get "/pages/manage/pages/new", params: { place: "client_report" }
 
     assert_empty Nokogiri::HTML(response.body).css("input[name='page[slug]'], select[name='page[place]']")
   end
 
-  test "a new page form opened with no place still asks for a name and an address" do
+  test "a new page form opened with no place still asks for a name and a URL slug" do
     get "/pages/manage/pages/new"
 
     assert_equal 2, Nokogiri::HTML(response.body).css("input[name='page[name]'], input[name='page[slug]']").size
@@ -59,7 +59,7 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_equal "Page 4", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
   end
 
-  test "a page created with no address is given a random address" do
+  test "a page created with no URL slug is given a random one" do
     post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "" } }
 
     assert_match(/\A\h{8}\z/, KeystoneUi::Pages::Page.find_by(name: "Pricing").slug)

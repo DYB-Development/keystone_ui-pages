@@ -15,7 +15,7 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     assert_equal [ [ "Client report", "client_report" ] ], Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| [ option.text, option["value"] ] }
   end
 
-  test "a new page form opened with a place whose pages have an address asks for the address" do
+  test "a new page form opened with a place whose pages have a URL slug asks for the URL slug" do
     KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
 
     get "/pages/manage/pages/new", params: { place: "marketing" }
@@ -34,13 +34,13 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     assert_equal [ [ "URL slug" ], [ "URL slug" ] ], labels
   end
 
-  test "two places registered separately each keep their own label, word and address setting" do
+  test "two places registered separately each keep their own label, word and URL slug setting" do
     KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
-    KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", address: false)
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
 
     assert_equal(
-      { "marketing" => { label: "Marketing site", default_name: "Page", address: true },
-        "client_report" => { label: "Client report", default_name: "Report template", address: false } },
+      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true },
+        "client_report" => { label: "Client report", default_name: "Report template", slug: false } },
       KeystoneUi::Pages.place_settings
     )
   end
