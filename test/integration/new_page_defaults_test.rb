@@ -26,7 +26,9 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_equal "client_report", Nokogiri::HTML(response.body).at_css("input[type=hidden][name='page[place]']")&.[]("value")
   end
 
-  test "a new page form opened with a place asks for no address and no place" do
+  test "a new page form opened with a place whose pages have no address asks for no address and no place" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", address: false)
+
     get "/pages/manage/pages/new", params: { place: "client_report" }
 
     assert_empty Nokogiri::HTML(response.body).css("input[name='page[slug]'], select[name='page[place]']")

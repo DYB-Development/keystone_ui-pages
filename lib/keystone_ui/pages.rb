@@ -45,6 +45,10 @@ module KeystoneUi
         @place_settings ||= {}
       end
 
+      def addressed?(place)
+        place_settings.dig(place.to_s, :address) != false
+      end
+
       def access_exceptions
         @access_exceptions || {}
       end

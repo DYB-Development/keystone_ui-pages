@@ -7,14 +7,14 @@
     <label class="ks-label mb-1">Name</label>
     <%= ui_input(name: "page[name]", placeholder: "e.g. Pricing") %>
 
-    <% unless @place %>
+    <% if KeystoneUi::Pages.addressed?(@place) %>
       <label class="ks-label mb-1">Address</label>
       <%= ui_input(name: "page[slug]", placeholder: "e.g. pricing") %>
+    <% end %>
 
-      <% if KeystoneUi::Pages.places.any? %>
-        <label class="ks-label mb-1">Place</label>
-        <%= ui_select(name: "page[place]", options: KeystoneUi::Pages.places.invert.to_a) %>
-      <% end %>
+    <% if !@place && KeystoneUi::Pages.places.any? %>
+      <label class="ks-label mb-1">Place</label>
+      <%= ui_select(name: "page[place]", options: KeystoneUi::Pages.places.invert.to_a) %>
     <% end %>
 
     <%= ui_button(label: "Create", type: :submit) %>
