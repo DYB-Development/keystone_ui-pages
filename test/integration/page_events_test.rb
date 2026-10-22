@@ -119,4 +119,14 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 404, 0 ], [ response.status, received.size ]
   end
+
+  test "a click with no element id is refused and calls no handler" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event })
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
+
+    post "/pages/pricing/events", params: { kind: "click" }
+
+    assert_equal [ 404, 0 ], [ response.status, received.size ]
+  end
 end
