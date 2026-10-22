@@ -36,6 +36,18 @@ class KeystoneUi::Pages::ClickReportingBrowserTest < KeystoneUi::Pages::Applicat
     assert_equal [ [ "click", card_id ] ], wait_for { clicks.presence }
   end
 
+  test "a click on part of the page that is not a link or button sends nothing" do
+    add_element("paragraph", "text" => "Prices are in dollars.")
+    button_id = add_element("button", "label" => "Get a quote")
+    @page_record.publish
+
+    visit "/pages/pricing"
+    find("p", text: "Prices are in dollars.").click
+    click_on "Get a quote"
+
+    assert_equal [ [ "click", button_id ] ], wait_for { clicks.presence }
+  end
+
   private
 
   def clicks
