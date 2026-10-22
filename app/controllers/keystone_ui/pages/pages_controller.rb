@@ -21,12 +21,6 @@ module KeystoneUi
       def visitor_values(page)
         send(KeystoneUi::Pages.values_method, page) if KeystoneUi::Pages.values_method
       end
-
-      def viewable?(page)
-        return true unless KeystoneUi::Pages.view_check_method
-
-        send(KeystoneUi::Pages.view_check_method, page)
-      end
     end
   end
 end

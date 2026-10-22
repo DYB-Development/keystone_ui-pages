@@ -15,6 +15,12 @@ module KeystoneUi
         send(KeystoneUi::Pages.owner_method) if KeystoneUi::Pages.owner_method
       end
 
+      def viewable?(page)
+        return true unless KeystoneUi::Pages.view_check_method
+
+        send(KeystoneUi::Pages.view_check_method, page)
+      end
+
       def refuse
         return head(:not_found) unless KeystoneUi::Pages.refusal_method
 

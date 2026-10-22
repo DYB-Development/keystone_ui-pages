@@ -32,5 +32,6 @@ KeystoneUi::Pages::Engine.routes.draw do
     end
   end
 
+  post ":slug/events", to: "events#create", as: :page_events
   get ":slug", to: "pages#show", as: :page
 end

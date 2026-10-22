@@ -56,8 +56,8 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
 
     assert_equal(
-      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true },
-        "client_report" => { label: "Client report", default_name: "Report template", slug: false } },
+      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil },
+        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil } },
       KeystoneUi::Pages.place_settings
     )
   end
