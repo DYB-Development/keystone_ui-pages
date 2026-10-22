@@ -66,7 +66,10 @@ inherit from the base controller, so define it there.
 - **Views and clicks handed to the host**: a page opened at `/pages/:slug` whose place has
   a handler loads the reporting script, which sends its view once it loads and
   a click on any link or button with the id of the element it sits in. Each
-  element on a live drawing carries its id as `data-page-element`.
+  element on a live drawing carries its id as `data-page-element`. The script
+  also fires `keystone-ui-pages:view` (`detail`: `slug`, `place`) and
+  `keystone-ui-pages:click` (`detail`: `slug`, `place`, `element`, `href`) on
+  `document`, whatever the event address answers, for a tag in the host layout.
   View live and PDFs send nothing. `POST /pages/:slug/events` calls the page's
   place's `events:` handler with a `KeystoneUi::Pages::Event` holding `page`,
   `place`, `kind` (`"view"` or `"click"`), `element` (the element id for a
