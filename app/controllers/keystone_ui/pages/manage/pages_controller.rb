@@ -60,8 +60,9 @@ module KeystoneUi
         end
 
         def restore
-          owned_pages.find(params[:id]).restore
-          redirect_to manage_pages_path
+          page = owned_pages.find(params[:id])
+          page.restore
+          redirect_to manage_pages_path(place: page.place)
         end
 
         private

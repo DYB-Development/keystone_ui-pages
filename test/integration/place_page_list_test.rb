@@ -41,6 +41,15 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/pages/manage/pages?place=client_report"
   end
 
+  test "restoring a page in a place returns to that place's page list" do
+    page = KeystoneUi::Pages::Page.find_by(slug: "invoice-report")
+    page.archive
+
+    post "/pages/manage/pages/#{page.id}/restore"
+
+    assert_redirected_to "/pages/manage/pages?place=client_report"
+  end
+
   test "the Create button on a page list opened with a place opens New page with that place" do
     get "/pages/manage/pages", params: { place: "client_report" }
 
