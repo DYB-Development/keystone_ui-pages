@@ -9,7 +9,7 @@ require "keystone_ui/pages/engine"
 module KeystoneUi
   module Pages
     class << self
-      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet, :access_exceptions, :default_names
+      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet, :access_exceptions
       attr_accessor :edit_check_method, :view_check_method, :values_method, :owner_method, :refusal_method, :chrome_path
 
       def base_controller
@@ -51,10 +51,6 @@ module KeystoneUi
 
       def access_exceptions
         @access_exceptions || {}
-      end
-
-      def default_names
-        @default_names || {}
       end
     end
 

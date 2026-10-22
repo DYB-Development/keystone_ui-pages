@@ -9,11 +9,10 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
 
   teardown do
     KeystoneUi::Pages.places = nil
-    KeystoneUi::Pages.default_names = nil
   end
 
-  test "a page created with no name in a place the host gives a word is named with that word and a number" do
-    KeystoneUi::Pages.default_names = { "client_report" => "Report template" }
+  test "a page created with no name in a place registered with a word is named with that word and a number" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template")
 
     post "/pages/manage/pages", params: { page: { name: "", slug: "pricing", place: "client_report" } }
 
