@@ -12,7 +12,9 @@ module KeystoneUi
         page = owned_pages.find_by(slug: params[:slug])
         return refuse unless page&.reporting? && viewable?(page)
 
-        KeystoneUi::Pages.place_settings.dig(page.place, :events).call(Event.new(page: page, place: page.place, kind: kind, element: element, request: request))
+        Rails.error.handle(context: { page_id: page.id, kind: kind }) do
+          KeystoneUi::Pages.place_settings.dig(page.place, :events).call(Event.new(page: page, place: page.place, kind: kind, element: element, request: request))
+        end
         head :no_content
       end
 
