@@ -6,6 +6,12 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <script>
+      window.pageEvents = []
+      for (const name of ["keystone-ui-pages:view", "keystone-ui-pages:click"]) {
+        document.addEventListener(name, (event) => window.pageEvents.push({ name, ...event.detail }))
+      }
+    </script>
     <%= yield :head %>
 
     <%= stylesheet_link_tag "tailwind" %>

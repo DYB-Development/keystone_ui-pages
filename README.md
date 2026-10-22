@@ -72,6 +72,29 @@ The handler receives a `KeystoneUi::Pages::Event` holding `page`, `place`, `kind
 
 A page opened at its public address, or drawn with `keystone_ui_page` in a host view, sends its view from the visitor's browser once it loads. View live in the builder and a printed PDF send nothing. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The same pages send a click on any link, button or card link, including one that opens another page, and a click anywhere else sends nothing. Views and clicks are sent without a form token and the gem sets no cookie.
 
+### Sending views and clicks to a third-party tag
+
+The same pages also fire two events on `document`, so an analytics tag set once in the host layout can send them on:
+
+- `keystone-ui-pages:view`, whose `detail` holds `slug` and `place`.
+- `keystone-ui-pages:click`, whose `detail` holds `slug`, `place`, `element` (the element id) and `href` (the link's full address, or null for a button).
+
+They fire whether or not the event address accepts the view or click, and only on pages whose place has a handler, so a handler that does nothing turns them on. Add the listener in `<head>` before `yield :head`, so it is in place before the page's view fires:
+
+```erb
+<script>
+  document.addEventListener("keystone-ui-pages:view", (event) => {
+    gtag("event", "page_view", { page_slug: event.detail.slug, page_place: event.detail.place })
+  })
+  document.addEventListener("keystone-ui-pages:click", (event) => {
+    gtag("event", "select_content", { page_slug: event.detail.slug, element_id: event.detail.element, link_url: event.detail.href })
+  })
+</script>
+<%= yield :head %>
+```
+
+Plausible's `plausible("Page click", { props: event.detail })` or Meta's `fbq("trackCustom", "PageClick", event.detail)` go in the same listeners.
+
 ## Trying it locally
 
 The test app runs the builder in development with sample places, access exceptions and a view check, so each case below can be shown without a host app:
