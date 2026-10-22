@@ -23,6 +23,17 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     assert_equal 1, Nokogiri::HTML(response.body).css("input[name='page[slug]']").size
   end
 
+  test "the new page form and page settings label the slug field URL slug" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+
+    labels = [ "/pages/manage/pages/new", "/pages/manage/pages/#{page.id}/edit" ].map do |path|
+      get path
+      Nokogiri::HTML(response.body).css("label").map(&:text).grep(/slug|Address/i)
+    end
+
+    assert_equal [ [ "URL slug" ], [ "URL slug" ] ], labels
+  end
+
   test "two places registered separately each keep their own label, word and address setting" do
     KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
     KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", address: false)

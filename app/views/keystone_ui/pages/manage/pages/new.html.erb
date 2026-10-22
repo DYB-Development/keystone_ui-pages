@@ -8,7 +8,7 @@
     <%= ui_input(name: "page[name]", placeholder: "e.g. Pricing") %>
 
     <% if KeystoneUi::Pages.addressed?(@place) %>
-      <label class="ks-label mb-1">Address</label>
+      <label class="ks-label mb-1">URL slug</label>
       <%= ui_input(name: "page[slug]", placeholder: "e.g. pricing") %>
     <% end %>
 

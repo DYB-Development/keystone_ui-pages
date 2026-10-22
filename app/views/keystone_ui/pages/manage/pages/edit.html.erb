@@ -9,7 +9,7 @@
     <label class="ks-label mb-1">Name</label>
     <%= ui_input(name: "page[name]", value: @page.name) %>
 
-    <label class="ks-label mb-1">Address</label>
+    <label class="ks-label mb-1">URL slug</label>
     <%= ui_input(name: "page[slug]", value: @page.slug) %>
 
     <% if KeystoneUi::Pages.places.any? %>
