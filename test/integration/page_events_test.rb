@@ -11,7 +11,7 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
   end
 
   test "a place registered with an event handler is reported and one registered without it is not" do
-    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) {})
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
     KeystoneUi::Pages.register_place("client_report", label: "Client report")
 
     assert_equal [ true, false ], [ KeystoneUi::Pages.reported?("marketing"), KeystoneUi::Pages.reported?("client_report") ]
@@ -77,7 +77,7 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
   end
 
   test "a view sent without a form token is accepted while the host checks form tokens" do
-    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) {})
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
     KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
     ActionController::Base.allow_forgery_protection = true
 
@@ -89,7 +89,7 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
   end
 
   test "accepting a view adds no row to any of the gem's tables" do
-    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) {})
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
     KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
     connection = ActiveRecord::Base.connection
     rows = -> { connection.tables.grep(/\Akeystone_ui_pages_/).sum { |table| connection.select_value("SELECT COUNT(*) FROM #{table}").to_i } }
