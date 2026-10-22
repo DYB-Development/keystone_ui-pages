@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- When the host has registered places, a page must belong to one of them; a page with no place is refused. A host with no places is unchanged.
+
 ### Added
 - The engine has `bin/rails`, so its migrations are made with `bin/rails g migration`.
 
