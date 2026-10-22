@@ -628,4 +628,14 @@ class KeystoneUi::Pages::DrawingHelperTest < ActionView::TestCase
       added["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = text
     end
   end
+
+  test "each element on a live drawing carries its element id" do
+    column_id = @document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(@document, "button", column_id: column_id)
+    element_id = document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+
+    render html: drawn_document(document)
+
+    assert_select ".ks-pages-element[data-page-element='#{element_id}']"
+  end
 end

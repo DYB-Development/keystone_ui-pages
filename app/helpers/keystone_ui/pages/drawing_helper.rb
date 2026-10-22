@@ -99,7 +99,7 @@ module KeystoneUi
       def drawn_element(element)
         return reported_missing(element) unless KeystoneUi::Pages.catalog.find(element["key"])
 
-        wrapped_element(element) unless hidden?(element)
+        wrapped_element(element, data: { page_element: element["id"] }) unless hidden?(element)
       end
 
       def hidden?(node)
