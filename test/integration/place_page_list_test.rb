@@ -19,6 +19,14 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
     assert_equal [ "pricing" ], Nokogiri::HTML(response.body).css("tr[data-page]").map { |row| row["data-page"] }
   end
 
+  test "the builder's Back link for a page in a place goes to that place's page list" do
+    page = KeystoneUi::Pages::Page.find_by(slug: "invoice-report")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    assert_equal "/pages/manage/pages?place=client_report", JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["back_url"]
+  end
+
   test "the Create button on a page list opened with a place opens New page with that place" do
     get "/pages/manage/pages", params: { place: "client_report" }
 
