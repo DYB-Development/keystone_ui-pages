@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- A page in a place registered with `slug: false` is no longer served at the public page address, even when the host sets no view check.
+
 ## [0.8.0] - 2026-10-22
 
 ### Added
