@@ -59,8 +59,15 @@ inherit from the base controller, so define it there.
   place, so "Report template 1", then "Report template 2"; it defaults to
   "Page". `slug:` says whether the place's pages have a URL slug; it defaults to
   true. A page in a place registered with `slug: false` is never served at
-  `/pages/:slug`, whatever the view check says. Registered places are offered alongside any set with `places =`, and
-  `places = nil` clears both.
+  `/pages/:slug`, whatever the view check says. `counts: true` turns on view
+  counting for the place's pages; it defaults to false. Registered places are
+  offered alongside any set with `places =`, and `places = nil` clears both.
+- **View counting**: `POST /pages/:slug/views` adds one to the page's view
+  total for today, kept in `keystone_ui_pages_page_counts` as one row per page,
+  day and kind. It needs no form token. It is refused the way the public page
+  refuses a page when the page has no live version, is another owner's, fails
+  the view check, or is in a place not registered with `counts: true`.
+  Archiving keeps the totals.
 - `KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }`
   — a hash of the exceptions an editor can set on a page, each stored value to
   its label. When it is not empty, the builder's top bar has an Access exception

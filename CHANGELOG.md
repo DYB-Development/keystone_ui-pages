@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `register_place` takes `counts: true`, and `POST /pages/:slug/views` adds one to a counted page's view total for today.
+- The engine has `bin/rails`, so its migrations are made with `bin/rails g migration`.
+
 ### Fixed
 - A page in a place registered with `slug: false` is no longer served at the public page address, even when the host sets no view check.
 
