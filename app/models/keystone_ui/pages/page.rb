@@ -84,6 +84,10 @@ module KeystoneUi
         versions.find_by(status: :live)
       end
 
+      def reporting?
+        live_version.present? && KeystoneUi::Pages.reported?(place)
+      end
+
       def next_number
         (versions.maximum(:number) || 0) + 1
       end

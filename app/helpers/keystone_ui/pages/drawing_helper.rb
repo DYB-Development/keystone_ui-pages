@@ -22,6 +22,13 @@ module KeystoneUi
         Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
       end
 
+      def reporting_data(page)
+        return {} unless page.reporting?
+
+        content_for :head, javascript_include_tag("keystone_ui_pages/reporting", defer: true)
+        { page_events: keystone_ui_pages.page_events_path(page.slug), page_slug: page.slug, page_place: page.place }
+      end
+
       def pages_paragraph(text:)
         return ui_paragraph(text: text) unless text.is_a?(Hash)
 

@@ -1,3 +1,2 @@
 <% content_for(:title, @version.title) if @version.title %>
-<% content_for(:head, javascript_include_tag("keystone_ui_pages/reporting", defer: true)) if @reporting %>
-<%= tag.div drawn_version(@version, values: @values.to_h), data: { live_page: "", **@reporting.to_h }, class: "@container print:bg-white print:[print-color-adjust:exact]" %>
+<%= tag.div drawn_version(@version, values: @values.to_h), data: { live_page: "", **(@page ? reporting_data(@page) : {}) }, class: "@container print:bg-white print:[print-color-adjust:exact]" %>
