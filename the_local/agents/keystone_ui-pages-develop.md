@@ -134,6 +134,10 @@ inherit from the base controller, so define it there.
   in every host view, that draws the page's live version with the values given,
   inside a `<div class="@container">`. It returns nil when no version is live.
   `values:` takes value names to values, with string or symbol keys.
+  When it draws the live version of a page whose place has an `events:`
+  handler, it adds the reporting script to `content_for :head` and the page's
+  view is sent from the browser once it loads, so the host layout must call
+  `yield :head`. An older version drawn by number sends nothing.
   `version:` takes a published version's number and draws that version
   instead, whether it is live or superseded and whether the page is
   unpublished or archived. It returns nil when the page has no version with
