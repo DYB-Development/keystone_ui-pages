@@ -99,4 +99,14 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
 
     assert_equal before, rows.call
   end
+
+  test "an event of a kind other than view or click is refused and calls no handler" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event })
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
+
+    post "/pages/pricing/events", params: { kind: "purchase" }
+
+    assert_equal [ 404, 0 ], [ response.status, received.size ]
+  end
 end

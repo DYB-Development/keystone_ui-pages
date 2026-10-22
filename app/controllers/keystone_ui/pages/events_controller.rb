@@ -10,7 +10,7 @@ module KeystoneUi
 
       def create
         page = owned_pages.find_by(slug: params[:slug])
-        return refuse unless page&.reporting? && viewable?(page)
+        return refuse unless page&.reporting? && viewable?(page) && described?
 
         Rails.error.handle(context: { page_id: page.id, kind: kind }) do
           KeystoneUi::Pages.place_settings.dig(page.place, :events).call(Event.new(page: page, place: page.place, kind: kind, element: element, request: request))
@@ -20,8 +20,12 @@ module KeystoneUi
 
       private
 
+      def described?
+        %w[view click].include?(kind)
+      end
+
       def kind
-        params[:kind] == "click" ? "click" : "view"
+        params.fetch(:kind, "view")
       end
 
       def element
