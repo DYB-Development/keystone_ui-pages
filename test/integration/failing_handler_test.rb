@@ -23,4 +23,10 @@ class KeystoneUi::Pages::FailingHandlerTest < ActionDispatch::IntegrationTest
   ensure
     Rails.error.unsubscribe(subscriber)
   end
+
+  test "a handler that raises gets the browser the same answer as one that succeeds" do
+    post "/pages/pricing/events"
+
+    assert_response :no_content
+  end
 end
