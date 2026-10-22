@@ -70,6 +70,14 @@ KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: -
 
 The handler receives a `KeystoneUi::Pages::Event` holding `page`, `place`, `kind` (`"view"` or `"click"`), `element` and `request`. For a click, `element` is the id of the page element the clicked link or button sits in, and for a view it is nil. Deciding what counts as a visit, honouring Do Not Track and leaving out crawlers is the handler's job.
 
+The handler runs inside the event request, so it should enqueue anything slow, such as a call to another service, rather than do it there:
+
+```ruby
+events: ->(event) { PageEventJob.perform_later(event.page, event.kind, event.element) }
+```
+
+A handler that raises is reported through `Rails.error` with the page's id and the event's kind, and the browser gets the same answer as when it succeeds. A request that fails in the browser shows the visitor nothing.
+
 A page opened at its public address, or drawn with `keystone_ui_page` in a host view, sends its view from the visitor's browser once it loads. View live in the builder and a printed PDF send nothing. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The same pages send a click on any link, button or card link, including one that opens another page, and a click anywhere else sends nothing. Views and clicks are sent without a form token and the gem sets no cookie.
 
 ### Sending views and clicks to a third-party tag
