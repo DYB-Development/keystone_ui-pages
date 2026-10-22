@@ -2,7 +2,7 @@
 
 require "application_system_test_case"
 
-class KeystoneUi::Pages::HostViewReportingTest < KeystoneUi::Pages::ApplicationSystemTestCase
+class KeystoneUi::Pages::HostViewReportingBrowserTest < KeystoneUi::Pages::ApplicationSystemTestCase
   teardown do
     KeystoneUi::Pages.places = nil
   end
