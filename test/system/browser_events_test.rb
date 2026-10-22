@@ -36,6 +36,19 @@ class KeystoneUi::Pages::BrowserEventsBrowserTest < KeystoneUi::Pages::Applicati
       wait_for { page_events.select { |event| event["name"].end_with?("click") }.presence }
   end
 
+  test "the view event fires even when the event address fails" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { raise "handler failed" })
+    @page_record.publish
+    Capybara.raise_server_errors = false
+
+    visit "/pages/pricing"
+
+    assert_equal [ "keystone-ui-pages:view" ], wait_for { page_events.map { |event| event["name"] }.presence }
+  ensure
+    Capybara.reset_sessions!
+    Capybara.raise_server_errors = true
+  end
+
   private
 
   def page_events
