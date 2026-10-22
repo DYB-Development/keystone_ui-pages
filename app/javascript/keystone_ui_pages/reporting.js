@@ -2,9 +2,14 @@ function send(address, fields = {}) {
   fetch(address, { method: "POST", body: new URLSearchParams(fields), credentials: "same-origin", keepalive: true })
 }
 
+function fire(name, drawn, details = {}) {
+  document.dispatchEvent(new CustomEvent(`keystone-ui-pages:${name}`, { detail: { slug: drawn.dataset.pageSlug, place: drawn.dataset.pagePlace, ...details } }))
+}
+
 function sendViews() {
   document.querySelectorAll("[data-page-events]:not([data-page-viewed])").forEach((drawn) => {
     drawn.dataset.pageViewed = ""
+    fire("view", drawn)
     send(drawn.dataset.pageEvents)
   })
 }
