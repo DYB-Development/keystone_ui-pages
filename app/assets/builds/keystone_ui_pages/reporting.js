@@ -1,0 +1,1 @@
+(()=>{function t(){document.querySelectorAll("[data-page-events]:not([data-page-viewed])").forEach(e=>{e.dataset.pageViewed="",fetch(e.dataset.pageEvents,{method:"POST",credentials:"same-origin",keepalive:!0})})}document.addEventListener("DOMContentLoaded",t);document.addEventListener("turbo:load",t);})();
