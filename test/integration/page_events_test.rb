@@ -23,4 +23,15 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ page, "marketing", "view", "/pages/pricing/events" ] ], received.map { |event| [ event.page, event.place, event.kind, event.request.path ] }
   end
+
+  test "a view for a page whose place has no handler calls no handler and is refused" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event })
+    KeystoneUi::Pages.register_place("client_report", label: "Client report")
+    KeystoneUi::Pages::Page.create!(name: "Monthly report", slug: "monthly-report", place: "client_report").publish
+
+    post "/pages/monthly-report/events"
+
+    assert_equal [ 404, 0 ], [ response.status, received.size ]
+  end
 end
