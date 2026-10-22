@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-21
+
 ### Added
 - The New page form takes a `place` in its link, creates the page in that place, and then asks for a name only.
 - A page created with no name is named with its place's word from `KeystoneUi::Pages.default_names` and the next number in that place, such as "Report template 3", or "Page 3" when the place has no word.
