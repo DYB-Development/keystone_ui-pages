@@ -63,4 +63,16 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, 0 ], [ response.status, received.size ]
   end
+
+  test "a view for another owner's page calls no handler" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event })
+    KeystoneUi::Pages.owner_method = :current_team
+    Team.create!(name: "Acme")
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing", owner: Team.create!(name: "Globex")).publish
+
+    post "/pages/pricing/events", headers: { "X-Team" => "Acme" }
+
+    assert_equal [ 404, 0 ], [ response.status, received.size ]
+  end
 end
