@@ -19,7 +19,7 @@ module KeystoneUi
       scope :current, -> { where(archived_at: nil) }
 
       before_validation(on: :create) do
-        self.name = "Untitled page" if name.blank?
+        self.name = "Page 1" if name.blank?
         self.slug = SecureRandom.hex(4) if slug.blank?
       end
 

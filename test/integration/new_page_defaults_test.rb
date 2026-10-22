@@ -35,10 +35,10 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_equal [ 422, 1 ], [ response.status, Nokogiri::HTML(response.body).css("form[action='/pages/manage/pages'] input[name='page[name]']").size ]
   end
 
-  test "a page created with no name is given a default name" do
+  test "a page created with no name in a place the host gives no word is named Page and a number" do
     post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
 
-    assert_equal "Untitled page", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
+    assert_equal "Page 1", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
   end
 
   test "a page created with no address is given a random address" do
