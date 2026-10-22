@@ -35,6 +35,12 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/pages/manage/pages?place=client_report"
   end
 
+  test "archiving a page in a place returns to that place's page list" do
+    post "/pages/manage/pages/#{KeystoneUi::Pages::Page.find_by(slug: "invoice-report").id}/archive"
+
+    assert_redirected_to "/pages/manage/pages?place=client_report"
+  end
+
   test "the Create button on a page list opened with a place opens New page with that place" do
     get "/pages/manage/pages", params: { place: "client_report" }
 

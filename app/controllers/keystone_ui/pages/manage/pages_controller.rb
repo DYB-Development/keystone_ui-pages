@@ -54,8 +54,9 @@ module KeystoneUi
         end
 
         def archive
-          owned_pages.find(params[:id]).archive
-          redirect_to manage_pages_path
+          page = owned_pages.find(params[:id])
+          page.archive
+          redirect_to manage_pages_path(place: page.place)
         end
 
         def restore
