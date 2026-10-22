@@ -41,6 +41,14 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_equal "Page 1", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
   end
 
+  test "a page created with no name takes the number after the highest default name already used" do
+    KeystoneUi::Pages::Page.create!(name: "Page 3", slug: "third")
+
+    post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
+
+    assert_equal "Page 4", KeystoneUi::Pages::Page.find_by(slug: "pricing").name
+  end
+
   test "a page created with no address is given a random address" do
     post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "" } }
 
