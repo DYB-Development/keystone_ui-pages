@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- The New page form takes a `place` in its link, creates the page in that place, and then asks for a name only.
+- A page created with no name is named "Untitled page", and one created with no slug gets a random one.
+
+### Changed
+- Creating a page with a place the host does not name shows the New page form again instead of raising.
+
 ## [0.6.0] - 2026-10-21
 
 ### Added

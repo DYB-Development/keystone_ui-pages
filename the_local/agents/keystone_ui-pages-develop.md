@@ -312,6 +312,12 @@ The catalog offers these Keystone UI components by default: `button`,
   from `--ks-spacing`. The page builder has no setting of its own for these:
   a host changes them through its keystone_ui theme values. A section saved
   without either draws as it did before.
+- **The New page form** at `/pages/manage/pages/new` saves a blank name as
+  "Untitled page" and a blank slug as eight random hex characters. A host
+  linking to it with `new_manage_page_path(place: "client_report")` creates the
+  page in that place, and the form then asks for a name only. A place the host
+  does not name in the link is ignored, and one posted to create is refused
+  with the form shown again.
 - **A page's settings** at `/pages/manage/pages/:id/edit` change its name, slug
   and place after it is created. A slug another page of the same owner uses, or
   a place the host does not name, is refused with a message and changes nothing.
