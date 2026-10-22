@@ -3,6 +3,20 @@
 require "test_helper"
 
 class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
+  setup do
+    KeystoneUi::Pages.places = { "marketing" => "Marketing site", "client_report" => "Client report" }
+  end
+
+  teardown do
+    KeystoneUi::Pages.places = nil
+  end
+
+  test "a new page form opened with a place carries that place to the page it creates" do
+    get "/pages/manage/pages/new", params: { place: "client_report" }
+
+    assert_equal "client_report", Nokogiri::HTML(response.body).at_css("input[type=hidden][name='page[place]']")&.[]("value")
+  end
+
   test "a page created with no name is given a default name" do
     post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
 

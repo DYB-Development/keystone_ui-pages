@@ -13,6 +13,7 @@ module KeystoneUi
         end
 
         def new
+          @place = params[:place] if KeystoneUi::Pages.places.key?(params[:place])
         end
 
         def create
