@@ -18,7 +18,10 @@ function sendClick(event) {
   const clicked = event.target.closest("a, button")
   const drawn = clicked?.closest("[data-page-events]")
   const element = clicked?.closest("[data-page-element]")
-  if (drawn && element) send(drawn.dataset.pageEvents, { kind: "click", element: element.dataset.pageElement })
+  if (!drawn || !element) return
+
+  fire("click", drawn, { element: element.dataset.pageElement, href: clicked.href ?? null })
+  send(drawn.dataset.pageEvents, { kind: "click", element: element.dataset.pageElement })
 }
 
 document.addEventListener("DOMContentLoaded", sendViews)

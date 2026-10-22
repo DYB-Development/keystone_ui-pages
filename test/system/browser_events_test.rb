@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "application_system_test_case"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::BrowserEventsBrowserTest < KeystoneUi::Pages::ApplicationSystemTestCase
   setup do
@@ -18,6 +19,21 @@ class KeystoneUi::Pages::BrowserEventsBrowserTest < KeystoneUi::Pages::Applicati
     visit "/pages/pricing"
 
     assert_equal [ { "name" => "keystone-ui-pages:view", "slug" => "pricing", "place" => "marketing" } ], wait_for { page_events.presence }
+  end
+
+  test "clicking a link inside an element fires a click event carrying the page's slug, place, element id and the link's address" do
+    column_id = @page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(@page_record.document, "button", column_id: column_id)
+    button_id = document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+    document = KeystoneUi::Pages::Operations.set(document, element_id: button_id, field: "label", value: "Get a quote")
+    @page_record.update!(document: KeystoneUi::Pages::Operations.set(document, element_id: button_id, field: "href", value: "#quote"))
+    @page_record.publish
+
+    visit "/pages/pricing"
+    click_on "Get a quote"
+
+    assert_equal [ { "name" => "keystone-ui-pages:click", "slug" => "pricing", "place" => "marketing", "element" => button_id, "href" => "#{page.evaluate_script("location.origin")}/pages/pricing#quote" } ],
+      wait_for { page_events.select { |event| event["name"].end_with?("click") }.presence }
   end
 
   private
