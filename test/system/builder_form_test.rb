@@ -31,14 +31,20 @@ class KeystoneUi::Pages::BuilderFormTest < KeystoneUi::Pages::ApplicationSystemT
     page_record = selected_form
 
     within("[data-list-field='fields']") { click_on "Add item" }
+    saved(page_record) { |fields| fields.size == 3 }
     fill_in "ks-pages-fields-2-label", with: "Message"
     find("[data-element-fields] label", text: "Form name").click
+    saved(page_record) { |fields| fields[2]["label"] == "Message" }
     fill_in "ks-pages-fields-2-name", with: "message"
     find("[data-element-fields] label", text: "Form name").click
+    saved(page_record) { |fields| fields[2]["name"] == "message" }
     select "long_text", from: "ks-pages-fields-2-kind"
+    saved(page_record) { |fields| fields[2]["kind"] == "long_text" }
     check "ks-pages-fields-2-required"
-    within(all("[data-list-entry]").first) { click_on "Remove item" }
-    within(all("[data-list-entry]").last) { click_on "Move up" }
+    saved(page_record) { |fields| fields[2]["required"] == "true" }
+    within(find("[data-list-entry]:first-of-type")) { click_on "Remove item" }
+    saved(page_record) { |fields| fields.size == 2 }
+    within(find("[data-list-entry]:last-of-type")) { click_on "Move up" }
 
     expected = [ { "label" => "Message", "name" => "message", "kind" => "long_text", "required" => "true" },
                  { "label" => "Email", "name" => "email", "kind" => "email", "required" => "true" } ]
@@ -54,6 +60,10 @@ class KeystoneUi::Pages::BuilderFormTest < KeystoneUi::Pages::ApplicationSystemT
     visit "/pages/manage/pages/#{page_record.id}"
     find("[data-element-id] .ks-form button").click
     page_record
+  end
+
+  def saved(page_record)
+    wait_for { yield(form_fields(page_record)["fields"] || []) }
   end
 
   def form_fields(page_record)
