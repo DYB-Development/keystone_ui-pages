@@ -6,6 +6,7 @@ module KeystoneUi
   module Pages
     class EventsController < KeystoneUi::Pages.base_controller.constantize
       include HostChecks
+      skip_forgery_protection
 
       def create
         page = owned_pages.find_by(slug: params[:slug])

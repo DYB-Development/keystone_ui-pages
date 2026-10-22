@@ -75,4 +75,16 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 404, 0 ], [ response.status, received.size ]
   end
+
+  test "a view sent without a form token is accepted while the host checks form tokens" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) {})
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
+    ActionController::Base.allow_forgery_protection = true
+
+    post "/pages/pricing/events"
+
+    assert_response :no_content
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
 end
