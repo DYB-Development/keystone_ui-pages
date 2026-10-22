@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "keystone_ui/pages/pdf_document"
 
 class KeystoneUi::Pages::PublicPageReportingTest < ActionDispatch::IntegrationTest
   teardown do
@@ -24,5 +25,14 @@ class KeystoneUi::Pages::PublicPageReportingTest < ActionDispatch::IntegrationTe
     get "/pages/manage/pages/#{page.id}/live"
 
     assert_select "script[src*='keystone_ui_pages/reporting'], [data-page-events]", 0
+  end
+
+  test "a page printed as a PDF holds no reporting script and no event address" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").tap(&:publish)
+
+    html = KeystoneUi::Pages::PdfDocument.html(page.live_version, values: {})
+
+    assert_empty Nokogiri::HTML(html).css("script[src*='keystone_ui_pages/reporting'], [data-page-events]")
   end
 end
