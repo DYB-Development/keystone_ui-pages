@@ -20,6 +20,14 @@ module KeystoneUi
         yield
       end
 
+      def with_event_address_blocked
+        page.driver.browser.execute_cdp("Network.enable")
+        page.driver.browser.execute_cdp("Network.setBlockedURLs", urls: [ "*/events" ])
+        yield
+      ensure
+        page.driver.browser.execute_cdp("Network.setBlockedURLs", urls: [])
+      end
+
       def touched(source, target)
         actions = page.driver.browser.action
         finger = actions.add_pointer_input(:touch, "finger")
