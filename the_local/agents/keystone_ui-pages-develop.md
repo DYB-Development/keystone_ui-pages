@@ -48,8 +48,8 @@ inherit from the base controller, so define it there.
   at `/pages/:slug`. Unset, every published page is shown.
 - `KeystoneUi::Pages.places = { "marketing" => "Marketing site" }` — a hash of
   the places a page can belong to, each stored value to the label editors see.
-  When it is not empty, the New page form offers them, a page with a place not
-  in it is refused, and the page list shows each page's place. The view check
+  When it is not empty, the New page form offers them with no blank choice, a
+  page with no place or a place not in it is refused, and the page list shows each page's place. The view check
   reads it as `page.place`. Unset, pages have no place.
 - `KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)`
   — adds one place with its own settings, so each part of a host app registers

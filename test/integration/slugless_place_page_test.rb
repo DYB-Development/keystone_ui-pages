@@ -16,16 +16,12 @@ class KeystoneUi::Pages::SluglessPlacePageTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "a published page in a place with a URL slug, or in no place, is still served at the public page address" do
+  test "a published page in a place with a URL slug is still served at the public page address" do
     KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
     KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").publish
-    KeystoneUi::Pages::Page.create!(name: "About", slug: "about").publish
 
-    statuses = %w[pricing about].map do |slug|
-      get "/pages/#{slug}"
-      response.status
-    end
+    get "/pages/pricing"
 
-    assert_equal [ 200, 200 ], statuses
+    assert_response :ok
   end
 end
