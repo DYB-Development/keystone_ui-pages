@@ -18,4 +18,10 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "pricing" ], Nokogiri::HTML(response.body).css("tr[data-page]").map { |row| row["data-page"] }
   end
+
+  test "the Create button on a page list opened with a place opens New page with that place" do
+    get "/pages/manage/pages", params: { place: "client_report" }
+
+    assert_equal [ "/pages/manage/pages/new?place=client_report" ], Nokogiri::HTML(response.body).css("a").select { |link| link.text.strip == "Create" }.map { |link| link["href"] }.uniq
+  end
 end
