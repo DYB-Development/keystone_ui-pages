@@ -29,6 +29,12 @@ class KeystoneUi::Pages::NewPageDefaultsTest < ActionDispatch::IntegrationTest
     assert_equal 2, Nokogiri::HTML(response.body).css("input[name='page[name]'], input[name='page[slug]']").size
   end
 
+  test "a page given a place the host has not defined is refused with the new page form shown again" do
+    post "/pages/manage/pages", params: { page: { name: "Pricing", slug: "pricing", place: "storefront" } }
+
+    assert_equal [ 422, 1 ], [ response.status, Nokogiri::HTML(response.body).css("form[action='/pages/manage/pages'] input[name='page[name]']").size ]
+  end
+
   test "a page created with no name is given a default name" do
     post "/pages/manage/pages", params: { page: { name: "", slug: "pricing" } }
 
