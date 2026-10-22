@@ -12,8 +12,18 @@ module KeystoneUi
         page = owned_pages.find_by(slug: params[:slug])
         return refuse unless page&.live_version && KeystoneUi::Pages.reported?(page.place) && viewable?(page)
 
-        KeystoneUi::Pages.place_settings.dig(page.place, :events).call(Event.new(page: page, place: page.place, kind: "view", element: nil, request: request))
+        KeystoneUi::Pages.place_settings.dig(page.place, :events).call(Event.new(page: page, place: page.place, kind: kind, element: element, request: request))
         head :no_content
+      end
+
+      private
+
+      def kind
+        params[:kind] == "click" ? "click" : "view"
+      end
+
+      def element
+        params[:element].presence if kind == "click"
       end
     end
   end
