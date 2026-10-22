@@ -34,4 +34,18 @@ class KeystoneUi::Pages::PageEventsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 404, 0 ], [ response.status, received.size ]
   end
+
+  test "a view for a page with no live version, including an archived page, calls no handler and is refused" do
+    received = []
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(event) { received << event })
+    KeystoneUi::Pages::Page.create!(name: "Draft", slug: "draft", place: "marketing")
+    KeystoneUi::Pages::Page.create!(name: "Old", slug: "old", place: "marketing").tap(&:publish).archive
+
+    statuses = %w[draft old].map do |slug|
+      post "/pages/#{slug}/events"
+      response.status
+    end
+
+    assert_equal [ 404, 404, 0 ], statuses + [ received.size ]
+  end
 end
