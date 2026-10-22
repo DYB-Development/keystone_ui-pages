@@ -26,6 +26,16 @@ class KeystoneUi::Pages::ClickReportingBrowserTest < KeystoneUi::Pages::Applicat
     assert_equal [ [ "click", button_id ] ] * 2, wait_for { clicks.presence if clicks.size == 2 }
   end
 
+  test "a click on a card link that opens another page is still handed to the handler" do
+    card_id = add_element("card", "link" => "/products/pricing", "cta" => "See pricing")
+    @page_record.publish
+
+    visit "/pages/pricing"
+    click_on "See pricing"
+
+    assert_equal [ [ "click", card_id ] ], wait_for { clicks.presence }
+  end
+
   private
 
   def clicks
