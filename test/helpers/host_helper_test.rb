@@ -4,6 +4,10 @@ require "test_helper"
 require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::HostHelperTest < ActiveSupport::TestCase
+  teardown do
+    KeystoneUi::Pages.places = nil
+  end
+
   test "a host draws a published page from its own view with its own values" do
     page = KeystoneUi::Pages::Page.create!(name: "Summary", slug: "summary")
     column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
@@ -89,5 +93,21 @@ class KeystoneUi::Pages::HostHelperTest < ActiveSupport::TestCase
     assert_equal [ "Acme", nil ], labels
   ensure
     Rails.cache = cache
+  end
+
+  test "a host drawing an older version of a page by number gives it no event address to send a view to" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
+    page = KeystoneUi::Pages::Page.create!(name: "Summary", slug: "summary", place: "marketing")
+    2.times { page.publish }
+
+    html = view_with_request.keystone_ui_page(page, version: 1)
+
+    assert_nil Nokogiri::HTML(html).at_css("[data-page-events]")
+  end
+
+  private
+
+  def view_with_request
+    ApplicationController.new.tap { |controller| controller.request = ActionDispatch::TestRequest.create }.view_context
   end
 end
