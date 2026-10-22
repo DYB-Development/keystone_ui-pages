@@ -9,7 +9,7 @@ require "keystone_ui/pages/engine"
 module KeystoneUi
   module Pages
     class << self
-      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet, :places, :access_exceptions, :default_names
+      attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet, :access_exceptions, :default_names
       attr_accessor :edit_check_method, :view_check_method, :values_method, :owner_method, :refusal_method, :chrome_path
 
       def base_controller
@@ -29,7 +29,20 @@ module KeystoneUi
       end
 
       def places
-        @places || {}
+        (@places || {}).merge(place_settings.transform_values { |settings| settings[:label] })
+      end
+
+      def places=(labels)
+        @places = labels
+        @place_settings = {}
+      end
+
+      def register_place(key, label:, default_name: "Page", address: true)
+        place_settings[key.to_s] = { label: label, default_name: default_name, address: address }
+      end
+
+      def place_settings
+        @place_settings ||= {}
       end
 
       def access_exceptions
