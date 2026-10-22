@@ -11,7 +11,7 @@ develop:
   - KeystoneUi::Pages.view_check_method
   - KeystoneUi::Pages.places
   - KeystoneUi::Pages.access_exceptions
-  - KeystoneUi::Pages.default_names
+  - KeystoneUi::Pages.register_place
   - KeystoneUi::Pages.values_method
   - KeystoneUi::Pages.edit_check_method
   - KeystoneUi::Pages.refusal_method

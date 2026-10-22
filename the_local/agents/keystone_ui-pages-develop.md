@@ -51,11 +51,15 @@ inherit from the base controller, so define it there.
   When it is not empty, the New page form offers them, a page with a place not
   in it is refused, and the page list shows each page's place. The view check
   reads it as `page.place`. Unset, pages have no place.
-- `KeystoneUi::Pages.default_names = { "client_report" => "Report template" }`
-  — the word a page created with no name starts with, per place. The page is
-  named with the word and the next number among that owner's pages in that
-  place, so "Report template 1", then "Report template 2". A place with no word,
-  and a page with no place, use "Page".
+- `KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)`
+  — adds one place with its own settings, so each part of a host app registers
+  the place it uses and two registrations never replace each other. `label:` is
+  what editors see. `default_name:` is the word a page created with no name
+  starts with, followed by the next number among that owner's pages in that
+  place, so "Report template 1", then "Report template 2"; it defaults to
+  "Page". `slug:` says whether the place's pages have a URL slug; it defaults to
+  true. Registered places are offered alongside any set with `places =`, and
+  `places = nil` clears both.
 - `KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }`
   — a hash of the exceptions an editor can set on a page, each stored value to
   its label. When it is not empty, the builder's top bar has an Access exception
@@ -324,11 +328,12 @@ The catalog offers these Keystone UI components by default: `button`,
   restoring go to that place's list, and so does the builder's Back link unless
   the host passed its own `return_to`.
 - **The New page form** at `/pages/manage/pages/new` saves a blank name from
-  `default_names` and a blank slug as eight random hex characters. A host
-  linking to it with `new_manage_page_path(place: "client_report")` creates the
-  page in that place, and the form then asks for a name only. A place the host
-  does not name in the link is ignored, and one posted to create is refused
-  with the form shown again.
+  the place's `default_name` and a blank slug as eight random hex characters,
+  and shows that name as the Name field's placeholder. A host linking to it
+  with `new_manage_page_path(place: "client_report")` creates the page in that
+  place and offers no place choice. The URL slug field shows unless the place
+  was registered with `slug: false`. A place the host does not name in the link
+  is ignored, and one posted to create is refused with the form shown again.
 - **A page's settings** at `/pages/manage/pages/:id/edit` change its name, slug
   and place after it is created. A slug another page of the same owner uses, or
   a place the host does not name, is refused with a message and changes nothing.
