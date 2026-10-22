@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - `register_place` takes an `events:` handler, and `POST /pages/:slug/events` hands each view of that place's live pages to it as a `KeystoneUi::Pages::Event`. The gem stores nothing.
 - `keystone_ui_page` sends a view from the browser when it draws the live version of a page whose place has an `events:` handler. The host layout must call `yield :head`.
 - A page opened at its public address sends a view from the browser when its place has an `events:` handler. View live and PDFs send nothing.
+- A click on a link or button in a reporting page is handed to the place's `events:` handler with the id of the element it sits in. Each element on a live drawing carries its id, and drawings cached before this release are drawn again.
 
 ### Changed
 - When the host has registered places, a page must belong to one of them; a page with no place is refused. A host with no places is unchanged.
