@@ -89,8 +89,8 @@ module KeystoneUi
       end
 
       def default_name
-        word = "Page"
-        used = Page.where(owner: owner, place: place).pluck(:name).filter_map { |taken| taken[/\A#{word} (\d+)\z/, 1]&.to_i }
+        word = KeystoneUi::Pages.default_names.fetch(place, "Page")
+        used = Page.where(owner: owner, place: place).pluck(:name).filter_map { |taken| taken[/\A#{Regexp.escape(word)} (\d+)\z/, 1]&.to_i }
         "#{word} #{(used.max || 0) + 1}"
       end
     end
