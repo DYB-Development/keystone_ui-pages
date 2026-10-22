@@ -12,4 +12,8 @@ class KeystoneUi::Pages::PagePlaceRequiredTest < ActiveSupport::TestCase
 
     assert_not KeystoneUi::Pages::Page.new(name: "Pricing", slug: "pricing").valid?
   end
+
+  test "a page with no place is accepted when the host has registered no places" do
+    assert KeystoneUi::Pages::Page.new(name: "Pricing", slug: "pricing").valid?
+  end
 end
