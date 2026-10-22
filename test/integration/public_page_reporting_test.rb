@@ -16,4 +16,13 @@ class KeystoneUi::Pages::PublicPageReportingTest < ActionDispatch::IntegrationTe
 
     assert_select "script[src*='keystone_ui_pages/reporting'], [data-page-events]", 0
   end
+
+  test "opening a page through the editor's View live loads no reporting script and gives no event address" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing").tap(&:publish)
+
+    get "/pages/manage/pages/#{page.id}/live"
+
+    assert_select "script[src*='keystone_ui_pages/reporting'], [data-page-events]", 0
+  end
 end
