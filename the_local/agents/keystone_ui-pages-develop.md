@@ -58,7 +58,8 @@ inherit from the base controller, so define it there.
   starts with, followed by the next number among that owner's pages in that
   place, so "Report template 1", then "Report template 2"; it defaults to
   "Page". `slug:` says whether the place's pages have a URL slug; it defaults to
-  true. Registered places are offered alongside any set with `places =`, and
+  true. A page in a place registered with `slug: false` is never served at
+  `/pages/:slug`, whatever the view check says. Registered places are offered alongside any set with `places =`, and
   `places = nil` clears both.
 - `KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }`
   — a hash of the exceptions an editor can set on a page, each stored value to

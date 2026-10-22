@@ -11,7 +11,7 @@ module KeystoneUi
       def show
         page = owned_pages.find_by(slug: params[:slug])
         @version = page&.live_version
-        return refuse if @version.nil? || !viewable?(page)
+        return refuse if @version.nil? || !KeystoneUi::Pages.slugged?(page.place) || !viewable?(page)
 
         @values = visitor_values(page)
       end
