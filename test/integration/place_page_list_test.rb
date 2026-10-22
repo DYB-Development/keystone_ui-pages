@@ -50,6 +50,12 @@ class KeystoneUi::Pages::PlacePageListTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/pages/manage/pages?place=client_report"
   end
 
+  test "the Show archived link on a page list opened with a place stays in that place" do
+    get "/pages/manage/pages", params: { place: "client_report" }
+
+    assert_equal "/pages/manage/pages?archived=1&place=client_report", Nokogiri::HTML(response.body).css("a").find { |link| link.text == "Show archived" }["href"]
+  end
+
   test "the Create button on a page list opened with a place opens New page with that place" do
     get "/pages/manage/pages", params: { place: "client_report" }
 

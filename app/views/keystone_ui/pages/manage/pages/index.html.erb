@@ -4,7 +4,7 @@
   <% end %>
 
   <p class="mb-4 text-sm">
-    <%= @archived ? link_to("Show current pages", manage_pages_path) : link_to("Show archived", manage_pages_path(archived: 1)) %>
+    <%= @archived ? link_to("Show current pages", manage_pages_path(place: @place)) : link_to("Show archived", manage_pages_path(archived: 1, place: @place)) %>
   </p>
 
   <div class="ks-table overflow-x-auto">
