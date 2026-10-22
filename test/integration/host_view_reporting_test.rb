@@ -26,4 +26,15 @@ class KeystoneUi::Pages::HostViewReportingTest < ActionDispatch::IntegrationTest
 
     assert_empty received
   end
+
+  test "opening a host view and sending its view sets no cookie" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: ->(_event) { })
+    KeystoneUi::Pages::Page.create!(name: "Product", slug: "product", place: "marketing").publish
+
+    get "/products/product"
+    set_by_host_view = response.headers["Set-Cookie"]
+    post "/pages/product/events"
+
+    assert_equal [ nil, nil ], [ set_by_host_view, response.headers["Set-Cookie"] ]
+  end
 end
