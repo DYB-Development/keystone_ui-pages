@@ -16,6 +16,7 @@ module KeystoneUi
 
         def new
           @place = chosen_place
+          @default_name = Page.new(place: @place, owner: page_owner).default_name
         end
 
         def create
