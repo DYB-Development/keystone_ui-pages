@@ -7,6 +7,7 @@ class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.places = nil
     KeystoneUi::Pages.view_check_method = nil
     KeystoneUi::Pages.refusal_method = nil
+    KeystoneUi::Pages.owner_method = nil
   end
 
   test "a place registered with counting on is counted and one registered without it is not" do
@@ -60,5 +61,16 @@ class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
     post "/pages/pricing/views", headers: { "X-Visitor" => "blocked" }
 
     assert_equal [ 403, 0 ], [ response.status, KeystoneUi::Pages::PageCount.count ]
+  end
+
+  test "a view for another owner's page is refused and adds nothing" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site", counts: true)
+    KeystoneUi::Pages.owner_method = :current_team
+    Team.create!(name: "Acme")
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing", owner: Team.create!(name: "Globex")).publish
+
+    post "/pages/pricing/views", headers: { "X-Team" => "Acme" }
+
+    assert_equal [ 404, 0 ], [ response.status, KeystoneUi::Pages::PageCount.count ]
   end
 end
