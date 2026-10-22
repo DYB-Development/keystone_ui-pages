@@ -6,7 +6,10 @@ module KeystoneUi
       include HostChecks
 
       def create
-        PageCount.add(owned_pages.find_by(slug: params[:slug]), "view")
+        page = owned_pages.find_by(slug: params[:slug])
+        return refuse unless page && KeystoneUi::Pages.counted?(page.place)
+
+        PageCount.add(page, "view")
         head :no_content
       end
     end

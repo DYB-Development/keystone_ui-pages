@@ -22,4 +22,17 @@ class KeystoneUi::Pages::PageViewCountsTest < ActionDispatch::IntegrationTest
 
     assert_equal 1, page.counts.find_by(day: Date.current, kind: "view")&.total
   end
+
+  test "a view for a page in an uncounted place or in no place is refused and adds nothing" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report")
+    KeystoneUi::Pages::Page.create!(name: "Monthly report", slug: "monthly-report", place: "client_report").publish
+    KeystoneUi::Pages::Page.create!(name: "About", slug: "about").publish
+
+    statuses = %w[monthly-report about].map do |slug|
+      post "/pages/#{slug}/views"
+      response.status
+    end
+
+    assert_equal [ 404, 404, 0 ], statuses + [ KeystoneUi::Pages::PageCount.count ]
+  end
 end
