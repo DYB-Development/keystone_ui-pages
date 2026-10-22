@@ -23,6 +23,15 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     assert_equal 1, Nokogiri::HTML(response.body).css("input[name='page[slug]']").size
   end
 
+  test "the new page form shows the name an unnamed page will get as the Name field's placeholder" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
+    KeystoneUi::Pages::Page.create!(name: "Report template 1", slug: "first", place: "client_report")
+
+    get "/pages/manage/pages/new", params: { place: "client_report" }
+
+    assert_equal "Report template 2", Nokogiri::HTML(response.body).at_css("input[name='page[name]']")["placeholder"]
+  end
+
   test "the new page form and page settings label the slug field URL slug" do
     page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
 

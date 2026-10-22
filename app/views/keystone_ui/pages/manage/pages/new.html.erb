@@ -5,7 +5,7 @@
     <%= hidden_field_tag "page[place]", @place if @place %>
 
     <label class="ks-label mb-1">Name</label>
-    <%= ui_input(name: "page[name]", placeholder: "e.g. Pricing") %>
+    <%= ui_input(name: "page[name]", placeholder: @default_name) %>
 
     <% if KeystoneUi::Pages.slugged?(@place) %>
       <label class="ks-label mb-1">URL slug</label>
