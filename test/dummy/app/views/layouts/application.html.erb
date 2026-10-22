@@ -8,6 +8,8 @@
 
     <script>
       window.pageEvents = []
+      window.pageErrors = []
+      window.addEventListener("unhandledrejection", (event) => window.pageErrors.push(String(event.reason)))
       for (const name of ["keystone-ui-pages:view", "keystone-ui-pages:click"]) {
         document.addEventListener(name, (event) => window.pageEvents.push({ name, ...event.detail }))
       }

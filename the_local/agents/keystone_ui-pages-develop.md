@@ -74,7 +74,10 @@ inherit from the base controller, so define it there.
   place's `events:` handler with a `KeystoneUi::Pages::Event` holding `page`,
   `place`, `kind` (`"view"` or `"click"`), `element` (the element id for a
   click, nil for a view) and `request`. The gem stores nothing;
-  what is kept, counted or shown is the host's to decide. It needs no form
+  what is kept, counted or shown is the host's to decide. The handler runs inside
+  the event request, so slow work belongs in a job it enqueues. A handler that
+  raises is reported through `Rails.error` with `page_id` and `kind`, and the
+  browser still gets 204. It needs no form
   token. It is refused the way the public page refuses a page when the page has
   no live version, is another owner's, fails the view check, or its place has
   no handler.

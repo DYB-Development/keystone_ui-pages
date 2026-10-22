@@ -1,6 +1,6 @@
 function report(drawn, kind, details = {}) {
   document.dispatchEvent(new CustomEvent(`keystone-ui-pages:${kind}`, { detail: { slug: drawn.dataset.pageSlug, place: drawn.dataset.pagePlace, ...details } }))
-  fetch(drawn.dataset.pageEvents, { method: "POST", body: new URLSearchParams({ kind, element: details.element ?? "" }), credentials: "same-origin", keepalive: true })
+  fetch(drawn.dataset.pageEvents, { method: "POST", body: new URLSearchParams({ kind, element: details.element ?? "" }), credentials: "same-origin", keepalive: true }).catch(() => {})
 }
 
 function reportViews() {
