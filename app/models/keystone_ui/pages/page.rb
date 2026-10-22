@@ -17,6 +17,8 @@ module KeystoneUi
       scope :archived, -> { where.not(archived_at: nil) }
       scope :current, -> { where(archived_at: nil) }
 
+      before_validation(on: :create) { self.name = "Untitled page" if name.blank? }
+
       validates :name, :slug, presence: true
       validates :slug, uniqueness: { scope: %i[owner_type owner_id] }
       validates :place, inclusion: { in: -> { KeystoneUi::Pages.places.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.places.any? }
