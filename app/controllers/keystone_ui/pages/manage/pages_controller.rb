@@ -8,12 +8,14 @@ module KeystoneUi
       class PagesController < BaseController
         def index
           @archived = params[:archived].present?
+          @place = chosen_place
           @pages = owned_pages.public_send(@archived ? :archived : :current).order(:name)
+          @pages = @pages.where(place: @place) if @place
           @printable = Printer.chrome.present?
         end
 
         def new
-          @place = params[:place] if KeystoneUi::Pages.places.key?(params[:place])
+          @place = chosen_place
         end
 
         def create
@@ -62,6 +64,10 @@ module KeystoneUi
         end
 
         private
+
+        def chosen_place
+          params[:place] if KeystoneUi::Pages.places.key?(params[:place])
+        end
 
         def local_address?(address)
           address.to_s.match?(%r{\A/(?![/\\])})
