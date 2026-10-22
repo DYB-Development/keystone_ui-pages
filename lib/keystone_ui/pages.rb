@@ -37,8 +37,8 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true)
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug }
+      def register_place(key, label:, default_name: "Page", slug: true, counts: false)
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, counts: counts }
       end
 
       def place_settings
@@ -47,6 +47,10 @@ module KeystoneUi
 
       def slugged?(place)
         place_settings.dig(place.to_s, :slug) != false
+      end
+
+      def counted?(place)
+        place_settings.dig(place.to_s, :counts) == true
       end
 
       def access_exceptions
