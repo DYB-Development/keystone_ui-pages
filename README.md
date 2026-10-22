@@ -70,7 +70,7 @@ KeystoneUi::Pages.register_place("marketing", label: "Marketing site", events: -
 
 The handler receives a `KeystoneUi::Pages::Event` holding `page`, `place`, `kind` (`"view"`), `element` and `request`. Deciding what counts as a visit, honouring Do Not Track and leaving out crawlers is the handler's job.
 
-A page drawn with `keystone_ui_page` in a host view sends its view from the visitor's browser once it loads. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The view is sent without a form token and the gem sets no cookie.
+A page opened at its public address, or drawn with `keystone_ui_page` in a host view, sends its view from the visitor's browser once it loads. View live in the builder and a printed PDF send nothing. That only happens when the live version is drawn and the page's place has a handler. Drawing an older version by number, or a page from a place with no handler, sends nothing. The helper puts its script in `content_for :head`, so the host layout must call `yield :head` inside `<head>`. The view is sent without a form token and the gem sets no cookie.
 
 ## Trying it locally
 
