@@ -107,4 +107,15 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal before, [ rows.call, enqueued_jobs.size ]
   end
+
+  test "a submitted form is answered in the host's page layout by the form's thank-you message in the same frame the form was drawn in" do
+    get "/pages/contact"
+    drawn_frame = Nokogiri::HTML(response.body).at_css("turbo-frame:has(form.ks-form)")&.[]("id")
+
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+    answer = Nokogiri::HTML(response.body)
+
+    assert_equal [ "keystone-ui-pages-form-#{@form_id}", "keystone-ui-pages-form-#{@form_id}", "Thanks, we will be in touch." ],
+      [ drawn_frame, answer.at_css("[data-host-layout] turbo-frame")&.[]("id"), answer.at_css("[data-host-layout] turbo-frame")&.text&.strip ]
+  end
 end
