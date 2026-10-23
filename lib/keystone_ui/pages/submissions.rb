@@ -20,6 +20,10 @@ module KeystoneUi
         { form_name: form_name(form, catalog: catalog), fields: fields, submit_label: setting(form, :submit_label, catalog), thank_you: thank_you(form, catalog: catalog) }
       end
 
+      def choices(text)
+        text.to_s.split(",").map(&:strip).reject(&:empty?)
+      end
+
       def accepted(form, submitted, catalog: Pages.catalog)
         names = Array(setting(form, :fields, catalog)).map { |field| field["name"].to_s }
         submitted.to_unsafe_h.slice(*names)
