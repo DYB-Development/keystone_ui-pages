@@ -53,4 +53,10 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ "contact" ], %w[help help] ], [ @received.map { |submission| submission.page.slug }, support ]
   end
+
+  test "a submission to a form not in the named version is refused as not found" do
+    post "/pages/contact/versions/1/forms/not-a-form", params: { name: "Ada" }
+
+    assert_equal [ 404, 0 ], [ response.status, @received.size ]
+  end
 end
