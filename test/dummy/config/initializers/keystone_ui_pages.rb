@@ -10,7 +10,8 @@ end
 if Rails.env.development?
   KeystoneUi::Pages::Values.names = { "client_name" => "Client name", "score" => "Score", "signed_in" => "Signed in", "purchased" => "Purchased" }
   KeystoneUi::Pages::Values.chooser = ->(_page) { [ [ "Acme report", "acme" ], [ "Globex report", "globex" ], [ "Anonymous visitor", "visitor" ], [ "Signed-in client", "signed_in_client" ], [ "Client who purchased", "purchased_client" ] ] }
-  KeystoneUi::Pages.places = { "marketing" => "Marketing site", "client_portal" => "Client portal", "paid_content" => "Paid content" }
+  KeystoneUi::Pages.places = { "client_portal" => "Client portal", "paid_content" => "Paid content" }
+  KeystoneUi::Pages.register_place("marketing", label: "Marketing site", submissions: ->(submission) { DemoSubmissions.record(submission) })
   KeystoneUi::Pages.access_exceptions = { "public_preview" => "Public preview" }
   KeystoneUi::Pages.view_check_method = :may_view_demo_page?
   KeystoneUi::Pages.refusal_method = :refuse_page
