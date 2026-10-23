@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "uri"
+
 module KeystoneUi
   module Pages
     module Submissions
@@ -20,8 +22,15 @@ module KeystoneUi
 
       def problems(form, values, catalog: Pages.catalog)
         Array(setting(form, :fields, catalog)).each_with_object({}) do |field, found|
-          found[field["name"].to_s] = "Fill this in" if field["required"].to_s == "true" && values[field["name"].to_s].blank?
+          message = problem(field, values[field["name"].to_s].to_s)
+          found[field["name"].to_s] = message if message
         end
+      end
+
+      private_class_method def problem(field, value)
+        return "Fill this in" if field["required"].to_s == "true" && value.blank?
+
+        "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
       end
 
       private_class_method def setting(form, key, catalog)

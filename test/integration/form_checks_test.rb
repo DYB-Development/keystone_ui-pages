@@ -24,4 +24,10 @@ class KeystoneUi::Pages::FormChecksTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 422, 0 ], [ response.status, @received.size ]
   end
+
+  test "a submission whose email field does not hold an email address never reaches the host's handler" do
+    post @address, params: { name: "Ada", email: "ada at example" }
+
+    assert_equal [ 422, 0 ], [ response.status, @received.size ]
+  end
 end
