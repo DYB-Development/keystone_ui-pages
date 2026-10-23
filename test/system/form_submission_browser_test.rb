@@ -35,7 +35,7 @@ class KeystoneUi::Pages::FormSubmissionBrowserTest < KeystoneUi::Pages::Applicat
       fill_in "name", with: name
       fill_in "email", with: "#{name.downcase}@example.com"
       click_on "Send"
-      page.has_text?("Thanks, we will be in touch.")
+      page.has_current_path?(%r{/forms/}) && page.has_text?("Thanks, we will be in touch.")
     end
 
     assert_equal %w[Ada Bo], @received.map { |values| values["name"] }
