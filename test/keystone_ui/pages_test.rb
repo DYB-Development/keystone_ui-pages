@@ -121,7 +121,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_every_keystone_ui_element_has_an_icon_and_belongs_to_a_group
     elements = keystone_elements.elements
     groups = elements.group_by(&:group).to_h { |group, members| [ group, members.map(&:key).sort ] }
-    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid], "Data" => %i[bar_chart data_table figure line_chart progress stat_card value_list], "Text" => %i[accordion alert code heading hero info label paragraph] }
+    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid form], "Data" => %i[bar_chart data_table figure line_chart progress stat_card value_list], "Text" => %i[accordion alert code heading hero info label paragraph] }
 
     assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
   end
@@ -142,6 +142,15 @@ class KeystoneUi::PagesTest < Minitest::Test
     accordion = keystone_elements.find(:accordion)
 
     assert_equal [ :ui_accordion, :list, %i[question answer] ], [ accordion.component, accordion.fields.first[:kind], accordion.fields.first[:entry].map { |field| field[:key] } ]
+  end
+
+  def test_the_catalog_offers_a_form_with_a_name_its_fields_a_submit_label_and_a_thank_you_message
+    form = keystone_elements.find(:form)
+    fields = form.fields.find { |field| field[:key] == :fields }
+
+    assert_equal [ "Form", %i[form_name fields submit_label thank_you], %i[label name kind required], %w[text email long_text], :yes_or_no ],
+      [ form.name, form.fields.map { |field| field[:key] }, fields[:entry].map { |part| part[:key] },
+        fields[:entry].find { |part| part[:key] == :kind }[:options], fields[:entry].find { |part| part[:key] == :required }[:kind] ]
   end
 
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors

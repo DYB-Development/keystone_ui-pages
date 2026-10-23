@@ -105,6 +105,18 @@ class KeystoneUi::Pages::HostHelperTest < ActiveSupport::TestCase
     assert_nil Nokogiri::HTML(html).at_css("[data-page-events]")
   end
 
+  test "a host view draws a page's form for the live version and for a pinned older version, each posting to its own version" do
+    page = KeystoneUi::Pages::Page.create!(name: "Contact", slug: "contact")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "form", column_id: column_id))
+    form_id = page.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["id"]
+    2.times { page.publish }
+
+    actions = [ view_with_request.keystone_ui_page(page), view_with_request.keystone_ui_page(page, version: 1) ].map { |html| Nokogiri::HTML(html).at_css("form.ks-form")&.[]("action") }
+
+    assert_equal [ "/pages/contact/versions/2/forms/#{form_id}", "/pages/contact/versions/1/forms/#{form_id}" ], actions
+  end
+
   private
 
   def view_with_request

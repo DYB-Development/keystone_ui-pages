@@ -3,7 +3,7 @@ A flow-layout page builder that draws keystone_ui elements from a versioned JSON
 
 ## Elements
 
-The catalog offers these keystone_ui components as page elements by default: `button`, `progress`, `alert`, `code`, `heading`, `label` (drawn by `ui_caption`), `paragraph`, `hero`, `cta_banner`, `card`, `stat_card`, `figure`, `info`, `badge`, `copy_button`, `feature_grid`, `accordion`, `data_table`, `bar_chart`, `line_chart` and `value_list`.
+The catalog offers these keystone_ui components as page elements by default: `button`, `progress`, `alert`, `code`, `heading`, `label` (drawn by `ui_caption`), `paragraph`, `hero`, `cta_banner`, `card`, `stat_card`, `figure`, `info`, `badge`, `copy_button`, `feature_grid`, `accordion`, `form` (drawn by the gem's own form helper), `data_table`, `bar_chart`, `line_chart` and `value_list`.
 
 A host adds its own element by registering it with a component of its own, and leaves an element out by its key:
 

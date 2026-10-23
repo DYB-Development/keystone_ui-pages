@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- A Form element: an editor names the form, lists its fields (label, field name, text, email or long text, and whether it is required) and sets its submit label and thank-you message. A published form posts to an address naming its version and form, and each visitor's form carries its own forgery token while the cached drawing holds none.
 - `register_place` takes an `events:` handler, and `POST /pages/:slug/events` hands each view of that place's live pages to it as a `KeystoneUi::Pages::Event`. The gem stores nothing.
 - `keystone_ui_page` sends a view from the browser when it draws the live version of a page whose place has an `events:` handler. The host layout must call `yield :head`.
 - A page opened at its public address sends a view from the browser when its place has an `events:` handler. View live and PDFs send nothing.

@@ -71,6 +71,16 @@ module KeystoneUi
                       default: [ { "title" => "Fast", "description" => "Pages load quickly." },
                                  { "title" => "Clear", "description" => "Every page reads plainly." },
                                  { "title" => "Yours", "description" => "Built from your own components." } ] } ])
+        catalog.register(key: :form, name: "Form", component: :pages_form, icon: :card, group: "Content", placed: true,
+          fields: [ { key: :form_name, label: "Form name", kind: :text, default: "Contact" },
+                    { key: :fields, label: "Fields", kind: :list,
+                      entry: [ { key: :label, label: "Label", kind: :text }, { key: :name, label: "Field name", kind: :text },
+                               { key: :kind, label: "Kind", kind: :one_of, options: %w[text email long_text], default: "text" },
+                               { key: :required, label: "Required", kind: :yes_or_no } ],
+                      default: [ { "label" => "Name", "name" => "name", "kind" => "text" },
+                                 { "label" => "Email", "name" => "email", "kind" => "email", "required" => "true" } ] },
+                    { key: :submit_label, label: "Submit label", kind: :text, default: "Send" },
+                    { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." } ])
         catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
           fields: [ { key: :items, label: "Questions", kind: :list,
                       entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],

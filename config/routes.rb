@@ -33,5 +33,6 @@ KeystoneUi::Pages::Engine.routes.draw do
   end
 
   post ":slug/events", to: "events#create", as: :page_events
+  post ":slug/versions/:number/forms/:element_id", to: "submissions#create", as: :page_form
   get ":slug", to: "pages#show", as: :page
 end

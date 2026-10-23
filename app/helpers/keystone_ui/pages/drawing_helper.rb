@@ -5,6 +5,8 @@ require "keystone_ui/pages/operations"
 module KeystoneUi
   module Pages
     module DrawingHelper
+      include FormHelper
+
       NARROW_SPANS = { "1/1" => "col-span-12", "3/4" => "col-span-9", "2/3" => "col-span-8", "1/2" => "col-span-6", "1/3" => "col-span-4", "1/4" => "col-span-3" }.freeze
       WIDE_SPANS = { "1/1" => "@sm:col-span-12", "3/4" => "@sm:col-span-9", "2/3" => "@sm:col-span-8", "1/2" => "@sm:col-span-6", "1/3" => "@sm:col-span-4", "1/4" => "@sm:col-span-3" }.freeze
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
@@ -19,7 +21,8 @@ module KeystoneUi
       def drawn_version(version, values: {})
         key = [ "keystone_ui_pages", DRAWING_FORMAT, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
-        Rails.cache.fetch(key) { drawn_document(version.document, values: values).to_str }.html_safe
+        @drawn_version = version
+        with_visitor_token(Rails.cache.fetch(key) { without_visitor_tokens(drawn_document(version.document, values: values).to_str) }).html_safe
       end
 
       def reporting_data(page)
@@ -37,6 +40,7 @@ module KeystoneUi
 
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
+        @drawn_version = nil if editing
         safe_join(document["sections"].map { |section| drawn_section(section, editing) })
       end
 
@@ -157,6 +161,7 @@ module KeystoneUi
       def component_for(element)
         definition = KeystoneUi::Pages.catalog.find(element["key"])
         values = definition.fields.reject { |field| field[:classes] }.to_h { |field| [ field[:key].to_sym, field_value(field, filled(element["fields"][field[:key].to_s]) || field[:default]) ] }
+        values.merge!(element_id: element["id"], version: @drawn_version) if definition.placed
         return send(definition.component, **values) unless definition.body
 
         body = values.delete(definition.body)

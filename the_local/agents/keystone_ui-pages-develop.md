@@ -183,7 +183,7 @@ inherit from the base controller, so define it there.
 
 ### The element catalog
 
-- `KeystoneUi::Pages.catalog.register(key:, name:, component:, fields:, body: nil, icon: nil, group: nil, align: nil)`
+- `KeystoneUi::Pages.catalog.register(key:, name:, component:, fields:, body: nil, icon: nil, group: nil, align: nil, placed: false)`
   — adds an element to the builder's palette, or replaces the one with the same
   key. `key:` is a symbol stored in page documents. `name:` is the label in the
   palette. `component:` is the name of a method the drawing calls with one
@@ -194,6 +194,14 @@ inherit from the base controller, so define it there.
   `:number` `:progress`, and any other value shows a box. `group:` is the
   palette heading it sits under, `"Other"` when unset. `align:` is the default
   placement in its column: `"stretch"`, `"start"`, `"center"` or `"end"`.
+  `placed: true` also passes `element_id:` and `version:` (nil in the builder)
+  to the method, which the Form element uses to build its address.
+- The built-in Form element (`:form`) holds a form name, a list of fields (each
+  a label, a field name, a kind of `text`, `email` or `long_text`, and whether
+  it is required), a submit label and a thank-you message. A published form
+  posts to `POST /pages/:slug/versions/:number/forms/:element_id`. Its drawing
+  is cached with a placeholder token, and each request puts in the visitor's
+  own forgery token, so the host's forgery protection stays on.
 - `KeystoneUi::Pages.catalog.leave_out(:copy_button)` — removes elements from
   the palette by key. Takes several keys.
 
