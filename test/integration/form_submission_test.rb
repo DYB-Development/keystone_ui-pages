@@ -59,4 +59,13 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 404, 0 ], [ response.status, @received.size ]
   end
+
+  test "a submission is refused as not found when its page's place has no handler" do
+    KeystoneUi::Pages.register_place("support", label: "Support")
+    KeystoneUi::Pages::Page.create!(name: "Help", slug: "help", place: "support", document: @page.document).publish
+
+    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+
+    assert_equal [ 404, 0 ], [ response.status, @received.size ]
+  end
 end
