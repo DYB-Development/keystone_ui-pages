@@ -38,4 +38,20 @@ class KeystoneUi::Pages::FormChecksTest < ActionDispatch::IntegrationTest
     fields = frame.css(".ks-form-field").map { |field| [ field.at_css("input")["name"], field.at_css("input")["value"], field.at_css(".ks-error")&.text ] }
     assert_equal [ [ "name", "Ada", nil ], [ "email", "ada at example", "Enter an email address" ] ], fields
   end
+
+  test "a visitor who later opens the same page sees no errors and no other visitor's values" do
+    cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    refused = open_session
+    refused.get "/pages/contact"
+    refused.post @address, params: { name: "Ada", email: "ada at example" }
+
+    later = open_session
+    later.get "/pages/contact"
+
+    form = Nokogiri::HTML(later.response.body).at_css("form.ks-form")
+    assert_equal [ 0, [ nil, nil ] ], [ form.css(".ks-error").size, form.css(".ks-form-field input").map { |input| input["value"] } ]
+  ensure
+    Rails.cache = cache
+  end
 end
