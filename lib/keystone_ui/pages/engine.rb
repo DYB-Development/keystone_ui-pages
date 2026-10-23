@@ -14,6 +14,10 @@ module KeystoneUi
         ActiveSupport.on_load(:action_view) { include KeystoneUi::Pages::HostHelper }
       end
 
+      initializer "keystone_ui_pages.check_places", after: :load_config_initializers do |app|
+        app.config.after_initialize { KeystoneUi::Pages.check_places! }
+      end
+
       initializer "keystone_ui_pages.tailwind" do
         KeystoneUi.configuration.tailwind_sources << root.join("app/views/**/*.erb").to_s
         KeystoneUi.configuration.tailwind_sources << root.join("app/helpers/**/*.rb").to_s

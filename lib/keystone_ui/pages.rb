@@ -49,6 +49,13 @@ module KeystoneUi
         place_settings.dig(place.to_s, :slug) != false
       end
 
+      def check_places!
+        place_settings.each do |place, settings|
+          unknown = settings[:leaves_out].reject { |key| catalog.find(key) }
+          raise ArgumentError, "The place #{place} leaves out #{unknown.join(", ")}, which no catalog element has" if unknown.any?
+        end
+      end
+
       def offered_catalog(place)
         catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)))
       end

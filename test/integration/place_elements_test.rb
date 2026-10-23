@@ -55,4 +55,12 @@ class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 422, true, "marketing" ], [ response.status, response.body.include?("Client report does not offer Form"), page.reload.place ]
   end
+
+  test "checking the places raises an error naming a left-out element no catalog entry has" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", leaves_out: [ :fomr ])
+
+    error = assert_raises(ArgumentError) { KeystoneUi::Pages.check_places! }
+
+    assert_equal "The place client_report leaves out fomr, which no catalog element has", error.message
+  end
 end
