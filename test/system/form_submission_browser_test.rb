@@ -33,6 +33,7 @@ class KeystoneUi::Pages::FormSubmissionBrowserTest < KeystoneUi::Pages::Applicat
     [ [ "/pages/contact", "Ada" ], [ "/products/contact", "Bo" ] ].each do |path, name|
       visit path
       fill_in "name", with: name
+      fill_in "email", with: "#{name.downcase}@example.com"
       click_on "Send"
       page.has_text?("Thanks, we will be in touch.")
     end

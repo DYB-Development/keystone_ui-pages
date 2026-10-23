@@ -18,6 +18,12 @@ module KeystoneUi
         submitted.to_unsafe_h.slice(*names)
       end
 
+      def problems(form, values, catalog: Pages.catalog)
+        Array(setting(form, :fields, catalog)).each_with_object({}) do |field, found|
+          found[field["name"].to_s] = "Fill this in" if field["required"].to_s == "true" && values[field["name"].to_s].blank?
+        end
+      end
+
       private_class_method def setting(form, key, catalog)
         form["fields"].fetch(key.to_s) { catalog.find(:form).fields.find { |field| field[:key] == key }[:default] }
       end

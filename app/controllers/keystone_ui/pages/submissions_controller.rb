@@ -20,7 +20,10 @@ module KeystoneUi
         return head(:not_found) unless handler
         return refuse unless viewable?(page)
 
-        handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: Submissions.accepted(form, params), request: request))
+        values = Submissions.accepted(form, params)
+        return head(:unprocessable_entity) if Submissions.problems(form, values).any?
+
+        handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: values, request: request))
         @element_id = form["id"]
         @thank_you = Submissions.thank_you(form)
       end
