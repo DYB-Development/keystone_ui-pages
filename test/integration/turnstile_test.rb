@@ -65,4 +65,15 @@ class KeystoneUi::Pages::TurnstileTest < ActionDispatch::IntegrationTest
 
     assert_equal [ answers[0], answers[2] ], [ answers[1], answers[3] ]
   end
+
+  test "with no keys set, no page loads anything from Cloudflare and no submission is sent to Cloudflare" do
+    get "/pages/contact"
+    loaded = Nokogiri::HTML(response.body).css("[src*='cloudflare'], [data-sitekey]").size
+
+    Net::HTTP.stub(:post_form, ->(*) { raise "sent to Cloudflare" }) do
+      post @address, params: { name: "Ada", email: "ada@example.com" }
+    end
+
+    assert_equal [ 0, [ false ] ], [ loaded, @received.map(&:bot) ]
+  end
 end
