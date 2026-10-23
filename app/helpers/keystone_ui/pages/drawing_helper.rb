@@ -22,6 +22,7 @@ module KeystoneUi
         key = [ "keystone_ui_pages", DRAWING_FORMAT, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
         @drawn_version = version
+        load_forms_script(version)
         with_visitor_token(Rails.cache.fetch(key) { without_visitor_tokens(drawn_document(version.document, values: values).to_str) }).html_safe
       end
 
@@ -45,6 +46,13 @@ module KeystoneUi
       end
 
       private
+
+      def load_forms_script(version)
+        return if @forms_script_loaded || Operations.elements(version.document).none? { |element| element["key"] == "form" }
+
+        @forms_script_loaded = true
+        content_for :head, javascript_include_tag("keystone_ui_pages/forms", defer: true)
+      end
 
       def rich_paragraphs(html)
         stored = Nokogiri::HTML5.fragment(html)
