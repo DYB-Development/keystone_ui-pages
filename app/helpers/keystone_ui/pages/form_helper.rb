@@ -7,9 +7,10 @@ module KeystoneUi
     module FormHelper
       FIELD_TYPES = { "text" => :text, "email" => :email, "long_text" => :textarea, "choice" => :select, "checkbox" => :checkbox }.freeze
       TOKEN_PLACEHOLDER = "keystone-ui-pages-form-token"
+      TRAP_NAME = "keystone_ui_pages_trap"
 
       def pages_form(form_name:, fields:, submit_label:, thank_you:, element_id:, version:, after_submitting: nil, next_address: nil, problems: {}, values: {})
-        content = safe_join(fields.map { |field| form_field(field, problems, values) } + [ ui_button(label: submit_label) ])
+        content = safe_join(fields.map { |field| form_field(field, problems, values) } + [ trap_field, ui_button(label: submit_label) ])
         return tag.div(content, class: "ks-form") unless version
 
         content_tag("turbo-frame", ui_form(action: keystone_ui_pages.page_form_path(version.page.slug, version.number, element_id)) { token_placeholder + content }, id: form_frame_id(element_id), class: "print:hidden")
@@ -33,6 +34,10 @@ module KeystoneUi
       end
 
       private
+
+      def trap_field
+        tag.div(tag.input(type: "text", name: TRAP_NAME, tabindex: -1, autocomplete: "off"), class: "absolute -left-[10000px] h-px w-px overflow-hidden", aria: { hidden: true })
+      end
 
       def token_placeholder
         tag.input(type: "hidden", name: request_forgery_protection_token, value: TOKEN_PLACEHOLDER, autocomplete: "off")
