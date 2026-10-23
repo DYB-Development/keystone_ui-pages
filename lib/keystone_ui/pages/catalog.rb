@@ -17,12 +17,22 @@ module KeystoneUi
         keys.each { |key| @elements.delete(key.to_sym) }
       end
 
+      def without(*keys)
+        Catalog.new.tap { |copy| elements.each { |element| copy.add(element) unless keys.include?(element.key) } }
+      end
+
       def elements
         @elements.values
       end
 
       def find(key)
         @elements[key.to_sym]
+      end
+
+      protected
+
+      def add(element)
+        @elements[element.key] = element
       end
     end
   end

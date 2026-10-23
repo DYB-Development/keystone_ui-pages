@@ -2,6 +2,7 @@
 
 require "securerandom"
 require "keystone_ui/pages/document"
+require "keystone_ui/pages/operations"
 
 module KeystoneUi
   module Pages
@@ -26,6 +27,7 @@ module KeystoneUi
       validates :name, :slug, presence: true
       validates :slug, uniqueness: { scope: %i[owner_type owner_id] }
       validates :place, inclusion: { in: -> { KeystoneUi::Pages.places.keys } }, if: -> { KeystoneUi::Pages.places.any? }
+      validate :place_offers_its_elements, if: :will_save_change_to_place?
       validates :access_exception, inclusion: { in: -> { KeystoneUi::Pages.access_exceptions.keys } }, allow_nil: true, if: -> { KeystoneUi::Pages.access_exceptions.any? }
 
       def publish
@@ -96,6 +98,16 @@ module KeystoneUi
         word = KeystoneUi::Pages.place_settings.dig(place, :default_name) || "Page"
         used = Page.where(owner: owner, place: place).pluck(:name).filter_map { |taken| taken[/\A#{Regexp.escape(word)} (\d+)\z/, 1]&.to_i }
         "#{word} #{(used.max || 0) + 1}"
+      end
+
+      private
+
+      def place_offers_its_elements
+        offered = KeystoneUi::Pages.offered_catalog(place)
+        held = Operations.elements(document).map { |element| element["key"] }.uniq
+        held.reject { |key| offered.find(key) }.filter_map { |key| KeystoneUi::Pages.catalog.find(key) }.each do |element|
+          errors.add(:place, "#{KeystoneUi::Pages.places[place]} does not offer #{element.name}")
+        end
       end
     end
   end

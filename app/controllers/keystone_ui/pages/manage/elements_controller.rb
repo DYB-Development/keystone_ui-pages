@@ -7,7 +7,7 @@ module KeystoneUi
         include EditsPages
 
         def create
-          changed(Operations.add(page.document, params.require(:key), column_id: params.require(:column_id)))
+          changed(Operations.add(page.document, params.require(:key), column_id: params.require(:column_id), catalog: KeystoneUi::Pages.offered_catalog(page.place)))
         end
 
         def bind

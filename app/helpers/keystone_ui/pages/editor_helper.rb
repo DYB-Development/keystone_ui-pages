@@ -7,7 +7,7 @@ module KeystoneUi
     module EditorHelper
       def editor_props(page)
         {
-          elements: KeystoneUi::Pages.catalog.elements.map { |element| element.to_h.slice(:key, :name, :fields, :icon, :group, :align) },
+          elements: KeystoneUi::Pages.offered_elements(page.place).map { |element| element.to_h.slice(:key, :name, :fields, :icon, :group, :align) },
           canvas: editor_canvas(page),
           document: page.document,
           elements_url: manage_page_elements_path(page),

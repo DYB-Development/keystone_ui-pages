@@ -37,8 +37,8 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil)
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions }
+      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [])
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym) }
       end
 
       def place_settings
@@ -47,6 +47,21 @@ module KeystoneUi
 
       def slugged?(place)
         place_settings.dig(place.to_s, :slug) != false
+      end
+
+      def check_places!
+        place_settings.each do |place, settings|
+          unknown = settings[:leaves_out].reject { |key| catalog.find(key) }
+          raise ArgumentError, "The place #{place} leaves out #{unknown.join(", ")}, which no catalog element has" if unknown.any?
+        end
+      end
+
+      def offered_catalog(place)
+        catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)))
+      end
+
+      def offered_elements(place)
+        offered_catalog(place).elements
       end
 
       def submission_handler(place)
