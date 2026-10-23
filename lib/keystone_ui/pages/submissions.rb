@@ -39,7 +39,9 @@ module KeystoneUi
       private_class_method def problem(field, value)
         return "Fill this in" if field["required"].to_s == "true" && value.blank?
 
-        "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
+        return "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
+
+        "Choose one of the options" if field["kind"] == "choice" && value.present? && !choices(field["choices"]).include?(value)
       end
 
       private_class_method def setting(form, key, catalog)

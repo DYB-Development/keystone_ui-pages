@@ -30,4 +30,10 @@ class KeystoneUi::Pages::ChoiceCheckboxFieldsTest < ActionDispatch::IntegrationT
     assert_equal [ %w[Design Build Support], "Contact me" ],
       [ form.css("select[name=service] option").map(&:text), form.at_css("input[type=checkbox][name=consent]")&.parent&.text&.strip ]
   end
+
+  test "a submission whose choice value is not one of the field's choices never reaches the host's handler" do
+    post @address, params: { service: "Hosting", consent: "0" }
+
+    assert_equal [ 422, 0 ], [ response.status, @received.size ]
+  end
 end
