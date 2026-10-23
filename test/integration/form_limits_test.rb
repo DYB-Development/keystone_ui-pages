@@ -24,4 +24,17 @@ class KeystoneUi::Pages::FormLimitsTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 422, 0 ], [ response.status, @received.size ]
   end
+
+  test "a visitor whose value is too long sees an error under that field naming the limit" do
+    post @address, params: { name: "A" * 201, email: "ada@example.com" }
+
+    fields = Nokogiri::HTML(response.body).css("turbo-frame .ks-form-field").map { |field| [ field.at_css("input")["name"], field.at_css(".ks-error")&.text ] }
+    assert_equal [ [ "name", "Keep this to 200 characters or fewer" ], [ "email", nil ] ], fields
+  end
+
+  test "a submission with more fields than its form lists is cut to the form's fields before any other check" do
+    post @address, params: { name: "Ada", email: "ada@example.com", extra: "A" * 10_000 }
+
+    assert_equal [ 200, [ { "name" => "Ada", "email" => "ada@example.com" } ] ], [ response.status, @received ]
+  end
 end
