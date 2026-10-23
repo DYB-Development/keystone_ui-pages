@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- A registered place that offers the Form element without a `submissions:` handler fails the app's boot. A handler that raises is reported through `Rails.error`, and the visitor sees the form again with their values and a message that it was not sent.
 - Every form carries a hidden trap field, and a submission that fills it reaches the handler with `bot: true` while the visitor sees the normal answer.
 - An editor chooses on each form whether a successful submission shows the thank-you message or sends the visitor to an address, which leaves the page even when it runs Turbo. Refusals still show their errors in place.
 - A published form is hidden in print, so no PDF and no page printed from the browser shows it.
