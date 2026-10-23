@@ -19,7 +19,7 @@ module KeystoneUi
                              "dark:@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border-dark)"
 
       def drawn_version(version, values: {})
-        key = [ "keystone_ui_pages", DRAWING_FORMAT, version.id, Operations.digest(values.to_h.stringify_keys) ]
+        key = [ "keystone_ui_pages", DRAWING_FORMAT, KeystoneUi::Pages.turnstile_site_key, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
         @drawn_version = version
         load_forms_script(version)
@@ -52,6 +52,7 @@ module KeystoneUi
 
         @forms_script_loaded = true
         content_for :head, javascript_include_tag("keystone_ui_pages/forms", defer: true)
+        content_for :head, javascript_include_tag("https://challenges.cloudflare.com/turnstile/v0/api.js", async: true, defer: true) if KeystoneUi::Pages.turnstile_site_key.present?
       end
 
       def rich_paragraphs(html)

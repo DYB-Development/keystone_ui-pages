@@ -10,7 +10,8 @@ module KeystoneUi
   module Pages
     class << self
       attr_writer :base_controller, :layout, :editor_layout, :pdf_stylesheet, :access_exceptions
-      attr_accessor :edit_check_method, :view_check_method, :values_method, :owner_method, :refusal_method, :chrome_path
+      attr_accessor :edit_check_method, :view_check_method, :values_method, :owner_method, :refusal_method, :chrome_path,
+                    :turnstile_site_key, :turnstile_secret_key
 
       def base_controller
         @base_controller || "ActionController::Base"

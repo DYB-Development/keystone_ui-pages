@@ -19,6 +19,8 @@ develop:
   - KeystoneUi::Pages.editor_layout
   - KeystoneUi::Pages.chrome_path
   - KeystoneUi::Pages.pdf_stylesheet
+  - KeystoneUi::Pages.turnstile_site_key
+  - KeystoneUi::Pages.turnstile_secret_key
   - KeystoneUi::Pages::Values.names
   - KeystoneUi::Pages::Values.chooser
   - KeystoneUi::Pages::Values.provider
