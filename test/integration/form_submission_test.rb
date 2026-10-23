@@ -81,4 +81,18 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal [ page_refusal, 0 ], [ response.status, @received.size ]
   end
+
+  test "a submission is accepted with the token its page was drawn with, and the submission address keeps the host's forgery protection" do
+    ActionController::Base.allow_forgery_protection = true
+
+    get "/pages/contact"
+    form = Nokogiri::HTML(response.body).at_css("form.ks-form")
+    post form["action"], params: { name: "Ada", authenticity_token: form.at_css("input[name=authenticity_token]")["value"] }
+    with_token = @received.size
+    post form["action"], params: { name: "Bo" }
+
+    assert_equal [ 1, 422, 1 ], [ with_token, response.status, @received.size ]
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
 end
