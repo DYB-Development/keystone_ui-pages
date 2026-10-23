@@ -12,7 +12,7 @@ module KeystoneUi
         content = safe_join(fields.map { |field| form_field(field, problems, values) } + [ ui_button(label: submit_label) ])
         return tag.div(content, class: "ks-form") unless version
 
-        content_tag("turbo-frame", ui_form(action: keystone_ui_pages.page_form_path(version.page.slug, version.number, element_id)) { token_placeholder + content }, id: form_frame_id(element_id))
+        content_tag("turbo-frame", ui_form(action: keystone_ui_pages.page_form_path(version.page.slug, version.number, element_id)) { token_placeholder + content }, id: form_frame_id(element_id), class: "print:hidden")
       end
 
       def redrawn_form(form, version, problems:, values:)
