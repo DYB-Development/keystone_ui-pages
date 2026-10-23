@@ -30,4 +30,12 @@ class KeystoneUi::Pages::FormChecksTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 422, 0 ], [ response.status, @received.size ]
   end
+
+  test "a refused visitor sees the form again in the form's frame with an error under each field that failed and the values they typed" do
+    post @address, params: { name: "Ada", email: "ada at example" }
+
+    frame = Nokogiri::HTML(response.body).at_css("[data-host-layout] turbo-frame#keystone-ui-pages-form-#{@form_id}")
+    fields = frame.css(".ks-form-field").map { |field| [ field.at_css("input")["name"], field.at_css("input")["value"], field.at_css(".ks-error")&.text ] }
+    assert_equal [ [ "name", "Ada", nil ], [ "email", "ada at example", "Enter an email address" ] ], fields
+  end
 end

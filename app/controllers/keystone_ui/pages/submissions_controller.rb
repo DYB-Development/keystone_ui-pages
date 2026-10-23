@@ -21,7 +21,8 @@ module KeystoneUi
         return refuse unless viewable?(page)
 
         values = Submissions.accepted(form, params)
-        return head(:unprocessable_entity) if Submissions.problems(form, values).any?
+        problems = Submissions.problems(form, values)
+        return render(:refused, status: :unprocessable_entity, locals: { form: form, version: version, problems: problems, values: values }) if problems.any?
 
         handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: values, request: request))
         @element_id = form["id"]
