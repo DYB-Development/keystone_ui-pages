@@ -63,4 +63,12 @@ class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
 
     assert_equal "The place client_report leaves out fomr, which no catalog element has", error.message
   end
+
+  test "checking the places raises an error naming a place that offers the Form element without a submission handler" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+
+    error = assert_raises(ArgumentError) { KeystoneUi::Pages.check_places! }
+
+    assert_equal "The place marketing offers the Form element but has no submissions handler", error.message
+  end
 end
