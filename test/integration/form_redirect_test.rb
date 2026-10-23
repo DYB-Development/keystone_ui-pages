@@ -25,6 +25,28 @@ class KeystoneUi::Pages::FormRedirectTest < ActionDispatch::IntegrationTest
     assert_equal [ 303, "http://www.example.com/pages/next-steps", 1 ], [ response.status, response.location, @received.size ]
   end
 
+  test "a form built before the after-submitting choice existed shows the thank-you message" do
+    post address, params: { name: "Ada", email: "ada@example.com" }
+
+    assert_equal [ 200, "Thanks, we will be in touch." ], [ response.status, Nokogiri::HTML(response.body).at_css("turbo-frame")&.text&.strip ]
+  end
+
+  test "a refused visitor sees the form with its errors in place of the form when the form is set to send them to an address" do
+    chosen("address", "/pages/next-steps")
+
+    post address, params: { name: "Ada", email: "" }
+
+    assert_equal [ 422, "Fill this in", 0 ], [ response.status, Nokogiri::HTML(response.body).at_css("turbo-frame#keystone-ui-pages-form-#{@form_id} .ks-error")&.text, @received.size ]
+  end
+
+  test "a form set to show the thank-you message shows it in place of the form even with an address filled in" do
+    chosen("thank_you", "/pages/next-steps")
+
+    post address, params: { name: "Ada", email: "ada@example.com" }
+
+    assert_equal [ 200, "Thanks, we will be in touch." ], [ response.status, Nokogiri::HTML(response.body).at_css("turbo-frame#keystone-ui-pages-form-#{@form_id}")&.text&.strip ]
+  end
+
   private
 
   def chosen(after_submitting, next_address = nil)
