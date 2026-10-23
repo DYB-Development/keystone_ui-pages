@@ -2,6 +2,7 @@
 
 require "keystone_ui/pages/submission"
 require "keystone_ui/pages/submissions"
+require "keystone_ui/pages/turnstile"
 require "keystone_ui/pages/operations"
 
 module KeystoneUi
@@ -25,7 +26,7 @@ module KeystoneUi
         return render(:refused, status: :unprocessable_entity, locals: { form: form, version: version, problems: problems, values: values }) if problems.any?
 
         begin
-          handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: Submissions.delivered(form, values), request: request, bot: Submissions.bot?(params)))
+          handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: Submissions.delivered(form, values), request: request, bot: bot?))
         rescue StandardError => error
           Rails.error.report(error, handled: true, context: { page_id: page.id, form_name: Submissions.form_name(form) })
           return render(:failed, status: :internal_server_error, locals: { form: form, version: version, values: values })
@@ -34,6 +35,12 @@ module KeystoneUi
 
         @element_id = form["id"]
         @thank_you = Submissions.thank_you(form)
+      end
+
+      private
+
+      def bot?
+        Submissions.bot?(params) || (Turnstile.on? && !Turnstile.confirmed?(params["cf-turnstile-response"], request.remote_ip))
       end
     end
   end

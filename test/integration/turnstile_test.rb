@@ -2,6 +2,8 @@
 
 require "test_helper"
 require "keystone_ui/pages/operations"
+require "keystone_ui/pages/turnstile"
+require "minitest/mock"
 
 class KeystoneUi::Pages::TurnstileTest < ActionDispatch::IntegrationTest
   setup do
@@ -31,5 +33,16 @@ class KeystoneUi::Pages::TurnstileTest < ActionDispatch::IntegrationTest
     end
 
     assert_equal [ [ "site-key", 1 ] ] * 2, shown
+  end
+
+  test "with keys set, a submission whose token Cloudflare does not confirm reaches the host's handler marked as a bot" do
+    KeystoneUi::Pages.turnstile_site_key = "site-key"
+    KeystoneUi::Pages.turnstile_secret_key = "secret-key"
+
+    KeystoneUi::Pages::Turnstile.stub(:confirmed?, false) do
+      post @address, params: { name: "Ada", email: "ada@example.com", "cf-turnstile-response" => "token" }
+    end
+
+    assert_equal [ true ], @received.map(&:bot)
   end
 end
