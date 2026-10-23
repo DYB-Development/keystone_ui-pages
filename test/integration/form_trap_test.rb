@@ -31,4 +31,10 @@ class KeystoneUi::Pages::FormTrapTest < ActionDispatch::IntegrationTest
 
     assert_equal [ true ], @received.map(&:bot)
   end
+
+  test "a submission with the trap field empty reaches the host's handler marked as not a bot" do
+    post @address, params: { name: "Ada", email: "ada@example.com", keystone_ui_pages_trap: "" }
+
+    assert_equal [ false ], @received.map(&:bot)
+  end
 end
