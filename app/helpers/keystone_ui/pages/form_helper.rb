@@ -8,7 +8,7 @@ module KeystoneUi
       FIELD_TYPES = { "text" => :text, "email" => :email, "long_text" => :textarea, "choice" => :select, "checkbox" => :checkbox }.freeze
       TOKEN_PLACEHOLDER = "keystone-ui-pages-form-token"
 
-      def pages_form(form_name:, fields:, submit_label:, thank_you:, element_id:, version:, problems: {}, values: {})
+      def pages_form(form_name:, fields:, submit_label:, thank_you:, element_id:, version:, after_submitting: nil, next_address: nil, problems: {}, values: {})
         content = safe_join(fields.map { |field| form_field(field, problems, values) } + [ ui_button(label: submit_label) ])
         return tag.div(content, class: "ks-form") unless version
 

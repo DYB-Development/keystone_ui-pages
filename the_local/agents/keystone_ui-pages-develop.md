@@ -86,6 +86,10 @@ inherit from the base controller, so define it there.
   field and the visitor's values, never reaching the handler. It otherwise answers
   with the form's thank-you message in a `turbo-frame` named after the form,
   inside the host's page layout, so a page running Turbo swaps only the form.
+  A form set to `address` answers a successful submission with a 303 redirect
+  there, after the handler runs. A page whose drawing holds a form adds the
+  forms script to `content_for :head`, which turns that redirect into a whole
+  page visit on a page running Turbo; refusals still answer in place.
   The gem stores nothing.
 - **Views and clicks handed to the host**: a page opened at `/pages/:slug` whose place has
   a handler loads the reporting script, which sends its view once it loads and
@@ -223,7 +227,9 @@ inherit from the base controller, so define it there.
 - The built-in Form element (`:form`) holds a form name, a list of fields (each
   a label, a field name, a kind of `text`, `email`, `long_text`, `choice` or
   `checkbox`, the choices of a `choice` field separated by commas, and whether
-  it is required), a submit label and a thank-you message. A published form
+  it is required), a submit label, a thank-you message, and what happens after a
+  successful submission: `thank_you` (the default) or `address`, which sends the
+  visitor to the address the editor sets. A published form
   posts to `POST /pages/:slug/versions/:number/forms/:element_id`. Its drawing
   is cached with a placeholder token, and each request puts in the visitor's
   own forgery token, so the host's forgery protection stays on. A published form

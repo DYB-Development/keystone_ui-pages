@@ -81,7 +81,9 @@ module KeystoneUi
                       default: [ { "label" => "Name", "name" => "name", "kind" => "text" },
                                  { "label" => "Email", "name" => "email", "kind" => "email", "required" => "true" } ] },
                     { key: :submit_label, label: "Submit label", kind: :text, default: "Send" },
-                    { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." } ])
+                    { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." },
+                    { key: :after_submitting, label: "After submitting", kind: :one_of, options: %w[thank_you address], default: "thank_you" },
+                    { key: :next_address, label: "Address to send the visitor to", kind: :address } ])
         catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
           fields: [ { key: :items, label: "Questions", kind: :list,
                       entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],

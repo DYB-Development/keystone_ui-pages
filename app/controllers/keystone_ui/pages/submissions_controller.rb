@@ -25,6 +25,8 @@ module KeystoneUi
         return render(:refused, status: :unprocessable_entity, locals: { form: form, version: version, problems: problems, values: values }) if problems.any?
 
         handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: Submissions.delivered(form, values), request: request))
+        return redirect_to(Submissions.next_address(form), status: :see_other, allow_other_host: true) if Submissions.next_address(form)
+
         @element_id = form["id"]
         @thank_you = Submissions.thank_you(form)
       end

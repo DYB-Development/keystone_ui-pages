@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- An editor chooses on each form whether a successful submission shows the thank-you message or sends the visitor to an address, which leaves the page even when it runs Turbo. Refusals still show their errors in place.
 - A published form is hidden in print, so no PDF and no page printed from the browser shows it.
 - A form field can be a choice, drawn as a menu of choices the editor lists separated by commas, or a checkbox, handed to the handler as `true` or `false`. A choice that is not one of the field's choices is refused.
 - A form submission missing a required field or holding a malformed email is refused before the handler, and the visitor sees the form again in place with an error under each failed field and their values kept.
