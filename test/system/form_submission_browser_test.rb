@@ -28,4 +28,15 @@ class KeystoneUi::Pages::FormSubmissionBrowserTest < KeystoneUi::Pages::Applicat
     assert_equal [ true, true, false ],
       [ page.has_text?("Thanks, we will be in touch."), page.evaluate_script("window.stayedOnPage === true && !!document.querySelector('h1')"), page.has_css?("form.ks-form", wait: 0) ]
   end
+
+  test "a form submitted from a page at the engine's address and from a page drawn in the host's own view both reach the handler" do
+    [ [ "/pages/contact", "Ada" ], [ "/products/contact", "Bo" ] ].each do |path, name|
+      visit path
+      fill_in "name", with: name
+      click_on "Send"
+      page.has_text?("Thanks, we will be in touch.")
+    end
+
+    assert_equal %w[Ada Bo], @received.map { |values| values["name"] }
+  end
 end
