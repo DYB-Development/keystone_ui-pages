@@ -20,9 +20,18 @@ module KeystoneUi
         { form_name: form_name(form, catalog: catalog), fields: fields, submit_label: setting(form, :submit_label, catalog), thank_you: thank_you(form, catalog: catalog) }
       end
 
+      def choices(text)
+        text.to_s.split(",").map(&:strip).reject(&:empty?)
+      end
+
       def accepted(form, submitted, catalog: Pages.catalog)
         names = Array(setting(form, :fields, catalog)).map { |field| field["name"].to_s }
         submitted.to_unsafe_h.slice(*names)
+      end
+
+      def delivered(form, values, catalog: Pages.catalog)
+        checkboxes = Array(setting(form, :fields, catalog)).select { |field| field["kind"] == "checkbox" }.map { |field| field["name"].to_s }
+        values.merge(checkboxes.to_h { |name| [ name, values[name].to_s == "1" ] })
       end
 
       def problems(form, values, catalog: Pages.catalog)
@@ -35,7 +44,9 @@ module KeystoneUi
       private_class_method def problem(field, value)
         return "Fill this in" if field["required"].to_s == "true" && value.blank?
 
-        "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
+        return "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
+
+        "Choose one of the options" if field["kind"] == "choice" && value.present? && !choices(field["choices"]).include?(value)
       end
 
       private_class_method def setting(form, key, catalog)

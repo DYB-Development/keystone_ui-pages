@@ -148,9 +148,15 @@ class KeystoneUi::PagesTest < Minitest::Test
     form = keystone_elements.find(:form)
     fields = form.fields.find { |field| field[:key] == :fields }
 
-    assert_equal [ "Form", %i[form_name fields submit_label thank_you], %i[label name kind required], %w[text email long_text], :yes_or_no ],
+    assert_equal [ "Form", %i[form_name fields submit_label thank_you], %i[label name kind choices required], %w[text email long_text choice checkbox], :yes_or_no ],
       [ form.name, form.fields.map { |field| field[:key] }, fields[:entry].map { |part| part[:key] },
         fields[:entry].find { |part| part[:key] == :kind }[:options], fields[:entry].find { |part| part[:key] == :required }[:kind] ]
+  end
+
+  def test_a_form_field_can_be_a_choice_with_its_choices_listed_or_a_checkbox
+    entry = keystone_elements.find(:form).fields.find { |field| field[:key] == :fields }[:entry]
+
+    assert_equal [ %w[choice checkbox], :text ], [ entry.find { |part| part[:key] == :kind }[:options] & %w[choice checkbox], entry.find { |part| part[:key] == :choices }&.[](:kind) ]
   end
 
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors

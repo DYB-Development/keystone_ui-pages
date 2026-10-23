@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- A form field can be a choice, drawn as a menu of choices the editor lists separated by commas, or a checkbox, handed to the handler as `true` or `false`. A choice that is not one of the field's choices is refused.
 - A form submission missing a required field or holding a malformed email is refused before the handler, and the visitor sees the form again in place with an error under each failed field and their values kept.
 - `register_place` takes `leaves_out:`, the catalog elements that place does not offer. The builder's element list, adding an element and moving a page to the place all respect it, and a key no catalog element has fails the app's boot.
 - `register_place` takes a `submissions:` handler, and a published form's submission is handed to it as a `KeystoneUi::Pages::Submission` holding the page, the version, the form's name, its element id, the values its version lists and the request. The visitor sees the form's thank-you message in place of the form. The gem stores nothing.
