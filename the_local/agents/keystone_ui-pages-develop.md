@@ -97,7 +97,9 @@ inherit from the base controller, so define it there.
   visitor the view check refuses the way the page is refused, and answers 404
   when the form is not in the version or the place has no handler. A required
   field left empty, an email field holding no email address, or a choice
-  that is not one of the field's choices, is refused with
+  that is not one of the field's choices, or a value longer than its kind
+  allows (text and choice 200 characters, email 254, long text 5000, checkbox
+  1), is refused with
   422 and the form drawn again in its frame with an error under each failed
   field and the visitor's values, never reaching the handler. It otherwise answers
   with the form's thank-you message in a `turbo-frame` named after the form,

@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- A form value longer than its kind allows (text and choice 200 characters, email 254, long text 5000) is refused with an error naming the limit, and fields a form does not list are dropped before any check.
 - `turnstile_site_key` and `turnstile_secret_key`: with them set, every form shows Cloudflare Turnstile and a submission Cloudflare does not confirm reaches the handler with `bot: true`. Unset, nothing is loaded from or sent to Cloudflare.
 - A registered place that offers the Form element without a `submissions:` handler fails the app's boot. A handler that raises is reported through `Rails.error`, and the visitor sees the form again with their values and a message that it was not sent.
 - Every form carries a hidden trap field, and a submission that fills it reaches the handler with `bot: true` while the visitor sees the normal answer.
