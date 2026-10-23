@@ -6,6 +6,7 @@ module KeystoneUi
   module Pages
     module Submissions
       TRAP_NAME = "keystone_ui_pages_trap"
+      LIMITS = { "text" => 200, "email" => 254, "long_text" => 5000, "choice" => 200, "checkbox" => 1 }.freeze
 
       module_function
 
@@ -52,6 +53,8 @@ module KeystoneUi
       end
 
       private_class_method def problem(field, value)
+        limit = LIMITS.fetch(field["kind"].presence || "text", LIMITS["text"])
+        return "Keep this to #{limit} characters or fewer" if value.length > limit
         return "Fill this in" if field["required"].to_s == "true" && value.blank?
 
         return "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
