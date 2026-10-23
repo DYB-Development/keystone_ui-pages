@@ -79,7 +79,10 @@ inherit from the base controller, so define it there.
   `form_name`, `element_id`, `values` (only the field names that version's form
   lists) and `request`. It keeps the host's forgery protection, refuses a
   visitor the view check refuses the way the page is refused, and answers 404
-  when the form is not in the version or the place has no handler. It answers
+  when the form is not in the version or the place has no handler. A required
+  field left empty, or an email field holding no email address, is refused with
+  422 and the form drawn again in its frame with an error under each failed
+  field and the visitor's values, never reaching the handler. It otherwise answers
   with the form's thank-you message in a `turbo-frame` named after the form,
   inside the host's page layout, so a page running Turbo swaps only the form.
   The gem stores nothing.
