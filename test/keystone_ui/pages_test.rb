@@ -148,7 +148,7 @@ class KeystoneUi::PagesTest < Minitest::Test
     form = keystone_elements.find(:form)
     fields = form.fields.find { |field| field[:key] == :fields }
 
-    assert_equal [ "Form", %i[form_name fields submit_label thank_you], %i[label name kind choices required], %w[text email long_text choice checkbox], :yes_or_no ],
+    assert_equal [ "Form", %i[form_name fields submit_label thank_you after_submitting next_address], %i[label name kind choices required], %w[text email long_text choice checkbox], :yes_or_no ],
       [ form.name, form.fields.map { |field| field[:key] }, fields[:entry].map { |part| part[:key] },
         fields[:entry].find { |part| part[:key] == :kind }[:options], fields[:entry].find { |part| part[:key] == :required }[:kind] ]
   end
@@ -157,6 +157,14 @@ class KeystoneUi::PagesTest < Minitest::Test
     entry = keystone_elements.find(:form).fields.find { |field| field[:key] == :fields }[:entry]
 
     assert_equal [ %w[choice checkbox], :text ], [ entry.find { |part| part[:key] == :kind }[:options] & %w[choice checkbox], entry.find { |part| part[:key] == :choices }&.[](:kind) ]
+  end
+
+  def test_a_form_chooses_between_showing_its_thank_you_message_and_sending_the_visitor_to_an_address
+    fields = keystone_elements.find(:form).fields
+
+    assert_equal [ :one_of, %w[thank_you address], "thank_you", :address ],
+      [ fields.find { |field| field[:key] == :after_submitting }&.[](:kind), fields.find { |field| field[:key] == :after_submitting }&.[](:options),
+        fields.find { |field| field[:key] == :after_submitting }&.[](:default), fields.find { |field| field[:key] == :next_address }&.[](:kind) ]
   end
 
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
