@@ -10,7 +10,11 @@ module KeystoneUi
         content = safe_join(fields.map { |field| form_field(field) } + [ ui_button(label: submit_label) ])
         return tag.div(content, class: "ks-form") unless version
 
-        ui_form(action: keystone_ui_pages.page_form_path(version.page.slug, version.number, element_id)) { token_placeholder + content }
+        content_tag("turbo-frame", ui_form(action: keystone_ui_pages.page_form_path(version.page.slug, version.number, element_id)) { token_placeholder + content }, id: form_frame_id(element_id))
+      end
+
+      def form_frame_id(element_id)
+        "keystone-ui-pages-form-#{element_id}"
       end
 
       def without_visitor_tokens(html)

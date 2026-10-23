@@ -16,3 +16,5 @@ gem "puma"
 gem "capybara"
 gem "selenium-webdriver"
 gem "tailwindcss-rails"
+# Loaded only by the test app layout that checks a form is answered in place.
+gem "turbo-rails"

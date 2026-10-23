@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dummy</title>
+    <%= csrf_meta_tags %>
+    <%= javascript_include_tag "turbo.min", type: "module" %>
+    <%= yield :head %>
+  </head>
+
+  <body data-host-layout>
+    <h1>Products</h1>
+    <%= yield %>
+  </body>
+</html>

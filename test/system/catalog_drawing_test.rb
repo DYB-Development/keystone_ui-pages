@@ -27,6 +27,7 @@ class KeystoneUi::Pages::CatalogDrawingTest < KeystoneUi::Pages::ApplicationSyst
     page.evaluate_script(<<~'JS')
       [...document.querySelectorAll(".ks-pages-element")].map((element) => {
         const drawn = element.cloneNode(true)
+        drawn.querySelectorAll("turbo-frame").forEach((frame) => frame.replaceWith(...frame.childNodes))
         drawn.querySelectorAll("form.ks-form").forEach((form) => {
           const fields = document.createElement("div")
           fields.className = form.className
