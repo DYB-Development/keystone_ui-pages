@@ -129,6 +129,7 @@ Each published page is at `http://localhost:3100/pages/<address>`, and the links
 | An exception lets a page through | Choose Public preview under Access exception in the builder, then act as Anonymous visitor | The page |
 | Unpublishing takes a page down | Choose Unpublish in the builder and reload the page's address | A refusal |
 | Archiving hides a page | Choose Archive in the page list, then Show archived and Restore | The page leaves the list and comes back as Unpublished |
+| A place leaves out an element | Open a Client portal page in the builder | No Form in the element list |
 | A form reaches its place's handler | Add a Form to a Marketing site page, publish it, open it and submit the form | The thank-you message, and a `Form submission on` line in the server log |
 
 ### Showing different content to each visitor
