@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "keystone_ui/pages/form_field_kinds"
+
 module KeystoneUi
   module Pages
     module KeystoneElements
@@ -75,7 +77,7 @@ module KeystoneUi
           fields: [ { key: :form_name, label: "Form name", kind: :text, default: "Contact" },
                     { key: :fields, label: "Fields", kind: :list,
                       entry: [ { key: :label, label: "Label", kind: :text }, { key: :name, label: "Field name", kind: :text },
-                               { key: :kind, label: "Kind", kind: :one_of, options: %w[text email long_text choice checkbox], default: "text" },
+                               { key: :kind, label: "Kind", kind: :one_of, options: FormFieldKinds.keys, default: "text" },
                                { key: :choices, label: "Choices, separated by commas", kind: :text },
                                { key: :required, label: "Required", kind: :yes_or_no } ],
                       default: [ { "label" => "Name", "name" => "name", "kind" => "text" },
