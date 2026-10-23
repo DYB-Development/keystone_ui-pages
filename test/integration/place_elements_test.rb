@@ -22,4 +22,14 @@ class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
   ensure
     KeystoneUi::Pages.catalog.leave_out(:quote)
   end
+
+  test "the builder's element list for a page holds only the elements its place offers" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", leaves_out: [ :form ])
+    page = KeystoneUi::Pages::Page.create!(name: "Monthly", slug: "monthly", place: "client_report")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    keys = JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["elements"].map { |element| element["key"] }
+    assert_equal [ false, true ], [ keys.include?("form"), keys.include?("button") ]
+  end
 end
