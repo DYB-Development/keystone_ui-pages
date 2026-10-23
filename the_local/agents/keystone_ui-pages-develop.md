@@ -70,7 +70,8 @@ inherit from the base controller, so define it there.
   what the place offers, and moving a page to a place that leaves out an
   element it holds is refused on its settings page. A key no catalog element
   has raises an `ArgumentError` when the app boots, checked after every
-  initializer and `after_initialize` block has run.
+  initializer and `after_initialize` block has run, and so does a registered
+  place that offers the Form element without a `submissions:` handler.
   Registered places are offered alongside any set with `places =`, and
   `places = nil` clears both.
 - **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
@@ -80,7 +81,10 @@ inherit from the base controller, so define it there.
   lists, with each checkbox as `true` or `false`), `request` and `bot`. Every
   form carries a trap field people cannot see, reach by keyboard, hear or have
   autofilled; a submission that fills it arrives with `bot: true`, and the
-  visitor still gets the normal answer, so the handler decides what to drop. It keeps the host's forgery protection, refuses a
+  visitor still gets the normal answer, so the handler decides what to drop.
+  A handler that raises is reported through `Rails.error` with `page_id` and
+  `form_name`, and the visitor gets the form back in place, with their values,
+  under a message saying it was not sent, never the thank-you or the address. It keeps the host's forgery protection, refuses a
   visitor the view check refuses the way the page is refused, and answers 404
   when the form is not in the version or the place has no handler. A required
   field left empty, an email field holding no email address, or a choice
