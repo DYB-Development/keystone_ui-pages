@@ -61,8 +61,21 @@ inherit from the base controller, so define it there.
   true. A page in a place registered with `slug: false` is never served at
   `/pages/:slug`, whatever the view check says. `events:` takes a handler the
   gem calls for each accepted view of the place's live pages; a place with no
-  handler reports nothing. Registered places are offered alongside any set with
-  `places =`, and `places = nil` clears both.
+  handler reports nothing. `submissions:` takes a handler the gem calls with a
+  `KeystoneUi::Pages::Submission` for each accepted form submission from the
+  place's pages; a place with no handler refuses every submission as not found.
+  Registered places are offered alongside any set with `places =`, and
+  `places = nil` clears both.
+- **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
+  finds the form in that version, live or older, and calls the place's
+  `submissions:` handler with a `Submission` holding `page`, `version`,
+  `form_name`, `element_id`, `values` (only the field names that version's form
+  lists) and `request`. It keeps the host's forgery protection, refuses a
+  visitor the view check refuses the way the page is refused, and answers 404
+  when the form is not in the version or the place has no handler. It answers
+  with the form's thank-you message in a `turbo-frame` named after the form,
+  inside the host's page layout, so a page running Turbo swaps only the form.
+  The gem stores nothing.
 - **Views and clicks handed to the host**: a page opened at `/pages/:slug` whose place has
   a handler loads the reporting script, which sends its view once it loads and
   a click on any link or button with the id of the element it sits in. Each
