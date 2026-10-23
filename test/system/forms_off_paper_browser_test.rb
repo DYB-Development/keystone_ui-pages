@@ -34,6 +34,12 @@ class KeystoneUi::Pages::FormsOffPaperBrowserTest < KeystoneUi::Pages::Applicati
     assert_equal false, page.evaluate_script("document.querySelector('form.ks-form').checkVisibility()")
   end
 
+  test "a page with a form shows the form on screen" do
+    visit "/pages/contact"
+
+    assert_equal true, page.evaluate_script("document.querySelector('form.ks-form').checkVisibility()")
+  end
+
   private
 
   def printed
