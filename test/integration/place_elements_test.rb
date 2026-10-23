@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
   teardown do
@@ -41,5 +42,17 @@ class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
     post "/pages/manage/pages/#{page.id}/elements", params: { key: "form", column_id: column_id }, as: :json
 
     assert_equal [ 422, [] ], [ response.status, page.reload.document["sections"][0]["rows"][0]["columns"][0]["elements"] ]
+  end
+
+  test "moving a page to a place that leaves out an element the page holds is refused on the settings page, naming the element" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", leaves_out: [ :form ])
+    page = KeystoneUi::Pages::Page.create!(name: "Contact", slug: "contact", place: "marketing")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "form", column_id: column_id))
+
+    patch "/pages/manage/pages/#{page.id}", params: { page: { name: "Contact", slug: "contact", place: "client_report" } }
+
+    assert_equal [ 422, true, "marketing" ], [ response.status, response.body.include?("Client report does not offer Form"), page.reload.place ]
   end
 end
