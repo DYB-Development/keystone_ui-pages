@@ -16,6 +16,8 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
   teardown do
     KeystoneUi::Pages.places = nil
+    KeystoneUi::Pages.view_check_method = nil
+    KeystoneUi::Pages.refusal_method = nil
   end
 
   test "a place's handler receives the page, the version and the visitor's request for each accepted submission" do
@@ -67,5 +69,16 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Ada" }
 
     assert_equal [ 404, 0 ], [ response.status, @received.size ]
+  end
+
+  test "a submission to a page the visitor may not view is refused the same way the page itself is" do
+    KeystoneUi::Pages.view_check_method = :may_view_page?
+    KeystoneUi::Pages.refusal_method = :refuse_page
+
+    get "/pages/contact", headers: { "X-Visitor" => "blocked" }
+    page_refusal = response.status
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }, headers: { "X-Visitor" => "blocked" }
+
+    assert_equal [ page_refusal, 0 ], [ response.status, @received.size ]
   end
 end

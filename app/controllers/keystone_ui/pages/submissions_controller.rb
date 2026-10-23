@@ -15,6 +15,7 @@ module KeystoneUi
         form = version && Operations.elements(version.document).find { |element| element["id"] == params[:element_id] && element["key"] == "form" }
         handler = form && KeystoneUi::Pages.submission_handler(page.place)
         return head(:not_found) unless handler
+        return refuse unless viewable?(page)
 
         handler.call(Submission.new(page: page, version: version, form_name: Submissions.form_name(form), element_id: form["id"], values: Submissions.accepted(form, params), request: request))
         head :no_content
