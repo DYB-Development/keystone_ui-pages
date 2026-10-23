@@ -77,7 +77,10 @@ inherit from the base controller, so define it there.
   finds the form in that version, live or older, and calls the place's
   `submissions:` handler with a `Submission` holding `page`, `version`,
   `form_name`, `element_id`, `values` (only the field names that version's form
-  lists, with each checkbox as `true` or `false`) and `request`. It keeps the host's forgery protection, refuses a
+  lists, with each checkbox as `true` or `false`), `request` and `bot`. Every
+  form carries a trap field people cannot see, reach by keyboard, hear or have
+  autofilled; a submission that fills it arrives with `bot: true`, and the
+  visitor still gets the normal answer, so the handler decides what to drop. It keeps the host's forgery protection, refuses a
   visitor the view check refuses the way the page is refused, and answers 404
   when the form is not in the version or the place has no handler. A required
   field left empty, an email field holding no email address, or a choice

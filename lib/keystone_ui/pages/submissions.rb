@@ -5,7 +5,13 @@ require "uri"
 module KeystoneUi
   module Pages
     module Submissions
+      TRAP_NAME = "keystone_ui_pages_trap"
+
       module_function
+
+      def bot?(submitted)
+        submitted[TRAP_NAME].present?
+      end
 
       def form_name(form, catalog: Pages.catalog)
         setting(form, :form_name, catalog)
