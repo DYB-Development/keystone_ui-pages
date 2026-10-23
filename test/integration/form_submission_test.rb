@@ -23,4 +23,10 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ @page, @page.live_version, "/pages/contact/versions/1/forms/#{@form_id}" ] ], @received.map { |submission| [ submission.page, submission.version, submission.request.path ] }
   end
+
+  test "a submission carries the form's name and each field's name and value" do
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com" }
+
+    assert_equal [ [ "Contact", { "name" => "Ada", "email" => "ada@example.com" } ] ], @received.map { |submission| [ submission.form_name, submission.values ] }
+  end
 end
