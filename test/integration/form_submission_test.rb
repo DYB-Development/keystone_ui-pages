@@ -4,6 +4,8 @@ require "test_helper"
 require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup do
     @received = []
     KeystoneUi::Pages.register_place("marketing", label: "Marketing site", submissions: ->(submission) { @received << submission })
@@ -94,5 +96,15 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     assert_equal [ 1, 422, 1 ], [ with_token, response.status, @received.size ]
   ensure
     ActionController::Base.allow_forgery_protection = false
+  end
+
+  test "accepting a submission adds no row to the gem's tables and queues no job" do
+    connection = ActiveRecord::Base.connection
+    rows = -> { connection.tables.grep(/\Akeystone_ui_pages_/).sum { |table| connection.select_value("SELECT COUNT(*) FROM #{table}").to_i } }
+    before = [ rows.call, enqueued_jobs.size ]
+
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+
+    assert_equal before, [ rows.call, enqueued_jobs.size ]
   end
 end
