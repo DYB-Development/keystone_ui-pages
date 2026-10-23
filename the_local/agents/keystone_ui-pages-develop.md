@@ -226,7 +226,8 @@ inherit from the base controller, so define it there.
   it is required), a submit label and a thank-you message. A published form
   posts to `POST /pages/:slug/versions/:number/forms/:element_id`. Its drawing
   is cached with a placeholder token, and each request puts in the visitor's
-  own forgery token, so the host's forgery protection stays on.
+  own forgery token, so the host's forgery protection stays on. A published form
+  is hidden in print, so no PDF and no page printed from the browser shows it.
 - `KeystoneUi::Pages.catalog.leave_out(:copy_button)` — removes elements from
   the palette by key. Takes several keys.
 
