@@ -39,4 +39,18 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal [ { "name" => "Ada" } ], @received.map(&:values)
   end
+
+  test "two places with two handlers each receive only their own pages' submissions, and either works when the other place is not registered" do
+    support = []
+    KeystoneUi::Pages.register_place("support", label: "Support", submissions: ->(submission) { support << submission.page.slug })
+    KeystoneUi::Pages::Page.create!(name: "Help", slug: "help", place: "support", document: @page.document).publish
+
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Bo" }
+    KeystoneUi::Pages.places = nil
+    KeystoneUi::Pages.register_place("support", label: "Support", submissions: ->(submission) { support << submission.page.slug })
+    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Cy" }
+
+    assert_equal [ [ "contact" ], %w[help help] ], [ @received.map { |submission| submission.page.slug }, support ]
+  end
 end
