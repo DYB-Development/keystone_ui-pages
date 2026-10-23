@@ -77,10 +77,11 @@ inherit from the base controller, so define it there.
   finds the form in that version, live or older, and calls the place's
   `submissions:` handler with a `Submission` holding `page`, `version`,
   `form_name`, `element_id`, `values` (only the field names that version's form
-  lists) and `request`. It keeps the host's forgery protection, refuses a
+  lists, with each checkbox as `true` or `false`) and `request`. It keeps the host's forgery protection, refuses a
   visitor the view check refuses the way the page is refused, and answers 404
   when the form is not in the version or the place has no handler. A required
-  field left empty, or an email field holding no email address, is refused with
+  field left empty, an email field holding no email address, or a choice
+  that is not one of the field's choices, is refused with
   422 and the form drawn again in its frame with an error under each failed
   field and the visitor's values, never reaching the handler. It otherwise answers
   with the form's thank-you message in a `turbo-frame` named after the form,
@@ -220,7 +221,8 @@ inherit from the base controller, so define it there.
   `placed: true` also passes `element_id:` and `version:` (nil in the builder)
   to the method, which the Form element uses to build its address.
 - The built-in Form element (`:form`) holds a form name, a list of fields (each
-  a label, a field name, a kind of `text`, `email` or `long_text`, and whether
+  a label, a field name, a kind of `text`, `email`, `long_text`, `choice` or
+  `checkbox`, the choices of a `choice` field separated by commas, and whether
   it is required), a submit label and a thank-you message. A published form
   posts to `POST /pages/:slug/versions/:number/forms/:element_id`. Its drawing
   is cached with a placeholder token, and each request puts in the visitor's
