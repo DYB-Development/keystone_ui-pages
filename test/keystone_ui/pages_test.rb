@@ -167,6 +167,15 @@ class KeystoneUi::PagesTest < Minitest::Test
         fields.find { |field| field[:key] == :after_submitting }&.[](:default), fields.find { |field| field[:key] == :next_address }&.[](:kind) ]
   end
 
+  def test_a_host_sets_a_turnstile_site_key_and_secret_key
+    KeystoneUi::Pages.turnstile_site_key = "site"
+    KeystoneUi::Pages.turnstile_secret_key = "secret"
+
+    assert_equal %w[site secret], [ KeystoneUi::Pages.turnstile_site_key, KeystoneUi::Pages.turnstile_secret_key ]
+  ensure
+    KeystoneUi::Pages.turnstile_site_key = KeystoneUi::Pages.turnstile_secret_key = nil
+  end
+
   def test_a_host_sets_its_controller_layouts_and_the_methods_that_check_editors_and_visitors
     settings = { base_controller: "ApplicationController", layout: "marketing", editor_layout: "admin",
                  edit_check_method: :may_edit_pages?, view_check_method: :may_view_page?,
