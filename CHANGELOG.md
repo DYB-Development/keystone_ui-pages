@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-23
+
 ### Added
 - A form value longer than its kind allows (text and choice 200 characters, email 254, long text 5000) is refused with an error naming the limit, and fields a form does not list are dropped before any check.
 - `turnstile_site_key` and `turnstile_secret_key`: with them set, every form shows Cloudflare Turnstile and a submission Cloudflare does not confirm reaches the handler with `bot: true`. Unset, nothing is loaded from or sent to Cloudflare.
