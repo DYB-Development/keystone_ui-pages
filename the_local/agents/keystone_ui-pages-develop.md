@@ -64,6 +64,13 @@ inherit from the base controller, so define it there.
   handler reports nothing. `submissions:` takes a handler the gem calls with a
   `KeystoneUi::Pages::Submission` for each accepted form submission from the
   place's pages; a place with no handler refuses every submission as not found.
+  `leaves_out:` takes catalog keys the place does not offer, such as
+  `[ :form ]`; every other catalog element is offered there, including ones
+  registered later. The builder's element list and adding an element use only
+  what the place offers, and moving a page to a place that leaves out an
+  element it holds is refused on its settings page. A key no catalog element
+  has raises an `ArgumentError` when the app boots, checked after every
+  initializer and `after_initialize` block has run.
   Registered places are offered alongside any set with `places =`, and
   `places = nil` clears both.
 - **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
