@@ -37,7 +37,7 @@ The builder opens in the editor's own mode and look. Its top bar has a Mode choi
 
 ## Printing and PDFs
 
-A printed page has a white background, keeps the colours of its charts and shaded cells, and does not split a section, a table row or a label and value row across pages. The builder's Print choice previews that layout.
+A printed page has no forms, a white background, keeps the colours of its charts and shaded cells, and does not split a section, a table row or a label and value row across pages. The builder's Print choice previews that layout.
 
 A host gets a published page as a PDF, drawn with the values it passes, and gets back a record whose `file` is kept in Active Storage:
 
