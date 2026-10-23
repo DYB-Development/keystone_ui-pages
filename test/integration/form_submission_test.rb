@@ -39,9 +39,9 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     @page.update!(document: KeystoneUi::Pages::Operations.set(@page.document, element_id: @form_id, field: "fields", value: fields))
     @page.publish
 
-    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", phone: "555-0100", admin: "1" }
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com", phone: "555-0100", admin: "1" }
 
-    assert_equal [ { "name" => "Ada" } ], @received.map(&:values)
+    assert_equal [ { "name" => "Ada", "email" => "ada@example.com" } ], @received.map(&:values)
   end
 
   test "two places with two handlers each receive only their own pages' submissions, and either works when the other place is not registered" do
@@ -49,17 +49,17 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("support", label: "Support", submissions: ->(submission) { support << submission.page.slug })
     KeystoneUi::Pages::Page.create!(name: "Help", slug: "help", place: "support", document: @page.document).publish
 
-    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }
-    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Bo" }
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com" }
+    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Bo", email: "bo@example.com" }
     KeystoneUi::Pages.places = nil
     KeystoneUi::Pages.register_place("support", label: "Support", submissions: ->(submission) { support << submission.page.slug })
-    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Cy" }
+    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Cy", email: "cy@example.com" }
 
     assert_equal [ [ "contact" ], %w[help help] ], [ @received.map { |submission| submission.page.slug }, support ]
   end
 
   test "a submission to a form not in the named version is refused as not found" do
-    post "/pages/contact/versions/1/forms/not-a-form", params: { name: "Ada" }
+    post "/pages/contact/versions/1/forms/not-a-form", params: { name: "Ada", email: "ada@example.com" }
 
     assert_equal [ 404, 0 ], [ response.status, @received.size ]
   end
@@ -68,7 +68,7 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("support", label: "Support")
     KeystoneUi::Pages::Page.create!(name: "Help", slug: "help", place: "support", document: @page.document).publish
 
-    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+    post "/pages/help/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com" }
 
     assert_equal [ 404, 0 ], [ response.status, @received.size ]
   end
@@ -79,7 +79,7 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     get "/pages/contact", headers: { "X-Visitor" => "blocked" }
     page_refusal = response.status
-    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }, headers: { "X-Visitor" => "blocked" }
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com" }, headers: { "X-Visitor" => "blocked" }
 
     assert_equal [ page_refusal, 0 ], [ response.status, @received.size ]
   end
@@ -89,9 +89,9 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     get "/pages/contact"
     form = Nokogiri::HTML(response.body).at_css("form.ks-form")
-    post form["action"], params: { name: "Ada", authenticity_token: form.at_css("input[name=authenticity_token]")["value"] }
+    post form["action"], params: { name: "Ada", email: "ada@example.com", authenticity_token: form.at_css("input[name=authenticity_token]")["value"] }
     with_token = @received.size
-    post form["action"], params: { name: "Bo" }
+    post form["action"], params: { name: "Bo", email: "bo@example.com" }
 
     assert_equal [ 1, 422, 1 ], [ with_token, response.status, @received.size ]
   ensure
@@ -103,7 +103,7 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     rows = -> { connection.tables.grep(/\Akeystone_ui_pages_/).sum { |table| connection.select_value("SELECT COUNT(*) FROM #{table}").to_i } }
     before = [ rows.call, enqueued_jobs.size ]
 
-    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com" }
 
     assert_equal before, [ rows.call, enqueued_jobs.size ]
   end
@@ -112,7 +112,7 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
     get "/pages/contact"
     drawn_frame = Nokogiri::HTML(response.body).at_css("turbo-frame:has(form.ks-form)")&.[]("id")
 
-    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada" }
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", email: "ada@example.com" }
     answer = Nokogiri::HTML(response.body)
 
     assert_equal [ "keystone-ui-pages-form-#{@form_id}", "keystone-ui-pages-form-#{@form_id}", "Thanks, we will be in touch." ],
