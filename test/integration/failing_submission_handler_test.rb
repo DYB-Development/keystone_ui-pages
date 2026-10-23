@@ -36,6 +36,17 @@ class KeystoneUi::Pages::FailingSubmissionHandlerTest < ActionDispatch::Integrat
       [ frame&.at_css(".ks-alert")&.text&.strip, frame&.css(".ks-form-field input")&.map { |input| input["value"] } ]
   end
 
+  test "a visitor whose submission the handler did not finish receiving never sees the thank-you message and is never sent to the editor's address" do
+    answers = [ "thank_you", "address" ].map do |after_submitting|
+      document = KeystoneUi::Pages::Operations.set(@page.document, element_id: @form_id, field: "after_submitting", value: after_submitting)
+      @page.update!(document: KeystoneUi::Pages::Operations.set(document, element_id: @form_id, field: "next_address", value: "/pages/next-steps"))
+      post address, params: { name: "Ada", email: "ada@example.com" }
+      [ response.status, response.location, response.body.include?("Thanks, we will be in touch.") ]
+    end
+
+    assert_equal [ [ 500, nil, false ] ] * 2, answers
+  end
+
   private
 
   def address
