@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 require "keystone_ui/pages/submissions"
+require "keystone_ui/pages/form_field_kinds"
 
 module KeystoneUi
   module Pages
     module FormHelper
-      FIELD_TYPES = { "text" => :text, "email" => :email, "long_text" => :textarea, "choice" => :select, "checkbox" => :checkbox }.freeze
       TOKEN_PLACEHOLDER = "keystone-ui-pages-form-token"
 
       def pages_form(form_name:, fields:, submit_label:, thank_you:, element_id:, version:, after_submitting: nil, next_address: nil, problems: {}, values: {}, failure: nil)
@@ -48,8 +48,8 @@ module KeystoneUi
 
       def form_field(field, problems, values)
         name = field[:name].to_s
-        ui_form_field(attribute: name, label: field[:label], type: FIELD_TYPES.fetch(field[:kind].to_s, :text), required: field[:required].to_s == "true",
-          errors: Array(problems[name]), value: values[name], options: Submissions.choices(field[:choices]).map { |choice| [ choice, choice ] })
+        ui_form_field(attribute: name, label: field[:label], type: FormFieldKinds.find(field[:kind]).drawn_as, required: field[:required].to_s == "true",
+          errors: Array(problems[name]), value: values[name], options: FormFieldKinds.choices(field[:choices]).map { |choice| [ choice, choice ] })
       end
     end
   end

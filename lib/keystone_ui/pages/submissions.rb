@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-require "uri"
+require "keystone_ui/pages/form_field_kinds"
 
 module KeystoneUi
   module Pages
     module Submissions
       TRAP_NAME = "keystone_ui_pages_trap"
-      LIMITS = { "text" => 200, "email" => 254, "long_text" => 5000, "choice" => 200, "checkbox" => 1 }.freeze
 
       module_function
 
@@ -31,18 +30,17 @@ module KeystoneUi
         setting(form, :next_address, catalog).presence if setting(form, :after_submitting, catalog) == "address"
       end
 
-      def choices(text)
-        text.to_s.split(",").map(&:strip).reject(&:empty?)
-      end
-
       def accepted(form, submitted, catalog: Pages.catalog)
         names = Array(setting(form, :fields, catalog)).map { |field| field["name"].to_s }
         submitted.to_unsafe_h.slice(*names)
       end
 
       def delivered(form, values, catalog: Pages.catalog)
-        checkboxes = Array(setting(form, :fields, catalog)).select { |field| field["kind"] == "checkbox" }.map { |field| field["name"].to_s }
-        values.merge(checkboxes.to_h { |name| [ name, values[name].to_s == "1" ] })
+        converted = Array(setting(form, :fields, catalog)).filter_map do |field|
+          kind = FormFieldKinds.find(field["kind"])
+          [ field["name"].to_s, kind.delivered.call(values[field["name"].to_s]) ] if kind.delivered
+        end
+        values.merge(converted.to_h)
       end
 
       def problems(form, values, catalog: Pages.catalog)
@@ -53,13 +51,11 @@ module KeystoneUi
       end
 
       private_class_method def problem(field, value)
-        limit = LIMITS.fetch(field["kind"].presence || "text", LIMITS["text"])
-        return "Keep this to #{limit} characters or fewer" if value.length > limit
+        kind = FormFieldKinds.find(field["kind"])
+        return "Keep this to #{kind.limit} characters or fewer" if value.length > kind.limit
         return "Fill this in" if field["required"].to_s == "true" && value.blank?
 
-        return "Enter an email address" if field["kind"] == "email" && value.present? && !value.match?(URI::MailTo::EMAIL_REGEXP)
-
-        "Choose one of the options" if field["kind"] == "choice" && value.present? && !choices(field["choices"]).include?(value)
+        kind.check&.call(value, field) if value.present?
       end
 
       private_class_method def setting(form, key, catalog)
