@@ -25,4 +25,10 @@ class KeystoneUi::Pages::FormTrapTest < ActionDispatch::IntegrationTest
     trap = Nokogiri::HTML(response.body).at_css("form.ks-form input[name=keystone_ui_pages_trap]")
     assert_equal [ "-1", "off", "true" ], [ trap&.[]("tabindex"), trap&.[]("autocomplete"), trap&.parent&.[]("aria-hidden") ]
   end
+
+  test "a submission with the trap field filled reaches the host's handler marked as a bot" do
+    post @address, params: { name: "Ada", email: "ada@example.com", keystone_ui_pages_trap: "https://spam.example" }
+
+    assert_equal [ true ], @received.map(&:bot)
+  end
 end

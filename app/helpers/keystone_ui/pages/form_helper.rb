@@ -7,7 +7,6 @@ module KeystoneUi
     module FormHelper
       FIELD_TYPES = { "text" => :text, "email" => :email, "long_text" => :textarea, "choice" => :select, "checkbox" => :checkbox }.freeze
       TOKEN_PLACEHOLDER = "keystone-ui-pages-form-token"
-      TRAP_NAME = "keystone_ui_pages_trap"
 
       def pages_form(form_name:, fields:, submit_label:, thank_you:, element_id:, version:, after_submitting: nil, next_address: nil, problems: {}, values: {})
         content = safe_join(fields.map { |field| form_field(field, problems, values) } + [ trap_field, ui_button(label: submit_label) ])
@@ -36,7 +35,7 @@ module KeystoneUi
       private
 
       def trap_field
-        tag.div(tag.input(type: "text", name: TRAP_NAME, tabindex: -1, autocomplete: "off"), class: "absolute -left-[10000px] h-px w-px overflow-hidden", aria: { hidden: true })
+        tag.div(tag.input(type: "text", name: Submissions::TRAP_NAME, tabindex: -1, autocomplete: "off"), class: "absolute -left-[10000px] h-px w-px overflow-hidden", aria: { hidden: true })
       end
 
       def token_placeholder
