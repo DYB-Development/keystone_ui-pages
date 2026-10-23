@@ -37,8 +37,8 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true, events: nil)
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events }
+      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil)
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions }
       end
 
       def place_settings
@@ -47,6 +47,10 @@ module KeystoneUi
 
       def slugged?(place)
         place_settings.dig(place.to_s, :slug) != false
+      end
+
+      def submission_handler(place)
+        place_settings.dig(place.to_s, :submissions)
       end
 
       def reported?(place)
