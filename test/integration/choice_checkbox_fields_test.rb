@@ -36,4 +36,10 @@ class KeystoneUi::Pages::ChoiceCheckboxFieldsTest < ActionDispatch::IntegrationT
 
     assert_equal [ 422, 0 ], [ response.status, @received.size ]
   end
+
+  test "the host's handler receives a checkbox field as checked or not checked" do
+    [ "1", "0" ].each { |ticked| post @address, params: { service: "Build", consent: ticked } }
+
+    assert_equal [ true, false ], @received.map { |values| values["consent"] }
+  end
 end

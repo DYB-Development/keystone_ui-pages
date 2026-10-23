@@ -29,6 +29,11 @@ module KeystoneUi
         submitted.to_unsafe_h.slice(*names)
       end
 
+      def delivered(form, values, catalog: Pages.catalog)
+        checkboxes = Array(setting(form, :fields, catalog)).select { |field| field["kind"] == "checkbox" }.map { |field| field["name"].to_s }
+        values.merge(checkboxes.to_h { |name| [ name, values[name].to_s == "1" ] })
+      end
+
       def problems(form, values, catalog: Pages.catalog)
         Array(setting(form, :fields, catalog)).each_with_object({}) do |field, found|
           message = problem(field, values[field["name"].to_s].to_s)
