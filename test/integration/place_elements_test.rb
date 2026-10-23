@@ -32,4 +32,14 @@ class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
     keys = JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])["elements"].map { |element| element["key"] }
     assert_equal [ false, true ], [ keys.include?("form"), keys.include?("button") ]
   end
+
+  test "adding an element the page's place leaves out is refused even when asked for outside the element list" do
+    KeystoneUi::Pages.register_place("client_report", label: "Client report", leaves_out: [ :form ])
+    page = KeystoneUi::Pages::Page.create!(name: "Monthly", slug: "monthly", place: "client_report")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+
+    post "/pages/manage/pages/#{page.id}/elements", params: { key: "form", column_id: column_id }, as: :json
+
+    assert_equal [ 422, [] ], [ response.status, page.reload.document["sections"][0]["rows"][0]["columns"][0]["elements"] ]
+  end
 end
