@@ -29,4 +29,14 @@ class KeystoneUi::Pages::FormSubmissionTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ "Contact", { "name" => "Ada", "email" => "ada@example.com" } ] ], @received.map { |submission| [ submission.form_name, submission.values ] }
   end
+
+  test "a submitted value whose name the form does not list in the version it was drawn from never reaches the handler" do
+    fields = [ { "label" => "Name", "name" => "name", "kind" => "text" }, { "label" => "Phone", "name" => "phone", "kind" => "text" } ]
+    @page.update!(document: KeystoneUi::Pages::Operations.set(@page.document, element_id: @form_id, field: "fields", value: fields))
+    @page.publish
+
+    post "/pages/contact/versions/1/forms/#{@form_id}", params: { name: "Ada", phone: "555-0100", admin: "1" }
+
+    assert_equal [ { "name" => "Ada" } ], @received.map(&:values)
+  end
 end
