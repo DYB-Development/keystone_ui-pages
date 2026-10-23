@@ -84,7 +84,15 @@ inherit from the base controller, so define it there.
   visitor still gets the normal answer, so the handler decides what to drop.
   A handler that raises is reported through `Rails.error` with `page_id` and
   `form_name`, and the visitor gets the form back in place, with their values,
-  under a message saying it was not sent, never the thank-you or the address. It keeps the host's forgery protection, refuses a
+  under a message saying it was not sent, never the thank-you or the address.
+- `KeystoneUi::Pages.turnstile_site_key = "..."` and
+  `KeystoneUi::Pages.turnstile_secret_key = "..."` — Cloudflare Turnstile keys.
+  With the site key set, every form shows Cloudflare's widget and a page holding
+  a form loads `https://challenges.cloudflare.com/turnstile/v0/api.js` through
+  `content_for :head`, so the host's content security policy must allow it.
+  With both set, each submission's token is confirmed with Cloudflare, and one
+  it does not confirm arrives with `bot: true` while the visitor gets the normal
+  answer. Unset, nothing is loaded from or sent to Cloudflare. It keeps the host's forgery protection, refuses a
   visitor the view check refuses the way the page is refused, and answers 404
   when the form is not in the version or the place has no handler. A required
   field left empty, an email field holding no email address, or a choice
