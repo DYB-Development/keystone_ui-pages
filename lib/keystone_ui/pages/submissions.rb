@@ -20,6 +20,10 @@ module KeystoneUi
         { form_name: form_name(form, catalog: catalog), fields: fields, submit_label: setting(form, :submit_label, catalog), thank_you: thank_you(form, catalog: catalog) }
       end
 
+      def next_address(form, catalog: Pages.catalog)
+        setting(form, :next_address, catalog).presence if setting(form, :after_submitting, catalog) == "address"
+      end
+
       def choices(text)
         text.to_s.split(",").map(&:strip).reject(&:empty?)
       end
