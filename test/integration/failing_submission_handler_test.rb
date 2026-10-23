@@ -28,6 +28,14 @@ class KeystoneUi::Pages::FailingSubmissionHandlerTest < ActionDispatch::Integrat
     Rails.error.unsubscribe(subscriber)
   end
 
+  test "a visitor whose submission raised an error in the handler sees a message in place of the form saying it was not sent, with their values kept" do
+    post address, params: { name: "Ada", email: "ada@example.com" }
+
+    frame = Nokogiri::HTML(response.body).at_css("turbo-frame#keystone-ui-pages-form-#{@form_id}")
+    assert_equal [ "Your form was not sent. Please try again.", %w[Ada ada@example.com] ],
+      [ frame&.at_css(".ks-alert")&.text&.strip, frame&.css(".ks-form-field input")&.map { |input| input["value"] } ]
+  end
+
   private
 
   def address
