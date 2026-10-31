@@ -4,7 +4,7 @@ require "application_system_test_case"
 
 class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSystemTestCase
   setup do
-    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence)
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
   end
 
   teardown do
@@ -85,5 +85,17 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     click_on "Back to builder"
 
     assert_current_path "/pages/manage/sequences/funnel/spring-sale?page_id=#{thanks.id}"
+  end
+
+  test "adding a page from the sequence's list opens it in the builder with the list showing the sequence as the host now answers it" do
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    within("[data-sequence-pages]") { click_on "Add page" }
+    fill_in "page[name]", with: "Thanks"
+    click_on "Create"
+
+    assert_equal [ "Thanks", [ "1 Landing", "2 Thanks" ], [ "2 Thanks" ] ],
+      [ find("[data-builder-top-bar] h1", text: "Thanks").text, all("[data-sequence-page]").map { |entry| entry.text.squish }, all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish } ]
   end
 end
