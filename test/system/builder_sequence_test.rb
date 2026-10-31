@@ -98,4 +98,16 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_equal [ "Thanks", [ "1 Landing", "2 Thanks" ], [ "2 Thanks" ] ],
       [ find("[data-builder-top-bar] h1", text: "Thanks").text, all("[data-sequence-page]").map { |entry| entry.text.squish }, all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish } ]
   end
+
+  test "adding a page with no name from an empty sequence gives it the place's default name and tells the host no page was open" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, default_name: "Step", sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+    ApplicationController.funnel_additions = []
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    within("[data-sequence-pages]") { click_on "Add page" }
+    click_on "Create"
+    find("[data-builder-top-bar] h1", text: "Step 1")
+
+    assert_equal [ [ "spring-sale", "Step 1", nil ] ], ApplicationController.funnel_additions.map { |key, added, open| [ key, added.name, open ] }
+  end
 end
