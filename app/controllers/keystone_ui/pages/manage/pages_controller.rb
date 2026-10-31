@@ -10,7 +10,7 @@ module KeystoneUi
           @archived = params[:archived].present?
           @place = chosen_place
           @pages = owned_pages.public_send(@archived ? :archived : :current).order(:name)
-          @pages = @pages.where(place: @place) if @place
+          @pages = @place ? @pages.where(place: @place) : @pages.where.not(place: KeystoneUi::Pages.unlisted_places).or(@pages.where(place: nil))
           @printable = Printer.chrome.present?
         end
 

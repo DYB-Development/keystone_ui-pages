@@ -38,8 +38,12 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [])
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym) }
+      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true)
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed }
+      end
+
+      def unlisted_places
+        place_settings.reject { |_key, settings| settings[:listed] }.keys
       end
 
       def place_settings
