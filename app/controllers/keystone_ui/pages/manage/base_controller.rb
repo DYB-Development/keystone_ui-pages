@@ -19,6 +19,10 @@ module KeystoneUi
           refuse unless editor?
         end
 
+        def local_address?(address)
+          address.to_s.match?(%r{\A/(?![/\\])})
+        end
+
         def editor?
           KeystoneUi::Pages.edit_check_method.nil? || send(KeystoneUi::Pages.edit_check_method)
         end

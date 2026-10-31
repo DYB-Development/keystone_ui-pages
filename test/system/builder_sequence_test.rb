@@ -75,4 +75,15 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     assert_current_path "/pages/manage/sequences/funnel/spring-sale?page_id=#{thanks.id}"
   end
+
+  test "going back to the builder from a page's history opened on the sequence screen brings staff back to the sequence screen on that page" do
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    thanks = KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
+    visit "/pages/manage/sequences/funnel/spring-sale?page_id=#{thanks.id}"
+    within("[data-builder-top-bar]") { click_on "History" }
+
+    click_on "Back to builder"
+
+    assert_current_path "/pages/manage/sequences/funnel/spring-sale?page_id=#{thanks.id}"
+  end
 end

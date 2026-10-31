@@ -1,7 +1,7 @@
 <%= ui_page(max_width: :xl) do %>
   <%= ui_page_header(title: "#{@page.name} history") %>
 
-  <div class="mb-6"><%= ui_button(label: "Back to builder", href: manage_page_path(@page), variant: :secondary) %></div>
+  <div class="mb-6"><%= ui_button(label: "Back to builder", href: @builder_url, variant: :secondary) %></div>
 
   <div class="ks-table overflow-x-auto">
     <table class="relative min-w-full divide-y divide-gray-300 dark:divide-white/15">

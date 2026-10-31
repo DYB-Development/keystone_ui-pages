@@ -75,10 +75,6 @@ module KeystoneUi
         def chosen_place
           params[:place] if KeystoneUi::Pages.places.key?(params[:place])
         end
-
-        def local_address?(address)
-          address.to_s.match?(%r{\A/(?![/\\])})
-        end
       end
     end
   end

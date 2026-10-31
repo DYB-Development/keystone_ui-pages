@@ -7,7 +7,7 @@
 <div data-page-builder>
   <% if @page %>
     <% here = manage_sequence_path(params[:place], params[:key], page_id: @page.id) %>
-    <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, publish_url: publish_manage_page_path(@page, return_to: here), unpublish_url: (unpublish_manage_page_path(@page, return_to: here) if @page.live_version)).merge(sequence_screen)) %>
+    <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, history_url: manage_page_versions_path(@page, return_to: here), publish_url: publish_manage_page_path(@page, return_to: here), unpublish_url: (unpublish_manage_page_path(@page, return_to: here) if @page.live_version)).merge(sequence_screen)) %>
   <% else %>
     <%= react_ui("keystone_ui_pages/editor", sequence_screen) %>
   <% end %>
