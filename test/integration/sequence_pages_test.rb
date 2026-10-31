@@ -53,4 +53,14 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal "Step 1", Nokogiri::HTML(response.body).at_css("input[name='page[name]']")&.[]("placeholder")
   end
+
+  test "a page added to a sequence is served at its own public address once it is published" do
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing" } }
+    page = KeystoneUi::Pages::Page.find_by(name: "Landing")
+    post "/pages/manage/pages/#{page.id}/publish"
+
+    get "/pages/#{page.slug}"
+
+    assert_response :success
+  end
 end
