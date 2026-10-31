@@ -4,6 +4,7 @@ require "test_helper"
 
 class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
   setup do
+    ApplicationController.funnel_additions = []
     KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
   end
 
@@ -20,5 +21,13 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     page = KeystoneUi::Pages::Page.find_by(name: "Landing")
     assert_equal [ "funnel", team, "spring-sale" ], [ page.place, page.owner, page.sequence_key ]
+  end
+
+  test "adding a page calls the host's add page method with the sequence's key, the new page and the page that was open" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Thanks" }, after_id: landing.id }
+
+    assert_equal [ [ "spring-sale", KeystoneUi::Pages::Page.find_by(name: "Thanks"), landing ] ], ApplicationController.funnel_additions
   end
 end
