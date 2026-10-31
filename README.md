@@ -106,6 +106,31 @@ They fire whether or not the event address accepts the view or click, and only o
 
 Plausible's `plausible("Page click", { props: event.detail })` or Meta's `fbq("trackCustom", "PageClick", event.detail)` go in the same listeners.
 
+## Showing a host's sequence in the builder
+
+A host that keeps pages in an order of its own, such as the pages of a funnel, names a method on its controller that answers a sequence by its key:
+
+```ruby
+KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence)
+```
+
+The gem calls the method on the editor's controller with the sequence's key. It answers a `KeystoneUi::Pages::Sequence` holding `title`, `pages` and `back_url`, or nil to refuse:
+
+```ruby
+def funnel_sequence(key)
+  funnel = current_team.funnels.find_by(key: key)
+  return unless funnel
+
+  KeystoneUi::Pages::Sequence.new(title: funnel.name, pages: funnel.pages_in_order, back_url: funnel_path(funnel))
+end
+```
+
+`pages` are the sequence's pages in the order a visitor goes through them. The gem keeps no order of its own, so the list shows the pages exactly as the method answers them.
+
+Staff open a sequence at `/pages/manage/sequences/<place>/<key>`. The builder shows the sequence's first page, with the sequence's title and its pages numbered from 1 beside it and the page being built marked. Choosing a page in the list opens it with the same list beside it. A sequence with no pages shows an empty page area saying no page has been added yet. The Back link goes to `back_url`, and a nil answer, or a place with no `sequence_method:`, gets the host's refusal.
+
+Each page keeps a `sequence_key`, set when the page is made and refused if it is changed later. Pages made in the page list have none, and their builder is unchanged.
+
 ## Trying it locally
 
 The test app runs the builder in development with sample places, access exceptions and a view check, so each case below can be shown without a host app:

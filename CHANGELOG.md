@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `register_place` takes `sequence_method:`, a host controller method called with a sequence's key that answers a `KeystoneUi::Pages::Sequence` holding `title`, `pages` in order and `back_url`, or nil to refuse.
+- The builder opens a sequence at `/pages/manage/sequences/<place>/<key>`, showing the sequence's title and its numbered pages beside the page being built, which is marked. Choosing a page opens it with the same list, a sequence with no pages shows an empty page area, and Back goes to the sequence's `back_url`.
+- A page keeps a `sequence_key`, set when it is made and refused if changed later. Run `bin/rails keystone_ui_pages:install:migrations` and migrate to add it.
+
 ## [0.9.0] - 2026-10-23
 
 ### Added
