@@ -31,6 +31,7 @@ KeystoneUi::Pages::Engine.routes.draw do
       end
     end
     get "sequences/:place/:key", to: "sequences#show", as: :sequence
+    get "sequences/:place/:key/pages/new", to: "sequence_pages#new", as: :new_sequence_page
     post "sequences/:place/:key/pages", to: "sequence_pages#create", as: :sequence_pages
   end
 

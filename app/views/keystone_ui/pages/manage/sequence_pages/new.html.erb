@@ -1,0 +1,12 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "New page") %>
+
+  <%= ui_form(action: manage_sequence_pages_path(params[:place], params[:key]), method: :post) do %>
+    <%= hidden_field_tag "after_id", params[:after_id] if params[:after_id] %>
+
+    <label class="ks-label mb-1">Name</label>
+    <%= ui_input(name: "page[name]", placeholder: @default_name) %>
+
+    <%= ui_button(label: "Create", type: :submit) %>
+  <% end %>
+<% end %>

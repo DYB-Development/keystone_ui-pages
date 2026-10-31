@@ -45,4 +45,12 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to "/pages/manage/sequences/funnel/spring-sale?page_id=#{KeystoneUi::Pages::Page.find_by(name: "Landing").id}"
   end
+
+  test "the form for adding a page to a sequence shows the place's default name as the Name field's placeholder" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, default_name: "Step", sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new"
+
+    assert_equal "Step 1", Nokogiri::HTML(response.body).at_css("input[name='page[name]']")&.[]("placeholder")
+  end
 end
