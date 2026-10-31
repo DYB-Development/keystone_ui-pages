@@ -8,7 +8,7 @@ module KeystoneUi
           @sequence = sequence(params[:place], params[:key])
           return refuse unless @sequence
 
-          @page = @sequence.pages.first
+          @page = params[:page_id] ? @sequence.pages.find { |page| page.id.to_s == params[:page_id] } : @sequence.pages.first
         end
       end
     end

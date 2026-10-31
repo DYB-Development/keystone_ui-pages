@@ -8,7 +8,7 @@ export default function SequencePages({ sequence }) {
         {sequence.pages.map((entry, index) => (
           <li key={entry.id} data-sequence-page aria-current={entry.current ? "page" : undefined}
             className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm aria-[current=page]:bg-(--ks-color-accent)/10 aria-[current=page]:font-semibold">
-            <span className="text-(--ks-color-icon)">{index + 1}</span> <span className="truncate">{entry.name}</span>
+            <span className="text-(--ks-color-icon)">{index + 1}</span> <a href={entry.url} className="truncate hover:underline">{entry.name}</a>
           </li>
         ))}
       </ol>
