@@ -40,4 +40,12 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_equal [ "Thanks", [ "1 Landing", "2 Thanks" ], [ "2 Thanks" ] ],
       [ find("[data-builder-top-bar] h1", text: "Thanks").text, all("[data-sequence-page]").map { |entry| entry.text.squish }, all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish } ]
   end
+
+  test "the builder's Back link on a sequence goes to the back address the host answered" do
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal "/funnels/spring-sale", URI(find("[data-builder-top-bar] a", text: "Back")[:href]).path
+  end
 end
