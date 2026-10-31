@@ -4,7 +4,10 @@ module KeystoneUi
   module Pages
     module Manage
       class SequencePagesController < BaseController
+        before_action :find_sequence
+
         def create
+          open_page = @sequence.pages.find { |page| page.id.to_s == params[:after_id].to_s }
           page = Page.create!(params.require(:page).permit(:name).merge(place: params[:place], sequence_key: params[:key], owner: page_owner))
           send(KeystoneUi::Pages.place_settings.dig(params[:place], :adds_page_method), params[:key], page, open_page)
           head :created
@@ -12,8 +15,9 @@ module KeystoneUi
 
         private
 
-        def open_page
-          sequence(params[:place], params[:key]).pages.find { |page| page.id.to_s == params[:after_id].to_s }
+        def find_sequence
+          @sequence = sequence(params[:place], params[:key])
+          refuse unless @sequence
         end
       end
     end
