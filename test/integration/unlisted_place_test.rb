@@ -28,4 +28,13 @@ class KeystoneUi::Pages::UnlistedPlaceTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Old pricing" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row.css("td").first.text.strip }
   end
+
+  test "the Create page form's place menu does not offer an unlisted place" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false)
+
+    get "/pages/manage/pages/new"
+
+    assert_equal [ "Marketing site" ], Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| option.text.strip }.reject(&:empty?)
+  end
 end

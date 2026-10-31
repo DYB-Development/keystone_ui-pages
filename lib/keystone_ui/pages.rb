@@ -42,6 +42,10 @@ module KeystoneUi
         place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed }
       end
 
+      def listed_places
+        places.except(*unlisted_places)
+      end
+
       def unlisted_places
         place_settings.reject { |_key, settings| settings[:listed] }.keys
       end
