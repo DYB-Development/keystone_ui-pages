@@ -96,6 +96,8 @@ linking editors to the builder or drawing a page in the host's screens.
    - `/pages/manage/pages/:id` is the builder for one page.
    - `/pages/manage/sequences/:place/:key` is the builder for a host's sequence
      of pages.
+   - `/pages/manage/sequences/:place/:key/pages/new` is the form the sequence's
+     Add page button opens.
    - `/pages/:slug` is a published page, drawn for visitors.
 
    Inside the host app, the engine's route helpers are reached through
@@ -158,6 +160,11 @@ linking editors to the builder or drawing a page in the host's screens.
 8. Check the install. Boot the app, open `/pages/manage/pages`, create a page,
    add an element in the builder, publish it, and open `/pages/<slug>`. The page
    list shows a PDF link only when Chrome or Chromium was found.
+
+   Boot stops with an `ArgumentError` naming a place when that place's settings
+   are incomplete: it leaves out an element no catalog entry has, it offers the
+   Form element with no submissions handler, or it answers sequences with no
+   add page method. Fixing the place belongs to `keystone_ui-pages-develop`.
 
 ## Conventions
 

@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   helper_method :testimonial
+  cattr_accessor :funnel_additions, default: []
 
   def testimonial(quote:)
     helpers.tag.blockquote(quote, class: "testimonial")
@@ -41,6 +42,10 @@ class ApplicationController < ActionController::Base
     return if request.headers["X-Sequence"] == "refused"
 
     KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}")
+  end
+
+  def add_funnel_page(key, page, after)
+    funnel_additions << [ key, page, after ]
   end
 
   def may_edit_pages?

@@ -56,8 +56,8 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
 
     assert_equal(
-      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil },
-        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil } },
+      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil },
+        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil } },
       KeystoneUi::Pages.place_settings
     )
   end
@@ -66,5 +66,19 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence)
 
     assert_equal :funnel_sequence, KeystoneUi::Pages.place_settings.dig("funnel", :sequence_method)
+  end
+
+  test "a place registered with an add page method keeps the name of the host method that records a page added to a sequence" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+
+    assert_equal :add_funnel_page, KeystoneUi::Pages.place_settings.dig("funnel", :adds_page_method)
+  end
+
+  test "checking the places raises an error naming a place that answers sequences without an add page method" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, leaves_out: [ :form ], sequence_method: :funnel_sequence)
+
+    error = assert_raises(ArgumentError) { KeystoneUi::Pages.check_places! }
+
+    assert_equal "The place funnel answers sequences but has no add page method", error.message
   end
 end
