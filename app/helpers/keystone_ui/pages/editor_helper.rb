@@ -38,6 +38,10 @@ module KeystoneUi
         }
       end
 
+      def sequence_props(sequence)
+        { title: sequence.title, pages: sequence.pages.map { |page| { id: page.id, name: page.name } } }
+      end
+
       def editor_canvas(page)
         drawn_document(page.document, editing: true, values: Values.sample(page, chosen_sample(page)))
       end

@@ -1,0 +1,8 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "keystone_ui/react", defer: true %>
+  <%= javascript_include_tag "keystone_ui_pages/editor", defer: true %>
+<% end %>
+
+<div data-page-builder>
+  <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, publish_url: publish_manage_page_path(@page), unpublish_url: (unpublish_manage_page_path(@page) if @page.live_version), sequence: sequence_props(@sequence))) %>
+</div>

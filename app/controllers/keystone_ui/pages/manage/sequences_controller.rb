@@ -8,7 +8,7 @@ module KeystoneUi
           @sequence = sequence(params[:place], params[:key])
           return refuse unless @sequence
 
-          head :ok
+          @page = @sequence.pages.first
         end
       end
     end
