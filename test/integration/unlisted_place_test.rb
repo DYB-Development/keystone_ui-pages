@@ -57,4 +57,13 @@ class KeystoneUi::Pages::UnlistedPlaceTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, "This page is not available" ], [ response.status, response.body ]
   end
+
+  test "creating a page in an unlisted place from the Create page form is refused and makes no page" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false)
+
+    post "/pages/manage/pages", params: { page: { name: "Landing", slug: "landing", place: "funnel" } }
+
+    assert_equal [ 403, 0 ], [ response.status, KeystoneUi::Pages::Page.count ]
+  end
 end

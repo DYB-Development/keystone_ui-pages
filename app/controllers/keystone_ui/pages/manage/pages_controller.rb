@@ -23,6 +23,8 @@ module KeystoneUi
 
         def create
           page = Page.new(params.require(:page).permit(:name, :slug, :place).merge(owner: page_owner))
+          return refuse if KeystoneUi::Pages.unlisted_places.include?(page.place)
+
           return render(:new, status: :unprocessable_entity) unless page.save
 
           redirect_to manage_page_path(page)
