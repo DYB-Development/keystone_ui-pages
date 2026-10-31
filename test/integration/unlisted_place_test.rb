@@ -17,4 +17,15 @@ class KeystoneUi::Pages::UnlistedPlaceTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Pricing" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row.css("td").first.text.strip }
   end
+
+  test "the archived page list leaves out the pages of an unlisted place" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false)
+    KeystoneUi::Pages::Page.create!(name: "Old pricing", slug: "old-pricing", place: "marketing").archive
+    KeystoneUi::Pages::Page.create!(name: "Old landing", slug: "old-landing", place: "funnel").archive
+
+    get "/pages/manage/pages", params: { archived: 1 }
+
+    assert_equal [ "Old pricing" ], Nokogiri::HTML(response.body).css("[data-page]").map { |row| row.css("td").first.text.strip }
+  end
 end
