@@ -12,6 +12,7 @@ develop:
   - KeystoneUi::Pages.places
   - KeystoneUi::Pages.access_exceptions
   - KeystoneUi::Pages.register_place
+  - KeystoneUi::Pages::Sequence
   - KeystoneUi::Pages.values_method
   - KeystoneUi::Pages.edit_check_method
   - KeystoneUi::Pages.refusal_method
@@ -30,6 +31,7 @@ develop:
   - KeystoneUi::Pages.catalog.register
   - KeystoneUi::Pages.catalog.leave_out
   - /manage/pages
+  - /manage/sequences
 
 sources:
   - README.md
@@ -42,6 +44,7 @@ sources:
   - lib/keystone_ui/pages/pdfs.rb
   - lib/keystone_ui/pages/pdf_document.rb
   - lib/keystone_ui/pages/printer.rb
+  - lib/keystone_ui/pages/sequence.rb
   - app/helpers/keystone_ui/pages/host_helper.rb
   - app/helpers/keystone_ui/pages/drawing_helper.rb
   - app/helpers/keystone_ui/pages/editor_helper.rb
@@ -49,6 +52,7 @@ sources:
   - app/controllers/keystone_ui/pages/pages_controller.rb
   - app/controllers/keystone_ui/pages/manage/base_controller.rb
   - app/controllers/keystone_ui/pages/manage/pages_controller.rb
+  - app/controllers/keystone_ui/pages/manage/sequences_controller.rb
   - app/controllers/keystone_ui/pages/manage/lives_controller.rb
   - app/controllers/keystone_ui/pages/manage/pdfs_controller.rb
   - app/controllers/keystone_ui/pages/manage/versions_controller.rb
@@ -60,3 +64,4 @@ sources:
   - db/migrate/20261014120001_create_keystone_ui_pages_versions.rb
   - db/migrate/20261015130000_create_keystone_ui_pages_pdfs.rb
   - db/migrate/20261016120000_add_edit_history_to_keystone_ui_pages_pages.rb
+  - db/migrate/20261031033356_add_sequence_key_to_keystone_ui_pages_pages.rb

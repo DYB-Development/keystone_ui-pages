@@ -18,8 +18,9 @@ linking editors to the builder or drawing a page in the host's screens.
 
 - `bin/rails keystone_ui_pages:install:migrations` — copies the engine's
   migrations into the host's `db/migrate`. They create the pages, versions and
-  PDFs tables and add the edit history columns that Undo and Redo use. Safe to
-  re-run, since a migration already copied is skipped.
+  PDFs tables and add the pages' place, access exception, archived, sequence
+  and edit history columns. Safe to re-run, since a migration already copied is
+  skipped.
 - `bin/rails active_storage:install` — Rails' own task that copies Active
   Storage's migration. PDFs are kept as Active Storage attachments.
 - `mount KeystoneUi::Pages::Engine => "/pages"` — the line in
@@ -68,10 +69,18 @@ linking editors to the builder or drawing a page in the host's screens.
    production uses before choosing one.
 
    The engine's migrations create `keystone_ui_pages_pages`,
-   `keystone_ui_pages_versions` and `keystone_ui_pages_pdfs`, and add
-   `undo_history` and `undone_changes` to the pages table. Without those two
-   columns, every edit in the builder fails, since each edit is recorded for
-   Undo and Redo.
+   `keystone_ui_pages_versions` and `keystone_ui_pages_pdfs`, and add these
+   columns to the pages table:
+
+   - `undo_history` and `undone_changes`, which record each edit for Undo and
+     Redo. Without them, every edit in the builder fails.
+   - `place` and `access_exception`, which hold the place a page sits in and the
+     access exception an editor set on it.
+   - `archived_at`, set when a page is archived from the page list.
+   - `sequence_key`, which holds the host sequence a page was made for.
+
+   The engine's screens read every one of these columns, so run every copied
+   migration.
 
 4. Mount the engine in `config/routes.rb`:
 
@@ -85,14 +94,16 @@ linking editors to the builder or drawing a page in the host's screens.
    - `/pages/manage/pages` is the editor's page list.
    - `/pages/manage/pages/new` creates a page.
    - `/pages/manage/pages/:id` is the builder for one page.
+   - `/pages/manage/sequences/:place/:key` is the builder for a host's sequence
+     of pages.
    - `/pages/:slug` is a published page, drawn for visitors.
 
    Inside the host app, the engine's route helpers are reached through
    `keystone_ui_pages`, such as `keystone_ui_pages.manage_pages_path`.
 
 5. Prepare the two layouts. Live pages are drawn in the layout named by
-   `KeystoneUi::Pages.layout`, and the page list, the builder and the version
-   history in the one named by `KeystoneUi::Pages.editor_layout`. Both default
+   `KeystoneUi::Pages.layout`, and the page list, the builder, the sequence
+   screen and the version history in the one named by `KeystoneUi::Pages.editor_layout`. Both default
    to `application`. Each layout used must:
 
    - add `<%= keystone_theme_attributes %>` inside its `<html` tag, so the page
@@ -151,7 +162,7 @@ linking editors to the builder or drawing a page in the host's screens.
 ## Conventions
 
 - **Re-run the migration install after upgrading the gem.** A later version can
-  add migrations, as the edit history one was added, and they reach the host
+  add migrations, as the sequence key one was added, and they reach the host
   only through `bin/rails keystone_ui_pages:install:migrations` followed by
   `bin/rails db:migrate`.
 - **The engine registers itself with Keystone UI's Tailwind build.** On boot it

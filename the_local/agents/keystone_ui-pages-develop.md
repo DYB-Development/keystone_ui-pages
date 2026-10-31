@@ -1,7 +1,7 @@
 ---
 name: keystone_ui-pages-develop
-description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs, linking editors to the builder, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
-tools: Read, Write, Edit, Grep
+description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
+tools: Bash, Read, Write, Edit, Grep
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
 
@@ -20,7 +20,8 @@ version in its own screens, prints it to PDF, and supplies values such as a
 client's name that bound fields and conditions read.
 
 Fire on any request to draw a page in a host screen, make or send a page as a
-PDF, give editors a link to the builder, supply values to pages, add a
+PDF, give editors a link to the builder, let staff build a host's ordered
+set of pages side by side, supply values to pages, add a
 host-drawn element or remove one from the builder, or change who may view or
 edit pages. If the engine is not mounted or its migrations have not run, that
 is the `keystone_ui-pages-install` local's job, not this one's.
@@ -73,7 +74,13 @@ inherit from the base controller, so define it there.
   initializer and `after_initialize` block has run, and so does a registered
   place that offers the Form element without a `submissions:` handler.
   Registered places are offered alongside any set with `places =`, and
-  `places = nil` clears both.
+  `places = nil` clears both. `listed: false` keeps the place out of the
+  editor's screens: the page list leaves out its pages unless it is opened with
+  that place, and the New page form and creating a page in it are refused, while
+  the place choices on the New page and settings forms do not offer it. Use it
+  for a place whose pages the host makes itself. `sequence_method:` names a
+  method that answers the place's sequences, described under the sequence
+  screen below. A place with none refuses its sequence screen.
 - **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
   finds the form in that version, live or older, and calls the place's
   `submissions:` handler with a `Submission` holding `page`, `version`,
@@ -226,6 +233,24 @@ inherit from the base controller, so define it there.
   `/`. The builder's Back link returns there, even after Publish reloads the
   builder. With no `return_to`, or one pointing at another site, Back goes to
   the page list.
+- `/manage/sequences/:place/:key` under the engine's mount path — the builder
+  for one of the host's sequences, at `/pages/manage/sequences/funnel/abc123`,
+  or `keystone_ui_pages.manage_sequence_path("funnel", "abc123")` from the
+  host. It runs behind the edit check. The engine calls the place's
+  `sequence_method:` with the key and draws the builder for the sequence's
+  first page, with the sequence's title and its pages numbered from 1 beside it
+  and the page being built marked. Choosing a page in that list opens it with
+  `page_id:` added to the address. A sequence with no pages, or a `page_id:`
+  not among its pages, shows an empty page area beside the list. The Back link
+  goes to the sequence's `back_url`. Publish, Unpublish and the History screen's
+  link back to the builder return to the same page on the sequence screen. A nil
+  answer, or a place with no `sequence_method:`, gets the host's refusal.
+- `KeystoneUi::Pages::Sequence.new(title:, pages:, back_url:)` — what a
+  sequence method answers. `title:` is the heading shown above the list.
+  `pages:` is an array of `KeystoneUi::Pages::Page` records in the order a
+  visitor goes through them, and the list shows them in exactly that order,
+  since the gem stores no order. `back_url:` is where Back goes. All three are
+  required.
 
 ### The element catalog
 
@@ -345,7 +370,42 @@ The catalog offers these Keystone UI components by default: `button`,
    <%= link_to "Edit page", keystone_ui_pages.manage_page_path(page, return_to: request.fullpath) %>
    ```
 
-8. To add an element the host draws, write its component as a method that takes
+8. To let staff build a host's own ordered set of pages side by side, such as
+   the steps of a funnel:
+
+   ```ruby
+   KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence)
+   ```
+
+   Write the method on the base controller. It takes the key from the address
+   and answers a `Sequence`, or nil to refuse:
+
+   ```ruby
+   def funnel_sequence(key)
+     funnel = current_team.funnels.find_by(key: key)
+     return unless funnel
+
+     KeystoneUi::Pages::Sequence.new(title: funnel.name, pages: funnel.pages_in_order, back_url: funnel_path(funnel))
+   end
+   ```
+
+   The engine does not limit a sequence's pages to `owner_method`'s owner, so
+   the method must find the sequence through the current owner and answer nil
+   for any other. The host makes each page itself, with the place and the
+   sequence's key:
+
+   ```ruby
+   KeystoneUi::Pages::Page.create!(owner: current_team, place: "funnel", sequence_key: funnel.key)
+   ```
+
+   `sequence_key` is set only when the page is made. A later update that
+   changes it raises `ActiveRecord::ReadonlyAttributeError` in an app on Rails
+   7.1 defaults or later, and is ignored otherwise. The host keeps the order and answers it in `pages:`. Which records a
+   sequence is and how its pages are ordered is the developer's decision, so ask
+   before choosing. Then link staff to
+   `keystone_ui_pages.manage_sequence_path("funnel", funnel.key)`.
+
+9. To add an element the host draws, write its component as a method that takes
    the fields as keyword arguments, make it callable from views, and register
    it:
 
@@ -443,6 +503,10 @@ The catalog offers these Keystone UI components by default: `button`,
   through the page's edits one at a time. The history is kept on the page, so
   it survives a reload and a publish, and a new edit after an undo clears what
   can be redone.
+- **A sequence's order is the host's.** The gem stores no order and no
+  membership beyond each page's `sequence_key`. The sequence screen shows
+  exactly the pages the sequence method answers, in that order, so adding,
+  removing or reordering pages is done in the host's own records.
 - **The builder's top bar** also has a Mode choice of light, dark and system
   (and custom for an editor in custom mode), a Look choice of the looks the host
   registers with Keystone UI, and a Print choice that previews the printed
