@@ -10,17 +10,21 @@ module KeystoneUi
           @archived = params[:archived].present?
           @place = chosen_place
           @pages = owned_pages.public_send(@archived ? :archived : :current).order(:name)
-          @pages = @pages.where(place: @place) if @place
+          @pages = @place ? @pages.where(place: @place) : @pages.where.not(place: KeystoneUi::Pages.unlisted_places).or(@pages.where(place: nil))
           @printable = Printer.chrome.present?
         end
 
         def new
           @place = chosen_place
+          return refuse if KeystoneUi::Pages.unlisted_places.include?(@place)
+
           @default_name = Page.new(place: @place, owner: page_owner).default_name
         end
 
         def create
           page = Page.new(params.require(:page).permit(:name, :slug, :place).merge(owner: page_owner))
+          return refuse if KeystoneUi::Pages.unlisted_places.include?(page.place)
+
           return render(:new, status: :unprocessable_entity) unless page.save
 
           redirect_to manage_page_path(page)
