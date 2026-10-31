@@ -56,9 +56,15 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
 
     assert_equal(
-      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true },
-        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil, submissions: nil, leaves_out: [], listed: true } },
+      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil },
+        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil } },
       KeystoneUi::Pages.place_settings
     )
+  end
+
+  test "a place registered with a sequence method keeps the name of the host method that answers its sequences" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence)
+
+    assert_equal :funnel_sequence, KeystoneUi::Pages.place_settings.dig("funnel", :sequence_method)
   end
 end
