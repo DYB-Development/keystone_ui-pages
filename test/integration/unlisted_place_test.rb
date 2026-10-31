@@ -5,6 +5,7 @@ require "test_helper"
 class KeystoneUi::Pages::UnlistedPlaceTest < ActionDispatch::IntegrationTest
   teardown do
     KeystoneUi::Pages.places = nil
+    KeystoneUi::Pages.refusal_method = nil
   end
 
   test "the page list with no place chosen leaves out the pages of an unlisted place" do
@@ -46,5 +47,14 @@ class KeystoneUi::Pages::UnlistedPlaceTest < ActionDispatch::IntegrationTest
     get "/pages/manage/pages/#{page.id}/edit"
 
     assert_equal [ "Marketing site" ], Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| option.text.strip }.reject(&:empty?)
+  end
+
+  test "opening the Create page form for an unlisted place gets the host's refusal" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false)
+
+    get "/pages/manage/pages/new", params: { place: "funnel" }
+
+    assert_equal [ 403, "This page is not available" ], [ response.status, response.body ]
   end
 end

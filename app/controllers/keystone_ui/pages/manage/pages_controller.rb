@@ -16,6 +16,8 @@ module KeystoneUi
 
         def new
           @place = chosen_place
+          return refuse if KeystoneUi::Pages.unlisted_places.include?(@place)
+
           @default_name = Page.new(place: @place, owner: page_owner).default_name
         end
 
