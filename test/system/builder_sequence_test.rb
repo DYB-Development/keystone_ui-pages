@@ -48,4 +48,10 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     assert_equal "/funnels/spring-sale", URI(find("[data-builder-top-bar] a", text: "Back")[:href]).path
   end
+
+  test "opening a sequence with no pages shows its title and an empty page area that says no page has been added yet" do
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal [ "Spring sale funnel", "No page has been added yet." ], [ find("[data-sequence-pages] h2").text, find("[data-page-frame]").text ]
+  end
 end

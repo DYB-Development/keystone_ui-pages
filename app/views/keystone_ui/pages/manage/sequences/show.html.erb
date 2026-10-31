@@ -3,6 +3,11 @@
   <%= javascript_include_tag "keystone_ui_pages/editor", defer: true %>
 <% end %>
 
+<% sequence_screen = { back_url: @sequence.back_url, sequence: sequence_props(@sequence, @page, place: params[:place], key: params[:key]) } %>
 <div data-page-builder>
-  <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, publish_url: publish_manage_page_path(@page), unpublish_url: (unpublish_manage_page_path(@page) if @page.live_version), back_url: @sequence.back_url, sequence: sequence_props(@sequence, @page, place: params[:place], key: params[:key]))) %>
+  <% if @page %>
+    <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, publish_url: publish_manage_page_path(@page), unpublish_url: (unpublish_manage_page_path(@page) if @page.live_version)).merge(sequence_screen)) %>
+  <% else %>
+    <%= react_ui("keystone_ui_pages/editor", sequence_screen) %>
+  <% end %>
 </div>
