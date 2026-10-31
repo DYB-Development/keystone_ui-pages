@@ -37,4 +37,14 @@ class KeystoneUi::Pages::UnlistedPlaceTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Marketing site" ], Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| option.text.strip }.reject(&:empty?)
   end
+
+  test "the page settings form does not offer an unlisted place to a page outside it" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false)
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing")
+
+    get "/pages/manage/pages/#{page.id}/edit"
+
+    assert_equal [ "Marketing site" ], Nokogiri::HTML(response.body).css("select[name='page[place]'] option").map { |option| option.text.strip }.reject(&:empty?)
+  end
 end
