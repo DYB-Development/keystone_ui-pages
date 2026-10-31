@@ -6,7 +6,8 @@ export default function SequencePages({ sequence }) {
       <h2 className="text-sm font-semibold">{sequence.title}</h2>
       <ol className="flex flex-col gap-1">
         {sequence.pages.map((entry, index) => (
-          <li key={entry.id} data-sequence-page className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
+          <li key={entry.id} data-sequence-page aria-current={entry.current ? "page" : undefined}
+            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm aria-[current=page]:bg-(--ks-color-accent)/10 aria-[current=page]:font-semibold">
             <span className="text-(--ks-color-icon)">{index + 1}</span> <span className="truncate">{entry.name}</span>
           </li>
         ))}

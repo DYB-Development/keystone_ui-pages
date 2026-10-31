@@ -38,8 +38,8 @@ module KeystoneUi
         }
       end
 
-      def sequence_props(sequence)
-        { title: sequence.title, pages: sequence.pages.map { |page| { id: page.id, name: page.name } } }
+      def sequence_props(sequence, built)
+        { title: sequence.title, pages: sequence.pages.map { |page| { id: page.id, name: page.name, current: page == built } } }
       end
 
       def editor_canvas(page)
