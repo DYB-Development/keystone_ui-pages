@@ -21,6 +21,11 @@ module KeystoneUi
         send(KeystoneUi::Pages.view_check_method, page)
       end
 
+      def sequence(place, key)
+        method = KeystoneUi::Pages.place_settings.dig(place, :sequence_method)
+        send(method, key) if method
+      end
+
       def refuse
         return head(:not_found) unless KeystoneUi::Pages.refusal_method
 
