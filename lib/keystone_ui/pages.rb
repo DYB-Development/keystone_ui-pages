@@ -64,6 +64,7 @@ module KeystoneUi
           unknown = settings[:leaves_out].reject { |key| catalog.find(key) }
           raise ArgumentError, "The place #{place} leaves out #{unknown.join(", ")}, which no catalog element has" if unknown.any?
           raise ArgumentError, "The place #{place} offers the Form element but has no submissions handler" if offered_catalog(place).find(:form) && !settings[:submissions]
+          raise ArgumentError, "The place #{place} answers sequences but has no add page method" if settings[:sequence_method] && !settings[:adds_page_method]
         end
       end
 

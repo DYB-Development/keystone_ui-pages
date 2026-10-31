@@ -73,4 +73,12 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
 
     assert_equal :add_funnel_page, KeystoneUi::Pages.place_settings.dig("funnel", :adds_page_method)
   end
+
+  test "checking the places raises an error naming a place that answers sequences without an add page method" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, leaves_out: [ :form ], sequence_method: :funnel_sequence)
+
+    error = assert_raises(ArgumentError) { KeystoneUi::Pages.check_places! }
+
+    assert_equal "The place funnel answers sequences but has no add page method", error.message
+  end
 end
