@@ -10,7 +10,7 @@ module KeystoneUi
           open_page = @sequence.pages.find { |page| page.id.to_s == params[:after_id].to_s }
           page = Page.create!(params.require(:page).permit(:name).merge(place: params[:place], sequence_key: params[:key], owner: page_owner))
           send(KeystoneUi::Pages.place_settings.dig(params[:place], :adds_page_method), params[:key], page, open_page)
-          head :created
+          redirect_to manage_sequence_path(params[:place], params[:key], page_id: page.id)
         end
 
         private

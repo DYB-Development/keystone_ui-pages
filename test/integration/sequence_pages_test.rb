@@ -39,4 +39,10 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, 0 ], [ response.status, KeystoneUi::Pages::Page.count ]
   end
+
+  test "adding a page sends staff to the sequence screen on the new page" do
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing" } }
+
+    assert_redirected_to "/pages/manage/sequences/funnel/spring-sale?page_id=#{KeystoneUi::Pages::Page.find_by(name: "Landing").id}"
+  end
 end
