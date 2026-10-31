@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_033356) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -52,6 +52,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_130000) do
     t.string "place"
     t.string "access_exception"
     t.datetime "archived_at"
+    t.string "sequence_key"
     t.index ["owner_type", "owner_id", "slug"], name: "index_keystone_ui_pages_pages_on_owner_and_slug", unique: true
     t.index ["owner_type", "owner_id"], name: "index_keystone_ui_pages_pages_on_owner"
   end

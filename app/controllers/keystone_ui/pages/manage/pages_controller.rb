@@ -49,13 +49,13 @@ module KeystoneUi
         def publish
           page = owned_pages.find(params[:id])
           page.publish
-          redirect_to manage_page_path(page)
+          redirect_to local_address?(params[:return_to]) ? params[:return_to] : manage_page_path(page)
         end
 
         def unpublish
           page = owned_pages.find(params[:id])
           page.unpublish
-          redirect_to manage_page_path(page)
+          redirect_to local_address?(params[:return_to]) ? params[:return_to] : manage_page_path(page)
         end
 
         def archive
@@ -74,10 +74,6 @@ module KeystoneUi
 
         def chosen_place
           params[:place] if KeystoneUi::Pages.places.key?(params[:place])
-        end
-
-        def local_address?(address)
-          address.to_s.match?(%r{\A/(?![/\\])})
         end
       end
     end

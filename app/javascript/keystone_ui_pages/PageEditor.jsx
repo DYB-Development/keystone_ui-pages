@@ -7,6 +7,7 @@ import LayoutPanel from "./LayoutPanel"
 import DeviceWidth, { DEVICES } from "./DeviceWidth"
 import SelectionToolbar from "./SelectionToolbar"
 import ElementPalette from "./ElementPalette"
+import SequencePages from "./SequencePages"
 import SelectionPath from "./SelectionPath"
 import SampleChoice from "./SampleChoice"
 import PageTitle from "./PageTitle"
@@ -30,7 +31,7 @@ const innermost = (target) => NODES.map(([selector, kind]) => [target.closest(se
 
 const PLACED_SENSORS = [PointerSensor.configure({ preventActivation: () => false }), KeyboardSensor]
 
-export default function PageEditor({ name, publish_url, unpublish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, title_url, access_exceptions = [], access_exception, access_exception_url, history_url, live_url, back_url, undo_url, redo_url, undoable: couldUndo, redoable: couldRedo, token }) {
+function PageBuilder({ name, publish_url, unpublish_url, elements, canvas: drawn, document: saved, elements_url, sections_url, columns_url, rows_url, nodes_url, arrangements, defaults, shares, value_names, looks = [], samples = [], sample, samples_url, title_url, access_exceptions = [], access_exception, access_exception_url, history_url, live_url, back_url, undo_url, redo_url, undoable: couldUndo, redoable: couldRedo, sequence, token }) {
   const [canvas, setCanvas] = useState(drawn)
   const [undoable, setUndoable] = useState(couldUndo)
   const [redoable, setRedoable] = useState(couldRedo)
@@ -232,6 +233,7 @@ export default function PageEditor({ name, publish_url, unpublish_url, elements,
         </div>
       </header>
       <div className="relative flex min-h-0 flex-1">
+        {sequence && <SequencePages sequence={sequence} />}
         <ElementPalette ref={palette} elements={elements}>
           <Button type="button" variant="secondary" onClick={() => addSection(sections_url, token).then(shown)}>Add section</Button>
         </ElementPalette>
@@ -267,4 +269,25 @@ export default function PageEditor({ name, publish_url, unpublish_url, elements,
       </div>
     </div>
   )
+}
+
+function EmptySequence({ sequence, back_url }) {
+  return (
+    <div data-builder className="fixed inset-0 flex flex-col bg-(--ks-color-surface) text-(--ks-color-text) dark:bg-(--ks-color-surface-dark) dark:text-(--ks-color-text-dark)">
+      <header data-builder-top-bar className="flex h-14 shrink-0 items-center gap-2 border-b border-(--ks-color-border) dark:border-(--ks-color-border-dark) px-4">
+        <a href={back_url} className="text-sm hover:underline">Back</a>
+        <h1 className="truncate text-base font-semibold">{sequence.title}</h1>
+      </header>
+      <div className="relative flex min-h-0 flex-1">
+        <SequencePages sequence={sequence} />
+        <main data-page-frame className="flex min-w-0 flex-1 items-center justify-center bg-surface-200 p-8 dark:bg-surface-900">
+          <p className="ks-hint">No page has been added yet.</p>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+export default function PageEditor(props) {
+  return props.document ? <PageBuilder {...props} /> : <EmptySequence {...props} />
 }

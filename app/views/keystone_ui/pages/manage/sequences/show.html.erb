@@ -1,0 +1,14 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "keystone_ui/react", defer: true %>
+  <%= javascript_include_tag "keystone_ui_pages/editor", defer: true %>
+<% end %>
+
+<% sequence_screen = { back_url: @sequence.back_url, sequence: sequence_props(@sequence, @page, place: params[:place], key: params[:key]) } %>
+<div data-page-builder>
+  <% if @page %>
+    <% here = manage_sequence_path(params[:place], params[:key], page_id: @page.id) %>
+    <%= react_ui("keystone_ui_pages/editor", editor_props(@page).merge(name: @page.name, history_url: manage_page_versions_path(@page, return_to: here), publish_url: publish_manage_page_path(@page, return_to: here), unpublish_url: (unpublish_manage_page_path(@page, return_to: here) if @page.live_version)).merge(sequence_screen)) %>
+  <% else %>
+    <%= react_ui("keystone_ui_pages/editor", sequence_screen) %>
+  <% end %>
+</div>

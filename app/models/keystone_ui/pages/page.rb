@@ -15,6 +15,7 @@ module KeystoneUi
       attribute :document, :json, default: -> { Document.blank }
       attribute :undo_history, :json, default: -> { [] }
       attribute :undone_changes, :json, default: -> { [] }
+      attr_readonly :sequence_key
 
       scope :archived, -> { where.not(archived_at: nil) }
       scope :current, -> { where(archived_at: nil) }

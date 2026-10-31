@@ -37,6 +37,12 @@ class ApplicationController < ActionController::Base
     { "owner" => request.headers["X-Owner"], "client_name" => request.headers["X-Client-Name"] }.compact
   end
 
+  def funnel_sequence(key)
+    return if request.headers["X-Sequence"] == "refused"
+
+    KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}")
+  end
+
   def may_edit_pages?
     request.headers["X-Editor"] != "refused"
   end

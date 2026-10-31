@@ -7,6 +7,7 @@ module KeystoneUi
         def index
           @page = owned_pages.find(params[:page_id])
           @versions = @page.versions.reorder(number: :desc)
+          @builder_url = local_address?(params[:return_to]) ? params[:return_to] : manage_page_path(@page)
         end
 
         def show

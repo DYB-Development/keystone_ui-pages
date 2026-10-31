@@ -4,6 +4,7 @@ require "keystone_ui/pages/version"
 require "keystone_ui/pages/catalog"
 require "keystone_ui/pages/values"
 require "keystone_ui/pages/keystone_elements"
+require "keystone_ui/pages/sequence"
 require "keystone_ui/pages/engine"
 
 module KeystoneUi
@@ -38,8 +39,8 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true)
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed }
+      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil)
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed, sequence_method: sequence_method }
       end
 
       def listed_places

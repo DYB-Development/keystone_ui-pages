@@ -30,6 +30,7 @@ KeystoneUi::Pages::Engine.routes.draw do
         post :restore, on: :member
       end
     end
+    get "sequences/:place/:key", to: "sequences#show", as: :sequence
   end
 
   post ":slug/events", to: "events#create", as: :page_events
