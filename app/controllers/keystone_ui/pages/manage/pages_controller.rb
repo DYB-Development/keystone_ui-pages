@@ -49,7 +49,7 @@ module KeystoneUi
         def publish
           page = owned_pages.find(params[:id])
           page.publish
-          redirect_to manage_page_path(page)
+          redirect_to local_address?(params[:return_to]) ? params[:return_to] : manage_page_path(page)
         end
 
         def unpublish

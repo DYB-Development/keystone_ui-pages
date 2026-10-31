@@ -54,4 +54,14 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     assert_equal [ "Spring sale funnel", "No page has been added yet." ], [ find("[data-sequence-pages] h2").text, find("[data-page-frame]").text ]
   end
+
+  test "publishing a page from the sequence screen brings staff back to the sequence screen on that page" do
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    thanks = KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
+    visit "/pages/manage/sequences/funnel/spring-sale?page_id=#{thanks.id}"
+
+    within("[data-builder-top-bar]") { click_on "Publish" }
+
+    assert_current_path "/pages/manage/sequences/funnel/spring-sale?page_id=#{thanks.id}"
+  end
 end
