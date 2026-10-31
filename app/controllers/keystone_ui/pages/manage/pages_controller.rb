@@ -55,7 +55,7 @@ module KeystoneUi
         def unpublish
           page = owned_pages.find(params[:id])
           page.unpublish
-          redirect_to manage_page_path(page)
+          redirect_to local_address?(params[:return_to]) ? params[:return_to] : manage_page_path(page)
         end
 
         def archive
