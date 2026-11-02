@@ -25,6 +25,7 @@ class KeystoneUi::Pages::FormChecksBrowserTest < KeystoneUi::Pages::ApplicationS
       page.execute_script("document.body.dataset.stayedOnPage = 'true'")
       fill_in "name", with: "Ada"
       fill_in "email", with: ""
+      page.execute_script("document.querySelector('[name=email]').form.noValidate = true")
       click_on "Send"
       [ page.has_css?(".ks-error", text: "Fill this in"), page.evaluate_script("document.body.dataset.stayedOnPage === 'true'"), find_field("name").value ]
     end
