@@ -78,6 +78,12 @@ Keystone UI itself must be installed first. Its own install local,
   its key with a title, its pages in order and a back address, or refuses it.
   The gem stores no order. Each page made for a sequence keeps that sequence's
   key, which cannot be changed later.
+- **Adding a page to a sequence.** The sequence screen has an Add page button
+  that asks for a name, with the place's default name used when it is left
+  blank. The gem makes the page and tells the host which sequence it joins and
+  which page was open, so the host decides where it goes in the order. The new
+  page then opens in the builder beside the list. A place that answers
+  sequences must also handle pages added this way.
 - **The catalog.** The builder offers a fixed list of Keystone UI components as
   elements. A host adds elements drawn by its own components and leaves out ones
   it does not want. Navigation, form inputs, page frames and components whose
@@ -87,7 +93,7 @@ Keystone UI itself must be installed first. Its own install local,
 - **Views and clicks.** The gem records nothing about visitors. A place with a
   handler is told of each view and each click on the live page, and the browser
   fires matching events a third-party analytics tag can listen for.
-- **PDFs are printed by Chrome or Chromium on the server** and kept in Active
+- **PDFs are printed by a Chromium-based browser on the server** and kept in Active
   Storage, one per live version and set of values. A page that uses no host
   values gets its PDF made when it is published.
 - **The editor's screens.** The page list, the builder, the sequence screen, the

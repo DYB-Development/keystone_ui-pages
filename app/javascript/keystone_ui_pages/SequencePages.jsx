@@ -1,4 +1,5 @@
 import React from "react"
+import Button from "keystone_ui-react/src/Button.jsx"
 
 export default function SequencePages({ sequence }) {
   return (
@@ -12,6 +13,7 @@ export default function SequencePages({ sequence }) {
           </li>
         ))}
       </ol>
+      <Button href={sequence.add_page_url} size="sm" variant="secondary">Add page</Button>
     </aside>
   )
 }

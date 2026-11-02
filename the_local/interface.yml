@@ -53,6 +53,7 @@ sources:
   - app/controllers/keystone_ui/pages/manage/base_controller.rb
   - app/controllers/keystone_ui/pages/manage/pages_controller.rb
   - app/controllers/keystone_ui/pages/manage/sequences_controller.rb
+  - app/controllers/keystone_ui/pages/manage/sequence_pages_controller.rb
   - app/controllers/keystone_ui/pages/manage/lives_controller.rb
   - app/controllers/keystone_ui/pages/manage/pdfs_controller.rb
   - app/controllers/keystone_ui/pages/manage/versions_controller.rb

@@ -39,8 +39,8 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil)
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed, sequence_method: sequence_method }
+      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil)
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed, sequence_method: sequence_method, adds_page_method: adds_page_method }
       end
 
       def listed_places
@@ -64,6 +64,7 @@ module KeystoneUi
           unknown = settings[:leaves_out].reject { |key| catalog.find(key) }
           raise ArgumentError, "The place #{place} leaves out #{unknown.join(", ")}, which no catalog element has" if unknown.any?
           raise ArgumentError, "The place #{place} offers the Form element but has no submissions handler" if offered_catalog(place).find(:form) && !settings[:submissions]
+          raise ArgumentError, "The place #{place} answers sequences but has no add page method" if settings[:sequence_method] && !settings[:adds_page_method]
         end
       end
 

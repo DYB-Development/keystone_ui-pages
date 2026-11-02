@@ -39,7 +39,9 @@ module KeystoneUi
       end
 
       def sequence_props(sequence, built, place:, key:)
-        { title: sequence.title, pages: sequence.pages.map { |page| { id: page.id, name: page.name, current: page == built, url: manage_sequence_path(place, key, page_id: page.id) } } }
+        { title: sequence.title,
+          pages: sequence.pages.map { |page| { id: page.id, name: page.name, current: page == built, url: manage_sequence_path(place, key, page_id: page.id) } },
+          add_page_url: new_manage_sequence_page_path(place, key, after_id: built&.id) }
       end
 
       def editor_canvas(page)

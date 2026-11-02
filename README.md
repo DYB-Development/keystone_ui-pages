@@ -111,7 +111,7 @@ Plausible's `plausible("Page click", { props: event.detail })` or Meta's `fbq("t
 A host that keeps pages in an order of its own, such as the pages of a funnel, names a method on its controller that answers a sequence by its key:
 
 ```ruby
-KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence)
+KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
 ```
 
 The gem calls the method on the editor's controller with the sequence's key. It answers a `KeystoneUi::Pages::Sequence` holding `title`, `pages` and `back_url`, or nil to refuse:
@@ -128,6 +128,16 @@ end
 `pages` are the sequence's pages in the order a visitor goes through them. The gem keeps no order of its own, so the list shows the pages exactly as the method answers them.
 
 Staff open a sequence at `/pages/manage/sequences/<place>/<key>`. The builder shows the sequence's first page, with the sequence's title and its pages numbered from 1 beside it and the page being built marked. Choosing a page in the list opens it with the same list beside it. A sequence with no pages shows an empty page area saying no page has been added yet. The Back link goes to `back_url`, and a nil answer, or a place with no `sequence_method:`, gets the host's refusal.
+
+A place with a `sequence_method:` also names an `adds_page_method:`, and a place that names one without the other fails the app's boot. The gem calls it on the editor's controller with the sequence's key, the new page and the page that was open when Add page was pressed, or nil when the sequence had no pages:
+
+```ruby
+def add_funnel_page(key, page, after)
+  current_team.funnels.find_by!(key: key).add_page(page, after: after)
+end
+```
+
+The Add page button in the sequence's list opens a form for the page's name, and a page left unnamed gets the place's `default_name:`. The gem makes the page in the sequence's place for the current owner, with the sequence's key, then calls the method and opens the new page on the sequence screen. The gem records no order, so the host decides where the page goes, and the list shows it wherever `sequence_method:` answers it. A sequence the host answers nil for refuses the form and adds no page.
 
 Each page keeps a `sequence_key`, set when the page is made and refused if it is changed later. Pages made in the page list have none, and their builder is unchanged.
 
