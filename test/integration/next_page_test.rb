@@ -37,6 +37,27 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     assert_equal "/pages/thanks", next_button&.[]("href")
   end
 
+  test "a visitor the host answers no next page for sees no Next page button" do
+    publish_landing
+
+    get "/pages/landing"
+
+    assert_nil next_button
+  end
+
+  test "each visitor's Next page button leads to the host's answer for them even after the page was drawn for someone else" do
+    cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    publish_landing
+    get "/pages/landing", headers: { "X-Next-Page" => "/pages/thanks" }
+
+    get "/pages/landing", headers: { "X-Next-Page" => "/pages/pricing" }
+
+    assert_equal "/pages/pricing", next_button&.[]("href")
+  ensure
+    Rails.cache = cache
+  end
+
   private
 
   def publish_landing
