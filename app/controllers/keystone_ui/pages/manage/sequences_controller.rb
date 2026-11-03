@@ -16,6 +16,7 @@ module KeystoneUi
           return refuse unless publishes && sequence(params[:place], params[:key])
 
           send(publishes, params[:key])
+          redirect_to manage_sequence_path(params[:place], params[:key], page_id: params[:page_id])
         end
       end
     end

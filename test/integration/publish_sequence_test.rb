@@ -35,4 +35,10 @@ class KeystoneUi::Pages::PublishSequenceTest < ActionDispatch::IntegrationTest
 
     assert_response :forbidden
   end
+
+  test "after Publish the staff member is back on the sequence screen on the page that was open" do
+    post "/pages/manage/sequences/funnel/spring-sale/publish", params: { page_id: 5 }
+
+    assert_redirected_to "/pages/manage/sequences/funnel/spring-sale?page_id=5"
+  end
 end
