@@ -31,7 +31,8 @@ module KeystoneUi
           Rails.error.report(error, handled: true, context: { page_id: page.id, form_name: Submissions.form_name(form) })
           return render(:failed, status: :internal_server_error, locals: { form: form, version: version, values: values })
         end
-        return redirect_to(Submissions.next_address(form), status: :see_other, allow_other_host: true) if Submissions.next_address(form)
+        address = Submissions.to_next_page?(form) ? KeystoneUi::Pages.next_page_address(self, page) : Submissions.next_address(form)
+        return redirect_to(address, status: :see_other, allow_other_host: true) if address
 
         @element_id = form["id"]
         @thank_you = Submissions.thank_you(form)

@@ -79,6 +79,11 @@ module KeystoneUi
         place_settings.dig(place.to_s, :next_page_method)
       end
 
+      def next_page_address(controller, page)
+        method = next_page_method(page.place)
+        controller.send(method, page) if method
+      end
+
       def offered_elements(place)
         offered_catalog(place).elements
       end

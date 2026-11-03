@@ -57,13 +57,8 @@ module KeystoneUi
       def with_next_page(html, page)
         return html unless html.include?(NEXT_PAGE_PLACEHOLDER)
 
-        address = next_page_address(page)
+        address = KeystoneUi::Pages.next_page_address(controller, page)
         html.gsub(%r{<!--next-page-->(.*?)<!--/next-page-->}m) { address ? Regexp.last_match(1).gsub(NEXT_PAGE_PLACEHOLDER, ERB::Util.html_escape(address)) : "" }
-      end
-
-      def next_page_address(page)
-        method = KeystoneUi::Pages.next_page_method(page.place)
-        controller.send(method, page) if method
       end
 
       def load_forms_script(version)
