@@ -1,10 +1,13 @@
 import React from "react"
+import Alert from "keystone_ui-react/src/Alert.jsx"
 import Button from "keystone_ui-react/src/Button.jsx"
 
 export default function SequencePages({ sequence }) {
   return (
     <aside data-sequence-pages className="flex w-56 shrink-0 flex-col gap-3 overflow-y-auto border-r border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) dark:bg-(--ks-color-surface-dark)">
       <h2 className="text-sm font-semibold">{sequence.title}</h2>
+      {sequence.notice && <Alert type="success" message={sequence.notice} />}
+      {sequence.refusal && <Alert type="error" message={sequence.refusal} />}
       <ol className="flex flex-col gap-1">
         {sequence.pages.map((entry, index) => (
           <li key={entry.id} data-sequence-page aria-current={entry.current ? "page" : undefined}
@@ -14,6 +17,12 @@ export default function SequencePages({ sequence }) {
         ))}
       </ol>
       <Button href={sequence.add_page_url} size="sm" variant="secondary">Add page</Button>
+      {sequence.publish_url && (
+        <form method="post" action={sequence.publish_url} className="flex flex-col">
+          <input type="hidden" name="authenticity_token" value={sequence.token} />
+          <Button type="submit" size="sm">Publish</Button>
+        </form>
+      )}
     </aside>
   )
 }

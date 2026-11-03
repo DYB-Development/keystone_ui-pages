@@ -40,6 +40,15 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
     assert_equal [ 403, 0 ], [ response.status, KeystoneUi::Pages::Page.count ]
   end
 
+  test "adding a page does not call the host's publish sequence method" do
+    ApplicationController.funnel_publishes = []
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, publishes_sequence_method: :publish_funnel)
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing" } }
+
+    assert_empty ApplicationController.funnel_publishes
+  end
+
   test "adding a page sends staff to the sequence screen on the new page" do
     post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing" } }
 

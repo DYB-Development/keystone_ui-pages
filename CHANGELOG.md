@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - `register_place` takes `next_page_method:`, a host controller method called with the page being shown that answers the address the visitor goes to next, or nil when there is none.
 - A place with a `next_page_method:` offers a Next page element with a label staff can change. A visitor sees it as a button leading to the host's answer, worked out on each visit, and sees no button when the host answers nil. A PDF never shows it.
 - In such a place a form's After submitting setting also offers `next_page`, which sends the visitor to the host's answer once the handler has received the submission, or shows the thank-you message when the host answers nil.
+- `register_place` takes `publishes_sequence_method:`, a host controller method called with a sequence's key when staff press Publish in the sequence's list. A place naming one shows the Publish button, and adding a page never calls it.
+- A host refuses to publish by raising `KeystoneUi::Pages::SequencePublishRefused` with the reason as its message. Staff return to the sequence screen and see the reason, or a message that the sequence is published.
 
 ## [0.10.0] - 2026-11-02
 

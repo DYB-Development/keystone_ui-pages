@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   helper_method :testimonial
   cattr_accessor :funnel_additions, default: []
+  cattr_accessor :funnel_publishes, default: []
 
   def testimonial(quote:)
     helpers.tag.blockquote(quote, class: "testimonial")
@@ -46,6 +47,16 @@ class ApplicationController < ActionController::Base
 
   def add_funnel_page(key, page, after)
     funnel_additions << [ key, page, after ]
+  end
+
+  def publish_funnel(key)
+    raise KeystoneUi::Pages::SequencePublishRefused, request.headers["X-Publish"] if request.headers["X-Publish"]
+
+    funnel_publishes << key
+  end
+
+  def refuse_to_publish_funnel(_key)
+    raise KeystoneUi::Pages::SequencePublishRefused, "The last page has no content"
   end
 
   def funnel_next_page(_page)

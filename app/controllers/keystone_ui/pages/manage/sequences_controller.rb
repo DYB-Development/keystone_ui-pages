@@ -10,6 +10,20 @@ module KeystoneUi
 
           @page = params[:page_id] ? @sequence.pages.find { |page| page.id.to_s == params[:page_id] } : @sequence.pages.first
         end
+
+        def publish
+          publishes = KeystoneUi::Pages.place_settings.dig(params[:place], :publishes_sequence_method)
+          answered = sequence(params[:place], params[:key])
+          return refuse unless publishes && answered
+
+          begin
+            send(publishes, params[:key])
+            flash[:sequence_notice] = "#{answered.title} is published."
+          rescue SequencePublishRefused => refusal
+            flash[:sequence_refusal] = refusal.message
+          end
+          redirect_to manage_sequence_path(params[:place], params[:key], page_id: params[:page_id])
+        end
       end
     end
   end

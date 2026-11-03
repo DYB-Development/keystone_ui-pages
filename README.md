@@ -139,6 +139,19 @@ end
 
 The Add page button in the sequence's list opens a form for the page's name, and a page left unnamed gets the place's `default_name:`. The gem makes the page in the sequence's place for the current owner, with the sequence's key, then calls the method and opens the new page on the sequence screen. The gem records no order, so the host decides where the page goes, and the list shows it wherever `sequence_method:` answers it. A sequence the host answers nil for refuses the form and adds no page.
 
+To let staff decide when visitors see a changed sequence, name a `publishes_sequence_method:` when registering the place. The sequence's list then shows a Publish button, and pressing it calls the method on the editor's controller with the sequence's key. Adding a page never calls it. A sequence the host answers nil for refuses the button's request. To refuse with a reason, raise `KeystoneUi::Pages::SequencePublishRefused`, and any other error is left to the host's error handling:
+
+```ruby
+def publish_funnel(key)
+  funnel = current_team.funnels.find_by!(key: key)
+  raise KeystoneUi::Pages::SequencePublishRefused, "This funnel has no pages" if funnel.pages.empty?
+
+  funnel.publish
+end
+```
+
+Staff return to the sequence screen on the page they had open, and see a message that the sequence is published or the reason the host gave. This is separate from each page's own Publish button, which publishes that page's content.
+
 Each page keeps a `sequence_key`, set when the page is made and refused if it is changed later. Pages made in the page list have none, and their builder is unchanged.
 
 To lead visitors from one page to the next, name a `next_page_method:` when registering the place. The gem calls it on the controller drawing the page with the page being shown, so it can read the visitor's request, and it answers an address or nil:
