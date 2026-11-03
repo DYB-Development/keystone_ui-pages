@@ -41,4 +41,17 @@ class KeystoneUi::Pages::PublishSequenceTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to "/pages/manage/sequences/funnel/spring-sale?page_id=5"
   end
+
+  test "after Publish the sequence screen says the sequence was published" do
+    post "/pages/manage/sequences/funnel/spring-sale/publish"
+    follow_redirect!
+
+    assert_equal "Spring sale funnel is published.", sequence_props["notice"]
+  end
+
+  private
+
+  def sequence_props
+    JSON.parse(css_select("[data-react-ui='keystone_ui_pages/editor']").first["data-props"])["sequence"]
+  end
 end

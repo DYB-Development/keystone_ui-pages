@@ -26,6 +26,15 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_no_selector "[data-sequence-pages] button", text: "Publish"
   end
 
+  test "pressing Publish in the sequence's list comes back to the screen saying the sequence is published" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, publishes_sequence_method: :publish_funnel)
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    within("[data-sequence-pages]") { click_on "Publish" }
+
+    assert_selector "[data-sequence-pages] [role='alert']", text: "Spring sale funnel is published."
+  end
+
   test "opening a sequence with pages shows its first page in the builder and its title and numbered pages beside it" do
     KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
     KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")

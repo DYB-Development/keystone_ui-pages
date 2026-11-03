@@ -13,9 +13,11 @@ module KeystoneUi
 
         def publish
           publishes = KeystoneUi::Pages.place_settings.dig(params[:place], :publishes_sequence_method)
-          return refuse unless publishes && sequence(params[:place], params[:key])
+          published = sequence(params[:place], params[:key])
+          return refuse unless publishes && published
 
           send(publishes, params[:key])
+          flash[:sequence_notice] = "#{published.title} is published."
           redirect_to manage_sequence_path(params[:place], params[:key], page_id: params[:page_id])
         end
       end
