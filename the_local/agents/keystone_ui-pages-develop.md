@@ -92,6 +92,11 @@ inherit from the base controller, so define it there.
   on each visit after the cached drawing is read, is left out when the method
   answers nil, and is never in a PDF. A form set to `next_page` sends the
   visitor to the answer, or shows its thank-you message when the answer is nil.
+  `publishes_sequence_method:` names a method the gem calls with a sequence's
+  key when staff press the Publish button in the sequence's list. Only a place
+  naming one shows the button, and adding a page never calls it. Raise
+  `KeystoneUi::Pages::SequencePublishRefused` with a reason to refuse, and staff
+  see the reason on the sequence screen. Any other error is not caught.
 - **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
   finds the form in that version, live or older, and calls the place's
   `submissions:` handler with a `Submission` holding `page`, `version`,
