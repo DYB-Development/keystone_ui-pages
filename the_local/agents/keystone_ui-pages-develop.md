@@ -85,6 +85,13 @@ inherit from the base controller, so define it there.
   of the place's sequences, described under the Add page form below. A place
   with a `sequence_method:` and no `adds_page_method:` raises an
   `ArgumentError` when the app boots, checked with the other place checks.
+  `next_page_method:` names a method the gem calls with the page being shown,
+  on the controller drawing it, that answers the address the visitor goes to
+  next, or nil. Only a place naming one offers the Next page element and the
+  `next_page` choice under a form's After submitting. The button is filled in
+  on each visit after the cached drawing is read, is left out when the method
+  answers nil, and is never in a PDF. A form set to `next_page` sends the
+  visitor to the answer, or shows its thank-you message when the answer is nil.
 - **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
   finds the form in that version, live or older, and calls the place's
   `submissions:` handler with a `Submission` holding `page`, `version`,

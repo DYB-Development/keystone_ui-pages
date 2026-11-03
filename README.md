@@ -141,6 +141,18 @@ The Add page button in the sequence's list opens a form for the page's name, and
 
 Each page keeps a `sequence_key`, set when the page is made and refused if it is changed later. Pages made in the page list have none, and their builder is unchanged.
 
+To lead visitors from one page to the next, name a `next_page_method:` when registering the place. The gem calls it on the controller drawing the page with the page being shown, so it can read the visitor's request, and it answers an address or nil:
+
+```ruby
+KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, next_page_method: :funnel_next_page)
+
+def funnel_next_page(page)
+  funnels.page_after(page)&.then { |following| keystone_ui_pages.page_path(following.slug) }
+end
+```
+
+The place then offers a Next page element, with a label staff can change. A visitor sees a button leading to the method's answer, asked for on each visit rather than cached with the page, and sees no button when it answers nil. A page printed to a PDF has no button. A form in the place also offers `next_page` under After submitting, which sends the visitor to the method's answer once the handler has received the submission, or shows the thank-you message when it answers nil. A place with no `next_page_method:` offers neither.
+
 ## Trying it locally
 
 The test app runs the builder in development with sample places, access exceptions and a view check, so each case below can be shown without a host app:
