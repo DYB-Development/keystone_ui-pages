@@ -116,6 +116,14 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
     assert_equal "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}/remove", builder_props.dig("sequence", "pages", 0, "remove_url")
   end
 
+  test "a place that names no remove page method gives its pages no confirmation screen address" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+
+    get "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_nil builder_props.dig("sequence", "pages", 0, "remove_url")
+  end
+
   private
 
   def builder_props
