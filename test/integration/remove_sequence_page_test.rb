@@ -19,4 +19,14 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
 
     assert_equal [ [ "spring-sale", @landing ] ], ApplicationController.funnel_removals
   end
+
+  test "a removed page is no longer served to visitors" do
+    @landing.publish
+    get "/pages/landing"
+
+    delete "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}"
+    get "/pages/landing"
+
+    assert_response :not_found
+  end
 end
