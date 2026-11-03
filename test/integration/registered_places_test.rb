@@ -56,8 +56,8 @@ class KeystoneUi::Pages::RegisteredPlacesTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages.register_place("client_report", label: "Client report", default_name: "Report template", slug: false)
 
     assert_equal(
-      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil, next_page_method: nil, publishes_sequence_method: nil },
-        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil, next_page_method: nil, publishes_sequence_method: nil } },
+      { "marketing" => { label: "Marketing site", default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil, next_page_method: nil, publishes_sequence_method: nil, removes_page_method: nil },
+        "client_report" => { label: "Client report", default_name: "Report template", slug: false, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil, next_page_method: nil, publishes_sequence_method: nil, removes_page_method: nil } },
       KeystoneUi::Pages.place_settings
     )
   end

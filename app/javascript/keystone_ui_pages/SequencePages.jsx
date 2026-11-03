@@ -13,6 +13,7 @@ export default function SequencePages({ sequence }) {
           <li key={entry.id} data-sequence-page aria-current={entry.current ? "page" : undefined}
             className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm aria-[current=page]:bg-(--ks-color-accent)/10 aria-[current=page]:font-semibold">
             <span className="text-(--ks-color-icon)">{index + 1}</span> <a href={entry.url} className="truncate hover:underline">{entry.name}</a>
+            {entry.remove_url && <a href={entry.remove_url} aria-label={`Remove ${entry.name}`} className="ml-auto text-xs text-(--ks-color-icon) hover:underline">Remove</a>}
           </li>
         ))}
       </ol>

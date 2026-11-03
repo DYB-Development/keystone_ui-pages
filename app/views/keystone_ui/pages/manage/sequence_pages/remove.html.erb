@@ -1,0 +1,8 @@
+<%= ui_page(max_width: :xl) do %>
+  <%= ui_page_header(title: "Remove page", subtitle: @page.name) %>
+
+  <%= ui_form(action: manage_sequence_page_path(params[:place], params[:key], @page), method: :delete) do %>
+    <%= ui_button(label: "Remove", type: :submit) %>
+    <%= ui_button(label: "Cancel", href: manage_sequence_path(params[:place], params[:key], page_id: @page.id), variant: :secondary) %>
+  <% end %>
+<% end %>

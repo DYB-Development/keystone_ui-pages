@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   helper_method :testimonial
   cattr_accessor :funnel_additions, default: []
   cattr_accessor :funnel_publishes, default: []
+  cattr_accessor :funnel_removals, default: []
 
   def testimonial(quote:)
     helpers.tag.blockquote(quote, class: "testimonial")
@@ -42,11 +43,19 @@ class ApplicationController < ActionController::Base
   def funnel_sequence(key)
     return if request.headers["X-Sequence"] == "refused"
 
-    KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}")
+    KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.current.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}")
   end
 
   def add_funnel_page(key, page, after)
     funnel_additions << [ key, page, after ]
+  end
+
+  def remove_funnel_page(key, page)
+    funnel_removals << [ key, page ]
+  end
+
+  def fail_to_remove_funnel_page(_key, _page)
+    raise "The host could not remove the page"
   end
 
   def publish_funnel(key)

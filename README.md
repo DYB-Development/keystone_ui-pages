@@ -152,6 +152,16 @@ end
 
 Staff return to the sequence screen on the page they had open, and see a message that the sequence is published or the reason the host gave. This is separate from each page's own Publish button, which publishes that page's content.
 
+To let staff remove a page from a sequence, name a `removes_page_method:` when registering the place. The sequence's list then shows Remove beside each page, which opens a confirmation screen. Confirming archives the page, so visitors can no longer open it, and calls the method on the editor's controller with the sequence's key and the page, inside one database transaction:
+
+```ruby
+def remove_funnel_page(key, page)
+  current_team.funnels.find_by!(key: key).remove_page(page)
+end
+```
+
+The method has to take the page out of what `sequence_method:` answers, since the gem keeps no order of its own. Staff return to the sequence screen on the page before the removed one, and a sequence whose first page was removed opens without naming a page, which shows its first remaining page or the empty page area. When the method raises, the page stays unarchived and the error goes to the host's error handling. A page the sequence does not answer, or a place with no `removes_page_method:`, gets the host's refusal.
+
 Each page keeps a `sequence_key`, set when the page is made and refused if it is changed later. Pages made in the page list have none, and their builder is unchanged.
 
 To lead visitors from one page to the next, name a `next_page_method:` when registering the place. The gem calls it on the controller drawing the page with the page being shown, so it can read the visitor's request, and it answers an address or nil:
