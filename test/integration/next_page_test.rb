@@ -66,6 +66,15 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     assert_includes after_submitting_options(page_props), "next_page"
   end
 
+  test "a form on a page in a place that names no next page method does not offer the next page after submitting" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    assert_equal %w[thank_you address], after_submitting_options(page_props)
+  end
+
   private
 
   def after_submitting_options(props)

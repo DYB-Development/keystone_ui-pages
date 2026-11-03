@@ -69,7 +69,10 @@ module KeystoneUi
       end
 
       def offered_catalog(place)
-        catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)), *(next_page_method(place) ? [] : [ :next_page ]))
+        offered = catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)))
+        return offered if next_page_method(place)
+
+        offered.without(:next_page).without_option(:form, :after_submitting, "next_page")
       end
 
       def next_page_method(place)
