@@ -97,6 +97,16 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     assert_nil Nokogiri::HTML(html).at_css("[data-page-element] a")
   end
 
+  test "the builder draws the Next page button with the same classes a visitor sees" do
+    publish_landing
+    get "/pages/landing", headers: { "X-Next-Page" => "/pages/thanks" }
+    live = next_button["class"]
+
+    get "/pages/manage/pages/#{KeystoneUi::Pages::Page.find_by(slug: "landing").id}"
+
+    assert_equal live, Nokogiri::HTML.fragment(page_props["canvas"]).at_css(".ks-button")&.[]("class")
+  end
+
   private
 
   def published_form_address

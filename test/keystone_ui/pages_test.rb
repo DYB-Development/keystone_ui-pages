@@ -121,7 +121,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_every_keystone_ui_element_has_an_icon_and_belongs_to_a_group
     elements = keystone_elements.elements
     groups = elements.group_by(&:group).to_h { |group, members| [ group, members.map(&:key).sort ] }
-    expected = { "Basics" => %i[badge button copy_button], "Content" => %i[card cta_banner feature_grid form], "Data" => %i[bar_chart data_table figure line_chart progress stat_card value_list], "Text" => %i[accordion alert code heading hero info label paragraph] }
+    expected = { "Basics" => %i[badge button copy_button next_page], "Content" => %i[card cta_banner feature_grid form], "Data" => %i[bar_chart data_table figure line_chart progress stat_card value_list], "Text" => %i[accordion alert code heading hero info label paragraph] }
 
     assert_equal [ expected, [] ], [ groups.sort.to_h, elements.reject(&:icon).map(&:key) ]
   end
@@ -129,7 +129,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_buttons_badges_and_copy_buttons_start_at_the_start_of_their_column
     starting = keystone_elements.elements.select { |element| element.align == "start" }.map(&:key)
 
-    assert_equal %i[badge button copy_button], starting.sort
+    assert_equal %i[badge button copy_button next_page], starting.sort
   end
 
   def test_the_catalog_offers_keystone_ui_feature_grid_filled_from_a_list_field
@@ -162,7 +162,7 @@ class KeystoneUi::PagesTest < Minitest::Test
   def test_a_form_chooses_between_showing_its_thank_you_message_and_sending_the_visitor_to_an_address
     fields = keystone_elements.find(:form).fields
 
-    assert_equal [ :one_of, %w[thank_you address], "thank_you", :address ],
+    assert_equal [ :one_of, %w[thank_you address next_page], "thank_you", :address ],
       [ fields.find { |field| field[:key] == :after_submitting }&.[](:kind), fields.find { |field| field[:key] == :after_submitting }&.[](:options),
         fields.find { |field| field[:key] == :after_submitting }&.[](:default), fields.find { |field| field[:key] == :next_address }&.[](:kind) ]
   end

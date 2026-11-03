@@ -11,7 +11,7 @@ class KeystoneUi::Pages::PlaceElementsTest < ActionDispatch::IntegrationTest
   test "a place registered with elements it leaves out offers every other element in the catalog" do
     KeystoneUi::Pages.register_place("client_report", label: "Client report", leaves_out: [ :form ])
 
-    assert_equal KeystoneUi::Pages.catalog.elements.map(&:key) - [ :form ], KeystoneUi::Pages.offered_elements("client_report").map(&:key)
+    assert_equal KeystoneUi::Pages.catalog.elements.map(&:key) - [ :form, :next_page ], KeystoneUi::Pages.offered_elements("client_report").map(&:key)
   end
 
   test "an element a host registers after its places are registered is offered in every place that does not name it" do

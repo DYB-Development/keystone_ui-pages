@@ -7,7 +7,7 @@ class KeystoneUi::Pages::CatalogDrawingTest < KeystoneUi::Pages::ApplicationSyst
   test "every element in the catalog is drawn in the builder by the same component with the same classes as on the live page" do
     page_record = KeystoneUi::Pages::Page.create!(name: "Everything", slug: "everything")
     column_id = page_record.document["sections"][0]["rows"][0]["columns"][0]["id"]
-    document = KeystoneUi::Pages.catalog.elements.reduce(page_record.document) do |filled, element|
+    document = drawn_the_same.reduce(page_record.document) do |filled, element|
       KeystoneUi::Pages::Operations.add(filled, element.key, column_id: column_id)
     end
     page_record.update!(document: document)
@@ -22,8 +22,12 @@ class KeystoneUi::Pages::CatalogDrawingTest < KeystoneUi::Pages::ApplicationSyst
 
   private
 
+  def drawn_the_same
+    KeystoneUi::Pages.catalog.elements.reject { |element| element.key == :next_page }
+  end
+
   def drawn_elements
-    assert_selector ".ks-pages-element", visible: :all, count: KeystoneUi::Pages.catalog.elements.size
+    assert_selector ".ks-pages-element", visible: :all, count: drawn_the_same.size
     page.evaluate_script(<<~'JS')
       [...document.querySelectorAll(".ks-pages-element")].map((element) => {
         const drawn = element.cloneNode(true)
