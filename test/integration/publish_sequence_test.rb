@@ -26,4 +26,13 @@ class KeystoneUi::Pages::PublishSequenceTest < ActionDispatch::IntegrationTest
 
     assert_equal [ 403, [] ], [ response.status, ApplicationController.funnel_publishes ]
   end
+
+  test "publishing in a place that names no publish sequence method gets the host's refusal" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+
+    post "/pages/manage/sequences/funnel/spring-sale/publish"
+
+    assert_response :forbidden
+  end
 end
