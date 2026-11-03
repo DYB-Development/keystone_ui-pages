@@ -146,7 +146,7 @@ def publish_funnel(key)
   funnel = current_team.funnels.find_by!(key: key)
   raise KeystoneUi::Pages::SequencePublishRefused, "This funnel has no pages" if funnel.pages.empty?
 
-  funnel.own_flow.publish!
+  funnel.publish
 end
 ```
 
