@@ -55,6 +55,10 @@ class ApplicationController < ActionController::Base
     funnel_publishes << key
   end
 
+  def refuse_to_publish_funnel(_key)
+    raise KeystoneUi::Pages::SequencePublishRefused, "The last page has no content"
+  end
+
   def funnel_next_page(_page)
     request.headers["X-Next-Page"].presence
   end
