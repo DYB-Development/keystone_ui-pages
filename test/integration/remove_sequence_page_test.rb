@@ -38,4 +38,13 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
 
     assert_equal [ 403, nil ], [ response.status, other.reload.archived_at ]
   end
+
+  test "removing a page in a place that names no remove page method gets the host's refusal and archives nothing" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+
+    delete "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}"
+
+    assert_equal [ 403, nil ], [ response.status, @landing.reload.archived_at ]
+  end
 end

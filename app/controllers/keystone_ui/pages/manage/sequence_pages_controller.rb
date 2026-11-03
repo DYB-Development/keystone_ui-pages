@@ -18,11 +18,12 @@ module KeystoneUi
         end
 
         def destroy
+          removes = KeystoneUi::Pages.place_settings.dig(params[:place], :removes_page_method)
           page = @sequence.pages.find { |entry| entry.id.to_s == params[:id] }
-          return refuse unless page
+          return refuse unless removes && page
 
           page.archive
-          send(KeystoneUi::Pages.place_settings.dig(params[:place], :removes_page_method), params[:key], page)
+          send(removes, params[:key], page)
         end
 
         private
