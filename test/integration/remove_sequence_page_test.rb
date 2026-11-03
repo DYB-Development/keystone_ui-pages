@@ -29,4 +29,13 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
 
     assert_response :not_found
   end
+
+  test "removing a page outside the sequence gets the host's refusal and archives nothing" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    other = KeystoneUi::Pages::Page.create!(name: "Other", slug: "other", place: "funnel", sequence_key: "autumn-sale")
+
+    delete "/pages/manage/sequences/funnel/spring-sale/pages/#{other.id}"
+
+    assert_equal [ 403, nil ], [ response.status, other.reload.archived_at ]
+  end
 end
