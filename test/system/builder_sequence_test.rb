@@ -143,4 +143,16 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     assert_equal [ [ "spring-sale", "Step 1", nil ] ], ApplicationController.funnel_additions.map { |key, added, open| [ key, added.name, open ] }
   end
+
+  test "a staff member removes a page from the sequence's list after confirming on the screen" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, removes_page_method: :remove_funnel_page)
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    within("[data-sequence-page]", text: "Thanks") { click_on "Remove" }
+    click_on "Remove"
+
+    assert_selector "[data-sequence-page] a", count: 1, text: "Landing"
+  end
 end
