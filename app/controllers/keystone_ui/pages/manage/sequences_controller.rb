@@ -13,12 +13,12 @@ module KeystoneUi
 
         def publish
           publishes = KeystoneUi::Pages.place_settings.dig(params[:place], :publishes_sequence_method)
-          published = sequence(params[:place], params[:key])
-          return refuse unless publishes && published
+          answered = sequence(params[:place], params[:key])
+          return refuse unless publishes && answered
 
           begin
             send(publishes, params[:key])
-            flash[:sequence_notice] = "#{published.title} is published."
+            flash[:sequence_notice] = "#{answered.title} is published."
           rescue SequencePublishRefused => refusal
             flash[:sequence_refusal] = refusal.message
           end
