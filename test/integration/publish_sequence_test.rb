@@ -1,0 +1,21 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class KeystoneUi::Pages::PublishSequenceTest < ActionDispatch::IntegrationTest
+  setup do
+    ApplicationController.funnel_publishes = []
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, publishes_sequence_method: :publish_funnel)
+  end
+
+  teardown do
+    KeystoneUi::Pages.places = nil
+    KeystoneUi::Pages.refusal_method = nil
+  end
+
+  test "pressing Publish calls the host's publish sequence method with the sequence's key" do
+    post "/pages/manage/sequences/funnel/spring-sale/publish"
+
+    assert_equal [ "spring-sale" ], ApplicationController.funnel_publishes
+  end
+end

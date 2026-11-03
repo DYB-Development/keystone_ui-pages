@@ -10,6 +10,10 @@ module KeystoneUi
 
           @page = params[:page_id] ? @sequence.pages.find { |page| page.id.to_s == params[:page_id] } : @sequence.pages.first
         end
+
+        def publish
+          send(KeystoneUi::Pages.place_settings.dig(params[:place], :publishes_sequence_method), params[:key])
+        end
       end
     end
   end
