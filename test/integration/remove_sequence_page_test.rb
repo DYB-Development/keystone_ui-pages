@@ -89,6 +89,12 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
     assert_select ".ks-page-header-subtitle", text: "Landing"
   end
 
+  test "the confirmation screen's Remove button sends the removal" do
+    get "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}/remove"
+
+    assert_select "form[action='/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}'] input[name='_method'][value='delete']"
+  end
+
   private
 
   def builder_props
