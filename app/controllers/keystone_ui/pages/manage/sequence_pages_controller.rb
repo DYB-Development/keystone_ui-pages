@@ -17,6 +17,11 @@ module KeystoneUi
           redirect_to manage_sequence_path(params[:place], params[:key], page_id: page.id)
         end
 
+        def destroy
+          page = @sequence.pages.find { |entry| entry.id.to_s == params[:id] }
+          send(KeystoneUi::Pages.place_settings.dig(params[:place], :removes_page_method), params[:key], page)
+        end
+
         private
 
         def find_sequence

@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   helper_method :testimonial
   cattr_accessor :funnel_additions, default: []
   cattr_accessor :funnel_publishes, default: []
+  cattr_accessor :funnel_removals, default: []
 
   def testimonial(quote:)
     helpers.tag.blockquote(quote, class: "testimonial")
@@ -47,6 +48,10 @@ class ApplicationController < ActionController::Base
 
   def add_funnel_page(key, page, after)
     funnel_additions << [ key, page, after ]
+  end
+
+  def remove_funnel_page(key, page)
+    funnel_removals << [ key, page ]
   end
 
   def publish_funnel(key)

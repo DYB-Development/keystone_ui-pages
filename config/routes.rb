@@ -33,7 +33,7 @@ KeystoneUi::Pages::Engine.routes.draw do
     get "sequences/:place/:key", to: "sequences#show", as: :sequence
     post "sequences/:place/:key/publish", to: "sequences#publish", as: :publish_sequence
     scope "sequences/:place/:key", as: :sequence do
-      resources :pages, only: %i[new create], controller: "sequence_pages"
+      resources :pages, only: %i[new create destroy], controller: "sequence_pages"
     end
   end
 
