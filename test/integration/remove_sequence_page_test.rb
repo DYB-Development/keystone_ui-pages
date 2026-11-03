@@ -47,4 +47,12 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
 
     assert_equal [ 403, nil ], [ response.status, @landing.reload.archived_at ]
   end
+
+  test "after a page is removed the builder opens the page before it" do
+    thanks = KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
+
+    delete "/pages/manage/sequences/funnel/spring-sale/pages/#{thanks.id}"
+
+    assert_redirected_to "/pages/manage/sequences/funnel/spring-sale?page_id=#{@landing.id}"
+  end
 end
