@@ -101,6 +101,21 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
     assert_select "a[href='/pages/manage/sequences/funnel/spring-sale?page_id=#{@landing.id}']", text: "Cancel"
   end
 
+  test "the confirmation screen refuses a page outside the sequence" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+    other = KeystoneUi::Pages::Page.create!(name: "Other", slug: "other", place: "funnel", sequence_key: "autumn-sale")
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/#{other.id}/remove"
+
+    assert_response :forbidden
+  end
+
+  test "each page in the sequence's list carries the address of its confirmation screen" do
+    get "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}/remove", builder_props.dig("sequence", "pages", 0, "remove_url")
+  end
+
   private
 
   def builder_props
