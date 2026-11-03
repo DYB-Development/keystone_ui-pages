@@ -12,6 +12,8 @@ module KeystoneUi
         end
 
         def publish
+          return refuse unless sequence(params[:place], params[:key])
+
           send(KeystoneUi::Pages.place_settings.dig(params[:place], :publishes_sequence_method), params[:key])
         end
       end

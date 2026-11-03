@@ -18,4 +18,12 @@ class KeystoneUi::Pages::PublishSequenceTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "spring-sale" ], ApplicationController.funnel_publishes
   end
+
+  test "publishing a sequence the host answers nothing for gets the host's refusal and publishes nothing" do
+    KeystoneUi::Pages.refusal_method = :refuse_page
+
+    post "/pages/manage/sequences/funnel/spring-sale/publish", headers: { "X-Sequence" => "refused" }
+
+    assert_equal [ 403, [] ], [ response.status, ApplicationController.funnel_publishes ]
+  end
 end
