@@ -95,6 +95,12 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
     assert_select "form[action='/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}'] input[name='_method'][value='delete']"
   end
 
+  test "the confirmation screen's Cancel link returns to the page on the sequence screen" do
+    get "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}/remove"
+
+    assert_select "a[href='/pages/manage/sequences/funnel/spring-sale?page_id=#{@landing.id}']", text: "Cancel"
+  end
+
   private
 
   def builder_props
