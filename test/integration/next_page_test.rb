@@ -58,7 +58,19 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     Rails.cache = cache
   end
 
+  test "a form on a page in a place that names a next page method offers the next page after submitting" do
+    page = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    assert_includes after_submitting_options(page_props), "next_page"
+  end
+
   private
+
+  def after_submitting_options(props)
+    offered(props, "form")["fields"].find { |field| field["key"] == "after_submitting" }["options"]
+  end
 
   def publish_landing
     page = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel")
