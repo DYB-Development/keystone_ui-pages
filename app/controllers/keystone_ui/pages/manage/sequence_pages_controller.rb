@@ -24,8 +24,10 @@ module KeystoneUi
 
           position = @sequence.pages.index(page)
           page_before = @sequence.pages[position - 1] if position.positive?
-          page.archive
-          send(removes, params[:key], page)
+          Page.transaction do
+            page.archive
+            send(removes, params[:key], page)
+          end
           redirect_to manage_sequence_path(params[:place], params[:key], page_id: page_before&.id)
         end
 

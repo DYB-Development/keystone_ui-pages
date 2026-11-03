@@ -54,6 +54,10 @@ class ApplicationController < ActionController::Base
     funnel_removals << [ key, page ]
   end
 
+  def fail_to_remove_funnel_page(_key, _page)
+    raise "The host could not remove the page"
+  end
+
   def publish_funnel(key)
     raise KeystoneUi::Pages::SequencePublishRefused, request.headers["X-Publish"] if request.headers["X-Publish"]
 

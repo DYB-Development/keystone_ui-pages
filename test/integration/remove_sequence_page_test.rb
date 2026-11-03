@@ -71,6 +71,18 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
     assert_nil builder_props["document"]
   end
 
+  test "a page stays unarchived when the host's remove page method raises" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, removes_page_method: :fail_to_remove_funnel_page)
+
+    begin
+      delete "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}"
+    rescue RuntimeError
+      nil
+    end
+
+    assert_nil @landing.reload.archived_at
+  end
+
   private
 
   def builder_props
