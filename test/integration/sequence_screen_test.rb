@@ -27,6 +27,14 @@ class KeystoneUi::Pages::SequenceScreenTest < ActionDispatch::IntegrationTest
     assert_equal "/pages/manage/sequences/funnel/spring-sale/publish", sequence_props["publish_url"]
   end
 
+  test "the sequence screen gives no address for publishing when the place names no publish sequence method" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page)
+
+    get "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_nil sequence_props["publish_url"]
+  end
+
   private
 
   def sequence_props
