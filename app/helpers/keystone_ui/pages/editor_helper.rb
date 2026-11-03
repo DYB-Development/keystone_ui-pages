@@ -42,7 +42,8 @@ module KeystoneUi
         { title: sequence.title,
           pages: sequence.pages.map { |page| { id: page.id, name: page.name, current: page == built, url: manage_sequence_path(place, key, page_id: page.id) } },
           add_page_url: new_manage_sequence_page_path(place, key, after_id: built&.id),
-          publish_url: (manage_publish_sequence_path(place, key) if KeystoneUi::Pages.place_settings.dig(place, :publishes_sequence_method)) }
+          publish_url: (manage_publish_sequence_path(place, key) if KeystoneUi::Pages.place_settings.dig(place, :publishes_sequence_method)),
+          token: form_authenticity_token }
       end
 
       def editor_canvas(page)

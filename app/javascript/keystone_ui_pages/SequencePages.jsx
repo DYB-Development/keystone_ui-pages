@@ -14,6 +14,10 @@ export default function SequencePages({ sequence }) {
         ))}
       </ol>
       <Button href={sequence.add_page_url} size="sm" variant="secondary">Add page</Button>
+      <form method="post" action={sequence.publish_url} className="flex flex-col">
+        <input type="hidden" name="authenticity_token" value={sequence.token} />
+        <Button type="submit" size="sm">Publish</Button>
+      </form>
     </aside>
   )
 }
