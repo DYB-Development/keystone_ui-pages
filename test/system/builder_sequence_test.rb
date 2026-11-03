@@ -19,6 +19,13 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_selector "[data-sequence-pages] button", text: "Publish"
   end
 
+  test "the sequence's list shows no Publish button when the place names no publish sequence method" do
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_selector "[data-sequence-pages]"
+    assert_no_selector "[data-sequence-pages] button", text: "Publish"
+  end
+
   test "opening a sequence with pages shows its first page in the builder and its title and numbered pages beside it" do
     KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
     KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
