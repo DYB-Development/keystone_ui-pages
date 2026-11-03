@@ -55,4 +55,25 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
 
     assert_redirected_to "/pages/manage/sequences/funnel/spring-sale?page_id=#{@landing.id}"
   end
+
+  test "after a sequence's first page is removed the builder opens the sequence without naming a page" do
+    KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
+
+    delete "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}"
+
+    assert_redirected_to "/pages/manage/sequences/funnel/spring-sale"
+  end
+
+  test "after the only page is removed the builder shows the empty page area" do
+    delete "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}"
+    follow_redirect!
+
+    assert_nil builder_props["document"]
+  end
+
+  private
+
+  def builder_props
+    JSON.parse(css_select("[data-react-ui='keystone_ui_pages/editor']").first["data-props"])
+  end
 end
