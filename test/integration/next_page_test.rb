@@ -81,6 +81,12 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     assert_equal [ 303, "http://www.example.com/pages/thanks" ], [ response.status, response.location ]
   end
 
+  test "a visitor who submits a form set to the next page sees the thank-you message when the host answers no address" do
+    post published_form_address, params: { name: "Ada", email: "ada@example.com" }
+
+    assert_equal [ 200, "Thanks, we will be in touch." ], [ response.status, Nokogiri::HTML(response.body).at_css("turbo-frame")&.text&.strip ]
+  end
+
   private
 
   def published_form_address
