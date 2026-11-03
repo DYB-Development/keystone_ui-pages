@@ -83,6 +83,12 @@ class KeystoneUi::Pages::RemoveSequencePageTest < ActionDispatch::IntegrationTes
     assert_nil @landing.reload.archived_at
   end
 
+  test "the confirmation screen names the page being removed" do
+    get "/pages/manage/sequences/funnel/spring-sale/pages/#{@landing.id}/remove"
+
+    assert_select ".ks-page-header-subtitle", text: "Landing"
+  end
+
   private
 
   def builder_props
