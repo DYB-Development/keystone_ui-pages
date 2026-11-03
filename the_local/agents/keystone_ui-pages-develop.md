@@ -97,6 +97,11 @@ inherit from the base controller, so define it there.
   naming one shows the button, and adding a page never calls it. Raise
   `KeystoneUi::Pages::SequencePublishRefused` with a reason to refuse, and staff
   see the reason on the sequence screen. Any other error is not caught.
+  `removes_page_method:` names a method the gem calls with a sequence's key and
+  the page staff confirmed removing. Only a place naming one shows Remove in the
+  sequence's list. The gem archives the page and calls the method in one
+  transaction, so a page stays unarchived when the method raises, and the method
+  has to take the page out of what `sequence_method:` answers.
 - **Form submissions handed to the host**: `POST /pages/:slug/versions/:number/forms/:element_id`
   finds the form in that version, live or older, and calls the place's
   `submissions:` handler with a `Submission` holding `page`, `version`,

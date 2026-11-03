@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `register_place` takes `removes_page_method:`, a host controller method called with a sequence's key and the page removed. A place naming one shows Remove beside each page in the sequence's list.
+- Remove opens a confirmation screen at `/pages/manage/sequences/<place>/<key>/pages/<id>/remove`. Confirming archives the page, calls the method and opens the page before it, or the sequence with no page named when it had none before it. A page the host's sequence does not answer is refused.
+- When the method raises, the page stays unarchived and the error goes to the host's error handling.
+
 ## [0.11.0] - 2026-11-03
 
 ### Added
