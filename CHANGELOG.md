@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-03
+
 ### Added
 - `register_place` takes `next_page_method:`, a host controller method called with the page being shown that answers the address the visitor goes to next, or nil when there is none.
 - A place with a `next_page_method:` offers a Next page element with a label staff can change. A visitor sees it as a button leading to the host's answer, worked out on each visit, and sees no button when the host answers nil. A PDF never shows it.
