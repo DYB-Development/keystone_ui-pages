@@ -49,6 +49,13 @@ class KeystoneUi::Pages::PublishSequenceTest < ActionDispatch::IntegrationTest
     assert_equal "Spring sale funnel is published.", sequence_props["notice"]
   end
 
+  test "when the host refuses to publish the sequence screen gives the host's reason" do
+    post "/pages/manage/sequences/funnel/spring-sale/publish", headers: { "X-Publish" => "The last page has no content" }
+    follow_redirect!
+
+    assert_equal "The last page has no content", sequence_props["refusal"]
+  end
+
   private
 
   def sequence_props

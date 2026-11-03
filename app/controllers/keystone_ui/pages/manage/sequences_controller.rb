@@ -16,8 +16,12 @@ module KeystoneUi
           published = sequence(params[:place], params[:key])
           return refuse unless publishes && published
 
-          send(publishes, params[:key])
-          flash[:sequence_notice] = "#{published.title} is published."
+          begin
+            send(publishes, params[:key])
+            flash[:sequence_notice] = "#{published.title} is published."
+          rescue SequencePublishRefused => refusal
+            flash[:sequence_refusal] = refusal.message
+          end
           redirect_to manage_sequence_path(params[:place], params[:key], page_id: params[:page_id])
         end
       end

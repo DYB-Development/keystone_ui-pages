@@ -50,6 +50,8 @@ class ApplicationController < ActionController::Base
   end
 
   def publish_funnel(key)
+    raise KeystoneUi::Pages::SequencePublishRefused, request.headers["X-Publish"] if request.headers["X-Publish"]
+
     funnel_publishes << key
   end
 

@@ -44,6 +44,7 @@ module KeystoneUi
           add_page_url: new_manage_sequence_page_path(place, key, after_id: built&.id),
           publish_url: (manage_publish_sequence_path(place, key, page_id: built&.id) if KeystoneUi::Pages.place_settings.dig(place, :publishes_sequence_method)),
           notice: flash[:sequence_notice],
+          refusal: flash[:sequence_refusal],
           token: form_authenticity_token }
       end
 
