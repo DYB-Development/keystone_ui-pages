@@ -19,6 +19,15 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     assert_equal [ "label" ], offered(page_props, "next_page")&.dig("fields")&.pluck("key")
   end
 
+  test "the builder does not offer a Next page element on a page in a place that names no next page method" do
+    KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing", place: "marketing")
+
+    get "/pages/manage/pages/#{page.id}"
+
+    assert_nil offered(page_props, "next_page")
+  end
+
   private
 
   def page_props

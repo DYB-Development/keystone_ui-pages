@@ -69,7 +69,11 @@ module KeystoneUi
       end
 
       def offered_catalog(place)
-        catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)))
+        catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)), *(next_page_method(place) ? [] : [ :next_page ]))
+      end
+
+      def next_page_method(place)
+        place_settings.dig(place.to_s, :next_page_method)
       end
 
       def offered_elements(place)
