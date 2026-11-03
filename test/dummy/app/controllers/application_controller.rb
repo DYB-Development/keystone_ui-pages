@@ -52,6 +52,10 @@ class ApplicationController < ActionController::Base
     request.headers["X-Next-Page"].presence
   end
 
+  def every_visitors_next_page(_page)
+    "/pages/thanks"
+  end
+
   def may_edit_pages?
     request.headers["X-Editor"] != "refused"
   end

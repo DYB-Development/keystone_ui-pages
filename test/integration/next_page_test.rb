@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "keystone_ui/pages/operations"
+require "keystone_ui/pages/pdf_document"
 
 class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
   setup do
@@ -85,6 +86,15 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     post published_form_address, params: { name: "Ada", email: "ada@example.com" }
 
     assert_equal [ 200, "Thanks, we will be in touch." ], [ response.status, Nokogiri::HTML(response.body).at_css("turbo-frame")&.text&.strip ]
+  end
+
+  test "a page printed to a PDF has no Next page button, since nobody can press it" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence, adds_page_method: :add_funnel_page, next_page_method: :every_visitors_next_page)
+    publish_landing
+
+    html = KeystoneUi::Pages::PdfDocument.html(KeystoneUi::Pages::Page.find_by(slug: "landing").live_version)
+
+    assert_nil Nokogiri::HTML(html).at_css("[data-page-element] a")
   end
 
   private

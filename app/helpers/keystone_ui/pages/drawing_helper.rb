@@ -19,12 +19,12 @@ module KeystoneUi
                              "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border) " \
                              "dark:@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border-dark)"
 
-      def drawn_version(version, values: {})
+      def drawn_version(version, values: {}, for_visitor: true)
         key = [ "keystone_ui_pages", DRAWING_FORMAT, KeystoneUi::Pages.turnstile_site_key, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
         @drawn_version = version
         load_forms_script(version)
-        with_next_page(with_visitor_token(Rails.cache.fetch(key) { without_visitor_tokens(drawn_document(version.document, values: values).to_str) }), version.page).html_safe
+        with_next_page(with_visitor_token(Rails.cache.fetch(key) { without_visitor_tokens(drawn_document(version.document, values: values).to_str) }), version.page, for_visitor).html_safe
       end
 
       def reporting_data(page)
@@ -54,11 +54,11 @@ module KeystoneUi
 
       private
 
-      def with_next_page(html, page)
+      def with_next_page(html, page, for_visitor)
         return html unless html.include?(NEXT_PAGE_PLACEHOLDER)
 
-        address = KeystoneUi::Pages.next_page_address(controller, page)
-        html.gsub(%r{<!--next-page-->(.*?)<!--/next-page-->}m) { address ? Regexp.last_match(1).gsub(NEXT_PAGE_PLACEHOLDER, ERB::Util.html_escape(address)) : "" }
+        address = KeystoneUi::Pages.next_page_address(controller, page) if for_visitor
+        html.gsub(%r{<!--next-page-->(.*?)<!--/next-page-->}m) { address ? Regexp.last_match(1).gsub(NEXT_PAGE_PLACEHOLDER) { ERB::Util.html_escape(address) } : "" }
       end
 
       def load_forms_script(version)
