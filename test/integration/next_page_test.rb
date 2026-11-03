@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
   setup do
@@ -28,7 +29,26 @@ class KeystoneUi::Pages::NextPageTest < ActionDispatch::IntegrationTest
     assert_nil offered(page_props, "next_page")
   end
 
+  test "a visitor's Next page button leads to the address the host's next page method answers for them" do
+    publish_landing
+
+    get "/pages/landing", headers: { "X-Next-Page" => "/pages/thanks" }
+
+    assert_equal "/pages/thanks", next_button&.[]("href")
+  end
+
   private
+
+  def publish_landing
+    page = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    page.update!(document: KeystoneUi::Pages::Operations.add(page.document, "next_page", column_id: column_id))
+    page.publish
+  end
+
+  def next_button
+    Nokogiri::HTML(response.body).at_css("[data-page-element] a")
+  end
 
   def page_props
     JSON.parse(Nokogiri::HTML(response.body).at_css("[data-react-ui]")["data-props"])

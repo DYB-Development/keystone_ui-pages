@@ -48,6 +48,10 @@ class ApplicationController < ActionController::Base
     funnel_additions << [ key, page, after ]
   end
 
+  def funnel_next_page(_page)
+    request.headers["X-Next-Page"].presence
+  end
+
   def may_edit_pages?
     request.headers["X-Editor"] != "refused"
   end
