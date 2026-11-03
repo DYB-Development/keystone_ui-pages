@@ -30,6 +30,10 @@ module KeystoneUi
         setting(form, :next_address, catalog).presence if setting(form, :after_submitting, catalog) == "address"
       end
 
+      def to_next_page?(form, catalog: Pages.catalog)
+        setting(form, :after_submitting, catalog) == "next_page"
+      end
+
       def accepted(form, submitted, catalog: Pages.catalog)
         names = Array(setting(form, :fields, catalog)).map { |field| field["name"].to_s }
         submitted.to_unsafe_h.slice(*names)

@@ -21,6 +21,14 @@ module KeystoneUi
         Catalog.new.tap { |copy| elements.each { |element| copy.add(element) unless keys.include?(element.key) } }
       end
 
+      def without_option(key, field_key, option)
+        Catalog.new.tap do |copy|
+          elements.each do |element|
+            copy.add(element.key == key ? element.with(fields: element.fields.map { |field| field[:key] == field_key ? field.merge(options: field[:options] - [ option ]) : field }) : element)
+          end
+        end
+      end
+
       def elements
         @elements.values
       end

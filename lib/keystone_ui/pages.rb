@@ -39,8 +39,8 @@ module KeystoneUi
         @place_settings = {}
       end
 
-      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil)
-        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed, sequence_method: sequence_method, adds_page_method: adds_page_method }
+      def register_place(key, label:, default_name: "Page", slug: true, events: nil, submissions: nil, leaves_out: [], listed: true, sequence_method: nil, adds_page_method: nil, next_page_method: nil)
+        place_settings[key.to_s] = { label: label, default_name: default_name, slug: slug, events: events, submissions: submissions, leaves_out: leaves_out.map(&:to_sym), listed: listed, sequence_method: sequence_method, adds_page_method: adds_page_method, next_page_method: next_page_method }
       end
 
       def listed_places
@@ -69,7 +69,19 @@ module KeystoneUi
       end
 
       def offered_catalog(place)
-        catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)))
+        offered = catalog.without(*Array(place_settings.dig(place.to_s, :leaves_out)))
+        return offered if next_page_method(place)
+
+        offered.without(:next_page).without_option(:form, :after_submitting, "next_page")
+      end
+
+      def next_page_method(place)
+        place_settings.dig(place.to_s, :next_page_method)
+      end
+
+      def next_page_address(controller, page)
+        method = next_page_method(page.place)
+        controller.send(method, page) if method
       end
 
       def offered_elements(place)

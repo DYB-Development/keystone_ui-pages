@@ -10,6 +10,8 @@ module KeystoneUi
       def register(catalog)
         catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start",
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
+        catalog.register(key: :next_page, name: "Next page", component: :pages_next_page, icon: :cursor, group: "Basics", align: "start", placed: true,
+          fields: [ { key: :label, label: "Label", default: "Next" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
         catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text",
@@ -84,7 +86,7 @@ module KeystoneUi
                                  { "label" => "Email", "name" => "email", "kind" => "email", "required" => "true" } ] },
                     { key: :submit_label, label: "Submit label", kind: :text, default: "Send" },
                     { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." },
-                    { key: :after_submitting, label: "After submitting", kind: :one_of, options: %w[thank_you address], default: "thank_you" },
+                    { key: :after_submitting, label: "After submitting", kind: :one_of, options: %w[thank_you address next_page], default: "thank_you" },
                     { key: :next_address, label: "Address to send the visitor to", kind: :address } ])
         catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
           fields: [ { key: :items, label: "Questions", kind: :list,

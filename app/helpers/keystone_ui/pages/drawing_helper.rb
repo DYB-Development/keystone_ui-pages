@@ -12,18 +12,19 @@ module KeystoneUi
       ELEMENT_ALIGNMENTS = { "stretch" => "flex flex-col", "start" => "flex justify-start", "center" => "flex justify-center", "end" => "flex justify-end" }.freeze
       COLUMN_ALIGNMENTS = { "top" => "justify-start", "center" => "justify-center", "bottom" => "justify-end" }.freeze
       DRAWING_FORMAT = 2
+      NEXT_PAGE_PLACEHOLDER = "keystone-ui-pages-next-page"
       SIZED_SECTION_PADDING = "py-[calc(var(--ks-spacing)*16)] lg:py-[calc(var(--ks-spacing)*24)]"
       SHADED_CLASSES = "bg-(color:--ks-color-fill-muted) dark:bg-(color:--ks-color-fill-muted-dark)"
       PLAIN_FIGURE_DIVIDER = "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-l-(length:--ks-border-width) " \
                              "@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border) " \
                              "dark:@sm:[.ks-pages-column:has(.ks-metric-plain)+&:has(.ks-metric-plain)]:border-(color:--ks-color-border-dark)"
 
-      def drawn_version(version, values: {})
+      def drawn_version(version, values: {}, for_visitor: true)
         key = [ "keystone_ui_pages", DRAWING_FORMAT, KeystoneUi::Pages.turnstile_site_key, version.id, Operations.digest(values.to_h.stringify_keys) ]
         @drawn_page_id = version.page_id
         @drawn_version = version
         load_forms_script(version)
-        with_visitor_token(Rails.cache.fetch(key) { without_visitor_tokens(drawn_document(version.document, values: values).to_str) }).html_safe
+        with_next_page(with_visitor_token(Rails.cache.fetch(key) { without_visitor_tokens(drawn_document(version.document, values: values).to_str) }), version.page, for_visitor).html_safe
       end
 
       def reporting_data(page)
@@ -39,6 +40,12 @@ module KeystoneUi
         rich_paragraphs(text["html"].to_s)
       end
 
+      def pages_next_page(label:, element_id:, version:)
+        return ui_button(label: label) unless version
+
+        safe_join([ "<!--next-page-->".html_safe, ui_button(label: label, href: NEXT_PAGE_PLACEHOLDER), "<!--/next-page-->".html_safe ])
+      end
+
       def drawn_document(document, editing: false, values: {})
         @drawn_values = values.to_h.stringify_keys
         @drawn_version = nil if editing
@@ -46,6 +53,13 @@ module KeystoneUi
       end
 
       private
+
+      def with_next_page(html, page, for_visitor)
+        return html unless html.include?(NEXT_PAGE_PLACEHOLDER)
+
+        address = KeystoneUi::Pages.next_page_address(controller, page) if for_visitor
+        html.gsub(%r{<!--next-page-->(.*?)<!--/next-page-->}m) { address ? Regexp.last_match(1).gsub(NEXT_PAGE_PLACEHOLDER) { ERB::Util.html_escape(address) } : "" }
+      end
 
       def load_forms_script(version)
         return if @forms_script_loaded || Operations.elements(version.document).none? { |element| element["key"] == "form" }
