@@ -126,4 +126,16 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ [ "spring-sale", KeystoneUi::Pages::Page.find_by(name: "Landing again"), landing ] ], ApplicationController.funnel_additions
   end
+
+  test "changing and publishing a copy leaves the page it came from unchanged" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id }
+    copy = KeystoneUi::Pages::Page.find_by(name: "Landing again")
+
+    copy.edit(KeystoneUi::Pages::Document.blank)
+    copy.publish
+
+    assert_equal [ copy.undo_history.first, :draft ], [ landing.reload.document, landing.state ]
+  end
+
 end
