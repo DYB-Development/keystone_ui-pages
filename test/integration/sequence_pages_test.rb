@@ -108,4 +108,14 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal landing.document, KeystoneUi::Pages::Page.find_by(name: "Landing again").document
   end
+
+  test "a copy of a published page from another sequence carries the key of the sequence it was added to and starts as a draft" do
+    winter = KeystoneUi::Pages::Page.create!(name: "Winter", slug: "winter", place: "funnel", sequence_key: "winter-sale")
+    winter.publish
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Spring" }, copy_of_id: winter.id }
+
+    page = KeystoneUi::Pages::Page.find_by(name: "Spring")
+    assert_equal [ "spring-sale", :draft ], [ page.sequence_key, page.state ]
+  end
 end
