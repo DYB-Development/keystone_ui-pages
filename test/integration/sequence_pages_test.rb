@@ -72,4 +72,13 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "the form for adding a page to a sequence offers a blank page or a copy of each page in the place that is not archived" do
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    KeystoneUi::Pages::Page.create!(name: "Old", slug: "old", place: "funnel", sequence_key: "spring-sale", archived_at: Time.current)
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new"
+
+    assert_equal [ "Blank page", "Landing" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
+  end
 end

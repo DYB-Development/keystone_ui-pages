@@ -9,6 +9,7 @@ module KeystoneUi
 
         def new
           @default_name = Page.new(place: params[:place], owner: page_owner).default_name
+          @copyable_pages = Page.current
         end
 
         def create
