@@ -90,4 +90,14 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Blank page" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
   end
+
+  test "the form for adding a page to a sequence offers no copy of a page that belongs to another page owner" do
+    KeystoneUi::Pages.owner_method = :current_team
+    Team.create!(name: "Acme")
+    KeystoneUi::Pages::Page.create!(name: "Rival", slug: "rival", place: "funnel", owner: Team.create!(name: "Rival"))
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new", headers: { "X-Team" => "Acme" }
+
+    assert_equal [ "Blank page" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
+  end
 end
