@@ -138,4 +138,12 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
     assert_equal [ copy.undo_history.first, :draft ], [ landing.reload.document, landing.state ]
   end
 
+  test "changing the page a copy came from leaves the copy unchanged" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id }
+
+    landing.edit(KeystoneUi::Pages::Document.blank)
+
+    assert_equal landing.undo_history.first, KeystoneUi::Pages::Page.find_by(name: "Landing again").document
+  end
 end
