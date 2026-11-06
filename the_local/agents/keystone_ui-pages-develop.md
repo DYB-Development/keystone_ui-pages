@@ -269,8 +269,12 @@ inherit from the base controller, so define it there.
   list has an Add page button, shown with or without pages in the sequence.
 - `/manage/sequences/:place/:key/pages/new` under the engine's mount path — the
   Add page form, or `keystone_ui_pages.new_manage_sequence_page_path("funnel", "abc123")`
-  from the host. It runs behind the edit check and asks only for a name, with
-  the place's next default name, such as "Step 3", as its placeholder. Creating
+  from the host. It runs behind the edit check and asks for a name, with
+  the place's next default name, such as "Step 3", as its placeholder, and for
+  Start from: Blank page, or a copy of any page in the same place that
+  `owner_method`'s record owns and that is not archived, including pages of
+  other sequences. A copy takes that page's document and nothing else, starts
+  as a draft, and changes apart from it afterwards. Creating
   makes a page with the name given, or the default name when it is left blank,
   in the sequence's place, with the sequence's key, owned by `owner_method`'s
   record, and with a random slug. The engine then calls the place's

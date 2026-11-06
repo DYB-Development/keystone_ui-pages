@@ -72,4 +72,78 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "the form for adding a page to a sequence offers a blank page or a copy of each page in the place that is not archived" do
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    KeystoneUi::Pages::Page.create!(name: "Old", slug: "old", place: "funnel", sequence_key: "spring-sale", archived_at: Time.current)
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new"
+
+    assert_equal [ "Blank page", "Landing" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
+  end
+
+  test "the form for adding a page to a sequence offers no copy of a page from another place" do
+    KeystoneUi::Pages.register_place("website", label: "Website")
+    KeystoneUi::Pages::Page.create!(name: "Home", slug: "home", place: "website")
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new"
+
+    assert_equal [ "Blank page" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
+  end
+
+  test "the form for adding a page to a sequence offers no copy of a page that belongs to another page owner" do
+    KeystoneUi::Pages.owner_method = :current_team
+    Team.create!(name: "Acme")
+    KeystoneUi::Pages::Page.create!(name: "Rival", slug: "rival", place: "funnel", owner: Team.create!(name: "Rival"))
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new", headers: { "X-Team" => "Acme" }
+
+    assert_equal [ "Blank page" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
+  end
+
+  test "a page added to a sequence as a copy holds the same document as the page it came from" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id }
+
+    assert_equal landing.document, KeystoneUi::Pages::Page.find_by(name: "Landing again").document
+  end
+
+  test "a copy of a published page from another sequence carries the key of the sequence it was added to and starts as a draft" do
+    winter = KeystoneUi::Pages::Page.create!(name: "Winter", slug: "winter", place: "funnel", sequence_key: "winter-sale")
+    winter.publish
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Spring" }, copy_of_id: winter.id }
+
+    page = KeystoneUi::Pages::Page.find_by(name: "Spring")
+    assert_equal [ "spring-sale", :draft ], [ page.sequence_key, page.state ]
+  end
+
+  test "adding a page as a copy calls the host's add page method with the sequence's key, the copy and the page that was open" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id, after_id: landing.id }
+
+    assert_equal [ [ "spring-sale", KeystoneUi::Pages::Page.find_by(name: "Landing again"), landing ] ], ApplicationController.funnel_additions
+  end
+
+  test "changing and publishing a copy leaves the page it came from unchanged" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id }
+    copy = KeystoneUi::Pages::Page.find_by(name: "Landing again")
+
+    copy.edit(KeystoneUi::Pages::Document.blank)
+    copy.publish
+
+    assert_equal [ copy.undo_history.first, :draft ], [ landing.reload.document, landing.state ]
+  end
+
+  test "changing the page a copy came from leaves the copy unchanged" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id }
+
+    landing.edit(KeystoneUi::Pages::Document.blank)
+
+    assert_equal landing.undo_history.first, KeystoneUi::Pages::Page.find_by(name: "Landing again").document
+  end
 end

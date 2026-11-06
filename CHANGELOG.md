@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- The Add page form in a sequence's list has a Start from list offering Blank page or a copy of any page in the place that the current owner owns and is not archived. A copy starts with that page's document as a draft in the sequence it was added to, is handed to the place's `adds_page_method:` like a blank page, and changes apart from the page it came from.
+
 ## [0.12.0] - 2026-11-03
 
 ### Added

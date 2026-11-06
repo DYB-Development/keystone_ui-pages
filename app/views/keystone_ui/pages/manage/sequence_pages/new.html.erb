@@ -7,6 +7,9 @@
     <label class="ks-label mb-1">Name</label>
     <%= ui_input(name: "page[name]", placeholder: @default_name) %>
 
+    <label class="ks-label mb-1">Start from</label>
+    <%= ui_select(name: "copy_of_id", options: [ [ "Blank page", "" ] ] + @copyable_pages.map { |page| [ page.name, page.id ] }) %>
+
     <%= ui_button(label: "Create", type: :submit) %>
   <% end %>
 <% end %>

@@ -80,7 +80,8 @@ Keystone UI itself must be installed first. Its own install local,
   key, which cannot be changed later.
 - **Adding a page to a sequence.** The sequence screen has an Add page button
   that asks for a name, with the place's default name used when it is left
-  blank. The gem makes the page and tells the host which sequence it joins and
+  blank, and whether to start blank or as a copy of another page in the same
+  place. The gem makes the page and tells the host which sequence it joins and
   which page was open, so the host decides where it goes in the order. The new
   page then opens in the builder beside the list. A place that answers
   sequences must also handle pages added this way.

@@ -21,7 +21,7 @@ Each field is text, long text, an address, a number, one of a list, yes or no, a
 - Form inputs need a form that sends answers somewhere, and pages do not receive answers: `form`, `form_field`, `input`, `textarea`, `select`, `multi_select`, `checkbox_row`, `radio_card`, `option_card`, `color_picker`, `file_upload`, `column_picker` and `search_select`.
 - Page frames and wrappers hold other components, and elements do not hold other elements: `page`, `form_page`, `show_page`, `page_header`, `section`, `grid`, `panel`, `card_link`, `modal` and `disclosure`.
 - These take structured data whose shape the catalog does not describe yet: `tab_switcher`, `swipe_deck`, `chart_card`, `funnel`, `pipeline`, `bucket`, `bucket_series`, `breakdown` and `calculation`.
-- These are new in keystone_ui and not offered yet: `picture` and `mobile_action`.
+- These are new in keystone_ui and not offered yet: `picture`, `mobile_action`, `sortable_list`, `empty_state` and `link_list`.
 
 ## Theme, look and styles
 
@@ -137,7 +137,7 @@ def add_funnel_page(key, page, after)
 end
 ```
 
-The Add page button in the sequence's list opens a form for the page's name, and a page left unnamed gets the place's `default_name:`. The gem makes the page in the sequence's place for the current owner, with the sequence's key, then calls the method and opens the new page on the sequence screen. The gem records no order, so the host decides where the page goes, and the list shows it wherever `sequence_method:` answers it. A sequence the host answers nil for refuses the form and adds no page.
+The Add page button in the sequence's list opens a form for the page's name, and a page left unnamed gets the place's `default_name:`. Its Start from list offers Blank page or a copy of any page in the same place that the current owner owns and is not archived, including pages of other sequences. A copy starts with that page's content and nothing else, as a draft, and the two pages change apart from then on. The gem makes the page in the sequence's place for the current owner, with the sequence's key, then calls the method and opens the new page on the sequence screen. The gem records no order, so the host decides where the page goes, and the list shows it wherever `sequence_method:` answers it. A sequence the host answers nil for refuses the form and adds no page.
 
 To let staff decide when visitors see a changed sequence, name a `publishes_sequence_method:` when registering the place. The sequence's list then shows a Publish button, and pressing it calls the method on the editor's controller with the sequence's key. Adding a page never calls it. A sequence the host answers nil for refuses the button's request. To refuse with a reason, raise `KeystoneUi::Pages::SequencePublishRefused`, and any other error is left to the host's error handling:
 
