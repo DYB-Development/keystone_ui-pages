@@ -81,4 +81,13 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Blank page", "Landing" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
   end
+
+  test "the form for adding a page to a sequence offers no copy of a page from another place" do
+    KeystoneUi::Pages.register_place("website", label: "Website")
+    KeystoneUi::Pages::Page.create!(name: "Home", slug: "home", place: "website")
+
+    get "/pages/manage/sequences/funnel/spring-sale/pages/new"
+
+    assert_equal [ "Blank page" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
+  end
 end
