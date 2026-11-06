@@ -100,4 +100,12 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Blank page" ], Nokogiri::HTML(response.body).css("select[name='copy_of_id'] option").map(&:text)
   end
+
+  test "a page added to a sequence as a copy holds the same document as the page it came from" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id }
+
+    assert_equal landing.document, KeystoneUi::Pages::Page.find_by(name: "Landing again").document
+  end
 end
