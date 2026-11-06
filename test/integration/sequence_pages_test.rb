@@ -118,4 +118,12 @@ class KeystoneUi::Pages::SequencePagesTest < ActionDispatch::IntegrationTest
     page = KeystoneUi::Pages::Page.find_by(name: "Spring")
     assert_equal [ "spring-sale", :draft ], [ page.sequence_key, page.state ]
   end
+
+  test "adding a page as a copy calls the host's add page method with the sequence's key, the copy and the page that was open" do
+    landing = KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    post "/pages/manage/sequences/funnel/spring-sale/pages", params: { page: { name: "Landing again" }, copy_of_id: landing.id, after_id: landing.id }
+
+    assert_equal [ [ "spring-sale", KeystoneUi::Pages::Page.find_by(name: "Landing again"), landing ] ], ApplicationController.funnel_additions
+  end
 end
