@@ -371,6 +371,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ [ :box, item ], :text, :text, [ :box, item ], :text, :text ], drawn(document).drawn.drop(1).reject { |call| call.first == :space }.map { |call| call.first == :box ? call : call.first }
   end
 
+  test "an accordion's answer is drawn four of keystone_ui's spacing steps under its question, as the accordion button pads it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." } ])))))
+
+    assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 4 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
   private
 
   def drawn(document, values: {})
