@@ -28,6 +28,7 @@ module KeystoneUi
       def declarations(stylesheet)
         rules(stylesheet).flat_map do |preludes, body|
           selectors = split(preludes.last.to_s, ",").map(&:strip)
+          next [] if preludes.any? { |prelude| prelude.start_with?("@") && !prelude.start_with?("@layer") }
           next [] unless selectors.any? { |selector| ROOTS.include?(selector) || looked?(selector) }
 
           rank = [ preludes.any? { |prelude| prelude.start_with?("@layer") } ? 0 : 1, selectors.any? { |selector| looked?(selector) } ? 1 : 0 ]

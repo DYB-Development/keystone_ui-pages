@@ -27,4 +27,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "223344", KeystoneUi::Pages::PdfLook.new(stylesheet, look: "calm").color("--ks-color-text")
   end
+
+  test "a token value set only for a screen or a dark scheme is left out, so the PDF keeps the light mode value" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-text:#18181b}@media (prefers-color-scheme:dark){:root{--ks-color-text:#ffffff}}")
+
+    assert_equal "18181B", look.color("--ks-color-text")
+  end
 end
