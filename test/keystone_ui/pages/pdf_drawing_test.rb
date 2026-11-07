@@ -364,6 +364,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-body", leading: "--text-sm--line-height" } ], drawn(document).drawn.select { |call| call.first == :text }.last.last(2)
   end
 
+  test "each accordion question and its answer are drawn in a box with the border, rounded corners and padding keystone_ui's accordion item and button rules give it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." }, { "question" => "Who for?", "answer" => "Hosts." } ])))))
+
+    item = { padding: [ "--ks-spacing", 6, 4 ], radius: [ "--ks-radius-surface", 1.5 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } }
+    assert_equal [ [ :box, item ], :text, :text, [ :box, item ], :text, :text ], drawn(document).drawn.drop(1).reject { |call| call.first == :space }.map { |call| call.first == :box ? call : call.first }
+  end
+
   private
 
   def drawn(document, values: {})
