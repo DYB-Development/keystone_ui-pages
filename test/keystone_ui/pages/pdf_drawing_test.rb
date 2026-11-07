@@ -358,6 +358,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: "line-height" }, drawn(document).styles.first)
   end
 
+  test "an accordion's answer is drawn at the size and in the look keystone_ui's accordion answer rule gives it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." } ])))))
+
+    assert_equal [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-body", leading: "--text-sm--line-height" } ], drawn(document).drawn.select { |call| call.first == :text }.last.last(2)
+  end
+
   private
 
   def drawn(document, values: {})
