@@ -67,7 +67,20 @@ A host with no Chrome can have the PDF drawn in Ruby instead, from the page's se
 KeystoneUi::Pages.pdf_drawing = :ruby
 ```
 
-It defaults to `:chrome`. The Ruby drawing needs no Chrome, so the page list shows its PDF links either way. Each element draws through its own PDF drawing, given to `catalog.register` as `pdf:`, and a page holding an element without one raises `KeystoneUi::Pages::NoPdfDrawing`, a `PrintFailed`, naming the element. So far the heading and label elements have PDF drawings, in Prawn's default font.
+It defaults to `:chrome`. The Ruby drawing needs no Chrome, so the page list shows its PDF links either way. Each element draws through its own PDF drawing, given to `catalog.register` as `pdf:`, and a page holding an element without one raises `KeystoneUi::Pages::NoPdfDrawing`, a `PrintFailed`, naming the element. So far the heading and label elements have PDF drawings.
+
+The Ruby drawing takes its look from keystone_ui. It reads the `--ks-` tokens for fonts, weights, text colours and spacing from the stylesheet `KeystoneUi::Pages.pdf_stylesheet` names, in light mode. A default look the host names with `default_look` and a token the host's own stylesheet changes both reach the PDF.
+
+A font named only by system fonts, with no font files, prints in Helvetica. A font the stylesheet loads with `@font-face` prints from TrueType copies of its files, since the PDF cannot read `.woff2` or `.woff`. Serve a `.ttf` copy beside each font file, under the same name, in the public folder or among the assets:
+
+```
+public/InterVariable.woff2
+public/InterVariable.ttf
+public/InterVariable-Italic.woff2
+public/InterVariable-Italic.ttf
+```
+
+The PDF prints regular, bold and italic text from the copies whose `@font-face` rules give those weights and styles. Asking for a PDF in a font with no TrueType copy served raises a `PrintFailed` naming the font and the file it looked for.
 
 ## Reporting views and clicks to the host
 
