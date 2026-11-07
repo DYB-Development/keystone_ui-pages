@@ -18,7 +18,7 @@ module KeystoneUi
       end
 
       def made(version, values)
-        return PdfDrawing.pdf(version, values: values) if Pages.pdf_drawing.to_s == "ruby"
+        return PdfDrawing.pdf(version, values: values) if Pages.ruby_pdf_drawing?
 
         Printer.pdf(PdfDocument.html(version, values: values))
       end

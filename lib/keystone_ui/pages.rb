@@ -34,6 +34,10 @@ module KeystoneUi
         @pdf_drawing || :chrome
       end
 
+      def ruby_pdf_drawing?
+        pdf_drawing.to_s == "ruby"
+      end
+
       def places
         (@places || {}).merge(place_settings.transform_values { |settings| settings[:label] })
       end
