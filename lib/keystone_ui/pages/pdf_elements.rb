@@ -46,9 +46,8 @@ module KeystoneUi
 
       def value_list(surface, fields)
         Array(fields[:rows].presence).each do |entry|
-          entry = entry.to_h.symbolize_keys
           surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ]) do |index|
-            surface.text(index.zero? ? entry[:label] : entry[:value], size: VALUE_LIST_SIZE)
+            surface.text(index.zero? ? entry[:label] : entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE)
           end
         end
       end

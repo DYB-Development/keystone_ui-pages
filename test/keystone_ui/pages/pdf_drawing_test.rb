@@ -218,6 +218,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).filter_map { |call| { row: call, text: call[1] }[call.first] }
   end
 
+  test "a label and value list draws each value from the host's values, or the row's fallback when the value is missing" do
+    document = page(section(row(column(element("value_list", rows: { "value" => "billing", "fallback" => nil })))))
+    billing = [ { "label" => "Rate", "value" => "$150.00" }, { label: "Reviews", value: nil }, { "label" => "Notes", "value" => "", "fallback" => "None yet" } ]
+
+    assert_equal [ "Rate", "$150.00", "Reviews", "N/A", "Notes", "None yet" ], drawn(document, values: { "billing" => billing }).texts
+  end
+
   private
 
   def drawn(document, values: {})
