@@ -352,6 +352,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "What is it?", "A page.", "Who for?", "Hosts." ], drawn(document).texts
   end
 
+  test "an accordion's question is drawn in the look keystone_ui's accordion button rule gives it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." } ])))))
+
+    assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: "line-height" }, drawn(document).styles.first)
+  end
+
   private
 
   def drawn(document, values: {})

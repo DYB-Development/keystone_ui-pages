@@ -50,7 +50,7 @@ module KeystoneUi
 
       def accordion(surface, fields)
         Array(fields[:items].presence).each do |item|
-          surface.text(item[:question], size: ACCORDION_QUESTION_SIZE)
+          surface.text(item[:question], size: ACCORDION_QUESTION_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: PAGE_LINE_HEIGHT)
           surface.text(item[:answer], size: ACCORDION_ANSWER_SIZE)
         end
       end
