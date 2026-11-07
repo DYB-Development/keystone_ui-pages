@@ -45,6 +45,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 58.692 + 24, fill_widths(surface.render).first, 0.001
   end
 
+  test "a boxed line of text given an address opens that address when clicked" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ], link: "https://ty-ler.com/book")
+
+    assert_includes surface.render, "/URI (https://ty-ler.com/book)"
+  end
+
   private
 
   def look

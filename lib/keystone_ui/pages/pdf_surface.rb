@@ -46,15 +46,17 @@ module KeystoneUi
         @document.move_down(inset)
       end
 
-      def boxed_text(content, size:, fill:, padding:, radius:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
+      def boxed_text(content, size:, fill:, padding:, radius:, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
         across = @look.points(padding.first) * padding[1]
         down = @look.points(padding.first) * padding.last
         width = @document.bounds.width
         top = @document.cursor
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
         height = measured(width - across * 2, &drawn) + down * 2
+        fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
+        linked(link, fill_width, height) if link
         @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], [ text_width(content, size, font, weight) + across * 2, width ].min, height, @look.points(radius.first) * radius.last)
+        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, @look.points(radius.first) * radius.last)
         @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
         @document.move_down(down)
       end
@@ -109,6 +111,12 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def linked(address, width, height)
+        left = @document.bounds.absolute_left
+        top = @document.y
+        @document.link_annotation([ left, top - height, left + width, top ], Border: [ 0, 0, 0 ], A: { Type: :Action, S: :URI, URI: PDF::Core::LiteralString.new(address) })
       end
 
       def text_width(content, size, font, weight)
