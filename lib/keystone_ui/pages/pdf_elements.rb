@@ -10,6 +10,7 @@ module KeystoneUi
 
       def heading(surface, fields)
         surface.text(fields[:text], size: HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"]))
+        surface.text(fields[:note], size: LABEL_SIZE) if fields[:note].present?
       end
 
       def label(surface, fields)

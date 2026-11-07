@@ -66,6 +66,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "The Paragraph element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
+  test "a heading's note is drawn under its text" do
+    document = page(section(row(column(element("heading", text: "Pricing", note: "Updated monthly")))))
+
+    assert_equal [ "Pricing", "Updated monthly" ], drawn(document).texts
+  end
+
   private
 
   def drawn(document, values: {})
