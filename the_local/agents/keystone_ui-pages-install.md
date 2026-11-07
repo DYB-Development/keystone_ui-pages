@@ -127,8 +127,35 @@ linking editors to the builder or drawing a page in the host's screens.
      columns and elements, so no browser is needed. Only the heading and label
      elements can be drawn this way so far, and a page holding any other
      element cannot be printed and raises an error naming that element.
+     It still needs Propshaft serving the host's stylesheet, since it reads the
+     fonts, weights, text colours and spacing from its `--ks-` tokens, and the
+     text sizes and letter spacing Keystone UI's heading and caption use, in
+     light mode and the host's default look. A token the host's own stylesheet
+     changes reaches the PDF the same way.
 
    The choice is a setting in the settings file, written in the next step.
+
+   With the Ruby drawing, check the fonts the host's stylesheet uses:
+
+   - A font named only by system fonts, with no `@font-face`, prints in
+     Helvetica and needs nothing.
+   - A font the stylesheet loads with `@font-face` needs a TrueType copy of each
+     of its files, because a PDF cannot read `.woff2` or `.woff`. Put a `.ttf`
+     file beside each font file, under the same name, either in `public/` or in
+     the asset paths Propshaft serves:
+
+     ```
+     public/InterVariable.woff2
+     public/InterVariable.ttf
+     public/InterVariable-Italic.woff2
+     public/InterVariable-Italic.ttf
+     ```
+
+     Regular, bold and italic text print from the copies whose `@font-face`
+     rules give those weights and styles. A PDF asked for in a font with no
+     TrueType copy served fails with an error naming the font and the file it
+     looked for. If the host has no `.ttf` files for its font, ask the
+     developer where to get them rather than converting or replacing the font.
 
 7. Create `config/initializers/keystone_ui_pages.rb` starting with:
 
@@ -156,7 +183,9 @@ linking editors to the builder or drawing a page in the host's screens.
    `keystone_ui_pages.manage_pages_path`, create a page, add an element in the
    builder, publish it, and open `/pages/<slug>`. With the Chrome drawing, the
    page list shows a PDF link only when Chrome or Chromium was found. With the
-   Ruby drawing, it always shows one.
+   Ruby drawing, it always shows one, so open it on a page holding only
+   headings and labels to confirm the fonts and text sizes print, with each
+   label in capitals.
 
    Boot stops with an `ArgumentError` naming a place when that place's settings
    are incomplete: it leaves out an element no catalog entry has, it offers the

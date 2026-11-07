@@ -3,18 +3,19 @@
 module KeystoneUi
   module Pages
     module PdfElements
-      HEADING_SIZES = { "sm" => 14, "md" => 18, "lg" => 24 }.freeze
-      LABEL_SIZE = 10
+      HEADING_SIZES = { "sm" => "--text-lg", "md" => "--text-2xl", "lg" => "--text-4xl" }.freeze
+      NOTE_SIZE = "--text-sm"
+      LABEL_SIZE = "--text-xs"
 
       module_function
 
       def heading(surface, fields)
-        surface.text(fields[:text], size: HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"]))
-        surface.text(fields[:note], size: LABEL_SIZE) if fields[:note].present?
+        surface.text(fields[:text], size: HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"]), font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text")
+        surface.text(fields[:note], size: NOTE_SIZE, color: "--ks-color-text-muted") if fields[:note].present?
       end
 
       def label(surface, fields)
-        surface.text(fields[:text], size: LABEL_SIZE)
+        surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-text-muted", uppercase: true, tracking: "--tracking-wider")
       end
     end
   end

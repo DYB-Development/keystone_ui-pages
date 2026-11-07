@@ -5,16 +5,21 @@ require "keystone_ui/pages/operations"
 require "keystone_ui/pages/filling"
 require "keystone_ui/pages/printer"
 require "keystone_ui/pages/pdf_surface"
+require "keystone_ui/pages/pdf_look"
 
 module KeystoneUi
   module Pages
     class NoPdfDrawing < PrintFailed; end
 
     module PdfDrawing
+      SPACING = "--ks-spacing"
+      ELEMENT_GAP = 4
+      ROW_GAP = 6
+
       module_function
 
       def pdf(version, values: {})
-        surface = PdfSurface.new
+        surface = PdfSurface.new(PdfLook.host)
         draw(version.document, surface, values: values)
         surface.render
       end
@@ -22,7 +27,10 @@ module KeystoneUi
       def draw(document, surface, values: {})
         values = values.to_h.stringify_keys
         shown(document["sections"], values).each do |section|
-          shown(section["rows"], values).each { |row| drawn_row(row, surface, values) }
+          shown(section["rows"], values).each_with_index do |row, position|
+            surface.space(SPACING, ROW_GAP) if position.positive?
+            drawn_row(row, surface, values)
+          end
         end
       end
 
@@ -30,7 +38,10 @@ module KeystoneUi
         columns = row["columns"]
         share = Operations::SHARES.fetch(columns.size, "1/1")
         surface.row(columns.map { |column| Rational(column["wide"] || share) }) do |index|
-          shown(columns[index]["elements"], values).each { |element| drawn_element(element, surface, values) }
+          shown(columns[index]["elements"], values).each_with_index do |element, position|
+            surface.space(SPACING, ELEMENT_GAP) if position.positive?
+            drawn_element(element, surface, values)
+          end
         end
       end
 
