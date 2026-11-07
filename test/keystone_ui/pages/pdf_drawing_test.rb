@@ -129,6 +129,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert drawn(document).styles.last[:uppercase]
   end
 
+  test "a label is drawn with the wider letter spacing keystone_ui's caption gives it" do
+    document = page(section(row(column(element("label", text: "Per seat")))))
+
+    assert_equal "--tracking-wider", drawn(document).styles.last[:tracking]
+  end
+
   private
 
   def drawn(document, values: {})
