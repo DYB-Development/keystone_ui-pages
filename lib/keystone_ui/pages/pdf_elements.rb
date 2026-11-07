@@ -25,7 +25,10 @@ module KeystoneUi
       end
 
       def paragraph(surface, fields)
-        rich_paragraphs(fields[:text]["html"]).each { |paragraph| surface.rich_text(runs(paragraph), size: PARAGRAPH_SIZE) }
+        text = fields[:text]
+        return surface.rich_text([ { text: text.to_s } ], size: PARAGRAPH_SIZE) unless text.is_a?(Hash)
+
+        rich_paragraphs(text["html"]).each { |paragraph| surface.rich_text(runs(paragraph), size: PARAGRAPH_SIZE) }
       end
 
       def rich_paragraphs(html)

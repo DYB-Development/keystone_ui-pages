@@ -161,6 +161,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ { text: "Firm", bold: true }, { text: " " }, { text: "soft", italic: true }, { text: " " }, { text: "both", bold: true, italic: true } ], drawn(document).drawn.last[1]
   end
 
+  test "a paragraph stored as plain text is drawn as one paragraph of that text, angle brackets and all" do
+    document = page(section(row(column(element("paragraph", text: "Use <b> for bold & <a> for links")))))
+
+    assert_equal [ "Use <b> for bold & <a> for links" ], drawn(document).paragraphs
+  end
+
   private
 
   def drawn(document, values: {})
