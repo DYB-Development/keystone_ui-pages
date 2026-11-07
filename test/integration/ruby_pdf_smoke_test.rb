@@ -19,4 +19,17 @@ class KeystoneUi::Pages::RubyPdfSmokeTest < ActiveSupport::TestCase
 
     assert_equal "%PDF", pdf.file.download[0, 4]
   end
+
+  test "a host that chooses the Ruby drawing gets a page of paragraphs, alerts and label and value lists as a PDF, end to end" do
+    page = KeystoneUi::Pages::Page.create!(name: "Report", slug: "report")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = %w[paragraph alert value_list].reduce(page.document) { |drawn, key| KeystoneUi::Pages::Operations.add(drawn, key, column_id: column_id) }
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["text"] = { "html" => "<p><strong><em>Firm</em></strong> terms<br>by <a href=\"https://ty-ler.com\">Tyler</a></p>" }
+    page.update!(document: document)
+    page.publish
+
+    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) }
+
+    assert_equal "%PDF", pdf.file.download[0, 4]
+  end
 end
