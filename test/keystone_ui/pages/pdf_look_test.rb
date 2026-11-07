@@ -21,4 +21,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "112233", look.color("--ks-color-text")
   end
+
+  test "the look named takes its own token values over the stylesheet's root values, and another look's values are left out" do
+    stylesheet = ':root[data-look="calm"]{--ks-color-text:#223344}:root[data-look="loud"]{--ks-color-text:#ff0000}:root{--ks-color-text:#18181b}'
+
+    assert_equal "223344", KeystoneUi::Pages::PdfLook.new(stylesheet, look: "calm").color("--ks-color-text")
+  end
 end

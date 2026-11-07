@@ -4,10 +4,12 @@ module KeystoneUi
   module Pages
     class PdfLook
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
+      ROOTS = [ ":root", ":host", "html" ].freeze
       LMS_TO_SRGB = [ [ 4.0767416621, -3.3077115913, 0.2309699292 ], [ -1.2684380046, 2.6097574011, -0.3413193965 ], [ -0.0041960863, -0.7034186147, 1.7076147010 ] ].freeze
 
-      def initialize(stylesheet)
-        @values = declarations(stylesheet).sort_by.with_index { |(layered, _declaration), index| [ layered ? 0 : 1, index ] }.to_h { |_layered, declaration| declaration }
+      def initialize(stylesheet, look: nil)
+        @look = look
+        @values = declarations(stylesheet).sort_by.with_index { |(rank, _declaration), index| [ rank, index ] }.to_h { |_rank, declaration| declaration }
       end
 
       def color(name)
@@ -25,9 +27,16 @@ module KeystoneUi
 
       def declarations(stylesheet)
         rules(stylesheet).flat_map do |preludes, body|
-          layered = preludes.any? { |prelude| prelude.start_with?("@layer") }
-          split(body, ";").filter_map { |declaration| [ layered, declaration.split(":", 2).map(&:strip) ] if declaration.include?(":") }
+          selectors = split(preludes.last.to_s, ",").map(&:strip)
+          next [] unless selectors.any? { |selector| ROOTS.include?(selector) || looked?(selector) }
+
+          rank = [ preludes.any? { |prelude| prelude.start_with?("@layer") } ? 0 : 1, selectors.any? { |selector| looked?(selector) } ? 1 : 0 ]
+          split(body, ";").filter_map { |declaration| [ rank, declaration.split(":", 2).map(&:strip) ] if declaration.include?(":") }
         end
+      end
+
+      def looked?(selector)
+        @look.present? && selector.match?(/\A(?::root|html)?\[data-look=["']?#{Regexp.escape(@look)}["']?\]\z/)
       end
 
       def rules(stylesheet)
