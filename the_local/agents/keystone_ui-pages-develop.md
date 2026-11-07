@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-develop
-description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
+description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
 tools: Bash, Read, Write, Edit, Grep
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -196,6 +196,26 @@ inherit from the base controller, so define it there.
 - `KeystoneUi::Pages.pdf_stylesheet = "tailwind.css"` — the name of the host's
   compiled stylesheet in Propshaft, written into every PDF. Defaults to
   `"tailwind.css"`. A name Propshaft cannot find prints the PDF with no styles.
+  Chrome drawing only.
+- `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
+  default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
+  the page in Ruby with Prawn from its sections, rows, columns and elements,
+  with no Chrome needed. A string works too. The Ruby drawing honours bound
+  values and show-when conditions and lays out each row's columns side by side
+  at their widths, in Prawn's default font, with no host stylesheet, colours or
+  print rules. Each element draws through the `pdf:` drawing given to
+  `catalog.register`. Of the built-in elements only `heading` (its text at
+  14, 18 or 24 points for `sm`, `md` or `lg`, and its note under it at 10) and
+  `label` (its text at 10) have one so far.
+- `KeystoneUi::Pages.ruby_pdf_drawing?` — true when `pdf_drawing` is `:ruby` or
+  `"ruby"`. Use it to decide whether to offer a PDF without checking for
+  Chrome.
+- `KeystoneUi::Pages::NoPdfDrawing` — raised by `KeystoneUi::Pages.pdf` under
+  the Ruby drawing when the page holds a shown element whose catalog entry has
+  no `pdf:` drawing. Its message names the element. It is a
+  `KeystoneUi::Pages::PrintFailed`, so a rescue of `PrintFailed` catches it.
+  Nothing is kept when it is raised. An element hidden by a show-when condition
+  for the values given is not drawn and does not raise.
 
 ### Host values
 
@@ -297,7 +317,7 @@ inherit from the base controller, so define it there.
 
 ### The element catalog
 
-- `KeystoneUi::Pages.catalog.register(key:, name:, component:, fields:, body: nil, icon: nil, group: nil, align: nil, placed: false)`
+- `KeystoneUi::Pages.catalog.register(key:, name:, component:, fields:, body: nil, icon: nil, group: nil, align: nil, placed: false, pdf: nil)`
   — adds an element to the builder's palette, or replaces the one with the same
   key. `key:` is a symbol stored in page documents. `name:` is the label in the
   palette. `component:` is the name of a method the drawing calls with one
@@ -310,6 +330,13 @@ inherit from the base controller, so define it there.
   placement in its column: `"stretch"`, `"start"`, `"center"` or `"end"`.
   `placed: true` also passes `element_id:` and `version:` (nil in the builder)
   to the method, which the Form element uses to build its address.
+  `pdf:` is the element's Ruby PDF drawing, used only when `pdf_drawing` is
+  `:ruby`: a callable taking the drawing surface and a hash of the element's
+  field values keyed by symbol, with bound values filled in and each unset
+  field at its `default:`. The surface's `text(content, size:)` writes the
+  content as a line of text at that size in points, below what was drawn
+  before it in the same column. An element registered without `pdf:` makes the
+  Ruby drawing raise `NoPdfDrawing` for any page showing it.
 - The built-in Form element (`:form`) holds a form name, a list of fields (each
   a label, a field name, a kind of `text`, `email`, `long_text`, `choice` or
   `checkbox`, the choices of a `choice` field separated by commas, and whether
@@ -392,17 +419,30 @@ The catalog offers these Keystone UI components by default: `button`,
    that uses no host values queues its PDF straight away, since it looks the
    same for everyone.
 
-   The page must be published, since only the live version is printed. The PDF
-   is the page drawn in light mode with the stylesheet named by
-   `pdf_stylesheet`, printed by Chrome or Chromium with no header or footer.
-   Printing keeps chart and cell colours on a white background and does not
-   split a section, a table row or a label and value row across pages.
+   The page must be published, since only the live version is printed.
 
-   When no Chrome or Chromium is found, the page list leaves out its PDF links
-   and `KeystoneUi::Pages.pdf` raises `KeystoneUi::Pages::PrintFailed` with a
+   Which drawing to use is the developer's decision, so ask before setting
+   `pdf_drawing`. Chrome draws every element with the host's styles but needs
+   Chrome or Chromium on the server. Ruby needs no Chrome but draws only
+   elements with a `pdf:` drawing, as plain text in Prawn's default font.
+
+   With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
+   named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
+   chart and cell colours on a white background and does not split a section,
+   a table row or a label and value row across pages. When no Chrome or
+   Chromium is found, the page list leaves out its PDF links and
+   `KeystoneUi::Pages.pdf` raises `KeystoneUi::Pages::PrintFailed` with a
    message saying to install one or name it with `chrome_path` or `CHROME_BIN`.
    It raises the same error when Chrome cannot be started or prints nothing.
-   Called from `prepare_pdf`, the error is raised inside the job, so the job
+
+   With `:ruby`, the page list shows its PDF links whether or not Chrome is
+   found. Before switching, check that every element on the pages that will be
+   printed has a `pdf:` drawing, and give a host-registered element one with
+   `pdf:` on `catalog.register`. A page showing an element without one raises
+   `NoPdfDrawing`, including from the PDF job queued when such a page is
+   published with no host values.
+
+   Called from `prepare_pdf`, either error is raised inside the job, so the job
    backend's retry rules apply. Ask the developer how a failed print should
    reach the user before rescuing it.
 
@@ -484,7 +524,8 @@ The catalog offers these Keystone UI components by default: `button`,
 
    The method must be reachable in the engine's views and in any host view that
    calls `keystone_ui_page`. A `helper_method` on the base controller covers
-   both. A page that holds an element the catalog no longer offers still
+   both. When the host uses the Ruby drawing, also pass `pdf:`, such as
+   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: 12) }`. A page that holds an element the catalog no longer offers still
    draws its other elements for visitors, marks the missing one in the editor
    as no longer offered, and reports the page's id and the element's key
    through `Rails.error`, so search the pages' documents for its key before
@@ -507,7 +548,7 @@ The catalog offers these Keystone UI components by default: `button`,
   its state, and when it was last published, plus its place and access
   exception when the host names any. Each row links to Edit and Settings and has
   an Archive button, and a published page also links to View live and, when
-  Chrome or Chromium is found, to its PDF. Show archived lists archived pages
+  `pdf_drawing` is `:ruby` or Chrome or Chromium is found, to its PDF. Show archived lists archived pages
   instead, each with a Restore button.
 - **A page's title** is set in the builder's settings panel when nothing is
   selected, and reaches visitors when the page is published. The engine's
