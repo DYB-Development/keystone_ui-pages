@@ -47,6 +47,17 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Acme", "Your plan" ], drawn(document, values: { "client_name" => "Acme" }).texts
   end
 
+  test "a section, row or element hidden by its condition for the values given is left out of the PDF" do
+    internal = { "value" => "audience", "equals" => "internal" }
+    document = page(
+      section(row(column(element("label", text: "Hidden section"))), show_when: internal),
+      section(row(column(element("label", text: "Hidden row")), show_when: internal),
+              row(column(element("label", text: "Hidden element", show_when: internal), element("label", text: "Shown"))))
+    )
+
+    assert_equal [ "Shown" ], drawn(document, values: { "audience" => "public" }).texts
+  end
+
   private
 
   def drawn(document, values: {})
