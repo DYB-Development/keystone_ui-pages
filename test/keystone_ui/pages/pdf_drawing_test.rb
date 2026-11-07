@@ -279,6 +279,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "--leading-relaxed", drawn(document).drawn.last.last[:leading]
   end
 
+  test "headings and a heading's note are drawn at the line heights keystone_ui's text sizes give them" do
+    document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
+                                       element("heading", text: "Large", size: "lg", note: "Updated monthly")))))
+
+    assert_equal %w[--text-lg--line-height --text-2xl--line-height --text-4xl--line-height --text-sm--line-height], drawn(document).styles.pluck(:leading)
+  end
+
   private
 
   def drawn(document, values: {})

@@ -29,8 +29,13 @@ module KeystoneUi
       module_function
 
       def heading(surface, fields)
-        surface.text(fields[:text], size: HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"]), font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text")
-        surface.text(fields[:note], size: NOTE_SIZE, color: "--ks-color-text-muted") if fields[:note].present?
+        size = HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"])
+        surface.text(fields[:text], size: size, font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text", leading: line_height(size))
+        surface.text(fields[:note], size: NOTE_SIZE, color: "--ks-color-text-muted", leading: line_height(NOTE_SIZE)) if fields[:note].present?
+      end
+
+      def line_height(size)
+        "#{size}--line-height"
       end
 
       def label(surface, fields)
