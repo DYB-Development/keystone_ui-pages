@@ -34,6 +34,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Pricing", "Per seat", "Billed monthly" ], drawn(document).texts
   end
 
+  test "a row's columns are drawn side by side at the widths the page gives them on a wide screen" do
+    document = page(section(row(column(wide: "1/4"), column)))
+
+    assert_equal [ :row, [ Rational(1, 4), Rational(1, 2) ] ], drawn(document).drawn.first
+  end
+
   private
 
   def drawn(document, values: {})

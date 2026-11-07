@@ -16,7 +16,8 @@ module KeystoneUi
 
       def drawn_row(row, surface)
         columns = row["columns"]
-        surface.row(columns.map { Rational(Operations::SHARES.fetch(columns.size, "1/1")) }) do |index|
+        share = Operations::SHARES.fetch(columns.size, "1/1")
+        surface.row(columns.map { |column| Rational(column["wide"] || share) }) do |index|
           columns[index]["elements"].each { |element| drawn_element(element, surface) }
         end
       end
