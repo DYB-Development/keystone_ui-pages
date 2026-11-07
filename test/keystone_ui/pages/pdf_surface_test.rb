@@ -13,7 +13,19 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 1, heights(surface.render).values_at("Left", "Right").uniq.size
   end
 
+  test "lines of text drawn with a line height token are spaced that many text sizes apart" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("First\nSecond", size: "--text-base", leading: "--leading-loose")
+
+    assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
+  end
+
   private
+
+  def look
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-color-text:#000000;--ks-font-body:sans-serif}")
+  end
 
   def heights(pdf)
     pdf.scan(/[\d.]+ ([\d.]+) Td\n[^\n]*\n\[<(\h+)>\] TJ/).to_h { |height, text| [ [ text ].pack("H*"), height ] }

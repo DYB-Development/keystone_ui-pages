@@ -13,14 +13,16 @@ module KeystoneUi
         @document = Prawn::Document.new
       end
 
-      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil)
+      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)
         content = content.to_s.upcase if uppercase
         points = @look.points(size)
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
-          @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) { @document.text(content.to_s, size: points, align: align || :left) }
+          @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) do
+            spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra) }
+          end
         end
       end
 
@@ -76,6 +78,13 @@ module KeystoneUi
       end
 
       private
+
+      def spaced(points, leading)
+        extra = leading ? @look.ratio(leading) * points - @document.font.height_at(points) : 0
+        @document.move_down(extra / 2)
+        yield extra
+        @document.move_down(extra / 2)
+      end
 
       def measured(width)
         drawing = @document
