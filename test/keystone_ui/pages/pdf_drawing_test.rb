@@ -78,6 +78,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ font: "--ks-font-heading", weight: "--ks-font-weight-heading" }, drawn(document).drawn.last.last.slice(:font, :weight))
   end
 
+  test "a label is drawn in the font keystone_ui names for body text, at its strong weight" do
+    document = page(section(row(column(element("label", text: "Per seat")))))
+
+    assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-strong" }, drawn(document).drawn.last.last.slice(:font, :weight))
+  end
+
   private
 
   def drawn(document, values: {})

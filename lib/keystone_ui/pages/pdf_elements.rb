@@ -14,7 +14,7 @@ module KeystoneUi
       end
 
       def label(surface, fields)
-        surface.text(fields[:text], size: LABEL_SIZE)
+        surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong")
       end
     end
   end
