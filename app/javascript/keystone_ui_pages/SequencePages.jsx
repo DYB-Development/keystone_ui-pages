@@ -7,6 +7,7 @@ export default function SequencePages({ sequence }) {
   return (
     <aside data-sequence-pages className="flex w-56 shrink-0 flex-col gap-3 overflow-y-auto border-r border-(--ks-color-border) bg-(--ks-color-surface) p-4 dark:border-(--ks-color-border-dark) dark:bg-(--ks-color-surface-dark)">
       <h2 className="text-sm font-semibold">{sequence.title}</h2>
+      {sequence.screen_url && <a href={sequence.screen_url} className="text-xs text-(--ks-color-accent) hover:underline">Change order</a>}
       {sequence.notice && <Alert type="success" message={sequence.notice} />}
       {sequence.refusal && <Alert type="error" message={sequence.refusal} />}
       <ol className="flex flex-col gap-1">

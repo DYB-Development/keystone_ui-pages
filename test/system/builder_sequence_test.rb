@@ -63,6 +63,14 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_equal [ "Published", "Draft" ], all("[data-sequence-page] [data-page-state]").map(&:text)
   end
 
+  test "the sequence's list links to the host's own screen when the host's sequence names one" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence_with_screen, adds_page_method: :add_funnel_page)
+
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal "/funnels/spring-sale/flow", URI(find("[data-sequence-pages] a", text: "Change order")[:href]).path
+  end
+
   test "the page being built is marked in the sequence's list" do
     KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
     KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")

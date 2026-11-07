@@ -46,6 +46,10 @@ class ApplicationController < ActionController::Base
     KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.current.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}", screen_url: request.headers["X-Sequence-Screen"])
   end
 
+  def funnel_sequence_with_screen(key)
+    funnel_sequence(key).with(screen_url: "/funnels/#{key}/flow")
+  end
+
   def add_funnel_page(key, page, after)
     funnel_additions << [ key, page, after ]
   end
