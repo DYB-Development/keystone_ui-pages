@@ -15,4 +15,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "E7000B", look.color("--ks-color-danger")
   end
+
+  test "a host's own value for a token outside any layer is taken over keystone_ui's value in a layer, wherever it sits in the stylesheet" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-text:#112233}@layer base{:root{--ks-color-text:#18181b}}")
+
+    assert_equal "112233", look.color("--ks-color-text")
+  end
 end

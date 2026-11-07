@@ -7,7 +7,7 @@ module KeystoneUi
       LMS_TO_SRGB = [ [ 4.0767416621, -3.3077115913, 0.2309699292 ], [ -1.2684380046, 2.6097574011, -0.3413193965 ], [ -0.0041960863, -0.7034186147, 1.7076147010 ] ].freeze
 
       def initialize(stylesheet)
-        @values = stylesheet.scan(/\{([^{}]*)\}/).flatten.flat_map { |block| block.split(";") }.to_h { |declaration| declaration.split(":", 2).map(&:strip) }
+        @values = declarations(stylesheet).sort_by.with_index { |(layered, _declaration), index| [ layered ? 0 : 1, index ] }.to_h { |_layered, declaration| declaration }
       end
 
       def color(name)
@@ -22,6 +22,44 @@ module KeystoneUi
       end
 
       private
+
+      def declarations(stylesheet)
+        rules(stylesheet).flat_map do |preludes, body|
+          layered = preludes.any? { |prelude| prelude.start_with?("@layer") }
+          split(body, ";").filter_map { |declaration| [ layered, declaration.split(":", 2).map(&:strip) ] if declaration.include?(":") }
+        end
+      end
+
+      def rules(stylesheet)
+        found = []
+        preludes = []
+        text = +""
+        stylesheet.gsub(%r{/\*.*?\*/}m, "").each_char do |char|
+          case char
+          when "{"
+            preludes.push(split(text, ";").last.to_s.strip)
+            text = +""
+          when "}"
+            found << [ preludes.dup, text ]
+            preludes.pop
+            text = +""
+          else
+            text << char
+          end
+        end
+        found
+      end
+
+      def split(text, separator)
+        parts = [ +"" ]
+        depth = 0
+        text.each_char do |char|
+          depth += 1 if char == "("
+          depth -= 1 if char == ")"
+          char == separator && depth.zero? ? parts << +"" : parts.last << char
+        end
+        parts.reject { |part| part.strip.empty? }
+      end
 
       def oklch_hex(css)
         lightness, chroma, hue = css[/\((.*)\)/, 1].split
