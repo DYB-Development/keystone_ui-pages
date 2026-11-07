@@ -10,7 +10,7 @@ class KeystoneUi::Pages::CatalogTest < Minitest::Test
 
     catalog.register(key: :card, name: "Card", component: :ui_card, fields: fields)
 
-    assert_equal KeystoneUi::Pages::Catalog::Element.new(key: :card, name: "Card", component: :ui_card, fields: fields, body: nil, icon: nil, group: nil, align: nil, placed: false), catalog.find("card")
+    assert_equal KeystoneUi::Pages::Catalog::Element.new(key: :card, name: "Card", component: :ui_card, fields: fields, body: nil, icon: nil, group: nil, align: nil, placed: false, pdf: nil), catalog.find("card")
   end
 
   def test_a_host_names_the_field_an_element_draws_as_its_content
@@ -44,5 +44,14 @@ class KeystoneUi::Pages::CatalogTest < Minitest::Test
     catalog.register(key: :chip, name: "Chip", component: :ui_badge, fields: [], align: "start")
 
     assert_equal "start", catalog.find(:chip).align
+  end
+
+  def test_a_host_gives_an_element_a_pdf_drawing
+    catalog = KeystoneUi::Pages::Catalog.new
+    drawing = ->(surface, fields) { surface.text(fields[:text], size: 10) }
+
+    catalog.register(key: :note, name: "Note", component: :ui_info, fields: [], pdf: drawing)
+
+    assert_equal drawing, catalog.find(:note).pdf
   end
 end
