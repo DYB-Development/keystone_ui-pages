@@ -199,6 +199,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--ks-font-weight-heading", nil ], drawn(document).styles.pluck(:weight)
   end
 
+  test "an alert's message is drawn one of keystone_ui's spacing steps under its title" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Read this")))))
+
+    assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 1 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
   private
 
   def drawn(document, values: {})
