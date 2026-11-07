@@ -71,6 +71,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 49.5, lefts(surface.render)["Book a call"]
   end
 
+  test "a box given a border and no fill is stroked in the border's colour at the border's width" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }) do
+      surface.text("Answer", size: "--text-base")
+    end
+
+    assert_match(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/, surface.render)
+  end
+
   private
 
   def look
