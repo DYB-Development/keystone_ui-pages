@@ -40,6 +40,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ :row, [ Rational(1, 4), Rational(1, 2) ] ], drawn(document).drawn.first
   end
 
+  test "a heading or label bound to a host value shows that value, or its fallback when the value is missing" do
+    document = page(section(row(column(element("heading", text: { "value" => "client_name", "fallback" => "Client" }),
+                                       element("label", text: { "value" => "plan_name", "fallback" => "Your plan" })))))
+
+    assert_equal [ "Acme", "Your plan" ], drawn(document, values: { "client_name" => "Acme" }).texts
+  end
+
   private
 
   def drawn(document, values: {})
