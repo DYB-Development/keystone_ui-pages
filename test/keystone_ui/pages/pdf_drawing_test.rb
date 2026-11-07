@@ -90,6 +90,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "--ks-color-text", drawn(document).drawn.last.last[:color]
   end
 
+  test "a label and a heading's note are drawn in the muted text colour keystone_ui gives them" do
+    document = page(section(row(column(element("heading", text: "Pricing", note: "Updated monthly"), element("label", text: "Per seat")))))
+
+    assert_equal [ "--ks-color-text-muted", "--ks-color-text-muted" ], drawn(document).drawn.last(2).map { |call| call.last[:color] }
+  end
+
   private
 
   def drawn(document, values: {})

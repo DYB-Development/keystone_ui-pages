@@ -10,11 +10,11 @@ module KeystoneUi
 
       def heading(surface, fields)
         surface.text(fields[:text], size: HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"]), font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text")
-        surface.text(fields[:note], size: LABEL_SIZE) if fields[:note].present?
+        surface.text(fields[:note], size: LABEL_SIZE, color: "--ks-color-text-muted") if fields[:note].present?
       end
 
       def label(surface, fields)
-        surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong")
+        surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-text-muted")
       end
     end
   end
