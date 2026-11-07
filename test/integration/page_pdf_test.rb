@@ -3,6 +3,7 @@
 require "test_helper"
 require "minitest/mock"
 require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_drawing"
 require "keystone_ui/pages/operations"
 
 class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
@@ -83,6 +84,19 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     KeystoneUi::Pages::Printer.stub(:pdf, ->(html) { printed = html; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page.reload) }
 
     assert_equal "Second", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
+  end
+
+  test "with the Ruby drawing chosen, asking again for the same version and values returns the kept PDF without drawing it again" do
+    KeystoneUi::Pages.pdf_drawing = :ruby
+    drawn = 0
+
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { drawn += 1; "%PDF-drawn" }) do
+      2.times { KeystoneUi::Pages.pdf(@page, version: 1, values: { "client_name" => "Acme" }) }
+    end
+
+    assert_equal 1, drawn
+  ensure
+    KeystoneUi::Pages.pdf_drawing = nil
   end
 
   private
