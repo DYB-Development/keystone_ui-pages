@@ -238,6 +238,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).styles.map { |style| style.values_at(:weight, :color) }
   end
 
+  test "a label and value list set to end-aligned values draws its values aligned to the right" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ], align: "end")))))
+
+    assert_equal [ nil, :right ], drawn(document).styles.pluck(:align)
+  end
+
   private
 
   def drawn(document, values: {})

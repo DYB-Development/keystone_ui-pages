@@ -14,6 +14,7 @@ module KeystoneUi
       ALERT_MESSAGE_SIZE = "--text-sm"
       VALUE_LIST_SIZE = "--text-base"
       VALUE_LIST_LABEL_SHARE = Rational(2, 5)
+      VALUE_LIST_ALIGNMENTS = { "end" => :right }.freeze
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
       ALERT_RADIUS = 0.75
@@ -47,7 +48,7 @@ module KeystoneUi
       def value_list(surface, fields)
         Array(fields[:rows].presence).each do |entry|
           surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ]) do |index|
-            index.zero? ? value_list_label(surface, entry) : value_list_value(surface, entry)
+            index.zero? ? value_list_label(surface, entry) : value_list_value(surface, entry, VALUE_LIST_ALIGNMENTS[fields[:align].to_s])
           end
         end
       end
@@ -56,8 +57,8 @@ module KeystoneUi
         surface.text(entry[:label], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: total?(entry) ? "--ks-color-text" : "--ks-color-text-secondary")
       end
 
-      def value_list_value(surface, entry)
-        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: "--ks-color-text")
+      def value_list_value(surface, entry, align)
+        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: "--ks-color-text", align: align)
       end
 
       def total_weight(entry)
