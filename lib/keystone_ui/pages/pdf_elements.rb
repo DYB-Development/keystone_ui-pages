@@ -10,7 +10,8 @@ module KeystoneUi
       NOTE_SIZE = "--text-sm"
       LABEL_SIZE = "--text-xs"
       PARAGRAPH_SIZE = "--text-base"
-      PARAGRAPH_TAGS = %w[p br a].freeze
+      PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
+      PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
       module_function
 
@@ -38,8 +39,15 @@ module KeystoneUi
           next [ { text: "\n" } ] if child.name == "br"
           next [ { text: child.text }.merge(marks) ] if child.text?
 
-          runs(child, child.name == "a" ? marks.merge(link: child["href"]).compact : marks)
+          runs(child, marked(child, marks))
         end
+      end
+
+      def marked(node, marks)
+        return marks.merge(link: node["href"]).compact if node.name == "a"
+        return marks.merge(PARAGRAPH_MARKS[node.name] => true) if PARAGRAPH_MARKS.key?(node.name)
+
+        marks
       end
     end
   end

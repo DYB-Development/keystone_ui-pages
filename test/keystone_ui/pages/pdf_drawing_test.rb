@@ -155,6 +155,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ { text: "Made by " }, { text: "Tyler", link: "https://ty-ler.com" } ], drawn(document).drawn.last[1]
   end
 
+  test "bold and italic marks stored in a paragraph are drawn bold and italic" do
+    document = page(section(row(column(element("paragraph", text: { "html" => "<p><strong>Firm</strong> <em>soft</em> <b><i>both</i></b></p>" })))))
+
+    assert_equal [ { text: "Firm", bold: true }, { text: " " }, { text: "soft", italic: true }, { text: " " }, { text: "both", bold: true, italic: true } ], drawn(document).drawn.last[1]
+  end
+
   private
 
   def drawn(document, values: {})
