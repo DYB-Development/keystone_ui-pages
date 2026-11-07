@@ -51,4 +51,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal 3.0, look.points("--ks-spacing")
   end
+
+  test "a font token naming only system fonts, with no font files, prints in Helvetica" do
+    look = KeystoneUi::Pages::PdfLook.new(':root{--ks-font-body:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif}')
+
+    assert_equal "Helvetica", look.font("--ks-font-body").name
+  end
 end

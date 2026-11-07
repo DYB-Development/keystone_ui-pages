@@ -3,6 +3,9 @@
 module KeystoneUi
   module Pages
     class PdfLook
+      Font = Data.define(:name, :files)
+      BUILT_IN_FONT = Font.new(name: "Helvetica", files: nil)
+
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
       POINTS_PER_UNIT = { "rem" => 12.0, "em" => 12.0, "px" => 0.75, "pt" => 1.0 }.freeze
       ROOTS = [ ":root", ":host", "html" ].freeze
@@ -18,6 +21,10 @@ module KeystoneUi
         return oklch_hex(css) if css.start_with?("oklch(")
 
         css.delete_prefix("#").upcase
+      end
+
+      def font(_name)
+        BUILT_IN_FONT
       end
 
       def weight(name)
