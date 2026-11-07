@@ -57,4 +57,15 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "Helvetica", look.font("--ks-font-body").name
   end
+
+  test "a font the stylesheet loads from files prints from the TrueType copies served beside them, in regular, bold and italic" do
+    served = { "/Inter-Regular.ttf" => "/public/Inter-Regular.ttf", "/Inter-Bold.ttf" => "/public/Inter-Bold.ttf", "/Inter-Italic.ttf" => "/public/Inter-Italic.ttf" }
+    look = KeystoneUi::Pages::PdfLook.new(':root{--ks-font-body:Inter, sans-serif}' \
+                                          '@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url("/Inter-Regular.woff2") format("woff2")}' \
+                                          '@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url("/Inter-Bold.woff2") format("woff2")}' \
+                                          '@font-face{font-family:Inter;font-style:italic;font-weight:400;src:url("/Inter-Italic.woff2") format("woff2")}',
+                                          font_files: ->(url) { served[url] })
+
+    assert_equal({ normal: "/public/Inter-Regular.ttf", bold: "/public/Inter-Bold.ttf", italic: "/public/Inter-Italic.ttf" }, look.font("--ks-font-body").files)
+  end
 end

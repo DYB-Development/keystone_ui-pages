@@ -11,9 +11,15 @@ module KeystoneUi
       ROOTS = [ ":root", ":host", "html" ].freeze
       LMS_TO_SRGB = [ [ 4.0767416621, -3.3077115913, 0.2309699292 ], [ -1.2684380046, 2.6097574011, -0.3413193965 ], [ -0.0041960863, -0.7034186147, 1.7076147010 ] ].freeze
 
-      def initialize(stylesheet, look: nil)
+      FONT_WEIGHTS = { "normal" => 400, "bold" => 700 }.freeze
+      FONT_STYLES = { normal: [ "normal", 400 ], bold: [ "normal", 700 ], italic: [ "italic", 400 ] }.freeze
+
+      def initialize(stylesheet, look: nil, font_files: ->(_url) { nil })
         @look = look
-        @values = declarations(stylesheet).sort_by.with_index { |(rank, _declaration), index| [ rank, index ] }.to_h { |_rank, declaration| declaration }
+        @font_files = font_files
+        rules = rules(stylesheet)
+        @faces = faces(rules)
+        @values = declarations(rules).sort_by.with_index { |(rank, _declaration), index| [ rank, index ] }.to_h { |_rank, declaration| declaration }
       end
 
       def color(name)
@@ -23,8 +29,11 @@ module KeystoneUi
         css.delete_prefix("#").upcase
       end
 
-      def font(_name)
-        BUILT_IN_FONT
+      def font(name)
+        family = split(value(name), ",").map { |listed| listed.strip.delete("\"'") }.find { |listed| @faces.key?(listed) }
+        return BUILT_IN_FONT unless family
+
+        Font.new(name: family, files: FONT_STYLES.transform_values { |(style, weight)| true_type(face(family, style, weight)) })
       end
 
       def weight(name)
@@ -60,8 +69,27 @@ module KeystoneUi
         end
       end
 
-      def declarations(stylesheet)
-        rules(stylesheet).flat_map do |preludes, body|
+      def faces(rules)
+        rules.select { |preludes, _body| preludes.last == "@font-face" }
+             .map { |_preludes, body| split(body, ";").to_h { |declaration| declaration.split(":", 2).map(&:strip) } }
+             .group_by { |face| face["font-family"].to_s.delete("\"'") }
+      end
+
+      def face(family, style, weight)
+        faces = @faces[family].select { |face| face.fetch("font-style", "normal") == style }.presence || @faces[family]
+        faces.min_by do |face|
+          weights = face.fetch("font-weight", "normal").split.map { |listed| FONT_WEIGHTS.fetch(listed) { listed.to_i } }
+          (weight - weight.clamp(weights.min, weights.max)).abs
+        end
+      end
+
+      def true_type(face)
+        url = face["src"].to_s[/url\(["']?([^"')]+)["']?\)/, 1]
+        @font_files.call(url.sub(/\.[^.\/]+\z/, ".ttf"))
+      end
+
+      def declarations(rules)
+        rules.flat_map do |preludes, body|
           selectors = split(preludes.last.to_s, ",").map(&:strip)
           next [] if preludes.any? { |prelude| prelude.start_with?("@") && !prelude.start_with?("@layer") }
           next [] unless selectors.any? { |selector| ROOTS.include?(selector) || looked?(selector) }
