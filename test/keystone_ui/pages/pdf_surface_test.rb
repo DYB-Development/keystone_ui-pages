@@ -21,6 +21,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
+  test "lines of rich text drawn with a line height token are spaced that many text sizes apart" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "First\nSecond" } ], size: "--text-base", leading: "--leading-loose")
+
+    assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
+  end
+
   private
 
   def look

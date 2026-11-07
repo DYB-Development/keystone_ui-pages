@@ -26,11 +26,13 @@ module KeystoneUi
         end
       end
 
-      def rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text")
+      def rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text", leading: nil)
+        points = @look.points(size)
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
-        @document.font(typeface.name) { @document.formatted_text(runs.map { |run| { text: run[:text], link: run[:link], styles: %i[bold italic].select { |style| run[style] } }.compact }, size: @look.points(size)) }
+        fragments = runs.map { |run| { text: run[:text], link: run[:link], styles: %i[bold italic].select { |style| run[style] } }.compact }
+        @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra) } }
       end
 
       def box(fill:, padding:, radius:, &content)
