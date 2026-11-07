@@ -29,10 +29,22 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
+  test "a boxed line of text is drawn inset from its fill's left edge by the padding's horizontal steps" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ])
+
+    assert_equal 48.0, lefts(surface.render)["Book a call"]
+  end
+
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-color-text:#000000;--ks-font-body:sans-serif}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif}")
+  end
+
+  def lefts(pdf)
+    pdf.scan(/([\d.]+) [\d.]+ Td\n[^\n]*\n\[<(\h+)>\] TJ/).to_h { |left, text| [ [ text ].pack("H*"), left.to_f ] }
   end
 
   def heights(pdf)

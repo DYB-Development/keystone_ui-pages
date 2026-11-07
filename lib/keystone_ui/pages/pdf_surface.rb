@@ -46,6 +46,19 @@ module KeystoneUi
         @document.move_down(inset)
       end
 
+      def boxed_text(content, size:, fill:, padding:, radius:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
+        across = @look.points(padding.first) * padding[1]
+        down = @look.points(padding.first) * padding.last
+        width = @document.bounds.width
+        top = @document.cursor
+        drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
+        height = measured(width - across * 2, &drawn) + down * 2
+        @document.fill_color(@look.color(fill))
+        @document.fill_rounded_rectangle([ 0, top ], width, height, @look.points(radius.first) * radius.last)
+        @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
+        @document.move_down(down)
+      end
+
       def rule(width:, color:)
         thickness = @look.points(width)
         @document.fill_color(@look.color(color))
