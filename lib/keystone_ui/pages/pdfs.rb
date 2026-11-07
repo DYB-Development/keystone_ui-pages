@@ -3,6 +3,7 @@
 require "keystone_ui/pages/operations"
 require "keystone_ui/pages/pdf_document"
 require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_drawing"
 
 module KeystoneUi
   module Pages
@@ -13,7 +14,13 @@ module KeystoneUi
         version = version ? page.versions.find_by(number: version) : page.versions.live.first
         digest = Operations.digest(values.to_h.stringify_keys)
         Pdf.find_by(version: version, values_digest: digest) || Pdf.create!(version: version, values_digest: digest,
-          file: { io: StringIO.new(Printer.pdf(PdfDocument.html(version, values: values))), filename: "#{page.slug}.pdf", content_type: "application/pdf" })
+          file: { io: StringIO.new(made(version, values)), filename: "#{page.slug}.pdf", content_type: "application/pdf" })
+      end
+
+      def made(version, values)
+        return PdfDrawing.pdf(version, values: values) if Pages.ruby_pdf_drawing?
+
+        Printer.pdf(PdfDocument.html(version, values: values))
       end
     end
   end

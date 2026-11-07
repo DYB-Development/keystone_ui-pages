@@ -31,7 +31,8 @@ This local declares no commands. The two working surfaces belong elsewhere:
   Active Storage's migrations, mounting the engine, the layouts and the settings
   file → **`keystone_ui-pages-install`**.
 - **Working with it** — what each setting does, places, who may view or edit,
-  host values, sequences, drawing a page in the host's own screens, PDFs, view
+  host values, sequences, drawing a page in the host's own screens, PDFs and
+  which drawing makes them, view
   and click reporting, form answers, linking to the builder and changing the
   element catalog → **`keystone_ui-pages-develop`**.
 
@@ -96,11 +97,20 @@ Keystone UI itself must be installed first. Its own install local,
 - **Views and clicks.** The gem records nothing about visitors. A place with a
   handler is told of each view and each click on the live page, and the browser
   fires matching events a third-party analytics tag can listen for.
-- **PDFs are printed by a Chromium-based browser on the server** and kept in Active
-  Storage, one per live version and set of values. A page that uses no host
-  values gets its PDF made when it is published.
+- **PDFs come from one of two drawings, chosen by the host.** The Chrome
+  drawing, the default, prints the page with a Chromium-based browser on the
+  server from the host's compiled stylesheet, so the PDF looks as the page does.
+  The Ruby drawing needs no browser and draws the page's sections, rows, columns
+  and elements with Prawn, in Prawn's default font. In the Ruby drawing each
+  element draws through its own PDF drawing, given when the element is added to
+  the catalog. A page holding an element with no PDF drawing cannot be printed
+  that way, and the error names the element. So far only the heading and label
+  elements have one.
+- **PDFs are kept in Active Storage**, one per published version and set of
+  values, whichever drawing made them. A page that uses no host values gets its
+  PDF made when it is published.
 - **The editor's screens.** The page list, the builder, the sequence screen, the
   version history and View live are open to whoever passes the host's edit
   check. The builder's undo and redo history is kept with the page.
 - Ruby >= 3.2. Rails >= 7.1. It depends on keystone_ui >= 0.49.0,
-  keystone_ui-styles >= 0.24.0 and keystone_ui-react >= 0.1.3.
+  keystone_ui-styles >= 0.24.0, keystone_ui-react >= 0.1.3 and prawn ~> 2.5.

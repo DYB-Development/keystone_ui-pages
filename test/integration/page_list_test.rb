@@ -69,4 +69,15 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
 
     assert_equal [ true, false ], [ response.body.include?("View live"), Nokogiri::HTML(response.body).css("[data-page='pricing'] a").map(&:text).include?("PDF") ]
   end
+
+  test "the page list offers a PDF when the Ruby drawing is chosen and no Chrome is found" do
+    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
+    KeystoneUi::Pages.pdf_drawing = :ruby
+
+    KeystoneUi::Pages::Printer.stub(:chrome, nil) { get "/pages/manage/pages" }
+
+    assert_includes Nokogiri::HTML(response.body).css("[data-page='pricing'] a").map(&:text), "PDF"
+  ensure
+    KeystoneUi::Pages.pdf_drawing = nil
+  end
 end

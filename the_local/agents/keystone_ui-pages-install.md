@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-install
-description: Use to hook Keystone UI Pages into a project — adding the gem, installing and running the engine's migrations and Active Storage's, mounting the engine, preparing the live-page and editor layouts, and writing the settings file.
+description: Use to hook Keystone UI Pages into a project — adding the gem, installing and running the engine's migrations and Active Storage's, mounting the engine, preparing the live-page and editor layouts, choosing how PDFs are made, and starting the settings file.
 tools: Bash, Read, Edit
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -18,9 +18,9 @@ linking editors to the builder or drawing a page in the host's screens.
 
 - `bin/rails keystone_ui_pages:install:migrations` — copies the engine's
   migrations into the host's `db/migrate`. They create the pages, versions and
-  PDFs tables and add the pages' place, access exception, archived, sequence
-  and edit history columns. Safe to re-run, since a migration already copied is
-  skipped.
+  PDFs tables and add the pages' edit history, place, access exception,
+  archived and sequence columns. Safe to re-run, since a migration already
+  copied is skipped.
 - `bin/rails active_storage:install` — Rails' own task that copies Active
   Storage's migration. PDFs are kept as Active Storage attachments.
 - `mount KeystoneUi::Pages::Engine => "/pages"` — the line in
@@ -33,13 +33,11 @@ linking editors to the builder or drawing a page in the host's screens.
 
    - Ruby >= 3.2 and Rails >= 7.1.
    - Keystone UI installed and working. The gem brings keystone_ui,
-     keystone_ui-styles and keystone_ui-react with it, but Keystone UI's own
-     setup is the `keystone_ui-install` local's job. Do it first if it is
+     keystone_ui-styles, keystone_ui-react and prawn with it, but Keystone UI's
+     own setup is the `keystone_ui-install` local's job. Do it first if it is
      missing.
-   - Propshaft serving the host's stylesheet, since PDFs read the compiled
-     stylesheet from it.
    - An Active Job backend. Publishing a page that uses no host values makes its
-     PDF in a job, and so does `KeystoneUi::Pages.prepare_pdf`.
+     PDF in a job.
 
 2. Add the gem to the Gemfile and install it:
 
@@ -88,25 +86,18 @@ linking editors to the builder or drawing a page in the host's screens.
    mount KeystoneUi::Pages::Engine => "/pages"
    ```
 
-   Ask the developer which path to use; `/pages` is the README's choice and the
-   one the other locals assume. With it:
-
-   - `/pages/manage/pages` is the editor's page list.
-   - `/pages/manage/pages/new` creates a page.
-   - `/pages/manage/pages/:id` is the builder for one page.
-   - `/pages/manage/sequences/:place/:key` is the builder for a host's sequence
-     of pages.
-   - `/pages/manage/sequences/:place/:key/pages/new` is the form the sequence's
-     Add page button opens.
-   - `/pages/:slug` is a published page, drawn for visitors.
+   Ask the developer which path to use. `/pages` is the README's choice and the
+   one the other locals assume. Under it the engine serves the editor's page
+   list, the builder for one page, the builder for a host's sequence of pages,
+   the version history, and each published page at `/pages/<slug>`.
 
    Inside the host app, the engine's route helpers are reached through
-   `keystone_ui_pages`, such as `keystone_ui_pages.manage_pages_path`.
+   `keystone_ui_pages`, such as `keystone_ui_pages.manage_pages_path` for the
+   page list.
 
-5. Prepare the two layouts. Live pages are drawn in the layout named by
-   `KeystoneUi::Pages.layout`, and the page list, the builder, the sequence
-   screen and the version history in the one named by `KeystoneUi::Pages.editor_layout`. Both default
-   to `application`. Each layout used must:
+5. Prepare the two layouts. Live pages are drawn in one layout, and the page
+   list, the builder, the sequence screen and the version history in another.
+   Both default to `application`. Each layout used must:
 
    - add `<%= keystone_theme_attributes %>` inside its `<html` tag, so the page
      follows the viewer's light, dark or custom mode and look;
@@ -116,50 +107,56 @@ linking editors to the builder or drawing a page in the host's screens.
      two script tags, `keystone_ui/react` and `keystone_ui_pages/editor`, there.
 
    The builder fills the whole window, so the host's own navigation in the
-   editor layout sits under it. The gem's test app uses a separate `editor`
+   editor's layout sits under it. The gem's test app uses a separate `editor`
    layout holding only the head and the page's content. Ask the developer
    whether to make one or use `application` for both.
 
-6. Write `config/initializers/keystone_ui_pages.rb`. Each setting is described
-   in `keystone_ui-pages-develop`. Ask the developer about each rather than
-   copying this whole block:
+6. Choose how PDFs are made, and ask the developer which one:
+
+   - **Chrome, the default.** Chrome or Chromium on the server prints the page
+     from the host's compiled stylesheet, so the PDF looks as the page does.
+     It needs Chrome or Chromium installed wherever the app makes PDFs,
+     including the production server or image, and Propshaft serving the
+     host's stylesheet. The gem uses the path the settings file names, then the
+     `CHROME_BIN` environment variable, then the first of
+     `/usr/bin/google-chrome`, `/usr/bin/google-chrome-stable`,
+     `/usr/bin/chromium`, `/usr/bin/chromium-browser`, and the Google Chrome and
+     Chromium apps in `/Applications` on macOS. Ask the developer how the
+     deployment installs it. Without one, everything except PDFs still works.
+   - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
+     columns and elements, so no browser is needed. Only the heading and label
+     elements can be drawn this way so far, and a page holding any other
+     element cannot be printed and raises an error naming that element.
+
+   The choice is a setting in the settings file, written in the next step.
+
+7. Create `config/initializers/keystone_ui_pages.rb` starting with:
 
    ```ruby
    require "keystone_ui/pages"
-
-   KeystoneUi::Pages.base_controller = "ApplicationController"
-   KeystoneUi::Pages.owner_method = :current_team
-   KeystoneUi::Pages.view_check_method = :may_view_page?
-   KeystoneUi::Pages.edit_check_method = :may_edit_pages?
-   KeystoneUi::Pages.refusal_method = :refuse_page
-   KeystoneUi::Pages.layout = "application"
-   KeystoneUi::Pages.editor_layout = "editor"
    ```
 
-   - `base_controller` is a string, read when the engine's controllers load, so
-     it belongs in this file. Set it to the controller that defines the methods
-     the other settings name, normally `ApplicationController`. Its filters,
-     such as a sign-in requirement, then run on every engine request, including
-     published pages.
-   - Without `edit_check_method`, anyone who can reach `/pages/manage` can
-     create, edit and publish pages. Without `view_check_method`, every
-     published page is public. Without `owner_method`, all pages are shared
-     across the whole app. Each of these is a decision about who may see and
-     change what, so put each to the developer.
-   - Host values, catalog changes, `chrome_path` and `pdf_stylesheet` go in the
-     same file once the developer wants them. The develop local carries them.
+   Then hand the settings to `keystone_ui-pages-develop`, which owns every one
+   of them. Before it writes them, put these questions to the developer, since
+   each is a decision about who may see and change what:
 
-7. Install Chrome or Chromium wherever the app makes PDFs, including the
-   production server or image. The gem looks for `KeystoneUi::Pages.chrome_path`,
-   then the `CHROME_BIN` environment variable, then these places:
-   `/usr/bin/google-chrome`, `/usr/bin/google-chrome-stable`,
-   `/usr/bin/chromium`, `/usr/bin/chromium-browser`, and the Google Chrome and
-   Chromium apps in `/Applications` on macOS. Ask the developer how the
-   deployment installs it. Without one, everything except PDFs still works.
+   - Which controller the engine's controllers inherit from, normally
+     `ApplicationController`. Its filters, such as a sign-in requirement, then
+     run on every engine request, including published pages.
+   - Who may create, edit and publish pages. With no answer, anyone who can
+     reach the page list can.
+   - Who may view a published page. With no answer, every published page is
+     public.
+   - Whether pages belong to an owner, such as the current team. With no
+     answer, all pages are shared across the whole app.
+   - Which layout each of the two from step 5 uses, and which PDF drawing from
+     step 6.
 
-8. Check the install. Boot the app, open `/pages/manage/pages`, create a page,
-   add an element in the builder, publish it, and open `/pages/<slug>`. The page
-   list shows a PDF link only when Chrome or Chromium was found.
+8. Check the install. Boot the app, open the page list at
+   `keystone_ui_pages.manage_pages_path`, create a page, add an element in the
+   builder, publish it, and open `/pages/<slug>`. With the Chrome drawing, the
+   page list shows a PDF link only when Chrome or Chromium was found. With the
+   Ruby drawing, it always shows one.
 
    Boot stops with an `ArgumentError` naming a place when that place's settings
    are incomplete: it leaves out an element no catalog entry has, it offers the
@@ -169,17 +166,17 @@ linking editors to the builder or drawing a page in the host's screens.
 ## Conventions
 
 - **Re-run the migration install after upgrading the gem.** A later version can
-  add migrations, as the sequence key one was added, and they reach the host
-  only through `bin/rails keystone_ui_pages:install:migrations` followed by
+  add migrations, and they reach the host only through
+  `bin/rails keystone_ui_pages:install:migrations` followed by
   `bin/rails db:migrate`.
 - **The engine registers itself with Keystone UI's Tailwind build.** On boot it
   appends its views, helpers, JavaScript and Ruby files to Keystone UI's
   Tailwind sources, so the host adds nothing to its Tailwind setup for the
   engine.
-- **The engine adds `keystone_ui_page` to every host view.** No helper include
-  is needed in the host.
+- **The engine adds its view helpers to every host view.** No helper include is
+  needed in the host.
 - **The methods the settings name live on the base controller.** The engine
   calls them on its own controllers, which inherit from it, so a method defined
   anywhere else is not found.
-- Drawing pages, making PDFs, host values and the catalog are out of scope here
-  and belong to `keystone_ui-pages-develop`.
+- Every setting, drawing pages, making PDFs, host values, places and the
+  catalog are out of scope here and belong to `keystone_ui-pages-develop`.

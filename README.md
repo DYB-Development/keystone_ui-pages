@@ -61,6 +61,14 @@ The PDF is printed by Chrome or Chromium on the server, from the page drawn with
 - Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`. Chrome runs hidden on the server, so nobody needs it as their browser. When none is found, the page list leaves out its PDF links and asking for a PDF raises an error saying how to name one.
 - Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`.
 
+A host with no Chrome can have the PDF drawn in Ruby instead, from the page's sections, rows, columns and elements:
+
+```ruby
+KeystoneUi::Pages.pdf_drawing = :ruby
+```
+
+It defaults to `:chrome`. The Ruby drawing needs no Chrome, so the page list shows its PDF links either way. Each element draws through its own PDF drawing, given to `catalog.register` as `pdf:`, and a page holding an element without one raises `KeystoneUi::Pages::NoPdfDrawing`, a `PrintFailed`, naming the element. So far the heading and label elements have PDF drawings, in Prawn's default font.
+
 ## Reporting views and clicks to the host
 
 The gem keeps no record of who views a page or what they click. A host that wants to know registers a handler on the place, and the gem hands each view and click to it:

@@ -27,4 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "keystone_ui", ">= 0.49.0"
   spec.add_dependency "keystone_ui-styles", ">= 0.24.0"
   spec.add_dependency "keystone_ui-react", ">= 0.1.3"
+  spec.add_dependency "prawn", "~> 2.5"
 end

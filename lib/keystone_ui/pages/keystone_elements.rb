@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "keystone_ui/pages/form_field_kinds"
+require "keystone_ui/pages/pdf_elements"
 
 module KeystoneUi
   module Pages
@@ -21,11 +22,11 @@ module KeystoneUi
         catalog.register(key: :code, name: "Code", component: :ui_code, icon: :code, group: "Text", body: :code,
           fields: [ { key: :code, label: "Code", kind: :long_text, default: "puts \"Hello\"" }, { key: :language, label: "Language", kind: :text },
                     { key: :caption, label: "Caption", kind: :text } ])
-        catalog.register(key: :heading, name: "Heading", component: :ui_heading, icon: :heading, group: "Text",
+        catalog.register(key: :heading, name: "Heading", component: :ui_heading, icon: :heading, group: "Text", pdf: PdfElements.method(:heading),
           fields: [ { key: :text, label: "Text", kind: :text, default: "Heading" },
                     { key: :size, label: "Size", kind: :one_of, options: %w[sm md lg], default: "md" },
                     { key: :note, label: "Note", kind: :text } ])
-        catalog.register(key: :label, name: "Label", component: :ui_caption, icon: :tag, group: "Text",
+        catalog.register(key: :label, name: "Label", component: :ui_caption, icon: :tag, group: "Text", pdf: PdfElements.method(:label),
           fields: [ { key: :text, label: "Text", kind: :text, default: "Label" } ])
         catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text",
           fields: [ { key: :text, label: "Text", kind: :rich_text, default: "Write the text of this paragraph here." } ])
