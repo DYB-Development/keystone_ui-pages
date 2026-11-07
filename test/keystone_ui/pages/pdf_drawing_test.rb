@@ -205,6 +205,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 1 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
   end
 
+  test "an alert's fill is drawn with the padding and rounded corners keystone_ui's alert rule gives it" do
+    document = page(section(row(column(element("alert", message: "Read this")))))
+
+    assert_equal({ padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-surface", 0.75 ] }, drawn(document).drawn.find { |call| call.first == :box }.last.except(:fill))
+  end
+
   private
 
   def drawn(document, values: {})

@@ -13,6 +13,8 @@ module KeystoneUi
       ALERT_TITLE_SIZE = "--text-base"
       ALERT_MESSAGE_SIZE = "--text-sm"
       ALERT_TITLE_GAP = 1
+      ALERT_PADDING = 4
+      ALERT_RADIUS = 0.75
       SPACING = "--ks-spacing"
       ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
@@ -31,7 +33,7 @@ module KeystoneUi
 
       def alert(surface, fields)
         tone = ALERT_TONES.fetch(fields[:type].to_s, ALERT_TONES["info"])
-        surface.box(fill: "--ks-color-#{tone}-50") do
+        surface.box(fill: "--ks-color-#{tone}-50", padding: [ SPACING, ALERT_PADDING ], radius: [ "--ks-radius-surface", ALERT_RADIUS ]) do
           if fields[:title].present?
             surface.text(fields[:title], size: ALERT_TITLE_SIZE, weight: "--ks-font-weight-heading", color: "--ks-color-#{tone}-800")
             surface.space(SPACING, ALERT_TITLE_GAP)

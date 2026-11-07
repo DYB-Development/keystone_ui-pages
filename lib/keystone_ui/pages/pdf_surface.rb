@@ -31,11 +31,15 @@ module KeystoneUi
         @document.font(typeface.name) { @document.formatted_text(runs.map { |run| { text: run[:text], link: run[:link], styles: %i[bold italic].select { |style| run[style] } }.compact }, size: @look.points(size)) }
       end
 
-      def box(fill:, &content)
-        height = measured(&content)
+      def box(fill:, padding:, radius:, &content)
+        inset = @look.points(padding.first) * padding.last
+        width = @document.bounds.width
+        top = @document.cursor
+        height = measured(width - inset * 2, &content) + inset * 2
         @document.fill_color(@look.color(fill))
-        @document.fill_rectangle([ 0, @document.cursor ], @document.bounds.width, height)
-        content.call
+        @document.fill_rounded_rectangle([ 0, top ], width, height, @look.points(radius.first) * radius.last)
+        @document.bounding_box([ inset, top - inset ], width: width - inset * 2, &content)
+        @document.move_down(inset)
       end
 
       def space(token, steps)
@@ -63,9 +67,9 @@ module KeystoneUi
 
       private
 
-      def measured
+      def measured(width)
         drawing = @document
-        @document = Prawn::Document.new(page_size: [ drawing.bounds.width, MEASURING_HEIGHT ], margin: 0)
+        @document = Prawn::Document.new(page_size: [ width, MEASURING_HEIGHT ], margin: 0)
         top = @document.cursor
         yield
         top - @document.cursor
