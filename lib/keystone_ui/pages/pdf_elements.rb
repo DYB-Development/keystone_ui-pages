@@ -47,9 +47,17 @@ module KeystoneUi
       def value_list(surface, fields)
         Array(fields[:rows].presence).each do |entry|
           surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ]) do |index|
-            surface.text(index.zero? ? entry[:label] : entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE)
+            index.zero? ? value_list_label(surface, entry) : value_list_value(surface, entry)
           end
         end
+      end
+
+      def value_list_label(surface, entry)
+        surface.text(entry[:label], size: VALUE_LIST_SIZE, color: "--ks-color-text-secondary")
+      end
+
+      def value_list_value(surface, entry)
+        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, color: "--ks-color-text")
       end
 
       def paragraph(surface, fields)

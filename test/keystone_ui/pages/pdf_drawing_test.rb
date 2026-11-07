@@ -225,6 +225,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Rate", "$150.00", "Reviews", "N/A", "Notes", "None yet" ], drawn(document, values: { "billing" => billing }).texts
   end
 
+  test "a label and value list draws its labels and values in the text colours keystone_ui's value list rules give them" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal [ "--ks-color-text-secondary", "--ks-color-text" ], drawn(document).styles.pluck(:color)
+  end
+
   private
 
   def drawn(document, values: {})
