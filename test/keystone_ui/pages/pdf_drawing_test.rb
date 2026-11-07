@@ -11,8 +11,8 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn = []
     end
 
-    def text(content, size:)
-      @drawn << [ :text, content, size ]
+    def text(content, size:, **style)
+      @drawn << [ :text, content, size, style ]
     end
 
     def row(widths)
@@ -70,6 +70,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("heading", text: "Pricing", note: "Updated monthly")))))
 
     assert_equal [ "Pricing", "Updated monthly" ], drawn(document).texts
+  end
+
+  test "a heading is drawn in the font keystone_ui names for headings, at the heading weight" do
+    document = page(section(row(column(element("heading", text: "Pricing")))))
+
+    assert_equal({ font: "--ks-font-heading", weight: "--ks-font-weight-heading" }, drawn(document).drawn.last.last.slice(:font, :weight))
   end
 
   private

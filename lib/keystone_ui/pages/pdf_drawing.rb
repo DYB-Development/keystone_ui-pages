@@ -5,6 +5,7 @@ require "keystone_ui/pages/operations"
 require "keystone_ui/pages/filling"
 require "keystone_ui/pages/printer"
 require "keystone_ui/pages/pdf_surface"
+require "keystone_ui/pages/pdf_look"
 
 module KeystoneUi
   module Pages
@@ -14,7 +15,7 @@ module KeystoneUi
       module_function
 
       def pdf(version, values: {})
-        surface = PdfSurface.new
+        surface = PdfSurface.new(PdfLook.host)
         draw(version.document, surface, values: values)
         surface.render
       end

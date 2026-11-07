@@ -5,12 +5,17 @@ require "prawn"
 module KeystoneUi
   module Pages
     class PdfSurface
-      def initialize
+      BOLD_WEIGHT = 600
+
+      def initialize(look)
+        @look = look
         @document = Prawn::Document.new
       end
 
-      def text(content, size:)
-        @document.text(content.to_s, size: size)
+      def text(content, size:, font: "--ks-font-body", weight: nil)
+        typeface = @look.font(font)
+        @document.font_families[typeface.name] = typeface.files if typeface.files
+        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { @document.text(content.to_s, size: size) }
       end
 
       def row(widths)
@@ -30,6 +35,12 @@ module KeystoneUi
 
       def render
         @document.render
+      end
+
+      private
+
+      def bold?(weight)
+        weight.present? && @look.weight(weight) >= BOLD_WEIGHT
       end
     end
   end
