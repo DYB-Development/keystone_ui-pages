@@ -298,6 +298,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "--text-sm--line-height", drawn(document).styles.last[:leading]
   end
 
+  test "a label and value row's note is drawn at the line height keystone_ui's extra small text size gives it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "note" => "Per hour", "value" => "$150.00" } ])))))
+
+    assert_equal "--text-xs--line-height", drawn(document).styles[1][:leading]
+  end
+
   private
 
   def drawn(document, values: {})
