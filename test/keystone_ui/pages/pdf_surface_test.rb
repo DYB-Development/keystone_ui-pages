@@ -62,6 +62,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/, surface.render)
   end
 
+  test "a boxed line of text given a border is inset by the border's width as well as its padding" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ],
+                                      border: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_equal 49.5, lefts(surface.render)["Book a call"]
+  end
+
   private
 
   def look

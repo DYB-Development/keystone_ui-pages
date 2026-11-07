@@ -47,8 +47,9 @@ module KeystoneUi
       end
 
       def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
-        across = @look.points(padding.first) * padding[1]
-        down = @look.points(padding.first) * padding.last
+        edge = border ? @look.points(border[:width]) : 0
+        across = @look.points(padding.first) * padding[1] + edge
+        down = @look.points(padding.first) * padding.last + edge
         width = @document.bounds.width
         top = @document.cursor
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
