@@ -13,6 +13,7 @@ module KeystoneUi
       ALERT_TITLE_SIZE = "--text-base"
       ALERT_MESSAGE_SIZE = "--text-sm"
       VALUE_LIST_SIZE = "--text-base"
+      VALUE_LIST_NOTE_SIZE = "--text-xs"
       VALUE_LIST_LABEL_SHARE = Rational(2, 5)
       VALUE_LIST_ALIGNMENTS = { "end" => :right }.freeze
       ALERT_TITLE_GAP = 1
@@ -55,6 +56,7 @@ module KeystoneUi
 
       def value_list_label(surface, entry)
         surface.text(entry[:label], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: total?(entry) ? "--ks-color-text" : "--ks-color-text-secondary")
+        surface.text(entry[:note], size: VALUE_LIST_NOTE_SIZE, weight: total_weight(entry), color: "--ks-color-text-muted") if entry[:note].present?
       end
 
       def value_list_value(surface, entry, align)

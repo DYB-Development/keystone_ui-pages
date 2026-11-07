@@ -244,6 +244,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ nil, :right ], drawn(document).styles.pluck(:align)
   end
 
+  test "a label and value row's note is drawn under its label at the size and in the muted colour keystone_ui's value list note rule gives it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "note" => "Per hour", "value" => "$150.00" } ])))))
+
+    assert_equal [ "Per hour", "--text-xs", "--ks-color-text-muted" ], drawn(document).drawn.select { |call| call.first == :text }[1].then { |call| [ call[1], call[2], call[3][:color] ] }
+  end
+
   private
 
   def drawn(document, values: {})
