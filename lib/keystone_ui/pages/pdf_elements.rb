@@ -26,9 +26,13 @@ module KeystoneUi
 
       def paragraph(surface, fields)
         text = fields[:text]
-        return surface.rich_text([ { text: text.to_s } ], size: PARAGRAPH_SIZE) unless text.is_a?(Hash)
+        return drawn_paragraph(surface, [ { text: text.to_s } ]) unless text.is_a?(Hash)
 
-        rich_paragraphs(text["html"]).each { |paragraph| surface.rich_text(runs(paragraph), size: PARAGRAPH_SIZE) }
+        rich_paragraphs(text["html"]).each { |paragraph| drawn_paragraph(surface, runs(paragraph)) }
+      end
+
+      def drawn_paragraph(surface, runs)
+        surface.rich_text(runs, size: PARAGRAPH_SIZE, font: "--ks-font-body", color: "--ks-color-text")
       end
 
       def rich_paragraphs(html)

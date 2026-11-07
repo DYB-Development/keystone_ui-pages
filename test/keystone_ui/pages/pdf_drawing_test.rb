@@ -167,6 +167,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Use <b> for bold & <a> for links" ], drawn(document).paragraphs
   end
 
+  test "a paragraph is drawn in keystone_ui's body font and the text colour its paragraph rule gives it" do
+    document = page(section(row(column(element("paragraph", text: "Founded in 2020")))))
+
+    assert_equal({ font: "--ks-font-body", color: "--ks-color-text" }, drawn(document).drawn.last.last)
+  end
+
   private
 
   def drawn(document, values: {})
