@@ -36,18 +36,19 @@ module KeystoneUi
       end
 
       def box(padding:, radius:, fill: nil, border: nil, &content)
-        inset = @look.points(padding.first) * padding.last
+        across = @look.points(padding.first) * padding[1]
+        down = @look.points(padding.first) * padding.last
         width = @document.bounds.width
         top = @document.cursor
-        height = measured(width - inset * 2, &content) + inset * 2
+        height = measured(width - across * 2, &content) + down * 2
         corner = @look.points(radius.first) * radius.last
         if fill
           @document.fill_color(@look.color(fill))
           @document.fill_rounded_rectangle([ 0, top ], width, height, corner)
         end
         bordered(border, top, width, height, corner) if border
-        @document.bounding_box([ inset, top - inset ], width: width - inset * 2, &content)
-        @document.move_down(inset)
+        @document.bounding_box([ across, top - down ], width: width - across * 2, &content)
+        @document.move_down(down)
       end
 
       def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)

@@ -81,6 +81,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/, surface.render)
   end
 
+  test "a box's content is inset from its left edge by the padding's horizontal steps" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 6, 4 ], radius: [ "--ks-radius-control", 1 ]) { surface.text("Book a call", size: "--text-base") }
+
+    assert_equal 54.0, lefts(surface.render)["Book a call"]
+  end
+
   private
 
   def look
