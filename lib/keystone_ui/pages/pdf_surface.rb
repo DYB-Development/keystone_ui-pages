@@ -27,7 +27,7 @@ module KeystoneUi
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
-        @document.font(typeface.name) { @document.formatted_text(runs.map { |run| { text: run[:text] } }, size: @look.points(size)) }
+        @document.font(typeface.name) { @document.formatted_text(runs.map { |run| run.slice(:text, :link) }, size: @look.points(size)) }
       end
 
       def space(token, steps)

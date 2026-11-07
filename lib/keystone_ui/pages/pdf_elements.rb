@@ -33,12 +33,12 @@ module KeystoneUi
         Nokogiri::HTML5.fragment(Rails::HTML5::SafeListSanitizer.new.sanitize(stored.to_html, tags: PARAGRAPH_TAGS, attributes: %w[href])).css("p")
       end
 
-      def runs(node)
+      def runs(node, marks = {})
         node.children.flat_map do |child|
           next [ { text: "\n" } ] if child.name == "br"
-          next [ { text: child.text } ] if child.text?
+          next [ { text: child.text }.merge(marks) ] if child.text?
 
-          runs(child)
+          runs(child, child.name == "a" ? marks.merge(link: child["href"]).compact : marks)
         end
       end
     end

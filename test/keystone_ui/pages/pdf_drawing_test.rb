@@ -149,6 +149,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "First line\nSecond line", "Next paragraph" ], drawn(document).paragraphs
   end
 
+  test "a link in a paragraph is drawn with the address it opens" do
+    document = page(section(row(column(element("paragraph", text: { "html" => "<p>Made by <a href=\"https://ty-ler.com\">Tyler</a></p>" })))))
+
+    assert_equal [ { text: "Made by " }, { text: "Tyler", link: "https://ty-ler.com" } ], drawn(document).drawn.last[1]
+  end
+
   private
 
   def drawn(document, values: {})
