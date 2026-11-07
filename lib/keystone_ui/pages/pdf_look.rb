@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require "keystone_ui/look_choice"
 require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_document"
 
 module KeystoneUi
   module Pages
@@ -15,6 +17,11 @@ module KeystoneUi
 
       FONT_WEIGHTS = { "normal" => 400, "bold" => 700 }.freeze
       FONT_STYLES = { normal: [ "normal", 400 ], bold: [ "normal", 700 ], italic: [ "italic", 400 ] }.freeze
+
+      def self.host
+        configuration = KeystoneUi.configuration
+        new(PdfDocument.stylesheet, look: KeystoneUi::LookChoice.new(looks: configuration.looks.keys, default: configuration.default_look).name)
+      end
 
       def initialize(stylesheet, look: nil, font_files: ->(_url) { nil })
         @look = look

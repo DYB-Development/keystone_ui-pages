@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
 require "keystone_ui/pages/pdf_look"
 
 class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
@@ -83,5 +84,19 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
                                           font_files: ->(url) { "/public#{url}" })
 
     assert_equal "Inter", look.font("--ks-font-body").name
+  end
+
+  test "the host's look is read from the stylesheet the gem prints with, in the default look the host names" do
+    configuration = KeystoneUi::Configuration.new.tap do |config|
+      config.register_look :calm, "calm.css"
+      config.default_look = :calm
+    end
+    stylesheet = ':root{--ks-color-text:#18181b}:root[data-look="calm"]{--ks-color-text:#223344}'
+
+    color = KeystoneUi.stub(:configuration, configuration) do
+      KeystoneUi::Pages::PdfDocument.stub(:stylesheet, stylesheet) { KeystoneUi::Pages::PdfLook.host.color("--ks-color-text") }
+    end
+
+    assert_equal "223344", color
   end
 end
