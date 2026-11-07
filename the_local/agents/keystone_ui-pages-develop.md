@@ -293,7 +293,7 @@ inherit from the base controller, so define it there.
   draft, published or unpublished. `back_url:` is where Back goes. These three
   are required. `screen_url:` is optional: the address of the host's own screen
   for the sequence, such as where its order is changed, and when given the list
-  shows a Change order link to it.
+  shows a Flow link to it.
 
 ### The element catalog
 
