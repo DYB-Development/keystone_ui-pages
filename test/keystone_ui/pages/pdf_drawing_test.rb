@@ -84,6 +84,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-strong" }, drawn(document).drawn.last.last.slice(:font, :weight))
   end
 
+  test "a heading is drawn in the text colour keystone_ui gives headings" do
+    document = page(section(row(column(element("heading", text: "Pricing")))))
+
+    assert_equal "--ks-color-text", drawn(document).drawn.last.last[:color]
+  end
+
   private
 
   def drawn(document, values: {})

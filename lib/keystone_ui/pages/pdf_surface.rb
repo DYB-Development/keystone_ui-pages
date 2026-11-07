@@ -12,9 +12,10 @@ module KeystoneUi
         @document = Prawn::Document.new
       end
 
-      def text(content, size:, font: "--ks-font-body", weight: nil)
+      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text")
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
+        @document.fill_color(@look.color(color))
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { @document.text(content.to_s, size: size) }
       end
 
