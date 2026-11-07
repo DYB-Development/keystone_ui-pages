@@ -125,7 +125,13 @@ def funnel_sequence(key)
 end
 ```
 
-`pages` are the sequence's pages in the order a visitor goes through them. The gem keeps no order of its own, so the list shows the pages exactly as the method answers them.
+`pages` are the sequence's pages in the order a visitor goes through them. The gem keeps no order of its own, so the list shows the pages exactly as the method answers them. Each page in the list shows whether it is a draft, published or unpublished.
+
+A sequence may also name `screen_url:`, the address of the host's own screen for the sequence, such as where its order is changed. The list then shows a Change order link to it:
+
+```ruby
+KeystoneUi::Pages::Sequence.new(title: funnel.name, pages: funnel.pages_in_order, back_url: funnel_path(funnel), screen_url: funnel_flow_path(funnel))
+```
 
 Staff open a sequence at `/pages/manage/sequences/<place>/<key>`. The builder shows the sequence's first page, with the sequence's title and its pages numbered from 1 beside it and the page being built marked. Choosing a page in the list opens it with the same list beside it. A sequence with no pages shows an empty page area saying no page has been added yet. The Back link goes to `back_url`, and a nil answer, or a place with no `sequence_method:`, gets the host's refusal.
 

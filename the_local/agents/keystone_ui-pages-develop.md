@@ -285,12 +285,15 @@ inherit from the base controller, so define it there.
   it opens the sequence screen with `page_id:` set to the new page. The form and
   creating are refused the same way as the sequence screen when the sequence
   method answers nil, and no page is made.
-- `KeystoneUi::Pages::Sequence.new(title:, pages:, back_url:)` — what a
-  sequence method answers. `title:` is the heading shown above the list.
+- `KeystoneUi::Pages::Sequence.new(title:, pages:, back_url:, screen_url: nil)` —
+  what a sequence method answers. `title:` is the heading shown above the list.
   `pages:` is an array of `KeystoneUi::Pages::Page` records in the order a
   visitor goes through them, and the list shows them in exactly that order,
-  since the gem stores no order. `back_url:` is where Back goes. All three are
-  required.
+  since the gem stores no order, each with a badge saying whether it is a
+  draft, published or unpublished. `back_url:` is where Back goes. These three
+  are required. `screen_url:` is optional: the address of the host's own screen
+  for the sequence, such as where its order is changed, and when given the list
+  shows a Change order link to it.
 
 ### The element catalog
 
