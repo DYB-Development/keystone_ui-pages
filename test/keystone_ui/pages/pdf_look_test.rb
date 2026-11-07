@@ -99,4 +99,17 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "223344", color
   end
+
+  test "the host's font is printed from the TrueType copy in its public folder" do
+    Dir.mktmpdir do |public_folder|
+      FileUtils.touch(File.join(public_folder, "Inter.ttf"))
+      stylesheet = ':root{--ks-font-body:Inter}@font-face{font-family:Inter;src:url("/Inter.woff2") format("woff2")}'
+
+      files = Rails.stub(:public_path, Pathname(public_folder)) do
+        KeystoneUi::Pages::PdfDocument.stub(:stylesheet, stylesheet) { KeystoneUi::Pages::PdfLook.host.font("--ks-font-body").files }
+      end
+
+      assert_equal File.join(public_folder, "Inter.ttf"), files[:normal]
+    end
+  end
 end

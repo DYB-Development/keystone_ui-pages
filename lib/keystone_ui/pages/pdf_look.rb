@@ -20,7 +20,12 @@ module KeystoneUi
 
       def self.host
         configuration = KeystoneUi.configuration
-        new(PdfDocument.stylesheet, look: KeystoneUi::LookChoice.new(looks: configuration.looks.keys, default: configuration.default_look).name)
+        new(PdfDocument.stylesheet, look: KeystoneUi::LookChoice.new(looks: configuration.looks.keys, default: configuration.default_look).name, font_files: method(:served_file))
+      end
+
+      def self.served_file(url)
+        path = Rails.public_path.join(url.delete_prefix("/"))
+        path.to_s if path.file?
       end
 
       def initialize(stylesheet, look: nil, font_files: ->(_url) { nil })
