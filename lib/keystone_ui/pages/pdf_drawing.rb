@@ -4,6 +4,7 @@ require "keystone_ui/pages"
 require "keystone_ui/pages/operations"
 require "keystone_ui/pages/filling"
 require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_surface"
 
 module KeystoneUi
   module Pages
@@ -11,6 +12,12 @@ module KeystoneUi
 
     module PdfDrawing
       module_function
+
+      def pdf(version, values: {})
+        surface = PdfSurface.new
+        draw(version.document, surface, values: values)
+        surface.render
+      end
 
       def draw(document, surface, values: {})
         values = values.to_h.stringify_keys
