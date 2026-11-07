@@ -112,4 +112,16 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
       assert_equal File.join(public_folder, "Inter.ttf"), files[:normal]
     end
   end
+
+  test "the host's font is printed from the TrueType copy among its assets when the stylesheet loads the font from its assets" do
+    stylesheet = ':root{--ks-font-body:Inter}@font-face{font-family:Inter;src:url("/assets/fonts/Inter.woff2") format("woff2")}'
+    asset = Struct.new(:path).new(Pathname("/app/assets/fonts/Inter.ttf"))
+    load_path = Rails.application.assets.load_path
+
+    files = load_path.stub(:find, ->(logical_path) { asset if logical_path == "fonts/Inter.ttf" }) do
+      KeystoneUi::Pages::PdfDocument.stub(:stylesheet, stylesheet) { KeystoneUi::Pages::PdfLook.host.font("--ks-font-body").files }
+    end
+
+    assert_equal "/app/assets/fonts/Inter.ttf", files[:normal]
+  end
 end

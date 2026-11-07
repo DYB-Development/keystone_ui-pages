@@ -25,7 +25,9 @@ module KeystoneUi
 
       def self.served_file(url)
         path = Rails.public_path.join(url.delete_prefix("/"))
-        path.to_s if path.file?
+        return path.to_s if path.file?
+
+        Rails.application.assets.load_path.find(url.delete_prefix("/").delete_prefix("assets/"))&.path&.to_s
       end
 
       def initialize(stylesheet, look: nil, font_files: ->(_url) { nil })
