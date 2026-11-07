@@ -101,11 +101,19 @@ Keystone UI itself must be installed first. Its own install local,
   drawing, the default, prints the page with a Chromium-based browser on the
   server from the host's compiled stylesheet, so the PDF looks as the page does.
   The Ruby drawing needs no browser and draws the page's sections, rows, columns
-  and elements with Prawn, in Prawn's default font. In the Ruby drawing each
-  element draws through its own PDF drawing, given when the element is added to
-  the catalog. A page holding an element with no PDF drawing cannot be printed
-  that way, and the error names the element. So far only the heading and label
-  elements have one.
+  and elements with Prawn. In the Ruby drawing each element draws through its
+  own PDF drawing, given when the element is added to the catalog. A page
+  holding an element with no PDF drawing cannot be printed that way, and the
+  error names the element. So far only the heading and label elements have one.
+- **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
+  fonts, font weights, text colours and spacing from the host's compiled
+  stylesheet, in light mode and in the host's default look, so a token the host
+  changes reaches the PDF. A font the stylesheet names only by system fonts
+  prints in Helvetica. A font the stylesheet loads from its own files prints
+  from a TrueType copy of each file, served beside it under the same name, since
+  a PDF cannot use web font files. Asking for a PDF in a loaded font with no
+  TrueType copy served fails, and the error names the font and the file it
+  looked for.
 - **PDFs are kept in Active Storage**, one per published version and set of
   values, whichever drawing made them. A page that uses no host values gets its
   PDF made when it is published.

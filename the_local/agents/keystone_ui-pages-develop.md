@@ -194,19 +194,39 @@ inherit from the base controller, so define it there.
   `/usr/bin/chromium-browser`, and the Google Chrome and Chromium apps in
   `/Applications` that can be run.
 - `KeystoneUi::Pages.pdf_stylesheet = "tailwind.css"` — the name of the host's
-  compiled stylesheet in Propshaft, written into every PDF. Defaults to
-  `"tailwind.css"`. A name Propshaft cannot find prints the PDF with no styles.
-  Chrome drawing only.
+  compiled stylesheet in Propshaft. Defaults to `"tailwind.css"`. The Chrome
+  drawing writes it into every PDF, and a name Propshaft cannot find prints
+  with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens from it,
+  so a name Propshaft cannot find, or a stylesheet missing a token the drawing
+  reads, makes the Ruby drawing raise a `KeyError` naming the token.
 - `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
   default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
   the page in Ruby with Prawn from its sections, rows, columns and elements,
   with no Chrome needed. A string works too. The Ruby drawing honours bound
   values and show-when conditions and lays out each row's columns side by side
-  at their widths, in Prawn's default font, with no host stylesheet, colours or
-  print rules. Each element draws through the `pdf:` drawing given to
-  `catalog.register`. Of the built-in elements only `heading` (its text at
-  14, 18 or 24 points for `sm`, `md` or `lg`, and its note under it at 10) and
-  `label` (its text at 10) have one so far.
+  at their widths, with no host print rules. It takes Keystone UI's look from
+  the `pdf_stylesheet`'s `--ks-` tokens, in light mode and in the host's
+  default Keystone UI look: values set inside `@media` rules or under any
+  selector other than `:root`, `:host`, `html` or the default look's
+  `[data-look=...]` are left out, a host's own value outside a layer wins over
+  Keystone UI's layered one, and the look's value wins over the root's. Rows
+  in a section sit six `--ks-spacing` steps apart and elements in a column four,
+  where `rem` and `em` count as 12 points and `px` as 0.75. Each element draws
+  through the `pdf:` drawing given to `catalog.register`. Of the built-in
+  elements only `heading` and `label` have one so far. A heading draws its text
+  at 14, 18 or 24 points for `sm`, `md` or `lg` in `--ks-font-heading` at
+  `--ks-font-weight-heading` and `--ks-color-text`, with its note under it at 10
+  points in `--ks-color-text-muted`. A label draws its text at 10 points in
+  `--ks-font-body` at `--ks-font-weight-strong` and `--ks-color-text-muted`.
+- **Fonts in the Ruby drawing.** A font token is read as a list of families,
+  and `inherit` takes the `html` element's `font-family`. The first family the
+  stylesheet loads with `@font-face` is used. A list with no such family prints
+  in Helvetica. A loaded family prints from a TrueType copy of the files its
+  `@font-face` rules load for regular, bold and italic text, found under the
+  same address with a `.ttf` ending, in `public/` or among the files Propshaft
+  serves. When any of the three copies is not served, `KeystoneUi::Pages.pdf`
+  raises `KeystoneUi::Pages::PrintFailed` naming the font and the address it
+  looked for. A weight of 600 or more prints bold.
 - `KeystoneUi::Pages.ruby_pdf_drawing?` — true when `pdf_drawing` is `:ruby` or
   `"ruby"`. Use it to decide whether to offer a PDF without checking for
   Chrome.
@@ -333,9 +353,13 @@ inherit from the base controller, so define it there.
   `pdf:` is the element's Ruby PDF drawing, used only when `pdf_drawing` is
   `:ruby`: a callable taking the drawing surface and a hash of the element's
   field values keyed by symbol, with bound values filled in and each unset
-  field at its `default:`. The surface's `text(content, size:)` writes the
-  content as a line of text at that size in points, below what was drawn
-  before it in the same column. An element registered without `pdf:` makes the
+  field at its `default:`. The surface has two calls.
+  `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text")`
+  writes the content at that size in points, below what was drawn before it in
+  the same column, in the font, weight and colour of the `--ks-` tokens named,
+  with no weight meaning regular. `space(token, steps)` moves down by that
+  many steps of a length token, such as `space("--ks-spacing", 2)`. Both read
+  the tokens as the Ruby drawing's look describes. An element registered without `pdf:` makes the
   Ruby drawing raise `NoPdfDrawing` for any page showing it.
 - The built-in Form element (`:form`) holds a form name, a list of fields (each
   a label, a field name, a kind of `text`, `email`, `long_text`, `choice` or
@@ -424,7 +448,8 @@ The catalog offers these Keystone UI components by default: `button`,
    Which drawing to use is the developer's decision, so ask before setting
    `pdf_drawing`. Chrome draws every element with the host's styles but needs
    Chrome or Chromium on the server. Ruby needs no Chrome but draws only
-   elements with a `pdf:` drawing, as plain text in Prawn's default font.
+   elements with a `pdf:` drawing, as text in Keystone UI's fonts, weights,
+   text colours and spacing read from the host's stylesheet.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
@@ -440,7 +465,12 @@ The catalog offers these Keystone UI components by default: `button`,
    printed has a `pdf:` drawing, and give a host-registered element one with
    `pdf:` on `catalog.register`. A page showing an element without one raises
    `NoPdfDrawing`, including from the PDF job queued when such a page is
-   published with no host values.
+   published with no host values. Also check the fonts the stylesheet's
+   `--ks-font-heading` and `--ks-font-body` name: a family loaded with
+   `@font-face` needs a `.ttf` copy served beside each of its files, or every
+   PDF raises `PrintFailed` naming the missing file. If the host has no `.ttf`
+   files for its font, ask the developer where to get them rather than
+   converting or replacing the font.
 
    Called from `prepare_pdf`, either error is raised inside the job, so the job
    backend's retry rules apply. Ask the developer how a failed print should
@@ -525,7 +555,7 @@ The catalog offers these Keystone UI components by default: `button`,
    The method must be reachable in the engine's views and in any host view that
    calls `keystone_ui_page`. A `helper_method` on the base controller covers
    both. When the host uses the Ruby drawing, also pass `pdf:`, such as
-   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: 12) }`. A page that holds an element the catalog no longer offers still
+   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: 12, color: "--ks-color-text-muted") }`. A page that holds an element the catalog no longer offers still
    draws its other elements for visitors, marks the missing one in the editor
    as no longer offered, and reports the page's id and the element's key
    through `Rails.error`, so search the pages' documents for its key before
