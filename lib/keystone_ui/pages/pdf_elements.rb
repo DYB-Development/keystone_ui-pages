@@ -12,6 +12,7 @@ module KeystoneUi
       PARAGRAPH_SIZE = "--text-base"
       ALERT_TITLE_SIZE = "--text-base"
       ALERT_MESSAGE_SIZE = "--text-sm"
+      ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -27,8 +28,11 @@ module KeystoneUi
       end
 
       def alert(surface, fields)
-        surface.text(fields[:title], size: ALERT_TITLE_SIZE) if fields[:title].present?
-        surface.text(fields[:message], size: ALERT_MESSAGE_SIZE)
+        tone = ALERT_TONES.fetch(fields[:type].to_s, ALERT_TONES["info"])
+        surface.box(fill: "--ks-color-#{tone}-50") do
+          surface.text(fields[:title], size: ALERT_TITLE_SIZE, color: "--ks-color-#{tone}-800") if fields[:title].present?
+          surface.text(fields[:message], size: ALERT_MESSAGE_SIZE, color: "--ks-color-#{tone}-800")
+        end
       end
 
       def paragraph(surface, fields)

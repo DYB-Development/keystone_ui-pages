@@ -23,6 +23,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :rich_text, runs, size, style ]
     end
 
+    def box(**style)
+      @drawn << [ :box, style ]
+      yield
+    end
+
     def row(widths)
       @drawn << [ :row, widths ]
       widths.each_index { |index| yield index }
@@ -177,6 +182,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("alert", title: "Heads up", message: "Prices change in May"), element("alert", message: "Saved")))))
 
     assert_equal [ "Heads up", "Prices change in May", "Saved" ], drawn(document).texts
+  end
+
+  test "an alert is drawn on the fill and in the text colour keystone_ui's tokens give its type" do
+    document = page(section(row(column(*%w[info success warning error].map { |type| element("alert", title: "Heads up", message: "Read this", type: type) }))))
+
+    drawing = drawn(document).drawn
+    assert_equal [ %w[--ks-color-info-50 --ks-color-success-50 --ks-color-warning-50 --ks-color-danger-50],
+                   %w[--ks-color-info-800 --ks-color-info-800 --ks-color-success-800 --ks-color-success-800 --ks-color-warning-800 --ks-color-warning-800 --ks-color-danger-800 --ks-color-danger-800] ],
+                 [ drawing.select { |call| call.first == :box }.map { |call| call.last[:fill] }, drawing.select { |call| call.first == :text }.map { |call| call.last[:color] } ]
   end
 
   private
