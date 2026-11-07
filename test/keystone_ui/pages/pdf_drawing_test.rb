@@ -377,6 +377,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 4 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
   end
 
+  test "accordion items are drawn four of keystone_ui's spacing steps apart, as the accordion rule spaces them, and the first has no space above it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." }, { "question" => "Who for?", "answer" => "Hosts." } ])))))
+
+    gap = [ :space, "--ks-spacing", 4 ]
+    assert_equal [ :row, :box, :text, gap, :text, gap, :box, :text, gap, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
   private
 
   def drawn(document, values: {})

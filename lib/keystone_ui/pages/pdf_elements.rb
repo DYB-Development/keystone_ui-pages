@@ -27,6 +27,7 @@ module KeystoneUi
       ACCORDION_PADDING_ACROSS = 6
       ACCORDION_PADDING_DOWN = 4
       ACCORDION_RADIUS = 1.5
+      ACCORDION_GAP = 4
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
       ALERT_RADIUS = 0.75
@@ -52,7 +53,8 @@ module KeystoneUi
       end
 
       def accordion(surface, fields)
-        Array(fields[:items].presence).each do |item|
+        Array(fields[:items].presence).each_with_index do |item, position|
+          surface.space(SPACING, ACCORDION_GAP) if position.positive?
           surface.box(padding: [ SPACING, ACCORDION_PADDING_ACROSS, ACCORDION_PADDING_DOWN ], radius: [ "--ks-radius-surface", ACCORDION_RADIUS ],
                       border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }) do
             surface.text(item[:question], size: ACCORDION_QUESTION_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: PAGE_LINE_HEIGHT)
