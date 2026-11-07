@@ -116,6 +116,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
   end
 
+  test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
+    document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
+                                       element("heading", text: "Large", size: "lg", note: "Updated monthly"), element("label", text: "Per seat")))))
+
+    assert_equal [ "--text-lg", "--text-2xl", "--text-4xl", "--text-sm", "--text-xs" ], drawn(document).drawn.select { |call| call.first == :text }.map { |call| call[2] }
+  end
+
   private
 
   def drawn(document, values: {})

@@ -16,7 +16,7 @@ module KeystoneUi
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
-        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { @document.text(content.to_s, size: size) }
+        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { @document.text(content.to_s, size: @look.points(size)) }
       end
 
       def space(token, steps)
