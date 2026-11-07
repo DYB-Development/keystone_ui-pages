@@ -19,6 +19,10 @@ module KeystoneUi
         css.delete_prefix("#").upcase
       end
 
+      def weight(name)
+        value(name).to_i
+      end
+
       def value(name)
         resolved(@values.fetch(name))
       end

@@ -39,4 +39,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "112233", look.color("--ks-color-text")
   end
+
+  test "a weight token is read as the number it names" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--font-weight-semibold:600;--ks-font-weight-heading:var(--font-weight-semibold)}")
+
+    assert_equal 600, look.weight("--ks-font-weight-heading")
+  end
 end
