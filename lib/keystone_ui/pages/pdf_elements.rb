@@ -43,7 +43,7 @@ module KeystoneUi
       def button(surface, fields)
         surface.boxed_text(fields[:label], size: BUTTON_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-on-accent", leading: line_height(BUTTON_SIZE),
                                            fill: "--ks-color-accent", padding: [ SPACING, BUTTON_PADDING_ACROSS, BUTTON_PADDING_DOWN ], radius: [ "--ks-radius-control", 1 ],
-                                           border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: nil)
+                                           border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: fields[:href].presence)
       end
 
       def line_height(size)

@@ -340,6 +340,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                      border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: nil } ], drawn(document).drawn.last
   end
 
+  test "a button with an address is drawn opening that address when clicked" do
+    document = page(section(row(column(element("button", label: "Book a call", href: "https://ty-ler.com/book")))))
+
+    assert_equal "https://ty-ler.com/book", drawn(document).drawn.last.last[:link]
+  end
+
   private
 
   def drawn(document, values: {})
