@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "keystone_ui/pages/operations"
+require "keystone_ui/pages/filling"
 
 module KeystoneUi
   module Pages
@@ -138,8 +139,7 @@ module KeystoneUi
       end
 
       def hidden?(node)
-        condition = node["show_when"]
-        condition && (@drawn_values || {})[condition["value"]].to_s != condition["equals"].to_s
+        Filling.hidden?(node, @drawn_values || {})
       end
 
       def wrapped_element(element, data: {})
@@ -170,9 +170,7 @@ module KeystoneUi
       end
 
       def filled(stored)
-        return stored.presence unless stored.is_a?(Hash) && stored.key?("value")
-
-        (@drawn_values || {})[stored["value"]].presence || stored["fallback"].presence || ""
+        Filling.filled(stored, @drawn_values || {})
       end
 
       def wrapper_classes(element)
