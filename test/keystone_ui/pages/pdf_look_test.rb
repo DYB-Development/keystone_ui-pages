@@ -9,4 +9,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "18181B", look.color("--ks-color-text")
   end
+
+  test "an oklch colour is turned into the hex colour it names" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-danger:oklch(57.7% .245 27.325)}")
+
+    assert_equal "E7000B", look.color("--ks-color-danger")
+  end
 end
