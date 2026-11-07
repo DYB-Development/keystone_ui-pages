@@ -55,13 +55,14 @@ module KeystoneUi
 
       def row(widths, gap: nil)
         spacing = gap ? @look.points(gap.first) * gap.last : 0
-        top = @document.cursor
-        lowest = @document.y
+        top = @document.y
+        lowest = top
         left = 0
         widths.each_with_index do |width, index|
           column_width = @document.bounds.width * width
           inset = index.positive? ? spacing : 0
-          @document.bounding_box([ left + inset, top ], width: column_width - inset) do
+          @document.y = top
+          @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
             yield index
             lowest = [ lowest, @document.y ].min
           end
