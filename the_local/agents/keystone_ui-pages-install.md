@@ -128,8 +128,10 @@ linking editors to the builder or drawing a page in the host's screens.
      elements can be drawn this way so far, and a page holding any other
      element cannot be printed and raises an error naming that element.
      It still needs Propshaft serving the host's stylesheet, since it reads the
-     fonts, weights, text colours and spacing from its `--ks-` tokens, in
-     light mode and the host's default look.
+     fonts, weights, text colours and spacing from its `--ks-` tokens, and the
+     text sizes and letter spacing Keystone UI's heading and caption use, in
+     light mode and the host's default look. A token the host's own stylesheet
+     changes reaches the PDF the same way.
 
    The choice is a setting in the settings file, written in the next step.
 
@@ -182,7 +184,8 @@ linking editors to the builder or drawing a page in the host's screens.
    builder, publish it, and open `/pages/<slug>`. With the Chrome drawing, the
    page list shows a PDF link only when Chrome or Chromium was found. With the
    Ruby drawing, it always shows one, so open it on a page holding only
-   headings and labels to confirm the fonts print.
+   headings and labels to confirm the fonts and text sizes print, with each
+   label in capitals.
 
    Boot stops with an `ArgumentError` naming a place when that place's settings
    are incomplete: it leaves out an element no catalog entry has, it offers the

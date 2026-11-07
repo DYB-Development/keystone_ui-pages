@@ -196,9 +196,10 @@ inherit from the base controller, so define it there.
 - `KeystoneUi::Pages.pdf_stylesheet = "tailwind.css"` — the name of the host's
   compiled stylesheet in Propshaft. Defaults to `"tailwind.css"`. The Chrome
   drawing writes it into every PDF, and a name Propshaft cannot find prints
-  with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens from it,
-  so a name Propshaft cannot find, or a stylesheet missing a token the drawing
-  reads, makes the Ruby drawing raise a `KeyError` naming the token.
+  with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens and the
+  `--text-` size and `--tracking-` letter spacing tokens from it, so a name
+  Propshaft cannot find, or a stylesheet missing a token the drawing reads,
+  makes the Ruby drawing raise a `KeyError` naming the token.
 - `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
   default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
   the page in Ruby with Prawn from its sections, rows, columns and elements,
@@ -211,13 +212,16 @@ inherit from the base controller, so define it there.
   `[data-look=...]` are left out, a host's own value outside a layer wins over
   Keystone UI's layered one, and the look's value wins over the root's. Rows
   in a section sit six `--ks-spacing` steps apart and elements in a column four,
-  where `rem` and `em` count as 12 points and `px` as 0.75. Each element draws
-  through the `pdf:` drawing given to `catalog.register`. Of the built-in
-  elements only `heading` and `label` have one so far. A heading draws its text
-  at 14, 18 or 24 points for `sm`, `md` or `lg` in `--ks-font-heading` at
-  `--ks-font-weight-heading` and `--ks-color-text`, with its note under it at 10
-  points in `--ks-color-text-muted`. A label draws its text at 10 points in
-  `--ks-font-body` at `--ks-font-weight-strong` and `--ks-color-text-muted`.
+  where `rem` counts as 12 points, `px` as 0.75 and `pt` as 1. An `em` counts
+  as 12 points, except in a letter spacing token, where it counts as the size
+  of the text it spaces. Each element draws through the `pdf:` drawing given to
+  `catalog.register`. Of the built-in elements only `heading` and `label` have
+  one so far. A heading draws its text at `--text-lg`, `--text-2xl` or
+  `--text-4xl` for `sm`, `md` or `lg` in `--ks-font-heading` at
+  `--ks-font-weight-heading` and `--ks-color-text`, with its note under it at
+  `--text-sm` in `--ks-color-text-muted`. A label draws its text in capitals at
+  `--text-xs` in `--ks-font-body` at `--ks-font-weight-strong` and
+  `--ks-color-text-muted`, with `--tracking-wider` letter spacing.
 - **Fonts in the Ruby drawing.** A font token is read as a list of families,
   and `inherit` takes the `html` element's `font-family`. The first family the
   stylesheet loads with `@font-face` is used. A list with no such family prints
@@ -354,10 +358,13 @@ inherit from the base controller, so define it there.
   `:ruby`: a callable taking the drawing surface and a hash of the element's
   field values keyed by symbol, with bound values filled in and each unset
   field at its `default:`. The surface has two calls.
-  `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text")`
-  writes the content at that size in points, below what was drawn before it in
-  the same column, in the font, weight and colour of the `--ks-` tokens named,
-  with no weight meaning regular. `space(token, steps)` moves down by that
+  `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil)`
+  writes the content below what was drawn before it in the same column.
+  `size:` names a length token, such as `"--text-sm"`, never a number of
+  points. `font:`, `weight:` and `color:` name `--ks-` tokens, with no weight
+  meaning regular. `uppercase: true` writes the content in capitals.
+  `tracking:` names a letter spacing token, such as `"--tracking-wider"`, and no
+  tracking means none. `space(token, steps)` moves down by that
   many steps of a length token, such as `space("--ks-spacing", 2)`. Both read
   the tokens as the Ruby drawing's look describes. An element registered without `pdf:` makes the
   Ruby drawing raise `NoPdfDrawing` for any page showing it.
@@ -449,7 +456,8 @@ The catalog offers these Keystone UI components by default: `button`,
    `pdf_drawing`. Chrome draws every element with the host's styles but needs
    Chrome or Chromium on the server. Ruby needs no Chrome but draws only
    elements with a `pdf:` drawing, as text in Keystone UI's fonts, weights,
-   text colours and spacing read from the host's stylesheet.
+   text sizes, letter spacing, text colours and spacing read from the host's
+   stylesheet.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
@@ -555,7 +563,9 @@ The catalog offers these Keystone UI components by default: `button`,
    The method must be reachable in the engine's views and in any host view that
    calls `keystone_ui_page`. A `helper_method` on the base controller covers
    both. When the host uses the Ruby drawing, also pass `pdf:`, such as
-   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: 12, color: "--ks-color-text-muted") }`. A page that holds an element the catalog no longer offers still
+   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted") }`.
+   Name only tokens the host's stylesheet sets, since a missing one raises a
+   `KeyError` naming it. A page that holds an element the catalog no longer offers still
    draws its other elements for visitors, marks the missing one in the editor
    as no longer offered, and reports the page's id and the element's key
    through `Rails.error`, so search the pages' documents for its key before

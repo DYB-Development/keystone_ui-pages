@@ -106,9 +106,11 @@ Keystone UI itself must be installed first. Its own install local,
   holding an element with no PDF drawing cannot be printed that way, and the
   error names the element. So far only the heading and label elements have one.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
-  fonts, font weights, text colours and spacing from the host's compiled
+  fonts, font weights, text colours and spacing, and the text sizes and letter
+  spacing Keystone UI's heading and caption use, from the host's compiled
   stylesheet, in light mode and in the host's default look, so a token the host
-  changes reaches the PDF. A font the stylesheet names only by system fonts
+  changes reaches the PDF. A label prints in capitals with the caption's wider
+  letter spacing, as it shows on screen. A font the stylesheet names only by system fonts
   prints in Helvetica. A font the stylesheet loads from its own files prints
   from a TrueType copy of each file, served beside it under the same name, since
   a PDF cannot use web font files. Asking for a PDF in a loaded font with no
