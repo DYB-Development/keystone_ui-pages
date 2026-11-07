@@ -179,7 +179,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a paragraph is drawn in keystone_ui's body font and the text colour its paragraph rule gives it" do
     document = page(section(row(column(element("paragraph", text: "Founded in 2020")))))
 
-    assert_equal({ font: "--ks-font-body", color: "--ks-color-text" }, drawn(document).drawn.last.last)
+    assert_equal({ font: "--ks-font-body", color: "--ks-color-text" }, drawn(document).drawn.last.last.slice(:font, :color))
   end
 
   test "an alert is drawn as its title above its message, or its message alone when it has no title" do
@@ -271,6 +271,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
 
     assert_equal({ gap: [ "--ks-spacing", 4 ] }, drawn(document).drawn.select { |call| call.first == :row }.last[2])
+  end
+
+  test "a paragraph's lines are drawn at the relaxed line height keystone_ui's paragraph rule gives them" do
+    document = page(section(row(column(element("paragraph", text: "Founded in 2020")))))
+
+    assert_equal "--leading-relaxed", drawn(document).drawn.last.last[:leading]
   end
 
   private

@@ -84,7 +84,7 @@ module KeystoneUi
       end
 
       def drawn_paragraph(surface, runs)
-        surface.rich_text(runs, size: PARAGRAPH_SIZE, font: "--ks-font-body", color: "--ks-color-text")
+        surface.rich_text(runs, size: PARAGRAPH_SIZE, font: "--ks-font-body", color: "--ks-color-text", leading: "--leading-relaxed")
       end
 
       def rich_paragraphs(html)
