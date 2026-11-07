@@ -45,4 +45,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal 600, look.weight("--ks-font-weight-heading")
   end
+
+  test "a length token in rem is read as the points it prints at, a rem being sixteen CSS pixels of three quarters of a point" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--spacing:.25rem;--ks-spacing:var(--spacing)}")
+
+    assert_equal 3.0, look.points("--ks-spacing")
+  end
 end

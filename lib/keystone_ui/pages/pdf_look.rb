@@ -4,6 +4,7 @@ module KeystoneUi
   module Pages
     class PdfLook
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
+      POINTS_PER_UNIT = { "rem" => 12.0, "em" => 12.0, "px" => 0.75, "pt" => 1.0 }.freeze
       ROOTS = [ ":root", ":host", "html" ].freeze
       LMS_TO_SRGB = [ [ 4.0767416621, -3.3077115913, 0.2309699292 ], [ -1.2684380046, 2.6097574011, -0.3413193965 ], [ -0.0041960863, -0.7034186147, 1.7076147010 ] ].freeze
 
@@ -21,6 +22,11 @@ module KeystoneUi
 
       def weight(name)
         value(name).to_i
+      end
+
+      def points(name)
+        length = value(name)
+        length.to_f * POINTS_PER_UNIT.fetch(length[/[a-z]+\z/], 0.0)
       end
 
       def value(name)
