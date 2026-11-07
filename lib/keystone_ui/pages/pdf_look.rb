@@ -42,7 +42,8 @@ module KeystoneUi
         css = value(name)
         return oklch_hex(css) if css.start_with?("oklch(")
 
-        css.delete_prefix("#").upcase
+        hex = css.delete_prefix("#").upcase
+        hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex
       end
 
       def font(name)
