@@ -89,6 +89,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 54.0, lefts(surface.render)["Book a call"]
   end
 
+  test "a box given a border insets its content by the border's width as well as its padding" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 6, 4 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }) do
+      surface.text("Book a call", size: "--text-base")
+    end
+
+    assert_equal 55.5, lefts(surface.render)["Book a call"]
+  end
+
   private
 
   def look

@@ -36,8 +36,7 @@ module KeystoneUi
       end
 
       def box(padding:, radius:, fill: nil, border: nil, &content)
-        across = @look.points(padding.first) * padding[1]
-        down = @look.points(padding.first) * padding.last
+        across, down = insets(padding, border)
         width = @document.bounds.width
         top = @document.cursor
         height = measured(width - across * 2, &content) + down * 2
@@ -52,9 +51,7 @@ module KeystoneUi
       end
 
       def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
-        edge = border ? @look.points(border[:width]) : 0
-        across = @look.points(padding.first) * padding[1] + edge
-        down = @look.points(padding.first) * padding.last + edge
+        across, down = insets(padding, border)
         width = @document.bounds.width
         top = @document.cursor
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
@@ -118,6 +115,11 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def insets(padding, border)
+        edge = border ? @look.points(border[:width]) : 0
+        [ @look.points(padding.first) * padding[1] + edge, @look.points(padding.first) * padding.last + edge ]
       end
 
       def bordered(border, top, width, height, corner)
