@@ -173,6 +173,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ font: "--ks-font-body", color: "--ks-color-text" }, drawn(document).drawn.last.last)
   end
 
+  test "an alert is drawn as its title above its message, or its message alone when it has no title" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Prices change in May"), element("alert", message: "Saved")))))
+
+    assert_equal [ "Heads up", "Prices change in May", "Saved" ], drawn(document).texts
+  end
+
   private
 
   def drawn(document, values: {})

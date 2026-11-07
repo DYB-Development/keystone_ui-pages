@@ -10,6 +10,8 @@ module KeystoneUi
       NOTE_SIZE = "--text-sm"
       LABEL_SIZE = "--text-xs"
       PARAGRAPH_SIZE = "--text-base"
+      ALERT_TITLE_SIZE = "--text-base"
+      ALERT_MESSAGE_SIZE = "--text-sm"
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -22,6 +24,11 @@ module KeystoneUi
 
       def label(surface, fields)
         surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-text-muted", uppercase: true, tracking: "--tracking-wider")
+      end
+
+      def alert(surface, fields)
+        surface.text(fields[:title], size: ALERT_TITLE_SIZE) if fields[:title].present?
+        surface.text(fields[:message], size: ALERT_MESSAGE_SIZE)
       end
 
       def paragraph(surface, fields)
