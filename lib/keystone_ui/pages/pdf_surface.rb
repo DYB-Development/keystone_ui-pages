@@ -53,13 +53,15 @@ module KeystoneUi
         @document.move_down(@look.points(token) * steps)
       end
 
-      def row(widths)
+      def row(widths, gap: nil)
+        spacing = gap ? @look.points(gap.first) * gap.last : 0
         top = @document.cursor
         lowest = @document.y
         left = 0
         widths.each_with_index do |width, index|
           column_width = @document.bounds.width * width
-          @document.bounding_box([ left, top ], width: column_width) do
+          inset = index.positive? ? spacing : 0
+          @document.bounding_box([ left + inset, top ], width: column_width - inset) do
             yield index
             lowest = [ lowest, @document.y ].min
           end

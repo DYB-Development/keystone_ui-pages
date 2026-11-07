@@ -16,6 +16,7 @@ module KeystoneUi
       VALUE_LIST_NOTE_SIZE = "--text-xs"
       VALUE_LIST_LABEL_SHARE = Rational(2, 5)
       VALUE_LIST_ROW_PADDING = 2
+      VALUE_LIST_GAP = 4
       VALUE_LIST_ALIGNMENTS = { "end" => :right }.freeze
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
@@ -51,7 +52,7 @@ module KeystoneUi
         Array(fields[:rows].presence).each_with_index do |entry, position|
           surface.rule(width: "--ks-border-width", color: "--ks-color-border") if position.positive?
           surface.space(SPACING, VALUE_LIST_ROW_PADDING)
-          surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ]) do |index|
+          surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ], gap: [ SPACING, VALUE_LIST_GAP ]) do |index|
             index.zero? ? value_list_label(surface, entry) : value_list_value(surface, entry, VALUE_LIST_ALIGNMENTS[fields[:align].to_s])
           end
           surface.space(SPACING, VALUE_LIST_ROW_PADDING)

@@ -32,8 +32,8 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :rule, style ]
     end
 
-    def row(widths)
-      @drawn << [ :row, widths ]
+    def row(widths, **layout)
+      @drawn << [ :row, widths, layout.presence ].compact
       widths.each_index { |index| yield index }
     end
 
@@ -218,8 +218,8 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a label and value list is drawn as rows of a label beside its value" do
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
 
-    assert_equal [ [ :row, [ Rational(2, 5), Rational(3, 5) ] ], "Rate", "$150.00", [ :row, [ Rational(2, 5), Rational(3, 5) ] ], "Hours", "12" ],
-                 drawn(document).drawn.drop(1).filter_map { |call| { row: call, text: call[1] }[call.first] }
+    assert_equal [ [ Rational(2, 5), Rational(3, 5) ], "Rate", "$150.00", [ Rational(2, 5), Rational(3, 5) ], "Hours", "12" ],
+                 drawn(document).drawn.drop(1).filter_map { |call| { row: call[1], text: call[1] }[call.first] }
   end
 
   test "a label and value list draws each value from the host's values, or the row's fallback when the value is missing" do
@@ -265,6 +265,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     assert_equal [ :row, :space, :row, :text, :text, :space, [ :rule, { width: "--ks-border-width", color: "--ks-color-border" } ], :space, :row, :text, :text, :space ],
                  drawn(document).drawn.map { |call| call.first == :rule ? call : call.first }
+  end
+
+  test "a label and value row draws its value four of keystone_ui's spacing steps from its label, as its row rule spaces them" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal({ gap: [ "--ks-spacing", 4 ] }, drawn(document).drawn.select { |call| call.first == :row }.last[2])
   end
 
   private
