@@ -32,4 +32,17 @@ class KeystoneUi::Pages::RubyPdfSmokeTest < ActiveSupport::TestCase
 
     assert_equal "%PDF", pdf.file.download[0, 4]
   end
+
+  test "a host that chooses the Ruby drawing gets a page of buttons, accordions and a form as a PDF, end to end" do
+    page = KeystoneUi::Pages::Page.create!(name: "Booking", slug: "booking")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = %w[button button accordion form].reduce(page.document) { |drawn, key| KeystoneUi::Pages::Operations.add(drawn, key, column_id: column_id) }
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["href"] = "https://ty-ler.com/book"
+    page.update!(document: document)
+    page.publish
+
+    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) }
+
+    assert_equal "%PDF", pdf.file.download[0, 4]
+  end
 end
