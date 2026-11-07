@@ -61,7 +61,7 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
   test "a font the stylesheet loads from files prints from the TrueType copies served beside them, in regular, bold and italic" do
     served = { "/Inter-Regular.ttf" => "/public/Inter-Regular.ttf", "/Inter-Bold.ttf" => "/public/Inter-Bold.ttf", "/Inter-Italic.ttf" => "/public/Inter-Italic.ttf" }
-    look = KeystoneUi::Pages::PdfLook.new(':root{--ks-font-body:Inter, sans-serif}' \
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-font-body:Inter, sans-serif}" \
                                           '@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url("/Inter-Regular.woff2") format("woff2")}' \
                                           '@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url("/Inter-Bold.woff2") format("woff2")}' \
                                           '@font-face{font-family:Inter;font-style:italic;font-weight:400;src:url("/Inter-Italic.woff2") format("woff2")}',
@@ -79,7 +79,7 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
   end
 
   test "a font token set to inherit takes the font the page's html element is given" do
-    look = KeystoneUi::Pages::PdfLook.new(':root{--default-font-family:Inter;--ks-font-body:inherit}html,:host{font-family:var(--default-font-family,sans-serif)}' \
+    look = KeystoneUi::Pages::PdfLook.new(":root{--default-font-family:Inter;--ks-font-body:inherit}html,:host{font-family:var(--default-font-family,sans-serif)}" \
                                           '@font-face{font-family:Inter;src:url("/Inter.woff2") format("woff2")}',
                                           font_files: ->(url) { "/public#{url}" })
 
