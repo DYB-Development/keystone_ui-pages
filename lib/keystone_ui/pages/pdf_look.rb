@@ -20,10 +20,28 @@ module KeystoneUi
       end
 
       def value(name)
-        @values.fetch(name).gsub(/var\((--[\w-]+)\)/) { value(Regexp.last_match(1)) }
+        resolved(@values.fetch(name))
       end
 
       private
+
+      def resolved(css)
+        start = css.index("var(")
+        return css unless start
+
+        finish = closing(css, start + 3)
+        variable, fallback = css[(start + 4)...finish].split(",", 2).map(&:strip)
+        replacement = @values.key?(variable) ? value(variable) : resolved(fallback.to_s)
+        resolved(css[0...start] + replacement + css[(finish + 1)..])
+      end
+
+      def closing(css, opening)
+        depth = 0
+        (opening...css.length).find do |index|
+          depth += { "(" => 1, ")" => -1 }.fetch(css[index], 0)
+          depth.zero?
+        end
+      end
 
       def declarations(stylesheet)
         rules(stylesheet).flat_map do |preludes, body|

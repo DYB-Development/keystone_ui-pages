@@ -33,4 +33,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "18181B", look.color("--ks-color-text")
   end
+
+  test "a token naming a variable the stylesheet does not set takes the fallback given beside it" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-text:var(--color-missing, var(--color-ink))}:root{--color-ink:#112233}")
+
+    assert_equal "112233", look.color("--ks-color-text")
+  end
 end
