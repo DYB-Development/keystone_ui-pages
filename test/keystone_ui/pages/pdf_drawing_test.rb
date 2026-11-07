@@ -250,6 +250,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Per hour", "--text-xs", "--ks-color-text-muted" ], drawn(document).drawn.select { |call| call.first == :text }[1].then { |call| [ call[1], call[2], call[3][:color] ] }
   end
 
+  test "a label and value row is padded above and below by two of keystone_ui's spacing steps, as its row rule pads it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
   private
 
   def drawn(document, values: {})
