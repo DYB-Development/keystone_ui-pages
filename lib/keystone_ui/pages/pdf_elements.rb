@@ -12,6 +12,8 @@ module KeystoneUi
       PARAGRAPH_SIZE = "--text-base"
       ALERT_TITLE_SIZE = "--text-base"
       ALERT_MESSAGE_SIZE = "--text-sm"
+      VALUE_LIST_SIZE = "--text-base"
+      VALUE_LIST_LABEL_SHARE = Rational(2, 5)
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
       ALERT_RADIUS = 0.75
@@ -39,6 +41,15 @@ module KeystoneUi
             surface.space(SPACING, ALERT_TITLE_GAP)
           end
           surface.text(fields[:message], size: ALERT_MESSAGE_SIZE, color: "--ks-color-#{tone}-800")
+        end
+      end
+
+      def value_list(surface, fields)
+        Array(fields[:rows].presence).each do |entry|
+          entry = entry.to_h.symbolize_keys
+          surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ]) do |index|
+            surface.text(index.zero? ? entry[:label] : entry[:value], size: VALUE_LIST_SIZE)
+          end
         end
       end
 

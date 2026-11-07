@@ -211,6 +211,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-surface", 0.75 ] }, drawn(document).drawn.find { |call| call.first == :box }.last.except(:fill))
   end
 
+  test "a label and value list is drawn as rows of a label beside its value" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
+
+    assert_equal [ [ :row, [ Rational(2, 5), Rational(3, 5) ] ], "Rate", "$150.00", [ :row, [ Rational(2, 5), Rational(3, 5) ] ], "Hours", "12" ],
+                 drawn(document).drawn.drop(1).filter_map { |call| { row: call, text: call[1] }[call.first] }
+  end
+
   private
 
   def drawn(document, values: {})
