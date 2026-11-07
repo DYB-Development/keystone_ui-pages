@@ -54,7 +54,7 @@ module KeystoneUi
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
         height = measured(width - across * 2, &drawn) + down * 2
         @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], width, height, @look.points(radius.first) * radius.last)
+        @document.fill_rounded_rectangle([ 0, top ], [ text_width(content, size, font, weight) + across * 2, width ].min, height, @look.points(radius.first) * radius.last)
         @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
         @document.move_down(down)
       end
@@ -109,6 +109,14 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def text_width(content, size, font, weight)
+        typeface = @look.font(font)
+        @document.font_families[typeface.name] = typeface.files if typeface.files
+        width = 0
+        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { width = @document.width_of(content.to_s, size: @look.points(size)) }
+        width
       end
 
       def bold?(weight)
