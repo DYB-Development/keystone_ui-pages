@@ -14,6 +14,7 @@ module KeystoneUi
     module PdfDrawing
       SPACING = "--ks-spacing"
       ELEMENT_GAP = 4
+      ROW_GAP = 6
 
       module_function
 
@@ -26,7 +27,10 @@ module KeystoneUi
       def draw(document, surface, values: {})
         values = values.to_h.stringify_keys
         shown(document["sections"], values).each do |section|
-          shown(section["rows"], values).each { |row| drawn_row(row, surface, values) }
+          shown(section["rows"], values).each_with_index do |row, position|
+            surface.space(SPACING, ROW_GAP) if position.positive?
+            drawn_row(row, surface, values)
+          end
         end
       end
 
