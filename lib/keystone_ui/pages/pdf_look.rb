@@ -32,7 +32,8 @@ module KeystoneUi
       end
 
       def font(name)
-        family = split(value(name), ",").map { |listed| listed.strip.delete("\"'") }.find { |listed| @faces.key?(listed) }
+        families = value(name) == "inherit" ? value("font-family") : value(name)
+        family = split(families, ",").map { |listed| listed.strip.delete("\"'") }.find { |listed| @faces.key?(listed) }
         return BUILT_IN_FONT unless family
 
         Font.new(name: family, files: FONT_STYLES.transform_values { |(style, weight)| true_type(face(family, style, weight)) })
