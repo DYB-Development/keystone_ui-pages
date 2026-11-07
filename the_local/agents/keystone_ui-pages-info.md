@@ -104,13 +104,23 @@ Keystone UI itself must be installed first. Its own install local,
   and elements with Prawn. In the Ruby drawing each element draws through its
   own PDF drawing, given when the element is added to the catalog. A page
   holding an element with no PDF drawing cannot be printed that way, and the
-  error names the element. So far only the heading and label elements have one.
+  error names the element. So far the heading, label, paragraph, alert and label
+  and value list elements have one.
+- **What the Ruby drawing prints for each of those.** A heading prints its text
+  and its note. A label prints in capitals with the caption's wider letter
+  spacing, as it shows on screen. A paragraph keeps its bold, italic, line breaks
+  and links. An alert prints its title and message in a rounded box tinted in its
+  tone: info, success, warning or error. A label and value list prints one row
+  per entry with a line between rows, a note under a label, a total row in the
+  strong weight, and the values set to the right when the element is aligned to
+  the end.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
-  fonts, font weights, text colours and spacing, and the text sizes and letter
-  spacing Keystone UI's heading and caption use, from the host's compiled
-  stylesheet, in light mode and in the host's default look, so a token the host
-  changes reaches the PDF. A label prints in capitals with the caption's wider
-  letter spacing, as it shows on screen. A font the stylesheet names only by system fonts
+  fonts, font weights, text colours, tone colours, borders, corner radius and
+  spacing from the host's compiled stylesheet, in light mode and in the host's
+  default look, so a token the host changes reaches the PDF. Each text prints at
+  the text size Keystone UI's component gives it on screen, and at the line
+  height it gets on screen, which is either that text size's own line height or
+  the page's line height from the stylesheet. A font the stylesheet names only by system fonts
   prints in Helvetica. A font the stylesheet loads from its own files prints
   from a TrueType copy of each file, served beside it under the same name, since
   a PDF cannot use web font files. Asking for a PDF in a loaded font with no

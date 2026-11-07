@@ -124,12 +124,15 @@ linking editors to the builder or drawing a page in the host's screens.
      Chromium apps in `/Applications` on macOS. Ask the developer how the
      deployment installs it. Without one, everything except PDFs still works.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
-     columns and elements, so no browser is needed. Only the heading and label
-     elements can be drawn this way so far, and a page holding any other
-     element cannot be printed and raises an error naming that element.
+     columns and elements, so no browser is needed. Only the heading, label,
+     paragraph, alert and label and value list elements can be drawn this way
+     so far, and a page holding any other element cannot be printed and raises
+     an error naming that element. Ask the developer whether the pages they
+     plan to print hold only those elements before choosing this drawing.
      It still needs Propshaft serving the host's stylesheet, since it reads the
-     fonts, weights, text colours and spacing from its `--ks-` tokens, and the
-     text sizes and letter spacing Keystone UI's heading and caption use, in
+     fonts, weights, text colours, fills, borders, radii and spacing from its
+     `--ks-` tokens, the page's line height from its `html` rule, and the text
+     sizes, line heights and letter spacing Keystone UI's text sizes give, in
      light mode and the host's default look. A token the host's own stylesheet
      changes reaches the PDF the same way.
 
@@ -184,8 +187,9 @@ linking editors to the builder or drawing a page in the host's screens.
    builder, publish it, and open `/pages/<slug>`. With the Chrome drawing, the
    page list shows a PDF link only when Chrome or Chromium was found. With the
    Ruby drawing, it always shows one, so open it on a page holding only
-   headings and labels to confirm the fonts and text sizes print, with each
-   label in capitals.
+   headings, labels, paragraphs, alerts and label and value lists to confirm
+   the fonts and text sizes print, each label prints in capitals, each alert
+   prints on its type's fill, and a paragraph's links open their address.
 
    Boot stops with an `ArgumentError` naming a place when that place's settings
    are incomplete: it leaves out an element no catalog entry has, it offers the
