@@ -48,7 +48,8 @@ module KeystoneUi
       end
 
       def value_list(surface, fields)
-        Array(fields[:rows].presence).each do |entry|
+        Array(fields[:rows].presence).each_with_index do |entry, position|
+          surface.rule(width: "--ks-border-width", color: "--ks-color-border") if position.positive?
           surface.space(SPACING, VALUE_LIST_ROW_PADDING)
           surface.row([ VALUE_LIST_LABEL_SHARE, 1 - VALUE_LIST_LABEL_SHARE ]) do |index|
             index.zero? ? value_list_label(surface, entry) : value_list_value(surface, entry, VALUE_LIST_ALIGNMENTS[fields[:align].to_s])

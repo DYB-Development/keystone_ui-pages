@@ -42,6 +42,13 @@ module KeystoneUi
         @document.move_down(inset)
       end
 
+      def rule(width:, color:)
+        thickness = @look.points(width)
+        @document.fill_color(@look.color(color))
+        @document.fill_rectangle([ 0, @document.cursor ], @document.bounds.width, thickness)
+        @document.move_down(thickness)
+      end
+
       def space(token, steps)
         @document.move_down(@look.points(token) * steps)
       end

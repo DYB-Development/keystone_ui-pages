@@ -28,6 +28,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       yield
     end
 
+    def rule(**style)
+      @drawn << [ :rule, style ]
+    end
+
     def row(widths)
       @drawn << [ :row, widths ]
       widths.each_index { |index| yield index }
@@ -254,6 +258,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
 
     assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "label and value rows are divided by a line of keystone_ui's border width and colour, and the first row has none above it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
+
+    assert_equal [ :row, :space, :row, :text, :text, :space, [ :rule, { width: "--ks-border-width", color: "--ks-color-border" } ], :space, :row, :text, :text, :space ],
+                 drawn(document).drawn.map { |call| call.first == :rule ? call : call.first }
   end
 
   private
