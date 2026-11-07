@@ -57,6 +57,12 @@ class KeystoneUi::Pages::SequenceScreenTest < ActionDispatch::IntegrationTest
     assert_equal [ "Draft", "Published", "Unpublished" ], sequence_props["pages"].map { |entry| entry["state"] }
   end
 
+  test "the sequence screen gives the address of the host's own screen when the host's sequence names one" do
+    get "/pages/manage/sequences/funnel/spring-sale", headers: { "X-Sequence-Screen" => "/funnels/spring-sale/flow" }
+
+    assert_equal "/funnels/spring-sale/flow", sequence_props["screen_url"]
+  end
+
   private
 
   def sequence_props
