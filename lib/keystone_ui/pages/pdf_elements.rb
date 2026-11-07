@@ -10,6 +10,7 @@ module KeystoneUi
       NOTE_SIZE = "--text-sm"
       LABEL_SIZE = "--text-xs"
       PARAGRAPH_SIZE = "--text-base"
+      PAGE_LINE_HEIGHT = "line-height"
       ALERT_TITLE_SIZE = "--text-base"
       ALERT_MESSAGE_SIZE = "--text-sm"
       VALUE_LIST_SIZE = "--text-base"
@@ -46,7 +47,7 @@ module KeystoneUi
         tone = ALERT_TONES.fetch(fields[:type].to_s, ALERT_TONES["info"])
         surface.box(fill: "--ks-color-#{tone}-50", padding: [ SPACING, ALERT_PADDING ], radius: [ "--ks-radius-surface", ALERT_RADIUS ]) do
           if fields[:title].present?
-            surface.text(fields[:title], size: ALERT_TITLE_SIZE, weight: "--ks-font-weight-heading", color: "--ks-color-#{tone}-800")
+            surface.text(fields[:title], size: ALERT_TITLE_SIZE, weight: "--ks-font-weight-heading", color: "--ks-color-#{tone}-800", leading: PAGE_LINE_HEIGHT)
             surface.space(SPACING, ALERT_TITLE_GAP)
           end
           surface.text(fields[:message], size: ALERT_MESSAGE_SIZE, color: "--ks-color-#{tone}-800", leading: line_height(ALERT_MESSAGE_SIZE))

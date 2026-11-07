@@ -304,6 +304,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "--text-xs--line-height", drawn(document).styles[1][:leading]
   end
 
+  test "an alert's title is drawn at the line height the stylesheet's html rule gives the page" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Read this")))))
+
+    assert_equal "line-height", drawn(document).styles.first[:leading]
+  end
+
   private
 
   def drawn(document, values: {})
