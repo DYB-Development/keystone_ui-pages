@@ -124,4 +124,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal "/app/assets/fonts/Inter.ttf", files[:normal]
   end
+
+  test "a letter spacing token in em is read as the points it adds between letters at a text size" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--tracking-wider:.05em}")
+
+    assert_equal 0.5, look.points("--tracking-wider", size: 10)
+  end
 end

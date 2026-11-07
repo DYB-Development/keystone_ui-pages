@@ -57,9 +57,12 @@ module KeystoneUi
         value(name).to_i
       end
 
-      def points(name)
+      def points(name, size: nil)
         length = value(name)
-        length.to_f * POINTS_PER_UNIT.fetch(length[/[a-z]+\z/], 0.0)
+        unit = length[/[a-z]+\z/]
+        return length.to_f * size if unit == "em" && size
+
+        length.to_f * POINTS_PER_UNIT.fetch(unit, 0.0)
       end
 
       def value(name)
