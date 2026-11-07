@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
 require "keystone_ui/pages/pdf_drawing"
+require "keystone_ui/pages/catalog"
+require "keystone_ui/pages/keystone_elements"
 
 class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   class RecordingSurface
@@ -314,6 +317,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
 
     assert_equal [ "line-height", "line-height" ], drawn(document).styles.pluck(:leading)
+  end
+
+  test "a form, a copy button and a Next page element draw nothing in the PDF and do not refuse it" do
+    document = page(section(row(column(element("form"), element("copy_button", text: "ABC123"), element("next_page")))))
+
+    keystone_elements = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }
+
+    assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first)
   end
 
   private

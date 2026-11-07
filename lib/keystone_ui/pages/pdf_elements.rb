@@ -35,6 +35,8 @@ module KeystoneUi
         surface.text(fields[:note], size: NOTE_SIZE, color: "--ks-color-text-muted", leading: line_height(NOTE_SIZE)) if fields[:note].present?
       end
 
+      def left_out(_surface, _fields); end
+
       def line_height(size)
         "#{size}--line-height"
       end
