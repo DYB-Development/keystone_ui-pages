@@ -23,6 +23,13 @@ module KeystoneUi
         end
       end
 
+      def rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text")
+        typeface = @look.font(font)
+        @document.font_families[typeface.name] = typeface.files if typeface.files
+        @document.fill_color(@look.color(color))
+        @document.font(typeface.name) { @document.formatted_text(runs.map { |run| { text: run[:text] } }, size: @look.points(size)) }
+      end
+
       def space(token, steps)
         @document.move_down(@look.points(token) * steps)
       end

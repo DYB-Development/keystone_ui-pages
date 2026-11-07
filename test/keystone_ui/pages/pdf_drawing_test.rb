@@ -19,6 +19,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :space, token, steps ]
     end
 
+    def rich_text(runs, size:, **style)
+      @drawn << [ :rich_text, runs, size, style ]
+    end
+
     def row(widths)
       @drawn << [ :row, widths ]
       widths.each_index { |index| yield index }
@@ -26,6 +30,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     def texts
       @drawn.select { |call| call.first == :text }.map { |call| call[1] }
+    end
+
+    def paragraphs
+      @drawn.select { |call| call.first == :rich_text }.map { |call| call[1].sum("") { |run| run[:text] } }
     end
 
     def styles
@@ -67,11 +75,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
-    document = page(section(row(column(element("heading", text: "Pricing"), element("paragraph")))))
+    document = page(section(row(column(element("heading", text: "Pricing"), element("code")))))
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Paragraph element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Code element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   test "a heading's note is drawn under its text" do
@@ -133,6 +141,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("label", text: "Per seat")))))
 
     assert_equal "--tracking-wider", drawn(document).styles.last[:tracking]
+  end
+
+  test "a paragraph stored as rich text is drawn as its paragraphs, with each line break kept" do
+    document = page(section(row(column(element("paragraph", text: { "html" => "<p>First line<br>Second line</p><p>Next paragraph</p>" })))))
+
+    assert_equal [ "First line\nSecond line", "Next paragraph" ], drawn(document).paragraphs
   end
 
   private

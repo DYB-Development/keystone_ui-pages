@@ -1,11 +1,16 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+require "rails-html-sanitizer"
+
 module KeystoneUi
   module Pages
     module PdfElements
       HEADING_SIZES = { "sm" => "--text-lg", "md" => "--text-2xl", "lg" => "--text-4xl" }.freeze
       NOTE_SIZE = "--text-sm"
       LABEL_SIZE = "--text-xs"
+      PARAGRAPH_SIZE = "--text-base"
+      PARAGRAPH_TAGS = %w[p br a].freeze
 
       module_function
 
@@ -16,6 +21,25 @@ module KeystoneUi
 
       def label(surface, fields)
         surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-text-muted", uppercase: true, tracking: "--tracking-wider")
+      end
+
+      def paragraph(surface, fields)
+        rich_paragraphs(fields[:text]["html"]).each { |paragraph| surface.rich_text(runs(paragraph), size: PARAGRAPH_SIZE) }
+      end
+
+      def rich_paragraphs(html)
+        stored = Nokogiri::HTML5.fragment(html.to_s)
+        stored.css("script, style").each(&:remove)
+        Nokogiri::HTML5.fragment(Rails::HTML5::SafeListSanitizer.new.sanitize(stored.to_html, tags: PARAGRAPH_TAGS, attributes: %w[href])).css("p")
+      end
+
+      def runs(node)
+        node.children.flat_map do |child|
+          next [ { text: "\n" } ] if child.name == "br"
+          next [ { text: child.text } ] if child.text?
+
+          runs(child)
+        end
       end
     end
   end
