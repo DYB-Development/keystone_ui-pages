@@ -231,6 +231,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--ks-color-text-secondary", "--ks-color-text" ], drawn(document).styles.pluck(:color)
   end
 
+  test "a label and value list's total row is drawn at keystone_ui's strong weight with its label in the full text colour" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Total", "value" => "$1,875.00", "total" => "true" } ])))))
+
+    assert_equal [ [ nil, "--ks-color-text-secondary" ], [ nil, "--ks-color-text" ], [ "--ks-font-weight-strong", "--ks-color-text" ], [ "--ks-font-weight-strong", "--ks-color-text" ] ],
+                 drawn(document).styles.map { |style| style.values_at(:weight, :color) }
+  end
+
   private
 
   def drawn(document, values: {})

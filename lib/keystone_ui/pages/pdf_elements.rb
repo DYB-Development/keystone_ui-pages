@@ -53,11 +53,19 @@ module KeystoneUi
       end
 
       def value_list_label(surface, entry)
-        surface.text(entry[:label], size: VALUE_LIST_SIZE, color: "--ks-color-text-secondary")
+        surface.text(entry[:label], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: total?(entry) ? "--ks-color-text" : "--ks-color-text-secondary")
       end
 
       def value_list_value(surface, entry)
-        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, color: "--ks-color-text")
+        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: "--ks-color-text")
+      end
+
+      def total_weight(entry)
+        "--ks-font-weight-strong" if total?(entry)
+      end
+
+      def total?(entry)
+        entry[:total].to_s == "true"
       end
 
       def paragraph(surface, fields)
