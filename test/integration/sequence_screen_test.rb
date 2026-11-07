@@ -44,6 +44,25 @@ class KeystoneUi::Pages::SequenceScreenTest < ActionDispatch::IntegrationTest
     assert_equal "/pages/manage/sequences/funnel/spring-sale/publish?page_id=#{landing.id}", sequence_props["publish_url"]
   end
 
+  test "each page in the sequence screen's list gives its state as a draft, published or unpublished page" do
+    draft = KeystoneUi::Pages::Page.create!(name: "A draft", slug: "a-draft", place: "funnel", sequence_key: "spring-sale")
+    published = KeystoneUi::Pages::Page.create!(name: "B published", slug: "b-published", place: "funnel", sequence_key: "spring-sale")
+    published.publish
+    unpublished = KeystoneUi::Pages::Page.create!(name: "C unpublished", slug: "c-unpublished", place: "funnel", sequence_key: "spring-sale")
+    unpublished.publish
+    unpublished.unpublish
+
+    get "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal [ "Draft", "Published", "Unpublished" ], sequence_props["pages"].map { |entry| entry["state"] }
+  end
+
+  test "the sequence screen gives the address of the host's own screen when the host's sequence names one" do
+    get "/pages/manage/sequences/funnel/spring-sale", headers: { "X-Sequence-Screen" => "/funnels/spring-sale/flow" }
+
+    assert_equal "/funnels/spring-sale/flow", sequence_props["screen_url"]
+  end
+
   private
 
   def sequence_props

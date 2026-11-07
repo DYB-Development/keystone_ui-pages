@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Each page in a sequence's list shows a badge saying whether it is a draft, published or unpublished.
+- `KeystoneUi::Pages::Sequence` takes an optional `screen_url:`, the address of the host's own screen for the sequence. When it is given, the sequence's list shows a Flow link to it.
+
 ## [0.13.0] - 2026-11-06
 
 ### Added

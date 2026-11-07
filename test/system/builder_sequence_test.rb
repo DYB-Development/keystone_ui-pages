@@ -50,8 +50,25 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     visit "/pages/manage/sequences/funnel/spring-sale"
 
-    assert_equal [ "Landing", "Spring sale funnel", [ "1 Landing", "2 Thanks" ] ],
+    assert_equal [ "Landing", "Spring sale funnel", [ "1 Landing Draft", "2 Thanks Draft" ] ],
       [ find("[data-builder-top-bar] h1").text, find("[data-sequence-pages] h2").text, all("[data-sequence-page]").map { |entry| entry.text.squish } ]
+  end
+
+  test "each page in the sequence's list shows its state" do
+    KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale").publish
+
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal [ "Published", "Draft" ], all("[data-sequence-page] [data-page-state]").map(&:text)
+  end
+
+  test "the sequence's list links to the host's own screen when the host's sequence names one" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence_with_screen, adds_page_method: :add_funnel_page)
+
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal "/funnels/spring-sale/flow", URI(find("[data-sequence-pages] a", text: "Flow")[:href]).path
   end
 
   test "the page being built is marked in the sequence's list" do
@@ -60,7 +77,7 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     visit "/pages/manage/sequences/funnel/spring-sale"
 
-    assert_equal [ "1 Landing" ], all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish }
+    assert_equal [ "1 Landing Draft" ], all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish }
   end
 
   test "choosing another page in the sequence's list opens it in the builder with the same list beside it" do
@@ -70,7 +87,7 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     within("[data-sequence-pages]") { click_on "Thanks" }
 
-    assert_equal [ "Thanks", [ "1 Landing", "2 Thanks" ], [ "2 Thanks" ] ],
+    assert_equal [ "Thanks", [ "1 Landing Draft", "2 Thanks Draft" ], [ "2 Thanks Draft" ] ],
       [ find("[data-builder-top-bar] h1", text: "Thanks").text, all("[data-sequence-page]").map { |entry| entry.text.squish }, all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish } ]
   end
 
@@ -128,7 +145,7 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     fill_in "page[name]", with: "Thanks"
     click_on "Create"
 
-    assert_equal [ "Thanks", [ "1 Landing", "2 Thanks" ], [ "2 Thanks" ] ],
+    assert_equal [ "Thanks", [ "1 Landing Draft", "2 Thanks Draft" ], [ "2 Thanks Draft" ] ],
       [ find("[data-builder-top-bar] h1", text: "Thanks").text, all("[data-sequence-page]").map { |entry| entry.text.squish }, all("[data-sequence-page][aria-current='page']").map { |entry| entry.text.squish } ]
   end
 

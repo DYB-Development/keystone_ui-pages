@@ -41,7 +41,8 @@ module KeystoneUi
       def sequence_props(sequence, built, place:, key:)
         removes = KeystoneUi::Pages.place_settings.dig(place, :removes_page_method)
         { title: sequence.title,
-          pages: sequence.pages.map { |page| { id: page.id, name: page.name, current: page == built, url: manage_sequence_path(place, key, page_id: page.id), remove_url: (remove_manage_sequence_page_path(place, key, page) if removes) } },
+          screen_url: sequence.screen_url,
+          pages: sequence.pages.map { |page| { id: page.id, name: page.name, state: page.state.to_s.capitalize, current: page == built, url: manage_sequence_path(place, key, page_id: page.id), remove_url: (remove_manage_sequence_page_path(place, key, page) if removes) } },
           add_page_url: new_manage_sequence_page_path(place, key, after_id: built&.id),
           publish_url: (manage_publish_sequence_path(place, key, page_id: built&.id) if KeystoneUi::Pages.place_settings.dig(place, :publishes_sequence_method)),
           notice: flash[:sequence_notice],
