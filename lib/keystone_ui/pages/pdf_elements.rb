@@ -49,7 +49,7 @@ module KeystoneUi
             surface.text(fields[:title], size: ALERT_TITLE_SIZE, weight: "--ks-font-weight-heading", color: "--ks-color-#{tone}-800")
             surface.space(SPACING, ALERT_TITLE_GAP)
           end
-          surface.text(fields[:message], size: ALERT_MESSAGE_SIZE, color: "--ks-color-#{tone}-800")
+          surface.text(fields[:message], size: ALERT_MESSAGE_SIZE, color: "--ks-color-#{tone}-800", leading: line_height(ALERT_MESSAGE_SIZE))
         end
       end
 

@@ -292,6 +292,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "--text-xs--line-height", drawn(document).styles.last[:leading]
   end
 
+  test "an alert's message is drawn at the line height keystone_ui's small text size gives it" do
+    document = page(section(row(column(element("alert", message: "Read this")))))
+
+    assert_equal "--text-sm--line-height", drawn(document).styles.last[:leading]
+  end
+
   private
 
   def drawn(document, values: {})
