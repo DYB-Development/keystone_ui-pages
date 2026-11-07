@@ -12,6 +12,9 @@ module KeystoneUi
     class NoPdfDrawing < PrintFailed; end
 
     module PdfDrawing
+      SPACING = "--ks-spacing"
+      ELEMENT_GAP = 4
+
       module_function
 
       def pdf(version, values: {})
@@ -31,7 +34,10 @@ module KeystoneUi
         columns = row["columns"]
         share = Operations::SHARES.fetch(columns.size, "1/1")
         surface.row(columns.map { |column| Rational(column["wide"] || share) }) do |index|
-          shown(columns[index]["elements"], values).each { |element| drawn_element(element, surface, values) }
+          shown(columns[index]["elements"], values).each_with_index do |element, position|
+            surface.space(SPACING, ELEMENT_GAP) if position.positive?
+            drawn_element(element, surface, values)
+          end
         end
       end
 

@@ -15,6 +15,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :text, content, size, style ]
     end
 
+    def space(token, steps)
+      @drawn << [ :space, token, steps ]
+    end
+
     def row(widths)
       @drawn << [ :row, widths ]
       widths.each_index { |index| yield index }
@@ -22,6 +26,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     def texts
       @drawn.select { |call| call.first == :text }.map { |call| call[1] }
+    end
+
+    def styles
+      @drawn.select { |call| call.first == :text }.map(&:last)
     end
   end
 
@@ -75,25 +83,31 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a heading is drawn in the font keystone_ui names for headings, at the heading weight" do
     document = page(section(row(column(element("heading", text: "Pricing")))))
 
-    assert_equal({ font: "--ks-font-heading", weight: "--ks-font-weight-heading" }, drawn(document).drawn.last.last.slice(:font, :weight))
+    assert_equal({ font: "--ks-font-heading", weight: "--ks-font-weight-heading" }, drawn(document).styles.last.slice(:font, :weight))
   end
 
   test "a label is drawn in the font keystone_ui names for body text, at its strong weight" do
     document = page(section(row(column(element("label", text: "Per seat")))))
 
-    assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-strong" }, drawn(document).drawn.last.last.slice(:font, :weight))
+    assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-strong" }, drawn(document).styles.last.slice(:font, :weight))
   end
 
   test "a heading is drawn in the text colour keystone_ui gives headings" do
     document = page(section(row(column(element("heading", text: "Pricing")))))
 
-    assert_equal "--ks-color-text", drawn(document).drawn.last.last[:color]
+    assert_equal "--ks-color-text", drawn(document).styles.last[:color]
   end
 
   test "a label and a heading's note are drawn in the muted text colour keystone_ui gives them" do
     document = page(section(row(column(element("heading", text: "Pricing", note: "Updated monthly"), element("label", text: "Per seat")))))
 
-    assert_equal [ "--ks-color-text-muted", "--ks-color-text-muted" ], drawn(document).drawn.last(2).map { |call| call.last[:color] }
+    assert_equal [ "--ks-color-text-muted", "--ks-color-text-muted" ], drawn(document).styles.last(2).pluck(:color)
+  end
+
+  test "elements in a column are drawn four of keystone_ui's spacing steps apart, as the page spaces them on screen" do
+    document = page(section(row(column(element("heading", text: "Pricing"), element("label", text: "Per seat")))))
+
+    assert_equal [ :row, :text, [ :space, "--ks-spacing", 4 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
   end
 
   private

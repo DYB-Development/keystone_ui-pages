@@ -19,6 +19,10 @@ module KeystoneUi
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { @document.text(content.to_s, size: size) }
       end
 
+      def space(token, steps)
+        @document.move_down(@look.points(token) * steps)
+      end
+
       def row(widths)
         top = @document.cursor
         lowest = @document.y
