@@ -30,7 +30,7 @@ module KeystoneUi
       def alert(surface, fields)
         tone = ALERT_TONES.fetch(fields[:type].to_s, ALERT_TONES["info"])
         surface.box(fill: "--ks-color-#{tone}-50") do
-          surface.text(fields[:title], size: ALERT_TITLE_SIZE, color: "--ks-color-#{tone}-800") if fields[:title].present?
+          surface.text(fields[:title], size: ALERT_TITLE_SIZE, weight: "--ks-font-weight-heading", color: "--ks-color-#{tone}-800") if fields[:title].present?
           surface.text(fields[:message], size: ALERT_MESSAGE_SIZE, color: "--ks-color-#{tone}-800")
         end
       end

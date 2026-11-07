@@ -193,6 +193,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  [ drawing.select { |call| call.first == :box }.map { |call| call.last[:fill] }, drawing.select { |call| call.first == :text }.map { |call| call.last[:color] } ]
   end
 
+  test "an alert's title is drawn at the heading weight keystone_ui's alert title rule gives it" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Read this")))))
+
+    assert_equal [ "--ks-font-weight-heading", nil ], drawn(document).styles.pluck(:weight)
+  end
+
   private
 
   def drawn(document, values: {})
