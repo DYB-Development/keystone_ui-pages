@@ -58,6 +58,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Shown" ], drawn(document, values: { "audience" => "public" }).texts
   end
 
+  test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
+    document = page(section(row(column(element("heading", text: "Pricing"), element("paragraph")))))
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
+
+    assert_equal "The Paragraph element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+  end
+
   private
 
   def drawn(document, values: {})

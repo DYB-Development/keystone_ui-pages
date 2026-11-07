@@ -3,9 +3,12 @@
 require "keystone_ui/pages"
 require "keystone_ui/pages/operations"
 require "keystone_ui/pages/filling"
+require "keystone_ui/pages/printer"
 
 module KeystoneUi
   module Pages
+    class NoPdfDrawing < PrintFailed; end
+
     module PdfDrawing
       module_function
 
@@ -30,6 +33,8 @@ module KeystoneUi
 
       def drawn_element(element, surface, values)
         definition = Pages.catalog.find(element["key"])
+        raise NoPdfDrawing, "The #{definition.name} element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome." unless definition.pdf
+
         definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, Filling.filled(element["fields"][field[:key].to_s], values) || field[:default] ] })
       end
     end
