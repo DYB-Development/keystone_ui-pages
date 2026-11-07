@@ -22,6 +22,8 @@ module KeystoneUi
       BUTTON_SIZE = "--text-base"
       BUTTON_PADDING_ACROSS = 4
       BUTTON_PADDING_DOWN = 2
+      ACCORDION_QUESTION_SIZE = "--text-base"
+      ACCORDION_ANSWER_SIZE = "--text-sm"
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
       ALERT_RADIUS = 0.75
@@ -44,6 +46,13 @@ module KeystoneUi
         surface.boxed_text(fields[:label], size: BUTTON_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-on-accent", leading: line_height(BUTTON_SIZE),
                                            fill: "--ks-color-accent", padding: [ SPACING, BUTTON_PADDING_ACROSS, BUTTON_PADDING_DOWN ], radius: [ "--ks-radius-control", 1 ],
                                            border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: fields[:href].presence)
+      end
+
+      def accordion(surface, fields)
+        Array(fields[:items].presence).each do |item|
+          surface.text(item[:question], size: ACCORDION_QUESTION_SIZE)
+          surface.text(item[:answer], size: ACCORDION_ANSWER_SIZE)
+        end
       end
 
       def line_height(size)

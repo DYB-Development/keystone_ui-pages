@@ -89,7 +89,7 @@ module KeystoneUi
                     { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." },
                     { key: :after_submitting, label: "After submitting", kind: :one_of, options: %w[thank_you address next_page], default: "thank_you" },
                     { key: :next_address, label: "Address to send the visitor to", kind: :address } ])
-        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
+        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text", pdf: PdfElements.method(:accordion),
           fields: [ { key: :items, label: "Questions", kind: :list,
                       entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],
                       default: [ { "question" => "What is this?", "answer" => "A question visitors often ask." },

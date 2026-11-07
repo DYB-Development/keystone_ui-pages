@@ -346,6 +346,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "https://ty-ler.com/book", drawn(document).drawn.last.last[:link]
   end
 
+  test "an accordion is drawn as each question with its answer beneath, in the order the page shows them" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." }, { "question" => "Who for?", "answer" => "Hosts." } ])))))
+
+    assert_equal [ "What is it?", "A page.", "Who for?", "Hosts." ], drawn(document).texts
+  end
+
   private
 
   def drawn(document, values: {})
