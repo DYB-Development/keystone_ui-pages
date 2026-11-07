@@ -217,10 +217,14 @@ inherit from the base controller, so define it there.
   of the text it spaces. A line height token, such as `--text-sm--line-height`
   or `--leading-relaxed`, is read as a number or a `calc(a / b)` and counts the
   text sizes each line takes, and the space it adds is split above and below
-  the text. Each element draws through the `pdf:` drawing given to
+  the text. A colour token must be an `oklch()` colour or a hex colour of
+  three or six digits, and a three-digit one prints as the six-digit colour it
+  names. Each element draws through the `pdf:` drawing given to
   `catalog.register`. Of the built-in elements `heading`, `label`,
-  `paragraph`, `alert` and `value_list` have one, and every other built-in
-  element raises `NoPdfDrawing`.
+  `paragraph`, `alert`, `value_list`, `button` and `accordion` have one.
+  `form`, `copy_button` and `next_page` have a drawing that draws nothing, so
+  they are left out of the PDF and do not raise. Every other built-in element
+  raises `NoPdfDrawing`.
 - **The built-in elements in the Ruby drawing.**
   - A heading draws its text at `--text-lg`, `--text-2xl` or `--text-4xl` for
     `sm`, `md` or `lg` in `--ks-font-heading` at `--ks-font-weight-heading` and
@@ -254,6 +258,27 @@ inherit from the base controller, so define it there.
     the list's values set to `end`, values draw against the right edge. A total
     row draws its label, note and value at `--ks-font-weight-strong`, with its
     label in `--ks-color-text`.
+  - A button draws its label at `--text-base` in `--ks-font-body` at
+    `--ks-font-weight-strong` and `--ks-color-on-accent`, at
+    `--text-base--line-height`, on a rounded box filled with
+    `--ks-color-accent`. The box is padded by four `--ks-spacing` steps across
+    and two down, has corners of one `--ks-radius-control`, and is outlined with
+    `--ks-border-width-control` in `--ks-color-on-accent`. It is as wide as the
+    label and its padding, and never wider than its column. A button with an
+    address opens it when the box is clicked in the PDF.
+  - An accordion draws every question with its answer shown under it, with no
+    arrow. Each item draws in a rounded box with no fill, outlined with
+    `--ks-border-width` in `--ks-color-border-subtle`, padded by six
+    `--ks-spacing` steps across and four down, with corners of 1.5 times
+    `--ks-radius-surface`, and items sit four `--ks-spacing` steps apart. The
+    question draws at `--text-base` in `--ks-font-body` at
+    `--ks-font-weight-heading` and `--ks-color-text-display`, at the line height
+    the stylesheet's `html` rule gives. The answer draws four `--ks-spacing`
+    steps under it at `--text-sm` in `--ks-color-text-body`, at
+    `--text-sm--line-height`. An accordion with no items draws nothing.
+  - The form, the copy button and the Next page button draw nothing in the
+    Ruby drawing. The four `--ks-spacing` steps between elements in a column
+    are still kept around each of them.
 - **Fonts in the Ruby drawing.** A font token is read as a list of families,
   and `inherit` takes the `html` element's `font-family`. The first family the
   stylesheet loads with `@font-face` is used. A list with no such family prints
@@ -392,7 +417,7 @@ inherit from the base controller, so define it there.
   field at its `default:`. A `:list` field arrives as an array of hashes with
   symbol keys, each blank part filled with its entry's `default:`. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has six
+  reads the tokens as the Ruby drawing's look describes. The surface has seven
   calls.
   - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
@@ -407,10 +432,24 @@ inherit from the base controller, so define it there.
     writes one paragraph from an array of runs. Each run is a hash with
     `text:`, and optionally `link:` (an address the run opens when clicked),
     `bold: true` and `italic: true`. A run whose text is `"\n"` breaks the line.
-  - `box(fill:, padding:, radius:) { ... }` draws a rounded box the width of the
-    column, as tall as what the block draws, and draws the block inside it.
-    `fill:` names a colour token. `padding:` and `radius:` are each a length
-    token and a number of steps, such as `[ "--ks-spacing", 4 ]`.
+  - `box(padding:, radius:, fill: nil, border: nil) { ... }` draws a rounded
+    box the width of the column, as tall as what the block draws, and draws the
+    block inside it. `padding:` is a length token and a number of steps, such
+    as `[ "--ks-spacing", 4 ]`, or a token and two numbers of steps, across and
+    then down, such as `[ "--ks-spacing", 6, 4 ]`. `radius:` is a length token
+    and a number of steps for the corners. `fill:` names a colour token, and no
+    fill leaves the box unfilled. `border:` is a hash of `width:`, a length
+    token for the outline's thickness, and `color:`, a colour token, such as
+    `{ width: "--ks-border-width", color: "--ks-color-border-subtle" }`. The
+    outline is drawn inside the box and its thickness is added to the padding.
+    A thickness of zero draws no outline, and no border means none.
+  - `boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)`
+    writes the content on a rounded box as wide as the content and its padding,
+    and never wider than the column. `size:`, `font:`, `weight:`, `color:` and
+    `leading:` work as they do for `text`. `fill:` names the box's colour token,
+    and `padding:`, `radius:` and `border:` work as they do for `box`. `link:`
+    is an address the whole box opens when clicked in the PDF, and no link
+    means none.
   - `rule(width:, color:)` draws a line across the column. `width:` names a
     length token for its thickness and `color:` a colour token.
   - `space(token, steps)` moves down by that many steps of a length token, such
@@ -519,7 +558,8 @@ The catalog offers these Keystone UI components by default: `button`,
    elements with a `pdf:` drawing, in Keystone UI's fonts, weights, text sizes,
    line heights, letter spacing, colours, fills, borders and spacing read from
    the host's stylesheet. Of the built-in elements it draws headings, labels,
-   paragraphs, alerts and label and value lists.
+   paragraphs, alerts, label and value lists, buttons and accordions, and it
+   leaves forms, copy buttons and Next page buttons out of the PDF.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
