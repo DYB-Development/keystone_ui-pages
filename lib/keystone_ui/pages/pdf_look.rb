@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "keystone_ui/pages/printer"
+
 module KeystoneUi
   module Pages
     class PdfLook
@@ -84,8 +86,8 @@ module KeystoneUi
       end
 
       def true_type(face)
-        url = face["src"].to_s[/url\(["']?([^"')]+)["']?\)/, 1]
-        @font_files.call(url.sub(/\.[^.\/]+\z/, ".ttf"))
+        url = face["src"].to_s[/url\(["']?([^"')]+)["']?\)/, 1].sub(/\.[^.\/]+\z/, ".ttf")
+        @font_files.call(url) || raise(PrintFailed, "The PDF needs a TrueType copy of the #{face["font-family"].delete("\"'")} font at #{url}, beside the font file the stylesheet loads, and none is served.")
       end
 
       def declarations(rules)

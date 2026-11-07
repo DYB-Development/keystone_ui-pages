@@ -68,4 +68,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal({ normal: "/public/Inter-Regular.ttf", bold: "/public/Inter-Bold.ttf", italic: "/public/Inter-Italic.ttf" }, look.font("--ks-font-body").files)
   end
+
+  test "a font the stylesheet loads from files with no TrueType copy served is refused with a print failure naming the font" do
+    look = KeystoneUi::Pages::PdfLook.new(':root{--ks-font-body:Inter}@font-face{font-family:Inter;src:url("/Inter.woff2") format("woff2")}')
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { look.font("--ks-font-body") }
+
+    assert_equal "The PDF needs a TrueType copy of the Inter font at /Inter.ttf, beside the font file the stylesheet loads, and none is served.", error.message
+  end
 end
