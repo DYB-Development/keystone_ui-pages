@@ -19,6 +19,9 @@ module KeystoneUi
       VALUE_LIST_ROW_PADDING = 2
       VALUE_LIST_GAP = 4
       VALUE_LIST_ALIGNMENTS = { "end" => :right }.freeze
+      BUTTON_SIZE = "--text-base"
+      BUTTON_PADDING_ACROSS = 4
+      BUTTON_PADDING_DOWN = 2
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
       ALERT_RADIUS = 0.75
@@ -36,6 +39,12 @@ module KeystoneUi
       end
 
       def left_out(_surface, _fields); end
+
+      def button(surface, fields)
+        surface.boxed_text(fields[:label], size: BUTTON_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-on-accent", leading: line_height(BUTTON_SIZE),
+                                           fill: "--ks-color-accent", padding: [ SPACING, BUTTON_PADDING_ACROSS, BUTTON_PADDING_DOWN ], radius: [ "--ks-radius-control", 1 ],
+                                           border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: nil)
+      end
 
       def line_height(size)
         "#{size}--line-height"

@@ -9,7 +9,7 @@ module KeystoneUi
       module_function
 
       def register(catalog)
-        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start",
+        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start", pdf: PdfElements.method(:button),
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
         catalog.register(key: :next_page, name: "Next page", component: :pages_next_page, icon: :cursor, group: "Basics", align: "start", placed: true, pdf: PdfElements.method(:left_out),
           fields: [ { key: :label, label: "Label", default: "Next" } ])

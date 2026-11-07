@@ -31,6 +31,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       yield
     end
 
+    def boxed_text(content, size:, **style)
+      @drawn << [ :boxed_text, content, size, style ]
+    end
+
     def rule(**style)
       @drawn << [ :rule, style ]
     end
@@ -325,6 +329,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     keystone_elements = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }
 
     assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first)
+  end
+
+  test "a button with no address is drawn as its label, in the look keystone_ui's primary medium button rules give it" do
+    document = page(section(row(column(element("button", label: "Book a call")))))
+
+    assert_equal [ :boxed_text, "Book a call", "--text-base",
+                   { font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-on-accent", leading: "--text-base--line-height",
+                     fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ],
+                     border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: nil } ], drawn(document).drawn.last
   end
 
   private
