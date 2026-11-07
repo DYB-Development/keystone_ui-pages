@@ -68,7 +68,7 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
 
     visit "/pages/manage/sequences/funnel/spring-sale"
 
-    assert_equal "/funnels/spring-sale/flow", URI(find("[data-sequence-pages] a", text: "Change order")[:href]).path
+    assert_equal "/funnels/spring-sale/flow", URI(find("[data-sequence-pages] a", text: "Flow")[:href]).path
   end
 
   test "the page being built is marked in the sequence's list" do
