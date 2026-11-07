@@ -1,0 +1,62 @@
+# frozen_string_literal: true
+
+require "test_helper"
+require "keystone_ui/pages/pdf_drawing"
+
+class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
+  class RecordingSurface
+    attr_reader :drawn
+
+    def initialize
+      @drawn = []
+    end
+
+    def text(content, size:)
+      @drawn << [ :text, content, size ]
+    end
+
+    def row(widths)
+      @drawn << [ :row, widths ]
+      widths.each_index { |index| yield index }
+    end
+
+    def texts
+      @drawn.select { |call| call.first == :text }.map { |call| call[1] }
+    end
+  end
+
+  test "the PDF draws each heading and label in the order the page shows them" do
+    document = page(
+      section(row(column(element("heading", text: "Pricing"), element("label", text: "Per seat")))),
+      section(row(column(element("label", text: "Billed monthly"))))
+    )
+
+    assert_equal [ "Pricing", "Per seat", "Billed monthly" ], drawn(document).texts
+  end
+
+  private
+
+  def drawn(document, values: {})
+    RecordingSurface.new.tap { |surface| KeystoneUi::Pages::PdfDrawing.draw(document, surface, values: values) }
+  end
+
+  def page(*sections)
+    { "schema_version" => 1, "sections" => sections }
+  end
+
+  def section(*rows, **settings)
+    { "id" => SecureRandom.uuid, "rows" => rows }.merge(settings.stringify_keys)
+  end
+
+  def row(*columns, **settings)
+    { "id" => SecureRandom.uuid, "columns" => columns }.merge(settings.stringify_keys)
+  end
+
+  def column(*elements, **settings)
+    { "id" => SecureRandom.uuid, "elements" => elements }.merge(settings.stringify_keys)
+  end
+
+  def element(key, show_when: nil, **fields)
+    { "id" => SecureRandom.uuid, "key" => key, "fields" => fields.stringify_keys, "show_when" => show_when }.compact
+  end
+end
