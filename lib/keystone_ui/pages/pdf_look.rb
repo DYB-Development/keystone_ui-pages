@@ -57,6 +57,10 @@ module KeystoneUi
         value(name).to_i
       end
 
+      def ratio(name)
+        value(name).delete_prefix("calc(").delete_suffix(")").split("/").map(&:to_f).reduce(:/)
+      end
+
       def points(name, size: nil)
         length = value(name)
         unit = length[/[a-z]+\z/]

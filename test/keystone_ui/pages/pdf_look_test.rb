@@ -134,6 +134,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "/app/assets/fonts/Inter.ttf", files[:normal]
   end
 
+  test "a line height token written as a division is read as the number of text sizes each line takes" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--text-sm--line-height:calc(1.25 / .875)}")
+
+    assert_in_delta 1.4286, look.ratio("--text-sm--line-height"), 0.0001
+  end
+
   test "a letter spacing token in em is read as the points it adds between letters at a text size" do
     look = KeystoneUi::Pages::PdfLook.new(":root{--tracking-wider:.05em}")
 
