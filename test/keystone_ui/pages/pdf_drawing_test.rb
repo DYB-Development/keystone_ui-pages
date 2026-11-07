@@ -286,6 +286,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal %w[--text-lg--line-height --text-2xl--line-height --text-4xl--line-height --text-sm--line-height], drawn(document).styles.pluck(:leading)
   end
 
+  test "a label is drawn at the line height keystone_ui's caption text size gives it" do
+    document = page(section(row(column(element("label", text: "Per seat")))))
+
+    assert_equal "--text-xs--line-height", drawn(document).styles.last[:leading]
+  end
+
   private
 
   def drawn(document, values: {})

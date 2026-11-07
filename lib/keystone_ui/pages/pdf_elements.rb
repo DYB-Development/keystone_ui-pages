@@ -39,7 +39,7 @@ module KeystoneUi
       end
 
       def label(surface, fields)
-        surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-text-muted", uppercase: true, tracking: "--tracking-wider")
+        surface.text(fields[:text], size: LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-text-muted", uppercase: true, tracking: "--tracking-wider", leading: line_height(LABEL_SIZE))
       end
 
       def alert(surface, fields)
