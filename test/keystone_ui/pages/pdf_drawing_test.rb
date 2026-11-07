@@ -123,6 +123,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--text-lg", "--text-2xl", "--text-4xl", "--text-sm", "--text-xs" ], drawn(document).drawn.select { |call| call.first == :text }.map { |call| call[2] }
   end
 
+  test "a label is drawn in capitals, as keystone_ui's caption shows it" do
+    document = page(section(row(column(element("label", text: "Per seat")))))
+
+    assert drawn(document).styles.last[:uppercase]
+  end
+
   private
 
   def drawn(document, values: {})

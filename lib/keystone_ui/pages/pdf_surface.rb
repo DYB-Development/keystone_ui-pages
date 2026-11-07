@@ -12,7 +12,8 @@ module KeystoneUi
         @document = Prawn::Document.new
       end
 
-      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text")
+      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false)
+        content = content.to_s.upcase if uppercase
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
