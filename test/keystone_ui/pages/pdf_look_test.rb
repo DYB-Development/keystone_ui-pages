@@ -67,7 +67,16 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
                                           '@font-face{font-family:Inter;font-style:italic;font-weight:400;src:url("/Inter-Italic.woff2") format("woff2")}',
                                           font_files: ->(url) { served[url] })
 
-    assert_equal({ normal: "/public/Inter-Regular.ttf", bold: "/public/Inter-Bold.ttf", italic: "/public/Inter-Italic.ttf" }, look.font("--ks-font-body").files)
+    assert_equal({ normal: "/public/Inter-Regular.ttf", bold: "/public/Inter-Bold.ttf", italic: "/public/Inter-Italic.ttf", bold_italic: "/public/Inter-Italic.ttf" }, look.font("--ks-font-body").files)
+  end
+
+  test "a font the stylesheet loads from files prints bold italic text from the TrueType copy of its bold italic face" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-font-body:Inter}" \
+                                          '@font-face{font-family:Inter;font-style:italic;font-weight:400;src:url("/Inter-Italic.woff2") format("woff2")}' \
+                                          '@font-face{font-family:Inter;font-style:italic;font-weight:700;src:url("/Inter-BoldItalic.woff2") format("woff2")}',
+                                          font_files: ->(url) { "/public#{url}" })
+
+    assert_equal "/public/Inter-BoldItalic.ttf", look.font("--ks-font-body").files[:bold_italic]
   end
 
   test "a font the stylesheet loads from files with no TrueType copy served is refused with a print failure naming the font" do
