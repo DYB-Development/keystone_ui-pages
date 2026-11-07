@@ -53,10 +53,19 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_includes surface.render, "/URI (https://ty-ler.com/book)"
   end
 
+  test "a boxed line of text given a border is stroked in the border's colour at the border's width" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ],
+                                      border: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_match(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/, surface.render)
+  end
+
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif}")
   end
 
   def fill_widths(pdf)

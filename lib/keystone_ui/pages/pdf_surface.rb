@@ -46,7 +46,7 @@ module KeystoneUi
         @document.move_down(inset)
       end
 
-      def boxed_text(content, size:, fill:, padding:, radius:, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
+      def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
         across = @look.points(padding.first) * padding[1]
         down = @look.points(padding.first) * padding.last
         width = @document.bounds.width
@@ -57,6 +57,7 @@ module KeystoneUi
         linked(link, fill_width, height) if link
         @document.fill_color(@look.color(fill))
         @document.fill_rounded_rectangle([ 0, top ], fill_width, height, @look.points(radius.first) * radius.last)
+        bordered(border, top, fill_width, height, @look.points(radius.first) * radius.last) if border
         @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
         @document.move_down(down)
       end
@@ -111,6 +112,15 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def bordered(border, top, width, height, corner)
+        thickness = @look.points(border[:width])
+        return unless thickness.positive?
+
+        @document.stroke_color(@look.color(border[:color]))
+        @document.line_width(thickness)
+        @document.stroke_rounded_rectangle([ thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
       end
 
       def linked(address, width, height)
