@@ -66,12 +66,12 @@ module KeystoneUi
       end
 
       def value_list_label(surface, entry)
-        surface.text(entry[:label], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: total?(entry) ? "--ks-color-text" : "--ks-color-text-secondary")
+        surface.text(entry[:label], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: total?(entry) ? "--ks-color-text" : "--ks-color-text-secondary", leading: PAGE_LINE_HEIGHT)
         surface.text(entry[:note], size: VALUE_LIST_NOTE_SIZE, weight: total_weight(entry), color: "--ks-color-text-muted", leading: line_height(VALUE_LIST_NOTE_SIZE)) if entry[:note].present?
       end
 
       def value_list_value(surface, entry, align)
-        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: "--ks-color-text", align: align)
+        surface.text(entry[:value].presence || entry[:fallback], size: VALUE_LIST_SIZE, weight: total_weight(entry), color: "--ks-color-text", align: align, leading: PAGE_LINE_HEIGHT)
       end
 
       def total_weight(entry)

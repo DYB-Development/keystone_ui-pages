@@ -310,6 +310,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "line-height", drawn(document).styles.first[:leading]
   end
 
+  test "a label and value row's label and value are drawn at the line height the stylesheet's html rule gives the page" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal [ "line-height", "line-height" ], drawn(document).styles.pluck(:leading)
+  end
+
   private
 
   def drawn(document, values: {})
