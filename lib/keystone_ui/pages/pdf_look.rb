@@ -16,7 +16,7 @@ module KeystoneUi
       LMS_TO_SRGB = [ [ 4.0767416621, -3.3077115913, 0.2309699292 ], [ -1.2684380046, 2.6097574011, -0.3413193965 ], [ -0.0041960863, -0.7034186147, 1.7076147010 ] ].freeze
 
       FONT_WEIGHTS = { "normal" => 400, "bold" => 700 }.freeze
-      FONT_STYLES = { normal: [ "normal", 400 ], bold: [ "normal", 700 ], italic: [ "italic", 400 ] }.freeze
+      FONT_STYLES = { normal: [ "normal", 400 ], bold: [ "normal", 700 ], italic: [ "italic", 400 ], bold_italic: [ "italic", 700 ] }.freeze
 
       def self.host
         configuration = KeystoneUi.configuration
@@ -55,6 +55,10 @@ module KeystoneUi
 
       def weight(name)
         value(name).to_i
+      end
+
+      def ratio(name)
+        value(name).delete_prefix("calc(").delete_suffix(")").split("/").map(&:to_f).reduce(:/)
       end
 
       def points(name, size: nil)

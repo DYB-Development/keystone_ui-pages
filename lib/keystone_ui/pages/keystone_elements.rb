@@ -15,7 +15,7 @@ module KeystoneUi
           fields: [ { key: :label, label: "Label", default: "Next" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
-        catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text",
+        catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text", pdf: PdfElements.method(:alert),
           fields: [ { key: :message, label: "Message", kind: :long_text, default: "Something worth knowing." }, { key: :title, label: "Title", kind: :text },
                     { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error], default: "info" },
                     { key: :dismissible, label: "Can be dismissed", kind: :yes_or_no } ])
@@ -28,7 +28,7 @@ module KeystoneUi
                     { key: :note, label: "Note", kind: :text } ])
         catalog.register(key: :label, name: "Label", component: :ui_caption, icon: :tag, group: "Text", pdf: PdfElements.method(:label),
           fields: [ { key: :text, label: "Text", kind: :text, default: "Label" } ])
-        catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text",
+        catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text", pdf: PdfElements.method(:paragraph),
           fields: [ { key: :text, label: "Text", kind: :rich_text, default: "Write the text of this paragraph here." } ])
         catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text",
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
@@ -104,7 +104,7 @@ module KeystoneUi
                     { key: :group_by, label: "Group rows by key", kind: :text, as: :key },
                     { key: :group_totals, label: "Group subtotals", kind: :data },
                     { key: :total, label: "Total row", kind: :data } ])
-        catalog.register(key: :value_list, name: "Label and value list", component: :ui_value_list, icon: :list, group: "Data",
+        catalog.register(key: :value_list, name: "Label and value list", component: :ui_value_list, icon: :list, group: "Data", pdf: PdfElements.method(:value_list),
           fields: [ { key: :rows, label: "Rows", kind: :list,
                       entry: [ { key: :label, label: "Label", kind: :text }, { key: :value, label: "Value", kind: :text },
                                { key: :note, label: "Note", kind: :text }, { key: :total, label: "Total", kind: :yes_or_no },

@@ -53,7 +53,15 @@ module KeystoneUi
         definition = Pages.catalog.find(element["key"])
         raise NoPdfDrawing, "The #{definition.name} element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome." unless definition.pdf
 
-        definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, Filling.filled(element["fields"][field[:key].to_s], values) || field[:default] ] })
+        definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, filled_field(field, element, values) ] })
+      end
+
+      def filled_field(field, element, values)
+        filled = Filling.filled(element["fields"][field[:key].to_s], values) || field[:default]
+        return filled unless field[:kind] == :list && filled.is_a?(Array)
+
+        defaults = Array(field[:entry]).to_h { |part| [ part[:key], part[:default] ] }.compact
+        filled.map { |entry| defaults.merge(entry.to_h.symbolize_keys.compact_blank) }
       end
     end
   end

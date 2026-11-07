@@ -19,13 +19,30 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :space, token, steps ]
     end
 
-    def row(widths)
-      @drawn << [ :row, widths ]
+    def rich_text(runs, size:, **style)
+      @drawn << [ :rich_text, runs, size, style ]
+    end
+
+    def box(**style)
+      @drawn << [ :box, style ]
+      yield
+    end
+
+    def rule(**style)
+      @drawn << [ :rule, style ]
+    end
+
+    def row(widths, **layout)
+      @drawn << [ :row, widths, layout.presence ].compact
       widths.each_index { |index| yield index }
     end
 
     def texts
       @drawn.select { |call| call.first == :text }.map { |call| call[1] }
+    end
+
+    def paragraphs
+      @drawn.select { |call| call.first == :rich_text }.map { |call| call[1].sum("") { |run| run[:text] } }
     end
 
     def styles
@@ -67,11 +84,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
-    document = page(section(row(column(element("heading", text: "Pricing"), element("paragraph")))))
+    document = page(section(row(column(element("heading", text: "Pricing"), element("code")))))
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Paragraph element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Code element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   test "a heading's note is drawn under its text" do
@@ -133,6 +150,170 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("label", text: "Per seat")))))
 
     assert_equal "--tracking-wider", drawn(document).styles.last[:tracking]
+  end
+
+  test "a paragraph stored as rich text is drawn as its paragraphs, with each line break kept" do
+    document = page(section(row(column(element("paragraph", text: { "html" => "<p>First line<br>Second line</p><p>Next paragraph</p>" })))))
+
+    assert_equal [ "First line\nSecond line", "Next paragraph" ], drawn(document).paragraphs
+  end
+
+  test "a link in a paragraph is drawn with the address it opens" do
+    document = page(section(row(column(element("paragraph", text: { "html" => "<p>Made by <a href=\"https://ty-ler.com\">Tyler</a></p>" })))))
+
+    assert_equal [ { text: "Made by " }, { text: "Tyler", link: "https://ty-ler.com" } ], drawn(document).drawn.last[1]
+  end
+
+  test "bold and italic marks stored in a paragraph are drawn bold and italic" do
+    document = page(section(row(column(element("paragraph", text: { "html" => "<p><strong>Firm</strong> <em>soft</em> <b><i>both</i></b></p>" })))))
+
+    assert_equal [ { text: "Firm", bold: true }, { text: " " }, { text: "soft", italic: true }, { text: " " }, { text: "both", bold: true, italic: true } ], drawn(document).drawn.last[1]
+  end
+
+  test "a paragraph stored as plain text is drawn as one paragraph of that text, angle brackets and all" do
+    document = page(section(row(column(element("paragraph", text: "Use <b> for bold & <a> for links")))))
+
+    assert_equal [ "Use <b> for bold & <a> for links" ], drawn(document).paragraphs
+  end
+
+  test "a paragraph is drawn in keystone_ui's body font and the text colour its paragraph rule gives it" do
+    document = page(section(row(column(element("paragraph", text: "Founded in 2020")))))
+
+    assert_equal({ font: "--ks-font-body", color: "--ks-color-text" }, drawn(document).drawn.last.last.slice(:font, :color))
+  end
+
+  test "an alert is drawn as its title above its message, or its message alone when it has no title" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Prices change in May"), element("alert", message: "Saved")))))
+
+    assert_equal [ "Heads up", "Prices change in May", "Saved" ], drawn(document).texts
+  end
+
+  test "an alert is drawn on the fill and in the text colour keystone_ui's tokens give its type" do
+    document = page(section(row(column(*%w[info success warning error].map { |type| element("alert", title: "Heads up", message: "Read this", type: type) }))))
+
+    drawing = drawn(document).drawn
+    assert_equal [ %w[--ks-color-info-50 --ks-color-success-50 --ks-color-warning-50 --ks-color-danger-50],
+                   %w[--ks-color-info-800 --ks-color-info-800 --ks-color-success-800 --ks-color-success-800 --ks-color-warning-800 --ks-color-warning-800 --ks-color-danger-800 --ks-color-danger-800] ],
+                 [ drawing.select { |call| call.first == :box }.map { |call| call.last[:fill] }, drawing.select { |call| call.first == :text }.map { |call| call.last[:color] } ]
+  end
+
+  test "an alert's title is drawn at the heading weight keystone_ui's alert title rule gives it" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Read this")))))
+
+    assert_equal [ "--ks-font-weight-heading", nil ], drawn(document).styles.pluck(:weight)
+  end
+
+  test "an alert's message is drawn one of keystone_ui's spacing steps under its title" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Read this")))))
+
+    assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 1 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "an alert's fill is drawn with the padding and rounded corners keystone_ui's alert rule gives it" do
+    document = page(section(row(column(element("alert", message: "Read this")))))
+
+    assert_equal({ padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-surface", 0.75 ] }, drawn(document).drawn.find { |call| call.first == :box }.last.except(:fill))
+  end
+
+  test "a label and value list is drawn as rows of a label beside its value" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
+
+    assert_equal [ [ Rational(2, 5), Rational(3, 5) ], "Rate", "$150.00", [ Rational(2, 5), Rational(3, 5) ], "Hours", "12" ],
+                 drawn(document).drawn.drop(1).filter_map { |call| { row: call[1], text: call[1] }[call.first] }
+  end
+
+  test "a label and value list draws each value from the host's values, or the row's fallback when the value is missing" do
+    document = page(section(row(column(element("value_list", rows: { "value" => "billing", "fallback" => nil })))))
+    billing = [ { "label" => "Rate", "value" => "$150.00" }, { label: "Reviews", value: nil }, { "label" => "Notes", "value" => "", "fallback" => "None yet" } ]
+
+    assert_equal [ "Rate", "$150.00", "Reviews", "N/A", "Notes", "None yet" ], drawn(document, values: { "billing" => billing }).texts
+  end
+
+  test "a label and value list draws its labels and values in the text colours keystone_ui's value list rules give them" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal [ "--ks-color-text-secondary", "--ks-color-text" ], drawn(document).styles.pluck(:color)
+  end
+
+  test "a label and value list's total row is drawn at keystone_ui's strong weight with its label in the full text colour" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Total", "value" => "$1,875.00", "total" => "true" } ])))))
+
+    assert_equal [ [ nil, "--ks-color-text-secondary" ], [ nil, "--ks-color-text" ], [ "--ks-font-weight-strong", "--ks-color-text" ], [ "--ks-font-weight-strong", "--ks-color-text" ] ],
+                 drawn(document).styles.map { |style| style.values_at(:weight, :color) }
+  end
+
+  test "a label and value list set to end-aligned values draws its values aligned to the right" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ], align: "end")))))
+
+    assert_equal [ nil, :right ], drawn(document).styles.pluck(:align)
+  end
+
+  test "a label and value row's note is drawn under its label at the size and in the muted colour keystone_ui's value list note rule gives it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "note" => "Per hour", "value" => "$150.00" } ])))))
+
+    assert_equal [ "Per hour", "--text-xs", "--ks-color-text-muted" ], drawn(document).drawn.select { |call| call.first == :text }[1].then { |call| [ call[1], call[2], call[3][:color] ] }
+  end
+
+  test "a label and value row is padded above and below by two of keystone_ui's spacing steps, as its row rule pads it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "label and value rows are divided by a line of keystone_ui's border width and colour, and the first row has none above it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
+
+    assert_equal [ :row, :space, :row, :text, :text, :space, [ :rule, { width: "--ks-border-width", color: "--ks-color-border" } ], :space, :row, :text, :text, :space ],
+                 drawn(document).drawn.map { |call| call.first == :rule ? call : call.first }
+  end
+
+  test "a label and value row draws its value four of keystone_ui's spacing steps from its label, as its row rule spaces them" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal({ gap: [ "--ks-spacing", 4 ] }, drawn(document).drawn.select { |call| call.first == :row }.last[2])
+  end
+
+  test "a paragraph's lines are drawn at the relaxed line height keystone_ui's paragraph rule gives them" do
+    document = page(section(row(column(element("paragraph", text: "Founded in 2020")))))
+
+    assert_equal "--leading-relaxed", drawn(document).drawn.last.last[:leading]
+  end
+
+  test "headings and a heading's note are drawn at the line heights keystone_ui's text sizes give them" do
+    document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
+                                       element("heading", text: "Large", size: "lg", note: "Updated monthly")))))
+
+    assert_equal %w[--text-lg--line-height --text-2xl--line-height --text-4xl--line-height --text-sm--line-height], drawn(document).styles.pluck(:leading)
+  end
+
+  test "a label is drawn at the line height keystone_ui's caption text size gives it" do
+    document = page(section(row(column(element("label", text: "Per seat")))))
+
+    assert_equal "--text-xs--line-height", drawn(document).styles.last[:leading]
+  end
+
+  test "an alert's message is drawn at the line height keystone_ui's small text size gives it" do
+    document = page(section(row(column(element("alert", message: "Read this")))))
+
+    assert_equal "--text-sm--line-height", drawn(document).styles.last[:leading]
+  end
+
+  test "a label and value row's note is drawn at the line height keystone_ui's extra small text size gives it" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "note" => "Per hour", "value" => "$150.00" } ])))))
+
+    assert_equal "--text-xs--line-height", drawn(document).styles[1][:leading]
+  end
+
+  test "an alert's title is drawn at the line height the stylesheet's html rule gives the page" do
+    document = page(section(row(column(element("alert", title: "Heads up", message: "Read this")))))
+
+    assert_equal "line-height", drawn(document).styles.first[:leading]
+  end
+
+  test "a label and value row's label and value are drawn at the line height the stylesheet's html rule gives the page" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
+
+    assert_equal [ "line-height", "line-height" ], drawn(document).styles.pluck(:leading)
   end
 
   private

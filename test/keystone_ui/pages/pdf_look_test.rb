@@ -67,7 +67,16 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
                                           '@font-face{font-family:Inter;font-style:italic;font-weight:400;src:url("/Inter-Italic.woff2") format("woff2")}',
                                           font_files: ->(url) { served[url] })
 
-    assert_equal({ normal: "/public/Inter-Regular.ttf", bold: "/public/Inter-Bold.ttf", italic: "/public/Inter-Italic.ttf" }, look.font("--ks-font-body").files)
+    assert_equal({ normal: "/public/Inter-Regular.ttf", bold: "/public/Inter-Bold.ttf", italic: "/public/Inter-Italic.ttf", bold_italic: "/public/Inter-Italic.ttf" }, look.font("--ks-font-body").files)
+  end
+
+  test "a font the stylesheet loads from files prints bold italic text from the TrueType copy of its bold italic face" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-font-body:Inter}" \
+                                          '@font-face{font-family:Inter;font-style:italic;font-weight:400;src:url("/Inter-Italic.woff2") format("woff2")}' \
+                                          '@font-face{font-family:Inter;font-style:italic;font-weight:700;src:url("/Inter-BoldItalic.woff2") format("woff2")}',
+                                          font_files: ->(url) { "/public#{url}" })
+
+    assert_equal "/public/Inter-BoldItalic.ttf", look.font("--ks-font-body").files[:bold_italic]
   end
 
   test "a font the stylesheet loads from files with no TrueType copy served is refused with a print failure naming the font" do
@@ -123,6 +132,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     end
 
     assert_equal "/app/assets/fonts/Inter.ttf", files[:normal]
+  end
+
+  test "a line height token written as a division is read as the number of text sizes each line takes" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--text-sm--line-height:calc(1.25 / .875)}")
+
+    assert_in_delta 1.4286, look.ratio("--text-sm--line-height"), 0.0001
   end
 
   test "a letter spacing token in em is read as the points it adds between letters at a text size" do

@@ -214,14 +214,46 @@ inherit from the base controller, so define it there.
   in a section sit six `--ks-spacing` steps apart and elements in a column four,
   where `rem` counts as 12 points, `px` as 0.75 and `pt` as 1. An `em` counts
   as 12 points, except in a letter spacing token, where it counts as the size
-  of the text it spaces. Each element draws through the `pdf:` drawing given to
-  `catalog.register`. Of the built-in elements only `heading` and `label` have
-  one so far. A heading draws its text at `--text-lg`, `--text-2xl` or
-  `--text-4xl` for `sm`, `md` or `lg` in `--ks-font-heading` at
-  `--ks-font-weight-heading` and `--ks-color-text`, with its note under it at
-  `--text-sm` in `--ks-color-text-muted`. A label draws its text in capitals at
-  `--text-xs` in `--ks-font-body` at `--ks-font-weight-strong` and
-  `--ks-color-text-muted`, with `--tracking-wider` letter spacing.
+  of the text it spaces. A line height token, such as `--text-sm--line-height`
+  or `--leading-relaxed`, is read as a number or a `calc(a / b)` and counts the
+  text sizes each line takes, and the space it adds is split above and below
+  the text. Each element draws through the `pdf:` drawing given to
+  `catalog.register`. Of the built-in elements `heading`, `label`,
+  `paragraph`, `alert` and `value_list` have one, and every other built-in
+  element raises `NoPdfDrawing`.
+- **The built-in elements in the Ruby drawing.**
+  - A heading draws its text at `--text-lg`, `--text-2xl` or `--text-4xl` for
+    `sm`, `md` or `lg` in `--ks-font-heading` at `--ks-font-weight-heading` and
+    `--ks-color-text`, at that size's `--line-height` token. Its note draws under
+    it at `--text-sm` in `--ks-color-text-muted`, at `--text-sm--line-height`.
+  - A label draws its text in capitals at `--text-xs` in `--ks-font-body` at
+    `--ks-font-weight-strong` and `--ks-color-text-muted`, with
+    `--tracking-wider` letter spacing, at `--text-xs--line-height`.
+  - A paragraph draws each of its stored paragraphs at `--text-base` in
+    `--ks-font-body` and `--ks-color-text`, at `--leading-relaxed`. Line breaks
+    and links are kept, and a link opens its address when clicked in the PDF.
+    Bold and italic marks stored in the text print bold and italic. Scripts,
+    styles and every other tag are dropped. A paragraph saved as a plain string
+    draws as one paragraph.
+  - An alert draws on a rounded box the width of its column, filled with
+    `--ks-color-<tone>-50`, padded by four `--ks-spacing` steps, with corners of
+    0.75 times `--ks-radius-surface`. The tone is the alert's type, with `error`
+    read as `danger`. Its title, when set, draws at `--text-base` and
+    `--ks-font-weight-heading` at the line height the stylesheet's `html` rule
+    gives, then one `--ks-spacing` step. Its message draws at `--text-sm` at
+    `--text-sm--line-height`. Both are in `--ks-color-<tone>-800`. Whether it
+    can be dismissed has no effect on paper.
+  - A label and value list draws each row with two `--ks-spacing` steps above
+    and below, and a line of `--ks-border-width` in `--ks-color-border` between
+    rows. The label takes two fifths of the width and the value the rest, four
+    `--ks-spacing` steps apart. Labels and values draw at `--text-base` at the
+    line height the stylesheet's `html` rule gives. A label is in
+    `--ks-color-text-secondary` and a value in `--ks-color-text`. A note draws
+    under its label at `--text-xs` in `--ks-color-text-muted`, at
+    `--text-xs--line-height`. A blank value draws the row's fallback text. With
+    the list's values set to `end`, values draw against the right edge. A total
+    row draws its label, note and value at `--ks-font-weight-strong`, with its
+    label in `--ks-color-text`.
 - **Fonts in the Ruby drawing.** A font token is read as a list of families,
   and `inherit` takes the `html` element's `font-family`. The first family the
   stylesheet loads with `@font-face` is used. A list with no such family prints
@@ -357,17 +389,42 @@ inherit from the base controller, so define it there.
   `pdf:` is the element's Ruby PDF drawing, used only when `pdf_drawing` is
   `:ruby`: a callable taking the drawing surface and a hash of the element's
   field values keyed by symbol, with bound values filled in and each unset
-  field at its `default:`. The surface has two calls.
-  `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil)`
-  writes the content below what was drawn before it in the same column.
-  `size:` names a length token, such as `"--text-sm"`, never a number of
-  points. `font:`, `weight:` and `color:` name `--ks-` tokens, with no weight
-  meaning regular. `uppercase: true` writes the content in capitals.
-  `tracking:` names a letter spacing token, such as `"--tracking-wider"`, and no
-  tracking means none. `space(token, steps)` moves down by that
-  many steps of a length token, such as `space("--ks-spacing", 2)`. Both read
-  the tokens as the Ruby drawing's look describes. An element registered without `pdf:` makes the
-  Ruby drawing raise `NoPdfDrawing` for any page showing it.
+  field at its `default:`. A `:list` field arrives as an array of hashes with
+  symbol keys, each blank part filled with its entry's `default:`. Every call
+  on the surface draws below what was drawn before it in the same column, and
+  reads the tokens as the Ruby drawing's look describes. The surface has six
+  calls.
+  - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)`
+    writes the content. `size:` names a length token, such as `"--text-sm"`,
+    never a number of points. `font:`, `weight:` and `color:` name `--ks-`
+    tokens, with no weight meaning regular. `uppercase: true` writes the
+    content in capitals. `tracking:` names a letter spacing token, such as
+    `"--tracking-wider"`, and no tracking means none. `align:` is `:left` (the
+    default), `:center` or `:right`. `leading:` names a line height token, such
+    as `"--text-sm--line-height"`, or `"line-height"` for the line height the
+    stylesheet's `html` rule gives, and no leading means the font's own height.
+  - `rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text", leading: nil)`
+    writes one paragraph from an array of runs. Each run is a hash with
+    `text:`, and optionally `link:` (an address the run opens when clicked),
+    `bold: true` and `italic: true`. A run whose text is `"\n"` breaks the line.
+  - `box(fill:, padding:, radius:) { ... }` draws a rounded box the width of the
+    column, as tall as what the block draws, and draws the block inside it.
+    `fill:` names a colour token. `padding:` and `radius:` are each a length
+    token and a number of steps, such as `[ "--ks-spacing", 4 ]`.
+  - `rule(width:, color:)` draws a line across the column. `width:` names a
+    length token for its thickness and `color:` a colour token.
+  - `space(token, steps)` moves down by that many steps of a length token, such
+    as `space("--ks-spacing", 2)`.
+  - `row(widths, gap: nil) { |index| ... }` splits the column side by side.
+    `widths` lists each part's share of the column, such as
+    `[ Rational(2, 5), Rational(3, 5) ]`. `gap:` is a length token and a number
+    of steps put before every part but the first. The block runs once per part
+    with its index, every part starts at the same height, and drawing continues
+    below the tallest.
+
+  A token the host's stylesheet does not set raises a `KeyError` naming it. An
+  element registered without `pdf:` makes the Ruby drawing raise
+  `NoPdfDrawing` for any page showing it.
 - The built-in Form element (`:form`) holds a form name, a list of fields (each
   a label, a field name, a kind of `text`, `email`, `long_text`, `choice` or
   `checkbox`, the choices of a `choice` field separated by commas, and whether
@@ -384,7 +441,11 @@ inherit from the base controller, so define it there.
 Each entry in `fields:` is a hash. Its `key:` is the keyword the component
 receives and its `label:` is the label in the builder's field panel. Its
 `kind:` is one of `:text` (the default when no kind is given), `:long_text`,
-`:address`, `:number`, `:one_of`, `:yes_or_no`, `:list` or `:data`. A number
+`:rich_text`, `:address`, `:number`, `:one_of`, `:yes_or_no`, `:list` or
+`:data`. A `:rich_text` field is edited the way a paragraph is and arrives as
+`{ "html" => "..." }`, or as a plain string when it was saved as one, such as
+its `default:`. The HTML is stored as the builder sent it, so a host component
+must sanitize it before drawing it. A number
 arrives as an Integer, or a Float when it has a decimal point, a `:one_of`
 arrives as a symbol, and a `:yes_or_no` as true or false. Its `default:` is the
 value used until the editor sets one. A `:one_of` field takes `options:`, the
@@ -455,9 +516,10 @@ The catalog offers these Keystone UI components by default: `button`,
    Which drawing to use is the developer's decision, so ask before setting
    `pdf_drawing`. Chrome draws every element with the host's styles but needs
    Chrome or Chromium on the server. Ruby needs no Chrome but draws only
-   elements with a `pdf:` drawing, as text in Keystone UI's fonts, weights,
-   text sizes, letter spacing, text colours and spacing read from the host's
-   stylesheet.
+   elements with a `pdf:` drawing, in Keystone UI's fonts, weights, text sizes,
+   line heights, letter spacing, colours, fills, borders and spacing read from
+   the host's stylesheet. Of the built-in elements it draws headings, labels,
+   paragraphs, alerts and label and value lists.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
@@ -563,7 +625,9 @@ The catalog offers these Keystone UI components by default: `button`,
    The method must be reachable in the engine's views and in any host view that
    calls `keystone_ui_page`. A `helper_method` on the base controller covers
    both. When the host uses the Ruby drawing, also pass `pdf:`, such as
-   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted") }`.
+   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted", leading: "--text-sm--line-height") }`.
+   Build it from the surface's calls in the Interface, with the same tokens
+   the component's Keystone UI classes use on screen.
    Name only tokens the host's stylesheet sets, since a missing one raises a
    `KeyError` naming it. A page that holds an element the catalog no longer offers still
    draws its other elements for visitors, marks the missing one in the editor
