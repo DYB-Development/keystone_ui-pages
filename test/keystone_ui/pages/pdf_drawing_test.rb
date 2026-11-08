@@ -733,6 +733,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                                    leading: "--text-4xl--line-height", align: :center } ], drawn(document).drawn.find { |call| call.first == :text }.last(2)
   end
 
+  test "a call to action's subtitle is drawn centred in the look keystone_ui's call to action subtitle rule and classes give it, spaced from its title and text as the page spaces them" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?", subtitle: "Book a call this week.", text: "No card needed.")))))
+
+    assert_equal [ [ :space, "--ks-spacing", 4 ], [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-2xl", 1 ], align: :center } ],
+                   [ :text, "Book a call this week.", "--text-lg", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-lg--line-height", align: :center } ],
+                   [ :space, "--ks-spacing", 8 ], :text ],
+                 drawn(document).drawn.drop(3).map { |call| call[1] == "No card needed." ? :text : call }
+  end
+
   private
 
   def drawn(document, values: {})
