@@ -50,18 +50,19 @@ module KeystoneUi
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
-      def box(padding:, width: nil, radius: nil, fill: nil, border: nil, &content)
+      def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, &content)
         across, down = insets(padding, border)
         width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
+        left = align == :center ? (@document.bounds.width - width) / 2 : 0
         top = @document.cursor
         height = measured(width - across * 2, &content) + down * 2
         corner = radius ? @look.points(radius.first) * radius.last : 0
         if fill
           @document.fill_color(@look.color(fill))
-          @document.fill_rounded_rectangle([ 0, top ], width, height, corner)
+          @document.fill_rounded_rectangle([ left, top ], width, height, corner)
         end
-        bordered(border, top, width, height, corner) if border
-        @document.bounding_box([ across, top - down ], width: width - across * 2, &content)
+        bordered(border, top, width, height, corner, left) if border
+        @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content)
         @document.move_down(down)
       end
 

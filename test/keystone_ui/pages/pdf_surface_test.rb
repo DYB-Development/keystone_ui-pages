@@ -157,6 +157,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 192.0, fill_widths(surface.render).first, 0.001
   end
 
+  test "a box narrower than the width it is drawn in and aligned to the centre is drawn centred in that width" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 0 ], width: [ "--ks-spacing", 64 ], align: :center) { surface.text("Revenue", size: "--text-base") }
+
+    assert_equal 36.0 + (540 - 192) / 2, lefts(surface.render)["Revenue"]
+  end
+
   test "a box given no fill, border or rounding insets its content by its padding alone" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
