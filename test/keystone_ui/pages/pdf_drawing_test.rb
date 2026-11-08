@@ -8,58 +8,65 @@ require "keystone_ui/pages/keystone_elements"
 
 class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   class RecordingSurface
-    attr_reader :drawn
+    attr_reader :laid_out
 
     def initialize
-      @drawn = []
+      @laid_out = []
+      @depth = 0
+    end
+
+    def drawn
+      @laid_out.select { |call, depth| depth.positive? || call.first == :row }.map(&:first)
     end
 
     def text(content, size:, **style)
-      @drawn << [ :text, content, size, style ]
+      record [ :text, content, size, style ]
     end
 
     def space(token, steps)
-      @drawn << [ :space, token, steps ]
+      record [ :space, token, steps ]
     end
 
     def rich_text(runs, size:, **style)
-      @drawn << [ :rich_text, runs, size, style ]
+      record [ :rich_text, runs, size, style ]
     end
 
     def box(**style)
-      @drawn << [ :box, style ]
+      record [ :box, style ]
       yield
     end
 
     def boxed_text(content, size:, **style)
-      @drawn << [ :boxed_text, content, size, style ]
+      record [ :boxed_text, content, size, style ]
     end
 
     def together
-      @drawn << [ :together ]
+      record [ :together ]
       yield
-      @drawn << [ :together_end ]
+      record [ :together_end ]
     end
 
     def rule(**style)
-      @drawn << [ :rule, style ]
+      record [ :rule, style ]
     end
 
     def bar(share, **style)
-      @drawn << [ :bar, share, style ]
+      record [ :bar, share, style ]
     end
 
     def row(widths, **layout)
-      @drawn << [ :row, widths, layout.presence ].compact
+      record [ :row, widths, layout.presence ].compact
+      @depth += 1
       widths.each_index { |index| yield index }
+      @depth -= 1
     end
 
     def table(heading, rows, **style)
-      @drawn << [ :table, heading, rows, style ]
+      record [ :table, heading, rows, style ]
     end
 
     def tables
-      @drawn.select { |call| call.first == :table }
+      drawn.select { |call| call.first == :table }
     end
 
     def table_texts
@@ -67,15 +74,21 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     end
 
     def texts
-      @drawn.select { |call| call.first == :text }.map { |call| call[1] }
+      drawn.select { |call| call.first == :text }.map { |call| call[1] }
     end
 
     def paragraphs
-      @drawn.select { |call| call.first == :rich_text }.map { |call| call[1].sum("") { |run| run[:text] } }
+      drawn.select { |call| call.first == :rich_text }.map { |call| call[1].sum("") { |run| run[:text] } }
     end
 
     def styles
-      @drawn.select { |call| call.first == :text }.map(&:last)
+      drawn.select { |call| call.first == :text }.map(&:last)
+    end
+
+    private
+
+    def record(call)
+      @laid_out << [ call, @depth ]
     end
   end
 
@@ -179,7 +192,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "rows in a section are drawn six of keystone_ui's spacing steps apart, as the page spaces them on screen" do
     document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
 
-    assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+    assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).laid_out.map(&:first).drop(1).map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "a section is drawn below the space keystone_ui's small, medium and large section spacing gives it, and medium when it has none" do
+    document = page(section(row(column), spacing: "sm"), section(row(column), spacing: "md"), section(row(column), spacing: "lg"), section(row(column)))
+
+    assert_equal [ 4, 6, 8, 6 ], drawn(document).laid_out.map(&:first).select { |call| call.first == :space }.map(&:last)
   end
 
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do

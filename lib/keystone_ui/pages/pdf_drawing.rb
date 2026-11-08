@@ -15,6 +15,7 @@ module KeystoneUi
       SPACING = "--ks-spacing"
       ELEMENT_GAP = 4
       ROW_GAP = 6
+      SECTION_SPACING = { "sm" => 4, "md" => 6, "lg" => 8 }.freeze
 
       module_function
 
@@ -27,10 +28,15 @@ module KeystoneUi
       def draw(document, surface, values: {})
         values = values.to_h.stringify_keys
         shown(document["sections"], values).each do |section|
-          shown(section["rows"], values).each_with_index do |row, position|
-            surface.space(SPACING, ROW_GAP) if position.positive?
-            drawn_row(row, surface, values)
-          end
+          surface.space(SPACING, SECTION_SPACING.fetch(section["spacing"] || Operations::DEFAULTS[:section]["spacing"]))
+          drawn_rows(section, surface, values)
+        end
+      end
+
+      def drawn_rows(section, surface, values)
+        shown(section["rows"], values).each_with_index do |row, position|
+          surface.space(SPACING, ROW_GAP) if position.positive?
+          drawn_row(row, surface, values)
         end
       end
 
