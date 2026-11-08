@@ -219,6 +219,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 1, surface.render.scan(/0\.0 0\.0 0\.0 scn\n36\.0 [\d.]+ 540\.0 1\.5 re\nf/).size
   end
 
+  test "a table given a border insets its rows by the border's width" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), [], **table_look, border: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_equal 55.5, lefts(surface.render)["Service"]
+  end
+
   private
 
   def look
