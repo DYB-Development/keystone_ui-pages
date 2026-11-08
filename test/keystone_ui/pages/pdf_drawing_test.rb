@@ -548,6 +548,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.find { |call| call.first == :box }&.last)
   end
 
+  test "a plain stat is drawn without its box, inset by the padding keystone_ui's plain metric rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", plain: "true")))))
+
+    assert_equal({ padding: [ "--ks-spacing", 4, 0 ] }, drawn(document).drawn.find { |call| call.first == :box }&.last)
+  end
+
   private
 
   def drawn(document, values: {})
