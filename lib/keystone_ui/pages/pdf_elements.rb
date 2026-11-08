@@ -89,6 +89,8 @@ module KeystoneUi
       FEATURE_GRID_TITLE_SIZE = "--text-4xl"
       FEATURE_GRID_TITLE_GAP = 4
       FEATURE_GRID_SUBTITLE_GAP = 16
+      FEATURE_GRID_COLUMNS = 2
+      FEATURE_GRID_GAP = 6
       FEATURE_TITLE_SIZE = "--text-lg"
       FEATURE_DESCRIPTION_SIZE = "--text-sm"
       INFO_GAP = 2
@@ -357,10 +359,15 @@ module KeystoneUi
           display_subtitle(surface, fields[:subtitle], DISPLAY_SUBTITLE_WIDE, :center)
           surface.space(SPACING, FEATURE_GRID_SUBTITLE_GAP)
         end
-        Array(fields[:features].presence).each do |feature|
-          surface.text(feature[:title], size: FEATURE_TITLE_SIZE)
-          surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE)
+        Array(fields[:features].presence).each_slice(FEATURE_GRID_COLUMNS).with_index do |features, position|
+          surface.space(SPACING, FEATURE_GRID_GAP) if position.positive?
+          surface.row([ Rational(1, FEATURE_GRID_COLUMNS) ] * FEATURE_GRID_COLUMNS, gap: [ SPACING, FEATURE_GRID_GAP ]) { |index| feature(surface, features[index]) if features[index] }
         end
+      end
+
+      def feature(surface, feature)
+        surface.text(feature[:title], size: FEATURE_TITLE_SIZE)
+        surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE)
       end
 
       def display_subtitle(surface, subtitle, width, align)
