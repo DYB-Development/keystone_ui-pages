@@ -604,6 +604,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.select { |call| call.first == :boxed_text }.map { |call| [ call[1], call.last[:fill], call.last[:color] ] }
   end
 
+  test "a badge is drawn at the size, weight, line height, padding and pill rounding keystone_ui's badge rule gives it" do
+    document = page(section(row(column(element("badge", label: "Paid")))))
+
+    assert_equal [ "--text-xs", { font: "--ks-font-body", weight: "--ks-font-weight-medium", leading: "--text-xs--line-height", padding: [ "--ks-spacing", 2, 1 ], radius: [ "--ks-radius-pill", 1 ] } ],
+                 drawn(document).drawn.last.then { |call| [ call[2], call.last.except(:fill, :color) ] }
+  end
+
   private
 
   def drawn(document, values: {})

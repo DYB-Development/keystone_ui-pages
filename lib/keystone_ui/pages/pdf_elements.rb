@@ -222,7 +222,8 @@ module KeystoneUi
 
       def badge(surface, fields)
         fill, color = badge_colors(fields[:variant].to_s)
-        surface.boxed_text(fields[:label], size: BADGE_SIZE, color: color, fill: fill, padding: [ SPACING, BADGE_PADDING_ACROSS, BADGE_PADDING_DOWN ], radius: [ "--ks-radius-pill", 1 ])
+        surface.boxed_text(fields[:label], size: BADGE_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: color, leading: line_height(BADGE_SIZE),
+                                           fill: fill, padding: [ SPACING, BADGE_PADDING_ACROSS, BADGE_PADDING_DOWN ], radius: [ "--ks-radius-pill", 1 ])
       end
 
       def badge_colors(tone)
