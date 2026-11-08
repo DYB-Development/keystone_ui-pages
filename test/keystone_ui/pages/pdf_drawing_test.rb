@@ -475,6 +475,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).tables.last[2].first[:cells].map { |cell| cell.slice(:weight, :color) }
   end
 
+  test "a table of one column draws it as keystone_ui's table draws a first column, aligned to the left" do
+    document = page(section(row(column(element("data_table", columns: [ { "key" => "service", "label" => "Service" } ], items: [ { "service" => "Review" } ])))))
+
+    assert_equal [ :left, :left ], drawn(document).tables.last.then { |call| [ call[1], *call[2] ].map { |table_row| table_row[:cells].first[:align] } }
+  end
+
   private
 
   def drawn(document, values: {})
