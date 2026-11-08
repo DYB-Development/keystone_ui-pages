@@ -149,6 +149,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ 540.0, 135.0 ], fill_widths(surface.render).map { |width| width.round(3) }
   end
 
+  test "text drawn after a bar starts the bar's height lower" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("First", size: "--text-base")
+    surface.bar(1, height: [ "--ks-spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-border", fill: "--ks-color-accent")
+    surface.text("Second", size: "--text-base")
+
+    assert_in_delta 6.0 + 13.872, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
+  end
+
   test "a line of text drawn with a line height token sits with the space its line height leaves split evenly above and below its letters" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

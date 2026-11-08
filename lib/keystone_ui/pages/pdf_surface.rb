@@ -86,6 +86,7 @@ module KeystoneUi
           @document.fill_color(@look.color(color))
           @document.fill_rounded_rectangle([ 0, top ], length, thickness, corner(radius, length, thickness))
         end
+        @document.move_down(thickness)
       end
 
       def rule(width:, color:)
