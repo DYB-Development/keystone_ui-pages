@@ -134,37 +134,50 @@ linking editors to the builder or drawing a page in the host's screens.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
      paragraph, alert, label and value list, button, accordion, table, stat,
-     figure, badge and progress elements print. The form, copy button and Next
-     page elements are left out of the PDF. An element the host adds to the
-     catalog prints only when it is registered with a PDF drawing of its own,
-     and a PDF of a page holding any other element is refused with a message
-     naming that element. An element a place leaves out keeps its drawing, so a
-     page in any place that offers it still prints it. Ask the developer whether
-     the pages they plan to print hold only those elements, or host elements
-     they will give PDF drawings, before choosing this drawing. Writing a host
-     element's PDF drawing belongs to `keystone_ui-pages-develop`.
-     It still needs Propshaft serving the host's stylesheet, since it reads the
-     fonts, weights, text colours, fills, borders, radii and spacing from its
-     `--ks-` tokens, the page's line height from its `html` rule, and the text
-     sizes, line heights and letter spacing Keystone UI's text sizes give, in
-     light mode and the host's default look. A table also reads its head and
-     body fills, header weight, divider colour, border and rounded corners from
-     the `--ks-` tokens, and the line under its heading row and above its total
-     row from Tailwind's `--color-gray-300`, so the compiled stylesheet must set
-     that variable too. A stat, figure and badge read the fill and text
-     colour each tone is given, and a progress bar reads its track, meter and
-     label colours, all from the `--ks-` tokens. A token the host's own
-     stylesheet changes reaches the
-     PDF the same way. A token the stylesheet does not set, or sets to a colour
-     or length the gem cannot read, refuses the PDF with a message naming the
-     token.
+     figure, badge, progress, code, hero, call to action, card, info and
+     feature grid elements print. The form, copy button and Next page elements
+     are left out of the PDF. The bar chart and line chart elements have no PDF
+     drawing yet, so a page holding either one is refused under this drawing.
+     An element the host adds to the catalog prints only when it is registered
+     with a PDF drawing of its own, and a PDF of a page holding any other
+     element is refused with a message naming that element. An element a place
+     leaves out keeps its drawing, so a page in any place that offers it still
+     prints it. Ask the developer whether the pages they plan to print hold
+     only those elements, or host elements they will give PDF drawings, before
+     choosing this drawing. Writing a host element's PDF drawing belongs to
+     `keystone_ui-pages-develop`.
+
+     It still needs Propshaft serving the host's stylesheet, since it reads its
+     whole look from that stylesheet's CSS variables, in light mode and the
+     host's default look:
+
+     - The `--ks-` tokens Keystone UI sets, for fonts, weights, text colours,
+       fills, borders, rounded corners and spacing.
+     - The page's line height from the stylesheet's `html` rule.
+     - These Tailwind variables, which the compiled stylesheet must also set:
+       each `--text-*` size used, from `--text-xs` to `--text-5xl`, with its
+       `--line-height`; `--spacing`; `--leading-relaxed`, for paragraphs and
+       code; `--tracking-tight`, for the titles of a hero, a call to action
+       and a feature grid; `--tracking-wider`, for labels; `--font-mono`, for
+       code; `--color-gray-300`, for the line under a table's heading row and
+       above its total row; and `--container-lg` and `--container-2xl`, for
+       the width of a hero's and a call to action's subtitle.
+
+     A token the host's own stylesheet changes reaches the PDF the same way. A
+     token the stylesheet does not set, or sets to a colour or length the gem
+     cannot read, refuses the PDF with a message naming the token. Tailwind
+     writes a theme variable into the compiled stylesheet only when something
+     uses it, so if a PDF is refused naming one of the Tailwind variables
+     above, ask the developer how they want the stylesheet to keep it rather
+     than editing their Tailwind setup unasked.
 
    The choice is a setting in the settings file, written in the next step.
 
    With the Ruby drawing, check the fonts the host's stylesheet uses:
 
    - A font named only by system fonts, with no `@font-face`, prints in
-     Helvetica and needs nothing. Helvetica draws only Windows-1252 characters,
+     Helvetica and needs nothing. Code in a code font named only by system
+     fonts prints in Courier. Helvetica draws only Windows-1252 characters,
      so text holding any other character refuses the PDF with a message naming
      the element and the character. If the host's pages will hold such
      characters, such as non-Latin scripts, ask the developer which font to
@@ -212,22 +225,37 @@ linking editors to the builder or drawing a page in the host's screens.
 8. Check the install. Boot the app, open the page list at
    `keystone_ui_pages.manage_pages_path`, create a page, add an element in the
    builder, publish it, and open `/pages/<slug>`. With the Chrome drawing, the
-   page list shows a PDF link only when Chrome or Chromium was found. With the
-   Ruby drawing, it always shows one, so open it on a page holding only
-   headings, labels, paragraphs, alerts, label and value lists, buttons,
-   accordions, tables, stats, figures, badges, progress bars and forms to
-   confirm the fonts and text sizes print, each
-   label prints in capitals, each alert prints on its type's fill, a
-   paragraph's links and a button with an address open their address, each
-   accordion question prints with its answer beneath it, each table prints its
-   heading row on the table head fill with its item rows beneath it, a gray
-   line under the heading row and inside a border with rounded corners, each
-   stat prints its label, value and note with the value in its tone's colour,
-   each figure prints in its tone's colour, each badge prints its label on its
-   tone's fill in a pill, each progress bar prints its label above a pill
-   filled to its share, and the form is left out. If the host registers
-   elements of its own, add each one to a page and open its PDF: one with a
-   PDF drawing prints, and one without is refused with a message naming it.
+   page list shows a PDF link only when Chrome or Chromium was found.
+
+   With the Ruby drawing, the page list always shows a PDF link. Open it on a
+   page holding only the elements step 6 lists as printing, plus a form, and
+   confirm:
+
+   - the fonts and text sizes print, and each label prints in capitals;
+   - each alert prints on its type's fill;
+   - a paragraph's links, a button with an address and a card's link text open
+     their address when clicked;
+   - each accordion question prints with its answer beneath it;
+   - each table prints its heading row on the table head fill, its item rows
+     beneath it, a gray line under the heading row, and a border with rounded
+     corners;
+   - each stat prints its label, value and note, with the value in its tone's
+     colour, and each figure prints in its tone's colour;
+   - each badge prints its label on its tone's fill in a pill, and each
+     progress bar prints its label above a pill filled to its share;
+   - code prints in the code font with its line breaks and leading spaces kept;
+   - a line break typed into any other element's text prints as one space;
+   - each hero prints its badge, title and subtitle, and each call to action
+     its title, subtitle and text centred;
+   - each info block prints its summary and detail in full;
+   - each feature grid prints its features two to a row, two features beside
+     each other print at the same height, and its title and subtitle print on
+     the same page as its first row;
+   - the form is left out.
+
+   If the host registers elements of its own, add each one to a page and open
+   its PDF: one with a PDF drawing prints, and one without is refused with a
+   message naming it.
 
    When a PDF link in the page list returns to the list showing a message, the
    PDF was refused, and the message names what to fix: the browser, an
@@ -250,7 +278,7 @@ linking editors to the builder or drawing a page in the host's screens.
 - **The engine registers itself with Keystone UI's Tailwind build.** On boot it
   appends its views, helpers, JavaScript and Ruby files to Keystone UI's
   Tailwind sources, so the host adds nothing to its Tailwind setup for the
-  engine.
+  engine's classes.
 - **The engine adds its view helpers to every host view.** No helper include is
   needed in the host.
 - **The methods the settings name live on the base controller.** The engine

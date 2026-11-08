@@ -17,14 +17,17 @@ module KeystoneUi
 
       BOLD_WEIGHT = 600
       MEASURING_HEIGHT = 14_400
+      NO_BREAK_SPACE = "\u00A0"
+      TAB_SIZE = "tab-size"
 
       def initialize(look)
         @look = look
         @document = Prawn::Document.new
       end
 
-      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)
+      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil, preformatted: false)
         content = content.to_s.upcase if uppercase
+        content = kept_spaces(content.to_s) if preformatted
         points = @look.points(size)
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
@@ -47,35 +50,50 @@ module KeystoneUi
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
-      def box(padding:, radius: nil, fill: nil, border: nil, &content)
+      def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, stretch: false, &content)
         across, down = insets(padding, border)
-        width = @document.bounds.width
-        top = @document.cursor
+        width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
+        left = align == :center ? (@document.bounds.width - width) / 2 : 0
         height = measured(width - across * 2, &content) + down * 2
+        height = [ height, @stretched.to_f ].max if stretch
+        next_page unless fits?(height) || height > @document.margin_box.height
+        top = @document.cursor
+        bottom = @document.bounds.absolute_bottom
         corner = radius ? @look.points(radius.first) * radius.last : 0
         if fill
           @document.fill_color(@look.color(fill))
-          @document.fill_rounded_rectangle([ 0, top ], width, height, corner)
+          @document.fill_rounded_rectangle([ left, top ], width, height, corner)
         end
-        bordered(border, top, width, height, corner) if border
-        @document.bounding_box([ across, top - down ], width: width - across * 2, &content)
+        bordered(border, top, width, height, corner, left) if border && !clip
+        clipped(clip && [ left, top, width, height, corner, border ]) { @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content) }
+        bordered(border, top + bottom - @document.bounds.absolute_bottom, width, height, corner, left) if border && clip
         @document.move_down(down)
+        @document.y = bottom + top - height if stretch
       end
 
-      def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
+      def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil, align: nil)
         across, down = insets(padding, border)
         width = @document.bounds.width
         top = @document.cursor
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
         height = measured(width - across * 2, &drawn) + down * 2
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
+        left = align == :center ? (width - fill_width) / 2 : 0
         corner = corner(radius, fill_width, height)
-        linked(link, fill_width, height) if link
-        @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, corner)
-        bordered(border, top, fill_width, height, corner) if border
-        @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
+        linked(link, fill_width, height, left) if link
+        translucent(fill) do
+          @document.fill_color(@look.color(fill))
+          @document.fill_rounded_rectangle([ left, top ], fill_width, height, corner)
+        end
+        bordered(border, top, fill_width, height, corner, left) if border
+        @document.bounding_box([ left + across, top - down ], width: width - left - across * 2, &drawn)
         @document.move_down(down)
+      end
+
+      def together(&content)
+        height = measured(@document.bounds.width, &content)
+        next_page unless fits?(height) || height > @document.margin_box.height
+        yield
       end
 
       def bar(share, height:, radius:, track:, fill:)
@@ -100,22 +118,26 @@ module KeystoneUi
         @document.move_down(@look.points(token) * steps)
       end
 
-      def row(widths, gap: nil)
+      def row(widths, gap: nil, grid: false)
         spacing = gap ? @look.points(gap.first) * gap.last : 0
+        room = grid ? @document.bounds.width - spacing * (widths.size - 1) : @document.bounds.width
+        stretched = widths.each_with_index.map { |width, index| measured(room * width) { yield index } }.max if grid
         top = @document.y
         first_page = @document.page_number
         lowest = [ first_page, -top ]
         left = 0
         widths.each_with_index do |width, index|
-          column_width = @document.bounds.width * width
-          inset = index.positive? ? spacing : 0
+          column_width = room * width
+          inset = index.positive? && !grid ? spacing : 0
           @document.go_to_page(first_page)
           @document.y = top
           @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
+            @stretched = stretched
             yield index
+            @stretched = nil
             lowest = [ lowest, [ @document.page_number, -@document.y ] ].max
           end
-          left += column_width
+          left += column_width + (grid ? spacing : 0)
         end
         @document.go_to_page(lowest.first)
         @document.y = -lowest.last
@@ -333,13 +355,15 @@ module KeystoneUi
         thickness = @look.points(border[:width])
         return unless thickness.positive?
 
-        @document.stroke_color(@look.color(border[:color]))
-        @document.line_width(thickness)
-        @document.stroke_rounded_rectangle([ left + thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
+        translucent(border[:color]) do
+          @document.stroke_color(@look.color(border[:color]))
+          @document.line_width(thickness)
+          @document.stroke_rounded_rectangle([ left + thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
+        end
       end
 
-      def linked(address, width, height)
-        left = @document.bounds.absolute_left
+      def linked(address, width, height, offset = 0)
+        left = @document.bounds.absolute_left + offset
         top = @document.y
         @document.link_annotation([ left, top - height, left + width, top ], Border: [ 0, 0, 0 ], A: { Type: :Action, S: :URI, URI: PDF::Core::LiteralString.new(address) })
       end
@@ -353,6 +377,34 @@ module KeystoneUi
           width = @document.width_of(content.to_s, size: @look.points(size))
         end
         width
+      end
+
+      def clipped(shape)
+        return yield unless shape
+
+        left, top, width, height, corner, border = shape
+        edge = border ? @look.points(border[:width]) : 0
+        @document.save_graphics_state do
+          @document.rounded_rectangle([ left + edge, top - edge ], width - edge * 2, height - edge * 2, [ corner - edge, 0 ].max)
+          @document.add_content("W n")
+          yield
+        end
+      end
+
+      def kept_spaces(content)
+        content.lines.map { |line| tab_stopped(line) }.join.gsub(/^ +/) { |spaces| NO_BREAK_SPACE * spaces.length }
+      end
+
+      def tab_stopped(line)
+        return line unless line.include?("\t")
+
+        stop = @look.value(TAB_SIZE).to_i
+        line.each_char.with_object(+"") { |char, spaced| spaced << (char == "\t" ? " " * (stop - spaced.length % stop) : char) }
+      end
+
+      def translucent(color, &painting)
+        opacity = @look.opacity(color)
+        opacity < 1 ? @document.transparent(opacity, &painting) : yield
       end
 
       def bold?(weight)

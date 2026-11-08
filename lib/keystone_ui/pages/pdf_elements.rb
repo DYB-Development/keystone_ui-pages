@@ -64,10 +64,66 @@ module KeystoneUi
       PROGRESS_LABEL_SIZE = "--text-sm"
       PROGRESS_LABEL_GAP = 1
       PROGRESS_BAR_LOOK = { height: [ TAILWIND_SPACING, 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }.freeze
+      CODE_SIZE = "--text-sm"
+      CODE_FONT = "--font-mono"
+      CODE_LOOK = { padding: [ SPACING, 0 ], radius: [ "--ks-radius-surface", 1 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }, clip: true }.freeze
+      CODE_BLOCK_LOOK = { padding: [ SPACING, 4 ], fill: "--ks-color-code" }.freeze
+      CODE_CAPTION_LOOK = { padding: [ SPACING, 4, 2 ], fill: "--ks-color-fill-muted" }.freeze
+      CODE_CAPTION_SIZE = "--text-xs"
+      DISPLAY_TITLE_LOOK = { font: "--ks-font-body", weight: STAT_VALUE_WEIGHT, color: "--ks-color-text-display", tracking: "--tracking-tight" }.freeze
+      HERO_BADGE_SIZE = "--text-sm"
+      HERO_BADGE_LOOK = { font: "--ks-font-body", color: "--ks-color-link", leading: "#{HERO_BADGE_SIZE}--line-height", fill: "--ks-color-tint", padding: [ SPACING, 4, 1.5 ],
+                          radius: [ "--ks-radius-pill", 1 ], border: { width: "--ks-border-width", color: "--ks-color-tint-border" } }.freeze
+      HERO_TITLE_SIZE = "--text-5xl"
+      DISPLAY_SUBTITLE_SIZE = "--text-lg"
+      HERO_SUBTITLE_WIDTH = [ "--container-lg", 1 ].freeze
+      HERO_ALIGNMENTS = { "centered" => :center }.freeze
+      HERO_TOP = 24
+      CTA_TITLE_SIZE = "--text-4xl"
+      CTA_TEXT_SIZE = "--text-base"
+      CTA_TITLE_GAP = 4
+      CARD_TITLE_SIZE = "--text-lg"
+      CARD_TEXT_SIZE = "--text-sm"
+      CARD_SUMMARY_GAP = 1
+      INFO_SIZE = "--text-sm"
+      FEATURE_GRID_TITLE_SIZE = "--text-4xl"
+      FEATURE_GRID_TITLE_GAP = 4
+      FEATURE_GRID_SUBTITLE_GAP = 16
+      FEATURE_GRID_COLUMNS = 2
+      FEATURE_GRID_GAP = 6
+      FEATURE_TITLE_GAP = 2
+      FEATURE_CARD_LOOK = { padding: [ SPACING, 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-raised", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } }.freeze
+      FEATURE_TITLE_SIZE = "--text-lg"
+      FEATURE_DESCRIPTION_SIZE = "--text-sm"
+      INFO_GAP = 2
+      INFO_SUMMARY_WIDTH = [ TAILWIND_SPACING, 64 ].freeze
+      INFO_DETAIL_WIDTH = [ TAILWIND_SPACING, 80 ].freeze
+      INFO_POPUP_LOOK = { padding: [ SPACING, 3 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-overlay", border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
+      CARD_LINK_GAP = 4
+      CARD_LOOK = { padding: [ SPACING, 6, 6 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-surface", border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
+      CTA_SUBTITLE_GAP = 8
+      DISPLAY_SUBTITLE_WIDE = [ "--container-2xl", 1 ].freeze
+      CTA_LOOK = { padding: [ SPACING, 6, 12 ], radius: [ "--ks-radius-surface", 2 ], fill: "--ks-color-fill-muted", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } }.freeze
+      HERO_PADDING_ACROSS = 6
+      HERO_PADDING_DOWN = 24
+      HERO_GAP = 8
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
       module_function
+
+      def flowing(drawing)
+        ->(surface, fields) { method(drawing).call(surface, flowed(fields)) }
+      end
+
+      def flowed(value)
+        case value
+        when String then value.gsub(/\s+/, " ").strip
+        when Array then value.map { |part| flowed(part) }
+        when Hash then value.transform_values { |part| flowed(part) }
+        else value
+        end
+      end
 
       def heading(surface, fields)
         size = HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"])
@@ -239,6 +295,115 @@ module KeystoneUi
         surface.text(fields[:label], size: PROGRESS_LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-meter-label", leading: line_height(PROGRESS_LABEL_SIZE))
         surface.space(SPACING, PROGRESS_LABEL_GAP)
         surface.bar(Rational([ (fields[:value].to_f / fields[:max].to_f * 100).round, 100 ].min, 100), **PROGRESS_BAR_LOOK)
+      end
+
+      def code(surface, fields)
+        surface.box(**CODE_LOOK) do
+          code_caption(surface, fields[:caption]) if fields[:caption].present?
+          surface.box(**CODE_BLOCK_LOOK) do
+            surface.text(fields[:code], size: CODE_SIZE, font: CODE_FONT, color: "--ks-color-text-code", leading: "--leading-relaxed", preformatted: true)
+          end
+        end
+      end
+
+      def code_caption(surface, caption)
+        surface.box(**CODE_CAPTION_LOOK) { surface.text(caption, size: CODE_CAPTION_SIZE, font: CODE_FONT, color: "--ks-color-text-display-muted", leading: line_height(CODE_CAPTION_SIZE)) }
+        surface.rule(width: "--ks-border-width", color: "--ks-color-border-subtle")
+      end
+
+      def hero(surface, fields)
+        align = HERO_ALIGNMENTS[fields[:layout].to_s]
+        surface.space(SPACING, HERO_TOP)
+        surface.box(padding: [ SPACING, HERO_PADDING_ACROSS, HERO_PADDING_DOWN ]) do
+          hero_badge(surface, fields[:badge], align) if fields[:badge].present?
+          surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE), align: align)
+          surface.space(SPACING, HERO_GAP)
+          if fields[:subtitle].present?
+            display_subtitle(surface, fields[:subtitle], HERO_SUBTITLE_WIDTH, align)
+            surface.space(SPACING, HERO_GAP)
+          end
+        end
+      end
+
+      def hero_badge(surface, badge, align)
+        surface.boxed_text(badge, size: HERO_BADGE_SIZE, **HERO_BADGE_LOOK, align: align)
+        surface.space(SPACING, HERO_GAP)
+      end
+
+      def cta_banner(surface, fields)
+        surface.box(**CTA_LOOK) do
+          surface.text(fields[:title], size: CTA_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(CTA_TITLE_SIZE), align: :center)
+          surface.space(SPACING, CTA_TITLE_GAP)
+          cta_subtitle(surface, fields[:subtitle]) if fields[:subtitle].present?
+          surface.text(fields[:text], size: CTA_TEXT_SIZE, font: "--ks-font-body", color: FIGURE_COLORS["neutral"], leading: PAGE_LINE_HEIGHT, align: :center) if fields[:text].present?
+        end
+      end
+
+      def cta_subtitle(surface, subtitle)
+        display_subtitle(surface, subtitle, DISPLAY_SUBTITLE_WIDE, :center)
+        surface.space(SPACING, CTA_SUBTITLE_GAP)
+      end
+
+      def card(surface, fields)
+        surface.box(**CARD_LOOK) do
+          surface.text(fields[:title], size: CARD_TITLE_SIZE, font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text", leading: line_height(CARD_TITLE_SIZE))
+          surface.space(SPACING, CARD_SUMMARY_GAP)
+          surface.text(fields[:summary], size: CARD_TEXT_SIZE, font: "--ks-font-body", color: "--ks-color-text-muted", leading: line_height(CARD_TEXT_SIZE)) if fields[:summary].present?
+          surface.space(SPACING, CARD_LINK_GAP)
+          surface.rich_text([ { text: fields[:cta].to_s, link: fields[:link].presence }.compact ], size: CARD_TEXT_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium",
+                                                                                                    color: "--ks-color-link", leading: line_height(CARD_TEXT_SIZE))
+        end
+      end
+
+      def info(surface, fields)
+        info_popup(surface, fields[:summary], INFO_SUMMARY_WIDTH)
+        return if fields[:detail].blank?
+
+        surface.space(SPACING, INFO_GAP)
+        info_popup(surface, fields[:detail], INFO_DETAIL_WIDTH)
+      end
+
+      def info_popup(surface, text, width)
+        surface.box(**INFO_POPUP_LOOK, width: width) { surface.text(text, size: INFO_SIZE, font: "--ks-font-body", color: "--ks-color-on-overlay-muted", leading: line_height(INFO_SIZE)) }
+      end
+
+      def feature_grid(surface, fields)
+        rows = Array(fields[:features].presence).each_slice(FEATURE_GRID_COLUMNS).to_a
+        surface.together do
+          feature_grid_heading(surface, fields)
+          feature_row(surface, rows.first) if rows.any?
+        end
+        rows.drop(1).each do |features|
+          surface.space(SPACING, FEATURE_GRID_GAP)
+          feature_row(surface, features)
+        end
+      end
+
+      def feature_grid_heading(surface, fields)
+        surface.text(fields[:title], size: FEATURE_GRID_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(FEATURE_GRID_TITLE_SIZE), align: :center)
+        surface.space(SPACING, FEATURE_GRID_TITLE_GAP)
+        return if fields[:subtitle].blank?
+
+        display_subtitle(surface, fields[:subtitle], DISPLAY_SUBTITLE_WIDE, :center)
+        surface.space(SPACING, FEATURE_GRID_SUBTITLE_GAP)
+      end
+
+      def feature_row(surface, features)
+        surface.row([ Rational(1, FEATURE_GRID_COLUMNS) ] * FEATURE_GRID_COLUMNS, gap: [ SPACING, FEATURE_GRID_GAP ], grid: true) { |index| feature(surface, features[index]) if features[index] }
+      end
+
+      def feature(surface, feature)
+        surface.box(**FEATURE_CARD_LOOK, stretch: true) do
+          surface.text(feature[:title], size: FEATURE_TITLE_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: line_height(FEATURE_TITLE_SIZE))
+          surface.space(SPACING, FEATURE_TITLE_GAP)
+          surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(FEATURE_DESCRIPTION_SIZE))
+        end
+      end
+
+      def display_subtitle(surface, subtitle, width, align)
+        surface.box(padding: [ SPACING, 0 ], width: width, align: align) do
+          surface.text(subtitle, size: DISPLAY_SUBTITLE_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(DISPLAY_SUBTITLE_SIZE), align: align)
+        end
       end
 
       def paragraph(surface, fields)

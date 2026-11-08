@@ -230,14 +230,19 @@ inherit from the base controller, so define it there.
   colour prints as the six-digit colour it names. A colour token in any other
   form, or a length token in a unit other
   than `rem`, `em`, `px` or `pt` that is not zero, raises `PrintFailed` naming
-  the token and its value. Each element draws through the `pdf:` drawing given
+  the token and its value. An eight-digit hex colour is read too, and its last
+  two digits are its opacity, which `boxed_text`'s fill and every outline
+  honour and every other fill and text colour ignore. Each element draws through the `pdf:` drawing given
   to `catalog.register`. Of the built-in elements `heading`, `label`,
   `paragraph`, `alert`, `value_list`, `button`, `accordion`, `data_table`,
-  `stat_card`, `figure`, `badge` and `progress` have one.
+  `stat_card`, `figure`, `badge`, `progress`, `code`, `hero`, `cta_banner`,
+  `card`, `info` and `feature_grid` have one.
   `form`, `copy_button` and `next_page` have a drawing that draws nothing, so
-  they are left out of the PDF and do not raise. Every other built-in element
-  raises `NoPdfDrawing`. A page holding an element whose key the catalog does
-  not have raises `PrintFailed` naming the key.
+  they are left out of the PDF and do not raise. `bar_chart` and `line_chart`
+  have none and raise `NoPdfDrawing`. A page holding an element whose key the catalog does
+  not have raises `PrintFailed` naming the key. A boxed element that does not
+  fit in the space left on a page draws whole at the top of the next page,
+  unless it is taller than a page.
 - **The built-in elements in the Ruby drawing.**
   - A heading draws its text at `--text-lg`, `--text-2xl` or `--text-4xl` for
     `sm`, `md` or `lg` in `--ks-font-heading` at `--ks-font-weight-heading` and
@@ -248,7 +253,7 @@ inherit from the base controller, so define it there.
     `--tracking-wider` letter spacing, at `--text-xs--line-height`.
   - A paragraph draws each of its stored paragraphs at `--text-base` in
     `--ks-font-body` and `--ks-color-text`, at `--leading-relaxed`. Line breaks
-    and links are kept, and a link opens its address when clicked in the PDF.
+    the editor adds in the builder and links are kept, and a link opens its address when clicked in the PDF.
     Bold and italic marks stored in the text print bold and italic. Scripts,
     styles and every other tag are dropped. A paragraph saved as a plain string
     draws as one paragraph.
@@ -351,13 +356,79 @@ inherit from the base controller, so define it there.
     `bar` two `--spacing` steps tall with corners of one `--ks-radius-pill`, on
     `--ks-color-track` and filled in `--ks-color-meter`. The fill is its value
     out of its maximum, rounded to a whole percent and never past full.
+  - A code element draws in a box with no padding, outlined with
+    `--ks-border-width` in `--ks-color-border-subtle`, with corners of one
+    `--ks-radius-surface`, and what it holds is clipped to those corners. Its
+    caption, when set, draws first on `--ks-color-fill-muted`, padded by four
+    `--ks-spacing` steps across and two down, at `--text-xs` in `--font-mono`
+    and `--ks-color-text-display-muted`, at `--text-xs--line-height`, with a
+    line of `--ks-border-width` in `--ks-color-border-subtle` under it. The code
+    draws on `--ks-color-code`, padded by four `--ks-spacing` steps, at
+    `--text-sm` in `--font-mono` and `--ks-color-text-code`, at
+    `--leading-relaxed`, with its line breaks, leading spaces and tabs kept. A
+    code holding a tab needs the stylesheet's `tab-size`.
+  - A hero draws 24 `--ks-spacing` steps down, padded by six steps across and
+    24 down. Its badge, when set, draws as a pill at `--text-sm` in
+    `--ks-font-body` and `--ks-color-link`, at `--text-sm--line-height`, filled
+    with `--ks-color-tint` and outlined with `--ks-border-width` in
+    `--ks-color-tint-border`, padded by four steps across and 1.5 down, then
+    eight steps. Its title draws at `--text-5xl` in `--ks-font-body` at 100
+    more than `--ks-font-weight-heading`, in `--ks-color-text-display` with
+    `--tracking-tight`, at `--text-5xl--line-height`, then eight steps. Its
+    subtitle, when set, draws at `--text-lg` in `--ks-color-text-display-muted`,
+    at `--text-lg--line-height`, no wider than `--container-lg`, then eight
+    steps. Everything is centred when its layout is `centered`, and drawn from
+    the left otherwise.
+  - A call to action draws in a rounded box filled with `--ks-color-fill-muted`,
+    outlined with `--ks-border-width` in `--ks-color-border-subtle`, padded by
+    six `--ks-spacing` steps across and twelve down, with corners of two
+    `--ks-radius-surface`, everything centred. Its title draws in the hero
+    title's look at `--text-4xl` and `--text-4xl--line-height`, then four steps.
+    Its subtitle, when set, draws as the hero's does but no wider than
+    `--container-2xl`, then eight steps. Its text, when set, draws at
+    `--text-base` in `--ks-color-on-page`, at the line height the stylesheet's
+    `html` rule gives.
+  - A card draws in a rounded box filled with `--ks-color-surface`, outlined
+    with `--ks-border-width` in `--ks-color-border`, padded by six
+    `--ks-spacing` steps, with corners of one `--ks-radius-surface`. Its title
+    draws at `--text-lg` in `--ks-font-heading` at `--ks-font-weight-heading`
+    and `--ks-color-text`, then one step. Its summary, when set, draws at
+    `--text-sm` in `--ks-color-text-muted`. Four steps under, its link text
+    draws at `--text-sm` at `--ks-font-weight-medium` in `--ks-color-link`, and
+    opens the card's address when clicked in the PDF. Each text is at its
+    size's `--line-height` token.
+  - An info element draws its summary in a rounded box no wider than 64
+    `--spacing` steps, filled with `--ks-color-overlay`, outlined with
+    `--ks-border-width` in `--ks-color-border`, padded by three `--ks-spacing`
+    steps, with corners of one `--ks-radius-surface`, at `--text-sm` in
+    `--ks-color-on-overlay-muted`, at `--text-sm--line-height`. Its detail, when
+    set, draws two steps under it in the same box no wider than 80 `--spacing`
+    steps. No button is drawn.
+  - A feature grid draws its title centred in the call to action's title look,
+    then four `--ks-spacing` steps. Its subtitle, when set, draws centred as the
+    call to action's does, then 16 steps. Its features draw two to a row, rows
+    six steps apart, with a gap of six steps shared between the two columns. A
+    row holding one feature leaves the second column empty. Each feature draws
+    in a rounded box filled with `--ks-color-raised`, outlined with
+    `--ks-border-width` in `--ks-color-border-subtle`, padded by six steps, with
+    corners of 1.5 times `--ks-radius-surface`. Its title draws at `--text-lg`
+    at `--ks-font-weight-heading` in `--ks-color-text-display`, then two steps,
+    and its description at `--text-sm` in `--ks-color-text-display-muted`, each
+    at its size's `--line-height` token. Icons are not drawn, and two features
+    in a row are stretched to the same height. The title, the subtitle and the
+    first row of features are drawn together, so the title never sits alone at
+    the bottom of a page.
   - The form, the copy button and the Next page button draw nothing in the
     Ruby drawing. The four `--ks-spacing` steps between elements in a column
     are still kept around each of them.
+  - Every one of the gem's own elements but code joins each line break or run
+    of spaces in its text fields into one space, and trims the ends, before
+    drawing, as a browser shows that text. Code keeps them. A host element's
+    `pdf:` drawing is handed its fields as stored, with nothing joined.
 - **Fonts in the Ruby drawing.** A font token is read as a list of families,
   and `inherit` takes the `html` element's `font-family`. The first family the
   stylesheet loads with `@font-face` is used. A list with no such family prints
-  in Helvetica. A loaded family prints from a TrueType copy of the files its
+  in Courier when it names `monospace`, and in Helvetica otherwise. A loaded family prints from a TrueType copy of the files its
   `@font-face` rules load for regular, bold and italic text, found under the
   same address with a `.ttf` ending, in `public/` or among the files Propshaft
   serves. When any of the three copies is not served, `KeystoneUi::Pages.pdf`
@@ -524,9 +595,9 @@ inherit from the base controller, so define it there.
   place leaves out with `leaves_out:` still prints by its drawing on a page in
   a place that offers it. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has nine
+  reads the tokens as the Ruby drawing's look describes. The surface has ten
   calls.
-  - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)`
+  - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil, preformatted: false)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
     never a number of points. `font:`, `weight:` and `color:` name `--ks-`
     tokens, with no weight meaning regular, and a weight of 600 or more
@@ -536,6 +607,10 @@ inherit from the base controller, so define it there.
     default), `:center` or `:right`. `leading:` names a line height token, such
     as `"--text-sm--line-height"`, or `"line-height"` for the line height the
     stylesheet's `html` rule gives, and no leading means the font's own height.
+    `preformatted: true` keeps the spaces at the start of each line and turns
+    each tab into spaces up to the next stop, every `tab-size` characters, read
+    from the stylesheet, so text holding a tab needs `tab-size` set or raises
+    `PrintFailed` naming it. Line breaks are kept either way.
   - `rich_text(runs, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)`
     writes one paragraph from an array of runs. `size:`, `font:`, `weight:`,
     `color:` and `leading:` work as they do for `text`, and a weight of 600 or
@@ -544,9 +619,15 @@ inherit from the base controller, so define it there.
     `italic: true`, `size:` (a length token for that run alone) and `color:` (a
     colour token for that run alone). A run whose text is `"\n"` breaks the
     line.
-  - `box(padding:, radius: nil, fill: nil, border: nil) { ... }` draws a box
+  - `box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, stretch: false) { ... }` draws a box
     the width of the column, as tall as what the block draws, and draws the
-    block inside it. `padding:` is a length token and a number of steps, such
+    block inside it. A box that does not fit in the space left on the page
+    starts on the next page, unless it is taller than a page. `width:` is a
+    length token and a number of steps, such as `[ "--container-lg", 1 ]`, for
+    a box narrower than the column, and never wider than it. `align: :center`
+    centres a narrower box in the column, and no align puts it at the left.
+    `clip: true` clips what the block draws to the box's rounded corners inside
+    its outline, and draws the outline over it. `padding:` is a length token and a number of steps, such
     as `[ "--ks-spacing", 4 ]`, or a token and two numbers of steps, across and
     then down, such as `[ "--ks-spacing", 6, 4 ]`. `radius:` is a length token
     and a number of steps for the corners, and no radius means square corners.
@@ -556,7 +637,9 @@ inherit from the base controller, so define it there.
     `{ width: "--ks-border-width", color: "--ks-color-border-subtle" }`. The
     outline is drawn inside the box and its thickness is added to the padding.
     A thickness of zero draws no outline, and no border means none.
-  - `boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)`
+    `stretch: true` in a part of a `row` given `grid: true` draws the box as
+    tall as the row's tallest part, and outside such a row it changes nothing.
+  - `boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil, align: nil)`
     writes the content on a rounded box as wide as the content and its padding,
     and never wider than the column. `size:`, `font:`, `weight:`, `color:` and
     `leading:` work as they do for `text`. `fill:` names the box's colour token,
@@ -564,7 +647,8 @@ inherit from the base controller, so define it there.
     corners are never rounder than half the box's height or width, so a radius
     token such as `--ks-radius-pill` rounds it into a pill. `link:`
     is an address the whole box opens when clicked in the PDF, and no link
-    means none.
+    means none. `align: :center` centres the box in the column, and no align
+    puts it at the left.
   - `bar(share, height:, radius:, track:, fill:)` draws a bar across the
     column. `share` is the part of the bar filled, from 0 to 1, such as
     `Rational(40, 100)`. `height:` is a length token and a number of steps for
@@ -577,12 +661,17 @@ inherit from the base controller, so define it there.
     length token for its thickness and `color:` a colour token.
   - `space(token, steps)` moves down by that many steps of a length token, such
     as `space("--ks-spacing", 2)`.
-  - `row(widths, gap: nil) { |index| ... }` splits the column side by side.
+  - `row(widths, gap: nil, grid: false) { |index| ... }` splits the column side by side.
     `widths` lists each part's share of the column, such as
     `[ Rational(2, 5), Rational(3, 5) ]`. `gap:` is a length token and a number
-    of steps put before every part but the first. The block runs once per part
+    of steps put before every part but the first, taken out of that part's
+    share. With `grid: true` the gaps are taken out of the column first and
+    the shares split what remains, so equal shares draw equal columns. The block runs once per part
     with its index, every part starts at the same height, and drawing continues
     below the tallest.
+  - `together { ... }` draws what the block draws, starting it on the next page
+    when it does not fit in the space left on the page, unless it is taller
+    than a page.
   - `table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)` draws a table
     the width of the column. `heading`, each entry of `rows` and `total` are
     rows, each a hash of `cells:` and optionally `fill:`, a colour token drawn
@@ -712,8 +801,9 @@ The catalog offers these Keystone UI components by default: `button`,
    line heights, letter spacing, colours, fills, borders and spacing read from
    the host's stylesheet. Of the built-in elements it draws headings, labels,
    paragraphs, alerts, label and value lists, buttons, accordions, tables,
-   stats, figures, badges and progress bars, and it leaves forms, copy buttons
-   and Next page buttons out of the PDF.
+   stats, figures, badges, progress bars, code, heroes, calls to action, cards,
+   info elements and feature grids, it leaves forms, copy buttons and Next page
+   buttons out of the PDF, and it refuses bar charts and line charts.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
@@ -843,7 +933,7 @@ The catalog offers these Keystone UI components by default: `button`,
     Register it with `pdf:` in the same `catalog.register` call that adds the
     element, since registering the key again replaces the whole entry. The
     drawing takes the surface and the field values only, so read every field
-    from `fields` by its symbol key and draw only with the surface's nine
+    from `fields` by its symbol key and draw only with the surface's ten
     calls. An element registered without `pdf:` refuses every PDF of a page
     showing it with `NoPdfDrawing`, whose message is "The <name> element has
     no PDF drawing, so this page cannot be drawn as a PDF without Chrome."
@@ -863,7 +953,7 @@ The catalog offers these Keystone UI components by default: `button`,
   PDF another way, because the gem's drawing applies bound values, conditions,
   layout and print rules together.
 - **A `pdf:` drawing draws only through the surface.** It takes the surface and
-  the field values and calls the surface's nine calls, never Prawn directly,
+  the field values and calls the surface's ten calls, never Prawn directly,
   since the surface places each call in the element's column and reads the
   host's tokens.
 - **Only the live version leaves the builder.** The draft is what editors

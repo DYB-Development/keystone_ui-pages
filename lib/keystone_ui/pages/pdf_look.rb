@@ -9,6 +9,7 @@ module KeystoneUi
     class PdfLook
       Font = Data.define(:name, :files)
       BUILT_IN_FONT = Font.new(name: "Helvetica", files: nil)
+      BUILT_IN_MONOSPACE_FONT = Font.new(name: "Courier", files: nil)
 
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
       WRITTEN_LENGTH = /\A\d+(\.\d+)?(rem|em|px|pt)\z/
@@ -47,14 +48,20 @@ module KeystoneUi
         return oklch_hex(css) if css.start_with?("oklch(")
 
         hex = css.delete_prefix("#").upcase
-        unreadable(name, css) unless hex.match?(/\A(\h{3}|\h{6})\z/)
-        hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex
+        unreadable(name, css) unless hex.match?(/\A(\h{3}|\h{6}|\h{8})\z/)
+        hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex[0, 6]
+      end
+
+      def opacity(name)
+        alpha = value(name)[/\A#\h{6}(\h{2})\z/, 1]
+        alpha ? (alpha.to_i(16) / 255.0).round(3) : 1.0
       end
 
       def font(name)
         families = value(name) == "inherit" ? value("font-family") : value(name)
-        family = split(families, ",").map { |listed| listed.strip.delete("\"'") }.find { |listed| @faces.key?(listed) }
-        return BUILT_IN_FONT unless family
+        listed = split(families, ",").map { |family| family.strip.delete("\"'") }
+        family = listed.find { |named| @faces.key?(named) }
+        return listed.include?("monospace") ? BUILT_IN_MONOSPACE_FONT : BUILT_IN_FONT unless family
 
         Font.new(name: family, files: FONT_STYLES.transform_values { |(style, weight)| true_type(face(family, style, weight)) })
       end

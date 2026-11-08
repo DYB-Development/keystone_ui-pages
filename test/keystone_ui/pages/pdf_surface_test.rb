@@ -15,6 +15,24 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 1, heights(surface.render).values_at("Left", "Right").uniq.size
   end
 
+  test "a row laid out as a grid shares its gaps between its columns, so columns of equal shares are equally wide" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true) { |index| surface.text(%w[Fast Clear][index], size: "--text-base") }
+
+    assert_equal 36.0 + (540 - 18) / 2 + 18, lefts(surface.render)["Clear"]
+  end
+
+  test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true) do |index|
+      surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent", stretch: true) { surface.text([ "Fast", "Clear\nPlain\nShort" ][index], size: "--text-base") }
+    end
+
+    assert_equal 1, fill_heights(surface.render).map { |height| height.round(3) }.uniq.size
+  end
+
   test "lines of text drawn with a line height token are spaced that many text sizes apart" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -105,6 +123,32 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 49.5, lefts(surface.render)["Book a call"]
   end
 
+  test "a boxed line of text aligned to the centre is drawn with its fill centred in the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ], align: :center)
+
+    assert_in_delta 36 + (540 - (58.692 + 24)) / 2 + 12, lefts(surface.render)["Book a call"], 0.001
+  end
+
+  test "a boxed line of text on a translucent fill is filled at the fill colour's opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new(":root{--text-sm:.875rem;--ks-spacing:.25rem;--ks-radius-pill:calc(infinity * 1px);--ks-color-tint:#3b82f633;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
+
+    surface.boxed_text("New", size: "--text-sm", fill: "--ks-color-tint", padding: [ "--ks-spacing", 4, 1.5 ], radius: [ "--ks-radius-pill", 1 ])
+
+    assert_match(%r{/ca 0\.2\b}, surface.render)
+  end
+
+  test "a boxed line of text given a translucent border is stroked at the border colour's opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new(":root{--text-sm:.875rem;--ks-spacing:.25rem;--ks-radius-pill:calc(infinity * 1px);--ks-border-width:1px;" \
+                                                                               "--ks-color-tint:#3b82f6;--ks-color-tint-border:#3b82f633;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
+
+    surface.boxed_text("New", size: "--text-sm", fill: "--ks-color-tint", padding: [ "--ks-spacing", 4, 1.5 ], radius: [ "--ks-radius-pill", 1 ],
+                              border: { width: "--ks-border-width", color: "--ks-color-tint-border" })
+
+    assert_match(%r{/CA 0\.2\b}, surface.render)
+  end
+
   test "a box given a border and no fill is stroked in the border's colour at the border's width" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -121,6 +165,54 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     surface.box(padding: [ "--ks-spacing", 6, 4 ], radius: [ "--ks-radius-control", 1 ]) { surface.text("Book a call", size: "--text-base") }
 
     assert_equal 54.0, lefts(surface.render)["Book a call"]
+  end
+
+  test "a box given a width narrower than the width it is drawn in is filled that wide" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 3 ], width: [ "--ks-spacing", 64 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent") { surface.text("Revenue", size: "--text-base") }
+
+    assert_in_delta 192.0, fill_widths(surface.render).first, 0.001
+  end
+
+  test "a box narrower than the width it is drawn in and aligned to the centre is drawn centred in that width" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 0 ], width: [ "--ks-spacing", 64 ], align: :center) { surface.text("Revenue", size: "--text-base") }
+
+    assert_equal 36.0 + (540 - 192) / 2, lefts(surface.render)["Revenue"]
+  end
+
+  test "a box that clips its content clips what is drawn inside it to the rounded corners inside its border" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }, clip: true) do
+      surface.box(padding: [ "--ks-spacing", 4 ], fill: "--ks-color-accent") { surface.text("puts 42", size: "--text-base") }
+    end
+
+    assert_match(/ c\nh\nW n\n[^W]*scn\n(?:[\d. ]+ [mlc]\n)+h\nf\n/, surface.render)
+  end
+
+  test "a box that clips its content strokes its border over what is drawn inside it" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }, clip: true) do
+      surface.box(padding: [ "--ks-spacing", 4 ], fill: "--ks-color-accent") { surface.text("puts 42", size: "--text-base") }
+    end
+
+    assert_match(/h\nf\n.*1\.5 w\n/m, surface.render)
+  end
+
+  test "a box that clips its content inside a column strokes its border at the top of the box, level with its clipped content" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.box(padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }, clip: true) do
+        surface.box(padding: [ "--ks-spacing", 4 ], fill: "--ks-color-accent") { surface.text("puts 42", size: "--text-base") }
+      end
+    end
+
+    assert_in_delta 0.75, surface.render.then { |pdf| pdf[/1\.5 w\n[\d.]+ ([\d.]+) m/, 1].to_f - pdf[/q\n[\d.]+ ([\d.]+) m\n/, 1].to_f }, 0.001
   end
 
   test "a box given no fill, border or rounding insets its content by its padding alone" do
@@ -191,6 +283,22 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     surface.text("Second", size: "--text-base", leading: "--leading-loose")
 
     assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
+  end
+
+  test "preformatted text keeps the spaces at the start of each line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("def total\n  42", size: "--text-base", preformatted: true)
+
+    assert_includes lefts(surface.render).keys, "  42".encode(Encoding::Windows_1252).b
+  end
+
+  test "preformatted text draws a tab as the spaces up to the next tab stop the stylesheet's tab size sets" do
+    surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new("html{tab-size:4}:root{--text-base:1rem;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
+
+    surface.text("ab\t42", size: "--text-base", preformatted: true)
+
+    assert_includes lefts(surface.render).keys, "ab  42"
   end
 
   test "text holding a character its font cannot draw is refused naming the character" do
@@ -307,6 +415,33 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     surface.table(table_row("Service"), Array.new(25) { |index| table_row("Review #{index}") }, **table_look)
 
     assert_equal [ 1, 1 ], pages(surface.render).map { |page| heights(page).keys.count("Service") }
+  end
+
+  test "a box that does not fit in the space left on a page is drawn whole at the top of the next page's margin" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.text("Introduction", size: "--text-base")
+      surface.space("--ks-spacing", 200)
+      surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent") { surface.text(Array.new(10) { |line| "Line #{line}" }.join("\n"), size: "--text-base") }
+    end
+
+    assert_equal 735.384, heights(pages(surface.render).last)["Line 0"].to_f
+  end
+
+  test "what is drawn together that does not fit in the space left on a page starts at the top of the next page's margin" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.text("Introduction", size: "--text-base")
+      surface.space("--ks-spacing", 200)
+      surface.together do
+        surface.text("Why teams choose us", size: "--text-base")
+        surface.text(Array.new(10) { |line| "Line #{line}" }.join("\n"), size: "--text-base")
+      end
+    end
+
+    assert_equal 747.384, heights(pages(surface.render).last)["Why teams choose us"].to_f
   end
 
   test "a table that starts part way down a page continues at the top of the next page's margin" do
@@ -445,6 +580,10 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
 
   def fill_widths(pdf)
     pdf.scan(/scn\n((?:[\d. ]+ [mlc]\n)+)h\nf\n/).map { |(path)| path.scan(/[\d.]+/).each_slice(2).map { |left, _| left.to_f }.minmax.then { |least, most| most - least } }
+  end
+
+  def fill_heights(pdf)
+    pdf.scan(/scn\n((?:[\d. ]+ [mlc]\n)+)h\nf\n/).map { |(path)| path.scan(/[\d.]+/).each_slice(2).map { |_, height| height.to_f }.minmax.then { |least, most| most - least } }
   end
 
   def lefts(pdf)

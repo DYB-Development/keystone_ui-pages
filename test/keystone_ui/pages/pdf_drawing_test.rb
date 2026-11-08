@@ -35,6 +35,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :boxed_text, content, size, style ]
     end
 
+    def together
+      @drawn << [ :together ]
+      yield
+      @drawn << [ :together_end ]
+    end
+
     def rule(**style)
       @drawn << [ :rule, style ]
     end
@@ -109,11 +115,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
-    document = page(section(row(column(element("heading", text: "Pricing"), element("code")))))
+    document = page(section(row(column(element("heading", text: "Pricing"), element("bar_chart")))))
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Code element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Bar chart element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   test "a page holding an element the catalog does not have is refused with a print failure naming the element's key" do
@@ -633,6 +639,229 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("progress", label: "Hours used")))))
 
     assert_equal({ height: [ "--spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }, drawn(document).drawn.last.last)
+  end
+
+  test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
+    document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
+
+    assert_equal [ "def total\n  42\nend", { font: "--font-mono", preformatted: true } ],
+                 drawn(document).drawn.find { |call| call.first == :text }.then { |call| [ call[1], call.last.slice(:font, :preformatted) ] }
+  end
+
+  test "a code element's code is drawn at the size, colour and line height keystone_ui's code block rule and classes give it" do
+    document = page(section(row(column(element("code", code: "puts 42")))))
+
+    assert_equal [ "--text-sm", { color: "--ks-color-text-code", leading: "--leading-relaxed" } ],
+                 drawn(document).drawn.find { |call| call.first == :text }.then { |call| [ call[2], call.last.slice(:color, :leading) ] }
+  end
+
+  test "a code element's code is drawn on the code block's fill and padding, inside the border and rounded corners keystone_ui's code rule gives it" do
+    document = page(section(row(column(element("code", code: "puts 42")))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-surface", 1 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }, clip: true } ],
+                   [ :box, { padding: [ "--ks-spacing", 4 ], fill: "--ks-color-code" } ], :text ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :text ? :text : call }
+  end
+
+  test "a code element's caption is drawn above its code, as the page shows it, in the look keystone_ui's code caption rule gives it with its line beneath" do
+    document = page(section(row(column(element("code", code: "puts 42", caption: "total.rb")))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 4, 2 ], fill: "--ks-color-fill-muted" } ],
+                   [ :text, "total.rb", "--text-xs", { font: "--font-mono", color: "--ks-color-text-display-muted", leading: "--text-xs--line-height" } ],
+                   [ :rule, { width: "--ks-border-width", color: "--ks-color-border-subtle" } ], [ :box, { padding: [ "--ks-spacing", 4 ], fill: "--ks-color-code" } ] ],
+                 drawn(document).drawn.drop(2).first(4)
+  end
+
+  test "a hero is drawn as its badge, its title and its subtitle, in the order the page shows them" do
+    document = page(section(row(column(element("hero", badge: "New", title: "Quotes in minutes", subtitle: "Build a quote from your price list.")))))
+
+    assert_equal [ "New", "Quotes in minutes", "Build a quote from your price list." ],
+                 drawn(document).drawn.select { |call| %i[text boxed_text].include?(call.first) }.map(&:second)
+  end
+
+  test "a hero's title is drawn at the size, weight, colour, letter spacing and line height keystone_ui's hero title rule and classes give it at the printed page's width" do
+    document = page(section(row(column(element("hero", title: "Quotes in minutes")))))
+
+    assert_equal [ "--text-5xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display", tracking: "--tracking-tight", leading: "--text-5xl--line-height" } ],
+                 drawn(document).drawn.find { |call| call[1] == "Quotes in minutes" }.then { |call| [ call[2], call.last.except(:align) ] }
+  end
+
+  test "a hero's subtitle is drawn at the size, colour and line height keystone_ui's hero subtitle rule and classes give it, no wider than its large width limit" do
+    document = page(section(row(column(element("hero", title: "Quotes in minutes", subtitle: "Build a quote from your price list.")))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-lg", 1 ] } ],
+                   [ :text, "Build a quote from your price list.", "--text-lg", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-lg--line-height" } ] ],
+                 drawn(document).drawn.each_cons(2).find { |_box, call| call[1] == "Build a quote from your price list." }.map { |call| [ *call.first(call.size - 1), call.last.except(:align) ] }
+  end
+
+  test "a hero's badge is drawn as its text in a pill with the fill, border, padding and text colour keystone_ui's hero badge rule gives it" do
+    document = page(section(row(column(element("hero", badge: "New", title: "Quotes in minutes")))))
+
+    assert_equal [ :boxed_text, "New", "--text-sm", { font: "--ks-font-body", color: "--ks-color-link", leading: "--text-sm--line-height", fill: "--ks-color-tint",
+                                                      padding: [ "--ks-spacing", 4, 1.5 ], radius: [ "--ks-radius-pill", 1 ], border: { width: "--ks-border-width", color: "--ks-color-tint-border" } } ],
+                 drawn(document).drawn.find { |call| call[1] == "New" }.then { |call| [ *call.first(3), call.last.except(:align) ] }
+  end
+
+  test "a centred hero draws its badge, title and subtitle centred, and a split hero draws them from the left, as the page lays them out at the printed page's width" do
+    aligned = %w[centered split].map do |layout|
+      document = page(section(row(column(element("hero", layout: layout, badge: "New", title: "Quotes in minutes", subtitle: "Build a quote.")))))
+      drawn(document).drawn.select { |call| %i[boxed_text text].include?(call.first) || (call.first == :box && call.last.key?(:width)) }.map { |call| call.last[:align] }
+    end
+
+    assert_equal [ [ :center ] * 4, [ nil ] * 4 ], aligned
+  end
+
+  test "a hero is drawn inside the space and padding keystone_ui's hero rules give it, its badge, title, subtitle and empty actions row eight spacing steps apart" do
+    document = page(section(row(column(element("hero", badge: "New", title: "Quotes in minutes", subtitle: "Build a quote.")))))
+
+    assert_equal [ [ :space, "--ks-spacing", 24 ], [ :box, { padding: [ "--ks-spacing", 6, 24 ] } ], :boxed_text, [ :space, "--ks-spacing", 8 ], :text,
+                   [ :space, "--ks-spacing", 8 ], :box, :text, [ :space, "--ks-spacing", 8 ] ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :space || call.last.keys == [ :padding ] ? call : call.first }
+  end
+
+  test "a call to action is drawn as its title, its subtitle and its text, in the order the page shows them" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?", subtitle: "Book a call this week.", text: "No card needed.")))))
+
+    assert_equal [ "Ready to start?", "Book a call this week.", "No card needed." ], drawn(document).texts
+  end
+
+  test "a call to action is drawn in a box with the fill, border, rounded corners and padding keystone_ui's call to action rule gives it at the printed page's width" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?")))))
+
+    assert_equal [ :box, { padding: [ "--ks-spacing", 6, 12 ], radius: [ "--ks-radius-surface", 2 ], fill: "--ks-color-fill-muted",
+                           border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } } ], drawn(document).drawn.second
+  end
+
+  test "a call to action's title is drawn centred at the size, weight, colour, letter spacing and line height keystone_ui's call to action title rule and classes give it" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?")))))
+
+    assert_equal [ "--text-4xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display", tracking: "--tracking-tight",
+                                   leading: "--text-4xl--line-height", align: :center } ], drawn(document).drawn.find { |call| call.first == :text }.last(2)
+  end
+
+  test "a call to action's subtitle is drawn centred in the look keystone_ui's call to action subtitle rule and classes give it, spaced from its title and text as the page spaces them" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?", subtitle: "Book a call this week.", text: "No card needed.")))))
+
+    assert_equal [ [ :space, "--ks-spacing", 4 ], [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-2xl", 1 ], align: :center } ],
+                   [ :text, "Book a call this week.", "--text-lg", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-lg--line-height", align: :center } ],
+                   [ :space, "--ks-spacing", 8 ], :text ],
+                 drawn(document).drawn.drop(3).map { |call| call[1] == "No card needed." ? :text : call }
+  end
+
+  test "a call to action's text is drawn centred in the page's own text size, line height and colour, which it takes from the page as the call to action sets none" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?", text: "No card needed.")))))
+
+    assert_equal [ "--text-base", { font: "--ks-font-body", color: "--ks-color-on-page", leading: "line-height", align: :center } ], drawn(document).drawn.last.last(2)
+  end
+
+  test "a card is drawn as its title, its summary and its link text, in the order the page shows them" do
+    document = page(section(row(column(element("card", title: "Pricing", summary: "Plans for every team.", link: "https://ty-ler.com/pricing", cta: "See plans")))))
+
+    assert_equal [ "Pricing", "Plans for every team.", "See plans" ],
+                 drawn(document).drawn.filter_map { |call| call[1] if call.first == :text || call.first == :rich_text }.map { |content| content.is_a?(Array) ? content.sum("") { |run| run[:text] } : content }
+  end
+
+  test "a card's link text is drawn opening the card's address when clicked" do
+    document = page(section(row(column(element("card", title: "Pricing", link: "https://ty-ler.com/pricing", cta: "See plans")))))
+
+    assert_equal [ { text: "See plans", link: "https://ty-ler.com/pricing" } ], drawn(document).drawn.find { |call| call.first == :rich_text }.second
+  end
+
+  test "a card is drawn in a box with the fill, border, rounded corners and padding keystone_ui's card rules give it at the printed page's width" do
+    document = page(section(row(column(element("card", title: "Pricing")))))
+
+    assert_equal [ :box, { padding: [ "--ks-spacing", 6, 6 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-surface",
+                           border: { width: "--ks-border-width", color: "--ks-color-border" } } ], drawn(document).drawn.second
+  end
+
+  test "a card's title, summary and link text are drawn in the looks keystone_ui's card title, summary and link rules give them, spaced as the card's body and link rows space them" do
+    document = page(section(row(column(element("card", title: "Pricing", summary: "Plans for every team.", link: "https://ty-ler.com/pricing", cta: "See plans")))))
+
+    assert_equal [ [ :text, "Pricing", "--text-lg", { font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text", leading: "--text-lg--line-height" } ],
+                   [ :space, "--ks-spacing", 1 ],
+                   [ :text, "Plans for every team.", "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-muted", leading: "--text-sm--line-height" } ],
+                   [ :space, "--ks-spacing", 4 ],
+                   [ :rich_text, [ { text: "See plans", link: "https://ty-ler.com/pricing" } ], "--text-sm",
+                     { font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-link", leading: "--text-sm--line-height" } ] ],
+                 drawn(document).drawn.drop(2)
+  end
+
+  test "an info block is drawn as its summary with its detail shown in full beneath it, as the page shows them once opened" do
+    document = page(section(row(column(element("info", summary: "How hours are counted", detail: "Hours are counted to the quarter hour.\nTravel is not counted.")))))
+
+    assert_equal [ "How hours are counted", "Hours are counted to the quarter hour. Travel is not counted." ], drawn(document).texts
+  end
+
+  test "an info block's summary and detail are each drawn in the box keystone_ui's info popup rules give them, at their own widths, the detail two spacing steps under the summary" do
+    document = page(section(row(column(element("info", summary: "How hours are counted", detail: "To the quarter hour.")))))
+    popup = { padding: [ "--ks-spacing", 3 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-overlay", border: { width: "--ks-border-width", color: "--ks-color-border" } }
+
+    assert_equal [ [ :box, popup.merge(width: [ "--spacing", 64 ]) ], :text, [ :space, "--ks-spacing", 2 ], [ :box, popup.merge(width: [ "--spacing", 80 ]) ], :text ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :text ? :text : call }
+  end
+
+  test "an info block's summary and detail are drawn at the size, colour and line height keystone_ui's info popup rules and classes give them" do
+    document = page(section(row(column(element("info", summary: "How hours are counted", detail: "To the quarter hour.")))))
+
+    assert_equal [ [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-on-overlay-muted", leading: "--text-sm--line-height" } ] ] * 2,
+                 drawn(document).drawn.select { |call| call.first == :text }.map { |call| call.last(2) }
+  end
+
+  test "a feature grid is drawn as its title, its subtitle and each feature's title and description, in the order the page shows them" do
+    features = [ { "title" => "Fast", "description" => "Pages load quickly." }, { "title" => "Clear", "description" => "Every page reads plainly." } ]
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.", features: features)))))
+
+    assert_equal [ "Why teams choose us", "Three reasons.", "Fast", "Pages load quickly.", "Clear", "Every page reads plainly." ], drawn(document).texts
+  end
+
+  test "a feature grid's title and subtitle are drawn centred in the looks keystone_ui's feature grid title and subtitle rules give them, spaced as the page spaces them" do
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.")))))
+
+    assert_equal [ [ :text, "Why teams choose us", "--text-4xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display",
+                                                                    tracking: "--tracking-tight", leading: "--text-4xl--line-height", align: :center } ],
+                   [ :space, "--ks-spacing", 4 ], [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-2xl", 1 ], align: :center } ], :text, [ :space, "--ks-spacing", 16 ] ],
+                 drawn(document).drawn.drop(2).first(5).map { |call| call[1] == "Three reasons." ? :text : call }
+  end
+
+  test "a feature grid's features are drawn two to a row of equal columns, six spacing steps apart across and down, as keystone_ui's feature grid lays them out at the printed page's width" do
+    features = %w[Fast Clear Yours].map { |title| { "title" => title, "description" => "#{title} pages." } }
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", features: features)))))
+
+    assert_equal [ [ :row, [ Rational(1, 2), Rational(1, 2) ], { gap: [ "--ks-spacing", 6 ], grid: true } ], [ :space, "--ks-spacing", 6 ],
+                   [ :row, [ Rational(1, 2), Rational(1, 2) ], { gap: [ "--ks-spacing", 6 ], grid: true } ] ],
+                 drawn(document).drawn.drop(1).select { |call| call.first == :row || call == [ :space, "--ks-spacing", 6 ] }
+  end
+
+  test "a feature is drawn in the box of keystone_ui's feature card, stretched to its row's height as the grid stretches it, its title and description in the looks the feature card's title and description rules give them" do
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", features: [ { "title" => "Fast", "description" => "Pages load quickly." } ])))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-raised", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" },
+                             stretch: true } ],
+                   [ :text, "Fast", "--text-lg", { font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: "--text-lg--line-height" } ],
+                   [ :space, "--ks-spacing", 2 ],
+                   [ :text, "Pages load quickly.", "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-sm--line-height" } ] ],
+                 drawn(document).drawn.reject { |call| call.first == :together_end }.last(4)
+  end
+
+  test "a feature grid's title and subtitle are drawn together with its first row of features, so they are never printed on a page apart from it" do
+    features = %w[Fast Clear Yours].map { |title| { "title" => title, "description" => "#{title} pages." } }
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.", features: features)))))
+
+    assert_equal %i[together text space box text space row box text space text box text space text together_end space row box text space text],
+                 drawn(document).drawn.drop(1).map(&:first)
+  end
+
+  test "every element the page shows as ordinary text joins a stored line break into a space, as the browser does, and only code keeps its line breaks" do
+    broken = "Two\nlines"
+    elements = [ element("heading", text: broken, note: broken), element("label", text: broken), element("paragraph", text: broken), element("alert", title: broken, message: broken),
+                 element("value_list", rows: [ { "label" => broken, "value" => broken, "note" => broken } ]), element("button", label: broken), element("accordion", items: [ { "question" => broken, "answer" => broken } ]),
+                 element("data_table", columns: [ { "key" => "name", "label" => broken } ], items: [ { "name" => broken } ]), element("stat_card", label: broken, value: broken, suffix: broken, note: broken),
+                 element("figure", text: broken), element("badge", label: broken), element("progress", label: broken), element("hero", badge: broken, title: broken, subtitle: broken),
+                 element("cta_banner", title: broken, subtitle: broken, text: broken), element("card", title: broken, summary: broken, cta: broken), element("info", summary: broken, detail: broken),
+                 element("feature_grid", title: broken, subtitle: broken, features: [ { "title" => broken, "description" => broken } ]), element("code", code: broken) ]
+    strings = ->(drawn) { drawn.is_a?(String) ? [ drawn ] : Array(drawn.is_a?(Hash) ? drawn.values : drawn).flat_map { |part| part.is_a?(String) || part.is_a?(Array) || part.is_a?(Hash) ? strings.(part) : [] } }
+
+    assert_equal [ broken ], strings.(drawn(page(section(row(column(*elements))))).drawn).select { |text| text.include?("\n") }.uniq
   end
 
   private

@@ -17,6 +17,18 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "FFFFFF", look.color("--ks-color-on-fill")
   end
 
+  test "an eight-digit hex colour is read as the six-digit hex colour it names, without its opacity" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-tint:#3b82f61a}")
+
+    assert_equal "3B82F6", look.color("--ks-color-tint")
+  end
+
+  test "a colour token's opacity is read from the last two digits of an eight-digit hex colour, and a colour with none is fully opaque" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-tint:#3b82f633;--ks-color-text:#000000}")
+
+    assert_equal [ 0.2, 1.0 ], [ look.opacity("--ks-color-tint"), look.opacity("--ks-color-text") ]
+  end
+
   test "an oklch colour is turned into the hex colour it names" do
     look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-danger:oklch(57.7% .245 27.325)}")
 
@@ -63,6 +75,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     look = KeystoneUi::Pages::PdfLook.new(':root{--ks-font-body:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif}')
 
     assert_equal "Helvetica", look.font("--ks-font-body").name
+  end
+
+  test "a font token naming only system monospace fonts, with no font files, prints in Courier" do
+    look = KeystoneUi::Pages::PdfLook.new(':root{--font-mono:ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace}')
+
+    assert_equal "Courier", look.font("--font-mono").name
   end
 
   test "a font the stylesheet loads from files prints from the TrueType copies served beside them, in regular, bold and italic" do
