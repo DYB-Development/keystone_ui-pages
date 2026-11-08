@@ -554,6 +554,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ padding: [ "--ks-spacing", 4, 0 ] }, drawn(document).drawn.find { |call| call.first == :box }&.last)
   end
 
+  test "a stat's label and note are drawn at the size, weight, colour and line height keystone_ui's stat label and note rules give them" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", note: "This month")))))
+
+    assert_equal [ [ "--text-sm", { font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-muted", leading: "--text-sm--line-height" } ],
+                   [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-muted", leading: "--text-sm--line-height" } ] ],
+                 drawn(document).drawn.select { |call| call.first == :text }.map { |call| call.last(2) }
+  end
+
   private
 
   def drawn(document, values: {})

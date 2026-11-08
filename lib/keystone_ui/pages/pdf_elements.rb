@@ -179,9 +179,9 @@ module KeystoneUi
 
       def stat_card(surface, fields)
         surface.box(**(fields[:plain].to_s == "true" ? STAT_PLAIN_LOOK : STAT_CARD_LOOK)) do
-          surface.text(fields[:label], size: STAT_LABEL_SIZE)
+          surface.text(fields[:label], size: STAT_LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-muted", leading: line_height(STAT_LABEL_SIZE))
           surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE, color: TONE_COLORS.fetch(fields[:variant].to_s, TONE_COLORS["neutral"]))
-          surface.text(fields[:note], size: STAT_NOTE_SIZE) if fields[:note].present?
+          surface.text(fields[:note], size: STAT_NOTE_SIZE, font: "--ks-font-body", color: "--ks-color-text-muted", leading: line_height(STAT_NOTE_SIZE)) if fields[:note].present?
         end
       end
 
