@@ -244,7 +244,7 @@ module KeystoneUi
       end
 
       def code(surface, fields)
-        surface.text(fields[:code], size: CODE_SIZE, font: CODE_FONT, preformatted: true)
+        surface.text(fields[:code], size: CODE_SIZE, font: CODE_FONT, color: "--ks-color-text-code", leading: "--leading-relaxed", preformatted: true)
       end
 
       def paragraph(surface, fields)

@@ -642,6 +642,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.find { |call| call.first == :text }.then { |call| [ call[1], call.last.slice(:font, :preformatted) ] }
   end
 
+  test "a code element's code is drawn at the size, colour and line height keystone_ui's code block rule and classes give it" do
+    document = page(section(row(column(element("code", code: "puts 42")))))
+
+    assert_equal [ "--text-sm", { color: "--ks-color-text-code", leading: "--leading-relaxed" } ],
+                 drawn(document).drawn.find { |call| call.first == :text }.then { |call| [ call[2], call.last.slice(:color, :leading) ] }
+  end
+
   private
 
   def drawn(document, values: {})
