@@ -346,6 +346,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 13.872 / 2, drawn["Begins"] - drawn["Middle"], 0.001
   end
 
+  test "a table draws a line of its parts divider's width and colour under its heading row and above its total row" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), [ table_row("Review"), table_row("Audit") ], total: table_row("Total"), **table_look,
+                  parts_divider: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_equal 2, surface.render.scan(/0\.0 0\.0 0\.0 scn\n36\.0 [\d.]+ 540\.0 1\.5 re\nf/).size
+  end
+
   private
 
   def look

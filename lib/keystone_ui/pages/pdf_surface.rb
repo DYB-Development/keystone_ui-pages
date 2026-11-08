@@ -109,17 +109,19 @@ module KeystoneUi
         @document.y = -lowest.last
       end
 
-      def table(heading, rows, border:, radius:, divider:, total: nil)
+      def table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)
         edge = @look.points(border[:width])
         frame = { border: border, edge: edge, corner: @look.points(radius.first) * radius.last, left: @document.bounds.absolute_left, width: @document.bounds.width, top: @document.y }
         @document.move_down(edge)
         @document.bounding_box([ edge, @document.cursor ], width: @document.bounds.width - edge * 2) do
           below = [ *rows, total ].compact
           widths = column_widths([ heading, *below ])
-          restarted(frame) unless fits?([ heading, *kept_together(below, 0) ].sum { |table_row| row_height(table_row, widths) })
-          drawn_table_row(heading, widths)
+          separators = below.each_index.map { |position| position == rows.size ? parts_divider : (divider if position.positive?) }
+          heading_lines = { row: heading, line: parts_divider }
+          restarted(frame) unless fits?(headed_height(heading_lines, widths) + rows_height(kept_together(below, 0), widths))
+          headed(heading_lines, widths)
           below.each_with_index do |table_row, position|
-            kept_on_page(kept_together(below, position), heading, widths, frame) { divided(divider, widths.sum) if position.positive? && position < rows.size }
+            kept_on_page(kept_together(below, position), separators[position], heading_lines, widths, frame) { divided(separators[position], widths.sum) }
             drawn_table_row(table_row, widths)
           end
           framed(frame)
@@ -191,12 +193,29 @@ module KeystoneUi
         rows[position]&.dig(:with_next) ? rows[position, 2] : rows[position, 1]
       end
 
-      def kept_on_page(table_rows, heading, widths, frame)
-        return yield if fits?(table_rows.sum { |table_row| row_height(table_row, widths) })
+      def kept_on_page(table_rows, separator, heading_lines, widths, frame)
+        return yield if fits?(line_thickness(separator) + rows_height(table_rows, widths))
 
         framed(frame)
         restarted(frame)
-        drawn_table_row(heading, widths)
+        headed(heading_lines, widths)
+      end
+
+      def headed(heading_lines, widths)
+        drawn_table_row(heading_lines[:row], widths)
+        divided(heading_lines[:line], widths.sum)
+      end
+
+      def headed_height(heading_lines, widths)
+        row_height(heading_lines[:row], widths) + line_thickness(heading_lines[:line])
+      end
+
+      def rows_height(table_rows, widths)
+        table_rows.sum { |table_row| row_height(table_row, widths) }
+      end
+
+      def line_thickness(line)
+        line ? @look.points(line[:width]) : 0
       end
 
       def restarted(frame)
@@ -221,6 +240,8 @@ module KeystoneUi
       end
 
       def divided(divider, width)
+        return unless divider
+
         thickness = @look.points(divider[:width])
         @document.fill_color(@look.color(divider[:color]))
         @document.fill_rectangle([ 0, @document.cursor ], width, thickness)
