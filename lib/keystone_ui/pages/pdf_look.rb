@@ -43,6 +43,7 @@ module KeystoneUi
         return oklch_hex(css) if css.start_with?("oklch(")
 
         hex = css.delete_prefix("#").upcase
+        unreadable(name, css) unless hex.match?(/\A(\h{3}|\h{6})\z/)
         hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex
       end
 
@@ -75,6 +76,10 @@ module KeystoneUi
       end
 
       private
+
+      def unreadable(name, css)
+        raise PrintFailed, "The PDF cannot read the keystone_ui token #{name}, whose value is #{css}."
+      end
 
       def resolved(css)
         start = css.index("var(")
