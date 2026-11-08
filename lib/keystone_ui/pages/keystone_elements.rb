@@ -9,9 +9,9 @@ module KeystoneUi
       module_function
 
       def register(catalog)
-        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start",
+        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start", pdf: PdfElements.method(:button),
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
-        catalog.register(key: :next_page, name: "Next page", component: :pages_next_page, icon: :cursor, group: "Basics", align: "start", placed: true,
+        catalog.register(key: :next_page, name: "Next page", component: :pages_next_page, icon: :cursor, group: "Basics", align: "start", placed: true, pdf: PdfElements.method(:left_out),
           fields: [ { key: :label, label: "Label", default: "Next" } ])
         catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
@@ -63,7 +63,7 @@ module KeystoneUi
         catalog.register(key: :badge, name: "Badge", component: :ui_badge, icon: :tag, group: "Basics", align: "start",
           fields: [ { key: :label, label: "Label", kind: :text, default: "Badge" },
                     { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
-        catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start",
+        catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start", pdf: PdfElements.method(:left_out),
           fields: [ { key: :text, label: "Text to copy", kind: :text },
                     { key: :label, label: "Label", kind: :text, default: "Copy" } ])
         catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content",
@@ -76,7 +76,7 @@ module KeystoneUi
                       default: [ { "title" => "Fast", "description" => "Pages load quickly." },
                                  { "title" => "Clear", "description" => "Every page reads plainly." },
                                  { "title" => "Yours", "description" => "Built from your own components." } ] } ])
-        catalog.register(key: :form, name: "Form", component: :pages_form, icon: :card, group: "Content", placed: true,
+        catalog.register(key: :form, name: "Form", component: :pages_form, icon: :card, group: "Content", placed: true, pdf: PdfElements.method(:left_out),
           fields: [ { key: :form_name, label: "Form name", kind: :text, default: "Contact" },
                     { key: :fields, label: "Fields", kind: :list,
                       entry: [ { key: :label, label: "Label", kind: :text }, { key: :name, label: "Field name", kind: :text },
@@ -89,7 +89,7 @@ module KeystoneUi
                     { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." },
                     { key: :after_submitting, label: "After submitting", kind: :one_of, options: %w[thank_you address next_page], default: "thank_you" },
                     { key: :next_address, label: "Address to send the visitor to", kind: :address } ])
-        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text",
+        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text", pdf: PdfElements.method(:accordion),
           fields: [ { key: :items, label: "Questions", kind: :list,
                       entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],
                       default: [ { "question" => "What is this?", "answer" => "A question visitors often ask." },

@@ -21,7 +21,7 @@ module KeystoneUi
         @document.fill_color(@look.color(color))
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
           @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) do
-            spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra) }
+            spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra, final_gap: leading.nil?) }
           end
         end
       end
@@ -32,18 +32,37 @@ module KeystoneUi
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         fragments = runs.map { |run| { text: run[:text], link: run[:link], styles: %i[bold italic].select { |style| run[style] } }.compact }
-        @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra) } }
+        @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
-      def box(fill:, padding:, radius:, &content)
-        inset = @look.points(padding.first) * padding.last
+      def box(padding:, radius:, fill: nil, border: nil, &content)
+        across, down = insets(padding, border)
         width = @document.bounds.width
         top = @document.cursor
-        height = measured(width - inset * 2, &content) + inset * 2
+        height = measured(width - across * 2, &content) + down * 2
+        corner = @look.points(radius.first) * radius.last
+        if fill
+          @document.fill_color(@look.color(fill))
+          @document.fill_rounded_rectangle([ 0, top ], width, height, corner)
+        end
+        bordered(border, top, width, height, corner) if border
+        @document.bounding_box([ across, top - down ], width: width - across * 2, &content)
+        @document.move_down(down)
+      end
+
+      def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
+        across, down = insets(padding, border)
+        width = @document.bounds.width
+        top = @document.cursor
+        drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
+        height = measured(width - across * 2, &drawn) + down * 2
+        fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
+        linked(link, fill_width, height) if link
         @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], width, height, @look.points(radius.first) * radius.last)
-        @document.bounding_box([ inset, top - inset ], width: width - inset * 2, &content)
-        @document.move_down(inset)
+        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, @look.points(radius.first) * radius.last)
+        bordered(border, top, fill_width, height, @look.points(radius.first) * radius.last) if border
+        @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
+        @document.move_down(down)
       end
 
       def rule(width:, color:)
@@ -82,10 +101,15 @@ module KeystoneUi
       private
 
       def spaced(points, leading)
-        extra = leading ? @look.ratio(leading) * points - @document.font.height_at(points) : 0
-        @document.move_down(extra / 2)
+        return yield 0 unless leading
+
+        line = @look.ratio(leading) * points
+        font = @document.font
+        letters = (font.ascender + font.descender) / @document.font_size * points
+        extra = line - font.height_at(points)
+        @document.move_down((line - letters) / 2)
         yield extra
-        @document.move_down(extra / 2)
+        @document.move_down((line - letters) / 2)
       end
 
       def measured(width)
@@ -96,6 +120,34 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def insets(padding, border)
+        edge = border ? @look.points(border[:width]) : 0
+        [ @look.points(padding.first) * padding[1] + edge, @look.points(padding.first) * padding.last + edge ]
+      end
+
+      def bordered(border, top, width, height, corner)
+        thickness = @look.points(border[:width])
+        return unless thickness.positive?
+
+        @document.stroke_color(@look.color(border[:color]))
+        @document.line_width(thickness)
+        @document.stroke_rounded_rectangle([ thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
+      end
+
+      def linked(address, width, height)
+        left = @document.bounds.absolute_left
+        top = @document.y
+        @document.link_annotation([ left, top - height, left + width, top ], Border: [ 0, 0, 0 ], A: { Type: :Action, S: :URI, URI: PDF::Core::LiteralString.new(address) })
+      end
+
+      def text_width(content, size, font, weight)
+        typeface = @look.font(font)
+        @document.font_families[typeface.name] = typeface.files if typeface.files
+        width = 0
+        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { width = @document.width_of(content.to_s, size: @look.points(size)) }
+        width
       end
 
       def bold?(weight)

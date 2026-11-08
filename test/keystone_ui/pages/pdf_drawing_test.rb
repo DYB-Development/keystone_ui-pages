@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
 require "keystone_ui/pages/pdf_drawing"
+require "keystone_ui/pages/catalog"
+require "keystone_ui/pages/keystone_elements"
 
 class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   class RecordingSurface
@@ -26,6 +29,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     def box(**style)
       @drawn << [ :box, style ]
       yield
+    end
+
+    def boxed_text(content, size:, **style)
+      @drawn << [ :boxed_text, content, size, style ]
     end
 
     def rule(**style)
@@ -314,6 +321,67 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
 
     assert_equal [ "line-height", "line-height" ], drawn(document).styles.pluck(:leading)
+  end
+
+  test "a form, a copy button and a Next page element draw nothing in the PDF and do not refuse it" do
+    document = page(section(row(column(element("form"), element("copy_button", text: "ABC123"), element("next_page")))))
+
+    keystone_elements = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }
+
+    assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first)
+  end
+
+  test "a button with no address is drawn as its label, in the look keystone_ui's primary medium button rules give it" do
+    document = page(section(row(column(element("button", label: "Book a call")))))
+
+    assert_equal [ :boxed_text, "Book a call", "--text-base",
+                   { font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-on-accent", leading: "--text-base--line-height",
+                     fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ],
+                     border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: nil } ], drawn(document).drawn.last
+  end
+
+  test "a button with an address is drawn opening that address when clicked" do
+    document = page(section(row(column(element("button", label: "Book a call", href: "https://ty-ler.com/book")))))
+
+    assert_equal "https://ty-ler.com/book", drawn(document).drawn.last.last[:link]
+  end
+
+  test "an accordion is drawn as each question with its answer beneath, in the order the page shows them" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." }, { "question" => "Who for?", "answer" => "Hosts." } ])))))
+
+    assert_equal [ "What is it?", "A page.", "Who for?", "Hosts." ], drawn(document).texts
+  end
+
+  test "an accordion's question is drawn in the look keystone_ui's accordion button rule gives it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." } ])))))
+
+    assert_equal({ font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: "line-height" }, drawn(document).styles.first)
+  end
+
+  test "an accordion's answer is drawn at the size and in the look keystone_ui's accordion answer rule gives it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." } ])))))
+
+    assert_equal [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-body", leading: "--text-sm--line-height" } ], drawn(document).drawn.select { |call| call.first == :text }.last.last(2)
+  end
+
+  test "each accordion question and its answer are drawn in a box with the border, rounded corners and padding keystone_ui's accordion item and button rules give it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." }, { "question" => "Who for?", "answer" => "Hosts." } ])))))
+
+    item = { padding: [ "--ks-spacing", 6, 4 ], radius: [ "--ks-radius-surface", 1.5 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } }
+    assert_equal [ [ :box, item ], :text, :text, [ :box, item ], :text, :text ], drawn(document).drawn.drop(1).reject { |call| call.first == :space }.map { |call| call.first == :box ? call : call.first }
+  end
+
+  test "an accordion's answer is drawn four of keystone_ui's spacing steps under its question, as the accordion button pads it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." } ])))))
+
+    assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 4 ], :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "accordion items are drawn four of keystone_ui's spacing steps apart, as the accordion rule spaces them, and the first has no space above it" do
+    document = page(section(row(column(element("accordion", items: [ { "question" => "What is it?", "answer" => "A page." }, { "question" => "Who for?", "answer" => "Hosts." } ])))))
+
+    gap = [ :space, "--ks-spacing", 4 ]
+    assert_equal [ :row, :box, :text, gap, :text, gap, :box, :text, gap, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
   end
 
   private

@@ -19,6 +19,15 @@ module KeystoneUi
       VALUE_LIST_ROW_PADDING = 2
       VALUE_LIST_GAP = 4
       VALUE_LIST_ALIGNMENTS = { "end" => :right }.freeze
+      BUTTON_SIZE = "--text-base"
+      BUTTON_PADDING_ACROSS = 4
+      BUTTON_PADDING_DOWN = 2
+      ACCORDION_QUESTION_SIZE = "--text-base"
+      ACCORDION_ANSWER_SIZE = "--text-sm"
+      ACCORDION_PADDING_ACROSS = 6
+      ACCORDION_PADDING_DOWN = 4
+      ACCORDION_RADIUS = 1.5
+      ACCORDION_GAP = 4
       ALERT_TITLE_GAP = 1
       ALERT_PADDING = 4
       ALERT_RADIUS = 0.75
@@ -33,6 +42,26 @@ module KeystoneUi
         size = HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"])
         surface.text(fields[:text], size: size, font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text", leading: line_height(size))
         surface.text(fields[:note], size: NOTE_SIZE, color: "--ks-color-text-muted", leading: line_height(NOTE_SIZE)) if fields[:note].present?
+      end
+
+      def left_out(_surface, _fields); end
+
+      def button(surface, fields)
+        surface.boxed_text(fields[:label], size: BUTTON_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-strong", color: "--ks-color-on-accent", leading: line_height(BUTTON_SIZE),
+                                           fill: "--ks-color-accent", padding: [ SPACING, BUTTON_PADDING_ACROSS, BUTTON_PADDING_DOWN ], radius: [ "--ks-radius-control", 1 ],
+                                           border: { width: "--ks-border-width-control", color: "--ks-color-on-accent" }, link: fields[:href].presence)
+      end
+
+      def accordion(surface, fields)
+        Array(fields[:items].presence).each_with_index do |item, position|
+          surface.space(SPACING, ACCORDION_GAP) if position.positive?
+          surface.box(padding: [ SPACING, ACCORDION_PADDING_ACROSS, ACCORDION_PADDING_DOWN ], radius: [ "--ks-radius-surface", ACCORDION_RADIUS ],
+                      border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }) do
+            surface.text(item[:question], size: ACCORDION_QUESTION_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: PAGE_LINE_HEIGHT)
+            surface.space(SPACING, ACCORDION_PADDING_DOWN)
+            surface.text(item[:answer], size: ACCORDION_ANSWER_SIZE, font: "--ks-font-body", color: "--ks-color-text-body", leading: line_height(ACCORDION_ANSWER_SIZE))
+          end
+        end
       end
 
       def line_height(size)

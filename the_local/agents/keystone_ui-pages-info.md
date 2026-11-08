@@ -104,16 +104,23 @@ Keystone UI itself must be installed first. Its own install local,
   and elements with Prawn. In the Ruby drawing each element draws through its
   own PDF drawing, given when the element is added to the catalog. A page
   holding an element with no PDF drawing cannot be printed that way, and the
-  error names the element. So far the heading, label, paragraph, alert and label
-  and value list elements have one.
+  error names the element. So far the heading, label, paragraph, alert, label
+  and value list, button and accordion elements have one.
+- **Screen-only elements are left out of a Ruby-drawn PDF.** The form, copy
+  button and Next page elements have a PDF drawing that prints nothing, so a
+  page holding them still prints, without them.
 - **What the Ruby drawing prints for each of those.** A heading prints its text
   and its note. A label prints in capitals with the caption's wider letter
   spacing, as it shows on screen. A paragraph keeps its bold, italic, line breaks
-  and links. An alert prints its title and message in a rounded box tinted in its
-  tone: info, success, warning or error. A label and value list prints one row
-  per entry with a line between rows, a note under a label, a total row in the
-  strong weight, and the values set to the right when the element is aligned to
-  the end.
+  and links, and a link opens its address when clicked in the PDF. An alert
+  prints its title and message in a rounded box tinted in its tone: info,
+  success, warning or error. A label and value list prints one row per entry
+  with a line between rows, a note under a label, a total row in the strong
+  weight, and the values set to the right when the element is aligned to the
+  end. A button prints its label in the look of Keystone UI's primary button,
+  and one with an address opens it when clicked in the PDF. An accordion prints
+  every question in its own bordered box with its answer shown beneath it, as an
+  opened question shows on screen, without the arrow.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
   fonts, font weights, text colours, tone colours, borders, corner radius and
   spacing from the host's compiled stylesheet, in light mode and in the host's

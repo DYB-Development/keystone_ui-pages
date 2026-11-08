@@ -25,7 +25,8 @@ develop:
   - KeystoneUi::Pages::NoPdfDrawing
   - "text(content"
   - "rich_text(runs"
-  - "box(fill:"
+  - "box(padding:"
+  - "boxed_text(content"
   - "rule(width:"
   - "space(token"
   - "row(widths"
