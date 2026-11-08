@@ -34,6 +34,7 @@ module KeystoneUi
       SPACING = "--ks-spacing"
       ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
       TABLE_SIZE = "--text-sm"
+      TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -114,13 +115,17 @@ module KeystoneUi
 
       def data_table(surface, fields)
         columns = Array(fields[:columns].presence)
-        heading = table_row(columns.map { |column| column[:label] })
-        rows = Array(fields[:items].presence).map { |item| table_row(columns.map { |column| item.to_h.stringify_keys[column[:key].to_s] }) }
+        heading = table_row(columns, columns.map { |column| column[:label] })
+        rows = Array(fields[:items].presence).map { |item| table_row(columns, columns.map { |column| item.to_h.stringify_keys[column[:key].to_s] }) }
         surface.table(heading, rows)
       end
 
-      def table_row(texts)
-        { cells: texts.map { |text| { text: text.to_s, size: TABLE_SIZE } } }
+      def table_row(columns, texts)
+        { cells: columns.zip(texts).each_with_index.map { |(column, text), index| { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, index == columns.size - 1) } } }
+      end
+
+      def table_alignment(column, last)
+        TABLE_ALIGNMENTS.fetch(column[:align].to_s) { last ? :right : :left }
       end
 
       def paragraph(surface, fields)

@@ -428,6 +428,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ %w[Service Hours], [] ], drawn(document, values: { "lines" => [] }).table_texts
   end
 
+  test "a table's columns are aligned as keystone_ui's table aligns them, the last to the right unless set to start and any set to end to the right" do
+    columns = [ { "key" => "service", "label" => "Service" }, { "key" => "hours", "label" => "Hours", "align" => "end" }, { "key" => "notes", "label" => "Notes", "align" => "start" } ]
+    document = page(section(row(column(element("data_table", columns: columns, items: [ { "service" => "Review", "hours" => "4", "notes" => "Done" } ]),
+                                       element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal [ [ %i[left right left], %i[left right left] ], [ %i[left right], %i[left right] ] ],
+                 drawn(document).tables.map { |call| [ call[1], *call[2] ].map { |table_row| table_row[:cells].pluck(:align) } }
+  end
+
   private
 
   def drawn(document, values: {})
