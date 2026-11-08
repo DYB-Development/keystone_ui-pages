@@ -30,7 +30,7 @@ module KeystoneUi
           fields: [ { key: :text, label: "Text", kind: :text, default: "Label" } ])
         catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text", pdf: PdfElements.method(:paragraph),
           fields: [ { key: :text, label: "Text", kind: :rich_text, default: "Write the text of this paragraph here." } ])
-        catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text",
+        catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text", pdf: PdfElements.method(:hero),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
                     { key: :subtitle, label: "Subtitle", kind: :long_text },
                     { key: :badge, label: "Badge", kind: :text },

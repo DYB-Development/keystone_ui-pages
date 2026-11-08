@@ -666,6 +666,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(2).first(4)
   end
 
+  test "a hero is drawn as its badge, its title and its subtitle, in the order the page shows them" do
+    document = page(section(row(column(element("hero", badge: "New", title: "Quotes in minutes", subtitle: "Build a quote from your price list.")))))
+
+    assert_equal [ "New", "Quotes in minutes", "Build a quote from your price list." ],
+                 drawn(document).drawn.select { |call| %i[text boxed_text].include?(call.first) }.map(&:second)
+  end
+
   private
 
   def drawn(document, values: {})

@@ -70,6 +70,9 @@ module KeystoneUi
       CODE_BLOCK_LOOK = { padding: [ SPACING, 4 ], fill: "--ks-color-code" }.freeze
       CODE_CAPTION_LOOK = { padding: [ SPACING, 4, 2 ], fill: "--ks-color-fill-muted" }.freeze
       CODE_CAPTION_SIZE = "--text-xs"
+      HERO_BADGE_SIZE = "--text-sm"
+      HERO_TITLE_SIZE = "--text-5xl"
+      HERO_SUBTITLE_SIZE = "--text-lg"
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -259,6 +262,12 @@ module KeystoneUi
       def code_caption(surface, caption)
         surface.box(**CODE_CAPTION_LOOK) { surface.text(caption, size: CODE_CAPTION_SIZE, font: CODE_FONT, color: "--ks-color-text-display-muted", leading: line_height(CODE_CAPTION_SIZE)) }
         surface.rule(width: "--ks-border-width", color: "--ks-color-border-subtle")
+      end
+
+      def hero(surface, fields)
+        surface.text(fields[:badge], size: HERO_BADGE_SIZE) if fields[:badge].present?
+        surface.text(fields[:title], size: HERO_TITLE_SIZE)
+        surface.text(fields[:subtitle], size: HERO_SUBTITLE_SIZE) if fields[:subtitle].present?
       end
 
       def paragraph(surface, fields)
