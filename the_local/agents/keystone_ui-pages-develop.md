@@ -224,7 +224,8 @@ inherit from the base controller, so define it there.
   than `rem`, `em`, `px` or `pt` that is not zero, raises `PrintFailed` naming
   the token and its value. Each element draws through the `pdf:` drawing given
   to `catalog.register`. Of the built-in elements `heading`, `label`,
-  `paragraph`, `alert`, `value_list`, `button` and `accordion` have one.
+  `paragraph`, `alert`, `value_list`, `button`, `accordion` and `data_table`
+  have one.
   `form`, `copy_button` and `next_page` have a drawing that draws nothing, so
   they are left out of the PDF and do not raise. Every other built-in element
   raises `NoPdfDrawing`. A page holding an element whose key the catalog does
@@ -280,6 +281,28 @@ inherit from the base controller, so define it there.
     the stylesheet's `html` rule gives. The answer draws four `--ks-spacing`
     steps under it at `--text-sm` in `--ks-color-text-body`, at
     `--text-sm--line-height`. An accordion with no items draws nothing.
+  - A table draws with the surface's `table` call, outlined with
+    `--ks-border-width` in `--ks-color-border`, with corners of one
+    `--ks-radius-surface`, and a line of `--ks-border-width` in
+    `--ks-color-divider` between item rows. Every cell draws at `--text-sm` in
+    `--ks-font-body` at `--text-sm--line-height`. The heading row holds each
+    column's heading on `--ks-color-table-head`, at `--ks-font-weight-heading`
+    and `--ks-color-text-heading`, padded by 3.5 `--ks-spacing` steps above and
+    below. Each item row draws on `--ks-color-table-body`, padded by four steps
+    above and below, with the first and last columns at
+    `--ks-font-weight-medium` in `--ks-color-text` and the columns between in
+    `--ks-color-text-muted`. The first column is padded by six steps on the
+    left and three on the right, the last by three and six, and the others by
+    three on each side. A column whose align is `start` draws against the left
+    and one whose align is `end` against the right, and with no align the last
+    column draws against the right and the others against the left. With
+    `group_by` set, a group row draws before the first item and before each
+    item whose value for that key differs from the item before it, styled as the heading, holding the value in
+    its first cell and that group's entry in `group_totals`, keyed by the value
+    and then by column key, in the others. A group row always draws on the same
+    page as the item after it. An item with no value for the key gets no group
+    row. With `total` set, a total row keyed by column key draws last, styled
+    as the heading.
   - The form, the copy button and the Next page button draw nothing in the
     Ruby drawing. The four `--ks-spacing` steps between elements in a column
     are still kept around each of them.
@@ -445,7 +468,7 @@ inherit from the base controller, so define it there.
   field at its `default:`. A `:list` field arrives as an array of hashes with
   symbol keys, each blank part filled with its entry's `default:`. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has seven
+  reads the tokens as the Ruby drawing's look describes. The surface has eight
   calls.
   - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
@@ -488,6 +511,27 @@ inherit from the base controller, so define it there.
     of steps put before every part but the first. The block runs once per part
     with its index, every part starts at the same height, and drawing continues
     below the tallest.
+  - `table(heading, rows, border:, radius:, divider:, total: nil)` draws a table
+    the width of the column. `heading`, each entry of `rows` and `total` are
+    rows, each a hash of `cells:` and optionally `fill:`, a colour token drawn
+    behind the row, and `with_next: true`, which keeps the row on the same page
+    as the row after it. Every row has the same number of cells. Each cell is a
+    hash of `text:`, `size:` and `padding:`, plus any other option `text`
+    takes. `size:` is required, as it is for `text`. `padding:` is a length
+    token followed by steps for the left, the right, and above and below, such
+    as `[ "--ks-spacing", 4, 3, 2 ]`. `border:` is a hash of `width:` and
+    `color:` for the outline, `radius:` is a length token and a number of steps
+    for the corners, and `divider:` is a hash of `width:` and `color:` for the
+    line between item rows, never drawn under the heading or above the total.
+    `total:` is drawn last, and no total draws none. When every column's widest
+    cell fits on one line, the columns share the width in proportion to their
+    widest cells. When they do not, each column whose widest cell fits its
+    share of the width left stays on one line, and the rest wrap in the width
+    that remains, never narrower than their longest word unless even the
+    longest words do not fit. A row never splits across pages. A table whose
+    heading and first row do not fit below what was drawn starts on the next
+    page, and a table longer than a page draws `heading` again at the top of
+    each page it continues on.
 
   A token the host's stylesheet does not set raises `PrintFailed` naming it.
   Text holding a character the font cannot draw raises `UndrawableCharacter`.
@@ -588,7 +632,8 @@ The catalog offers these Keystone UI components by default: `button`,
    elements with a `pdf:` drawing, in Keystone UI's fonts, weights, text sizes,
    line heights, letter spacing, colours, fills, borders and spacing read from
    the host's stylesheet. Of the built-in elements it draws headings, labels,
-   paragraphs, alerts, label and value lists, buttons and accordions, and it
+   paragraphs, alerts, label and value lists, buttons, accordions and tables,
+   and it
    leaves forms, copy buttons and Next page buttons out of the PDF.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet

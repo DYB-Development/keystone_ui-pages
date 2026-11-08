@@ -133,15 +133,16 @@ linking editors to the builder or drawing a page in the host's screens.
      browser.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
-     paragraph, alert, label and value list, button and accordion elements
-     print. The form, copy button and Next page elements are left out of the
+     paragraph, alert, label and value list, button, accordion and table
+     elements print. The form, copy button and Next page elements are left out of the
      PDF. A PDF of a page holding any other element is refused with a message
      naming that element. Ask the developer whether the pages they plan
      to print hold only those elements before choosing this drawing.
      It still needs Propshaft serving the host's stylesheet, since it reads the
      fonts, weights, text colours, fills, borders, radii and spacing from its
      `--ks-` tokens, the page's line height from its `html` rule, and the text
-     sizes, line heights and letter spacing Keystone UI's text sizes give, in
+     sizes, line heights and letter spacing Keystone UI's text sizes give, and
+     the table's head and body fills, header weight, divider and border, in
      light mode and the host's default look. A token the host's own stylesheet
      changes reaches the PDF the same way. A Keystone UI token the stylesheet
      does not set, or sets to a colour or length the gem cannot read, refuses
@@ -203,10 +204,12 @@ linking editors to the builder or drawing a page in the host's screens.
    page list shows a PDF link only when Chrome or Chromium was found. With the
    Ruby drawing, it always shows one, so open it on a page holding only
    headings, labels, paragraphs, alerts, label and value lists, buttons,
-   accordions and forms to confirm the fonts and text sizes print, each label
-   prints in capitals, each alert prints on its type's fill, a paragraph's
-   links and a button with an address open their address, each accordion
-   question prints with its answer beneath it, and the form is left out.
+   accordions, tables and forms to confirm the fonts and text sizes print, each
+   label prints in capitals, each alert prints on its type's fill, a
+   paragraph's links and a button with an address open their address, each
+   accordion question prints with its answer beneath it, each table prints its
+   heading row on the table head fill with its item rows beneath it, and the
+   form is left out.
 
    When a PDF link in the page list returns to the list showing a message, the
    PDF was refused, and the message names what to fix: the browser, an
