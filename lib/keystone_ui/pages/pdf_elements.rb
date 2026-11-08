@@ -37,6 +37,9 @@ module KeystoneUi
       TABLE_HEADER_LOOK = { weight: "--ks-font-weight-heading", color: "--ks-color-text-heading" }.freeze
       TABLE_CELL_LOOKS = { first: { weight: "--ks-font-weight-medium", color: "--ks-color-text" }, middle: { color: "--ks-color-text-muted" },
                            last: { weight: "--ks-font-weight-medium", color: "--ks-color-text" } }.freeze
+      TABLE_PADDING_ACROSS = { first: [ 6, 3 ], middle: [ 3, 3 ], last: [ 3, 6 ] }.freeze
+      TABLE_HEADER_PADDING_DOWN = 3.5
+      TABLE_CELL_PADDING_DOWN = 4
       TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
@@ -140,11 +143,14 @@ module KeystoneUi
       end
 
       def table_row(columns, texts, header: false)
-        cells = columns.zip(texts).each_with_index.map do |(column, text), index|
-          position = table_position(index, columns.size)
-          { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, position) }.merge(header ? TABLE_HEADER_LOOK : TABLE_CELL_LOOKS[position])
-        end
+        cells = columns.zip(texts).each_with_index.map { |(column, text), index| table_cell(column, text, table_position(index, columns.size), header) }
         { cells: cells, fill: header ? "--ks-color-table-head" : "--ks-color-table-body" }
+      end
+
+      def table_cell(column, text, position, header)
+        down = header ? TABLE_HEADER_PADDING_DOWN : TABLE_CELL_PADDING_DOWN
+        { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, position), padding: [ SPACING, *TABLE_PADDING_ACROSS[position], down ] }
+          .merge(header ? TABLE_HEADER_LOOK : TABLE_CELL_LOOKS[position])
       end
 
       def table_position(index, count)

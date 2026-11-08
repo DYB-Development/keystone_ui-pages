@@ -481,6 +481,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ :left, :left ], drawn(document).tables.last.then { |call| [ call[1], *call[2] ].map { |table_row| table_row[:cells].first[:align] } }
   end
 
+  test "a table's cells are padded as keystone_ui's first, middle and last table header and cell rules pad them" do
+    columns = [ { "key" => "service", "label" => "Service" }, { "key" => "notes", "label" => "Notes" }, { "key" => "hours", "label" => "Hours" } ]
+    document = page(section(row(column(element("data_table", columns: columns, items: [ { "service" => "Review", "notes" => "Done", "hours" => "4" } ])))))
+
+    assert_equal [ [ [ "--ks-spacing", 6, 3, 3.5 ], [ "--ks-spacing", 3, 3, 3.5 ], [ "--ks-spacing", 3, 6, 3.5 ] ], [ [ "--ks-spacing", 6, 3, 4 ], [ "--ks-spacing", 3, 3, 4 ], [ "--ks-spacing", 3, 6, 4 ] ] ],
+                 drawn(document).tables.last.then { |call| [ call[1], call[2].first ].map { |table_row| table_row[:cells].pluck(:padding) } }
+  end
+
   private
 
   def drawn(document, values: {})
