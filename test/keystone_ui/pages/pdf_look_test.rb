@@ -175,4 +175,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal 0.5, look.points("--tracking-wider", size: 10)
   end
+
+  test "a length a keystone_ui class writes out, such as the one pixel of a divide line, is read as the points it prints at" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-spacing:0.25rem}")
+
+    assert_equal 0.75, look.points("1px")
+  end
 end
