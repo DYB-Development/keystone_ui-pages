@@ -30,6 +30,7 @@ develop:
   - "box(padding:"
   - "boxed_text(content"
   - "rule(width:"
+  - "bar(share"
   - "space(token"
   - "row(widths"
   - "table(heading"
