@@ -50,7 +50,7 @@ module KeystoneUi
       def drawn_rows(section, surface, values)
         shown(section["rows"], values).each_with_index do |row, position|
           surface.space(SPACING, ROW_GAP) if position.positive?
-          drawn_row(row, surface, values)
+          surface.together { drawn_row(row, surface, values) }
         end
       end
 

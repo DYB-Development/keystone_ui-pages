@@ -197,7 +197,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "rows in a section are drawn six of keystone_ui's spacing steps apart, as the page spaces them on screen" do
     document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
 
-    assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).laid_out.map(&:first).drop(2).first(5).map { |call| call.first == :space ? call : call.first }
+    assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).laid_out.map(&:first).reject { |call| call.first.start_with?("together") }.drop(1).map { |call| call.first == :space ? call : call.first }
   end
 
   test "a section is drawn below the space keystone_ui's small, medium and large section spacing gives it, and medium when it has none" do
@@ -209,7 +209,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a section's rows are drawn together, so a section that fits on one page is never split across two" do
     document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
 
-    assert_equal %i[space together row text space row text together_end], drawn(document).laid_out.map { |call, _depth| call.first }
+    assert_equal %i[space together row text space row text together_end], drawn(document).laid_out.map { |call, _depth| call.first }.values_at(0, 1, 3, 4, 6, 8, 9, -1)
   end
 
   test "a shaded section's rows are drawn on keystone_ui's shaded section fill, with no padding, as the page shades it" do
@@ -249,6 +249,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                                        element("label", text: "Default"), element("button", label: "Book")))))
 
     assert_equal %i[start center end start], drawn(document).drawn.select { |call| call.first == :aligned }.map(&:last)
+  end
+
+  test "each row of a section is drawn together, so a section taller than a page breaks between its rows" do
+    document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
+
+    assert_equal %i[together row text together_end space together row text together_end], drawn(document).laid_out.map(&:first).map(&:first)[2..-2]
   end
 
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
