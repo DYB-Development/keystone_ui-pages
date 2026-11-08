@@ -57,7 +57,7 @@ module KeystoneUi
         catalog.register(key: :figure, name: "Figure", component: :ui_figure, icon: :number, group: "Data", pdf: PdfElements.method(:figure),
           fields: [ { key: :text, label: "Text", kind: :text, default: "0" },
                     { key: :tone, label: "Tone", kind: :one_of, options: %w[neutral success danger], default: "neutral" } ])
-        catalog.register(key: :info, name: "Info", component: :ui_info, icon: :info, group: "Text", body: :detail,
+        catalog.register(key: :info, name: "Info", component: :ui_info, icon: :info, group: "Text", body: :detail, pdf: PdfElements.method(:info),
           fields: [ { key: :summary, label: "Summary", kind: :text, default: "More information" },
                     { key: :detail, label: "Detail", kind: :long_text } ])
         catalog.register(key: :badge, name: "Badge", component: :ui_badge, icon: :tag, group: "Basics", align: "start", pdf: PdfElements.method(:badge),

@@ -85,6 +85,7 @@ module KeystoneUi
       CARD_TITLE_SIZE = "--text-lg"
       CARD_TEXT_SIZE = "--text-sm"
       CARD_SUMMARY_GAP = 1
+      INFO_SIZE = "--text-sm"
       CARD_LINK_GAP = 4
       CARD_LOOK = { padding: [ SPACING, 6, 6 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-surface", border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
       CTA_SUBTITLE_GAP = 8
@@ -326,6 +327,11 @@ module KeystoneUi
           surface.rich_text([ { text: fields[:cta].to_s, link: fields[:link].presence }.compact ], size: CARD_TEXT_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium",
                                                                                                     color: "--ks-color-link", leading: line_height(CARD_TEXT_SIZE))
         end
+      end
+
+      def info(surface, fields)
+        surface.text(fields[:summary], size: INFO_SIZE)
+        surface.text(fields[:detail], size: INFO_SIZE) if fields[:detail].present?
       end
 
       def display_subtitle(surface, subtitle, width, align)

@@ -780,6 +780,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(2)
   end
 
+  test "an info block is drawn as its summary with its detail shown in full beneath it, as the page shows them once opened" do
+    document = page(section(row(column(element("info", summary: "How hours are counted", detail: "Hours are counted to the quarter hour.\nTravel is not counted.")))))
+
+    assert_equal [ "How hours are counted", "Hours are counted to the quarter hour.\nTravel is not counted." ], drawn(document).texts
+  end
+
   private
 
   def drawn(document, values: {})
