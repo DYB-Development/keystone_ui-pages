@@ -109,11 +109,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
-    document = page(section(row(column(element("heading", text: "Pricing"), element("code")))))
+    document = page(section(row(column(element("heading", text: "Pricing"), element("bar_chart")))))
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Code element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Bar chart element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   test "a page holding an element the catalog does not have is refused with a print failure naming the element's key" do
@@ -633,6 +633,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("progress", label: "Hours used")))))
 
     assert_equal({ height: [ "--spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }, drawn(document).drawn.last.last)
+  end
+
+  test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
+    document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
+
+    assert_equal [ "def total\n  42\nend", { font: "--font-mono", preformatted: true } ],
+                 drawn(document).drawn.find { |call| call.first == :text }.then { |call| [ call[1], call.last.slice(:font, :preformatted) ] }
   end
 
   private

@@ -19,7 +19,7 @@ module KeystoneUi
           fields: [ { key: :message, label: "Message", kind: :long_text, default: "Something worth knowing." }, { key: :title, label: "Title", kind: :text },
                     { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error], default: "info" },
                     { key: :dismissible, label: "Can be dismissed", kind: :yes_or_no } ])
-        catalog.register(key: :code, name: "Code", component: :ui_code, icon: :code, group: "Text", body: :code,
+        catalog.register(key: :code, name: "Code", component: :ui_code, icon: :code, group: "Text", body: :code, pdf: PdfElements.method(:code),
           fields: [ { key: :code, label: "Code", kind: :long_text, default: "puts \"Hello\"" }, { key: :language, label: "Language", kind: :text },
                     { key: :caption, label: "Caption", kind: :text } ])
         catalog.register(key: :heading, name: "Heading", component: :ui_heading, icon: :heading, group: "Text", pdf: PdfElements.method(:heading),
