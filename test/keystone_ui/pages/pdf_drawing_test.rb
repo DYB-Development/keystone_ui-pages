@@ -362,14 +362,20 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a label and value row is padded above and below by two of keystone_ui's spacing steps, as its row rule pads it" do
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
 
-    assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+    assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.reject { |call| call.first.start_with?("together") }.map { |call| call.first == :space ? call : call.first }
   end
 
   test "label and value rows are divided by a line of keystone_ui's border width and colour, and the first row has none above it" do
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
 
     assert_equal [ :row, :space, :row, :text, :text, :space, [ :rule, { width: "--ks-border-width", color: "--ks-color-border" } ], :space, :row, :text, :text, :space ],
-                 drawn(document).drawn.map { |call| call.first == :rule ? call : call.first }
+                 drawn(document).drawn.reject { |call| call.first.start_with?("together") }.map { |call| call.first == :rule ? call : call.first }
+  end
+
+  test "each label and value row is drawn together with the line above it, so a row is never split across two pages" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
+
+    assert_equal %i[row together space row text text space together_end together rule space row text text space together_end], drawn(document).drawn.map(&:first)
   end
 
   test "a label and value row draws its value four of keystone_ui's spacing steps from its label, as its row rule spaces them" do
