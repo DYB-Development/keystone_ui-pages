@@ -68,7 +68,7 @@ module KeystoneUi
         unit = length[/[a-z]+\z/]
         return length.to_f * size if unit == "em" && size
 
-        length.to_f * POINTS_PER_UNIT.fetch(unit, 0.0)
+        length.to_f * POINTS_PER_UNIT.fetch(unit) { length.to_f.zero? ? 0.0 : unreadable(name, length) }
       end
 
       def value(name)
