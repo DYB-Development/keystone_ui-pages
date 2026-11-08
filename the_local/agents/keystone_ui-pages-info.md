@@ -105,7 +105,7 @@ Keystone UI itself must be installed first. Its own install local,
   own PDF drawing, given when the element is added to the catalog. A page
   holding an element with no PDF drawing cannot be printed that way, and the
   error names the element. So far the heading, label, paragraph, alert, label
-  and value list, button and accordion elements have one.
+  and value list, button, accordion and table elements have one.
 - **Screen-only elements are left out of a Ruby-drawn PDF.** The form, copy
   button and Next page elements have a PDF drawing that prints nothing, so a
   page holding them still prints, without them.
@@ -121,6 +121,23 @@ Keystone UI itself must be installed first. Its own install local,
   and one with an address opens it when clicked in the PDF. An accordion prints
   every question in its own bordered box with its answer shown beneath it, as an
   opened question shows on screen, without the arrow.
+- **What the Ruby drawing prints for a table.** A table prints its heading
+  row, one row per item, and its total row when it has one, filling the width
+  of the column it sits in. When every column fits on one line, the columns
+  share the width in proportion to their widest cells. When they do not, a column whose text fits its share of the width
+  stays on one line and the other columns wrap, never narrower than their
+  longest word. A column set to end, and the last column unless it is set to
+  start, is aligned to the right. A table grouped by a key prints each group's
+  name, with its subtotals when given, above the group's rows and on the same
+  page as the first of them. A row is never split across pages, and a table
+  longer than a page prints its heading row again at the top of the next page.
+  A table with no items prints its heading row alone, and a table with no
+  columns prints nothing. The heading, group and total rows print on the table
+  head fill and the item rows on the table body fill, with a line in the divider
+  colour between item rows. Keystone UI's one pixel gray line sits under the
+  heading row and above the total row. A cell shorter than its row is centred
+  from top to bottom. The table prints inside its border and rounded corners,
+  with the row fills clipped to the corners, without the screen's shadow.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
   fonts, font weights, text colours, tone colours, borders, corner radius and
   spacing from the host's compiled stylesheet, in light mode and in the host's

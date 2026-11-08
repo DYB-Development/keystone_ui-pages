@@ -44,6 +44,18 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       widths.each_index { |index| yield index }
     end
 
+    def table(heading, rows, **style)
+      @drawn << [ :table, heading, rows, style ]
+    end
+
+    def tables
+      @drawn.select { |call| call.first == :table }
+    end
+
+    def table_texts
+      tables.last.then { |call| [ call[1][:cells].pluck(:text), call[2].map { |table_row| table_row[:cells].pluck(:text) } ] }
+    end
+
     def texts
       @drawn.select { |call| call.first == :text }.map { |call| call[1] }
     end
@@ -56,6 +68,8 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn.select { |call| call.first == :text }.map(&:last)
     end
   end
+
+  SERVICE_COLUMNS = [ { "key" => "service", "label" => "Service" }, { "key" => "hours", "label" => "Hours" } ].freeze
 
   test "the PDF draws each heading and label in the order the page shows them" do
     document = page(
@@ -400,6 +414,112 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     gap = [ :space, "--ks-spacing", 4 ]
     assert_equal [ :row, :box, :text, gap, :text, gap, :box, :text, gap, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "a table is drawn as a heading row of its column headings and one row per item" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" }, { "service" => "Audit", "hours" => "2" } ])))))
+
+    assert_equal [ %w[Service Hours], [ %w[Review 4], %w[Audit 2] ] ], drawn(document).table_texts
+  end
+
+  test "a table whose host value holds no items is drawn as its heading row alone" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: { "value" => "lines", "fallback" => nil })))))
+
+    assert_equal [ %w[Service Hours], [] ], drawn(document, values: { "lines" => [] }).table_texts
+  end
+
+  test "a table's columns are aligned as keystone_ui's table aligns them, the last to the right unless set to start and any set to end to the right" do
+    columns = [ { "key" => "service", "label" => "Service" }, { "key" => "hours", "label" => "Hours", "align" => "end" }, { "key" => "notes", "label" => "Notes", "align" => "start" } ]
+    document = page(section(row(column(element("data_table", columns: columns, items: [ { "service" => "Review", "hours" => "4", "notes" => "Done" } ]),
+                                       element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal [ [ %i[left right left], %i[left right left] ], [ %i[left right], %i[left right] ] ],
+                 drawn(document).tables.map { |call| [ call[1], *call[2] ].map { |table_row| table_row[:cells].pluck(:align) } }
+  end
+
+  test "a table grouped by a key draws each group's name above its rows, with the group's subtotals when they are given" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" }, { "team" => "Ops", "service" => "Audit", "hours" => "2" }, { "team" => "Sales", "service" => "Pitch", "hours" => "1" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team", group_totals: { "Ops" => { "hours" => "6" } })))))
+
+    assert_equal [ %w[Ops 6], %w[Review 4], %w[Audit 2], [ "Sales", "" ], %w[Pitch 1] ], drawn(document).table_texts.last
+  end
+
+  test "a table's total row is drawn as its total row, with each column's total" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ], total: { "service" => "Total", "hours" => "4" })))))
+
+    assert_equal %w[Total 4], drawn(document).tables.last.last[:total][:cells].pluck(:text)
+  end
+
+  test "a table's heading, group and total rows are drawn on keystone_ui's table head fill and its item rows on the table body fill" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team", total: { "service" => "Total", "hours" => "4" })))))
+
+    table = drawn(document).tables.last
+    assert_equal %w[--ks-color-table-head --ks-color-table-head --ks-color-table-body --ks-color-table-head], [ table[1], *table[2], table.last[:total] ].pluck(:fill)
+  end
+
+  test "a table's heading, group and total cells are drawn at the weight and in the colour keystone_ui's table header rule gives them" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team", total: { "service" => "Total", "hours" => "4" })))))
+
+    table = drawn(document).tables.last
+    header = { weight: "--ks-font-weight-heading", color: "--ks-color-text-heading" }
+    assert_equal [ [ header, header ] ] * 3, [ table[1], table[2].first, table.last[:total] ].map { |table_row| table_row[:cells].map { |cell| cell.slice(:weight, :color) } }
+  end
+
+  test "a table's item cells are drawn at the weights and in the colours keystone_ui's first, middle and last table cell rules give them" do
+    columns = [ { "key" => "service", "label" => "Service" }, { "key" => "notes", "label" => "Notes" }, { "key" => "hours", "label" => "Hours" } ]
+    document = page(section(row(column(element("data_table", columns: columns, items: [ { "service" => "Review", "notes" => "Done", "hours" => "4" } ])))))
+
+    assert_equal [ { weight: "--ks-font-weight-medium", color: "--ks-color-text" }, { color: "--ks-color-text-muted" }, { weight: "--ks-font-weight-medium", color: "--ks-color-text" } ],
+                 drawn(document).tables.last[2].first[:cells].map { |cell| cell.slice(:weight, :color) }
+  end
+
+  test "a table of one column draws it as keystone_ui's table draws a first column, aligned to the left" do
+    document = page(section(row(column(element("data_table", columns: [ { "key" => "service", "label" => "Service" } ], items: [ { "service" => "Review" } ])))))
+
+    assert_equal [ :left, :left ], drawn(document).tables.last.then { |call| [ call[1], *call[2] ].map { |table_row| table_row[:cells].first[:align] } }
+  end
+
+  test "a table's cells are padded as keystone_ui's first, middle and last table header and cell rules pad them" do
+    columns = [ { "key" => "service", "label" => "Service" }, { "key" => "notes", "label" => "Notes" }, { "key" => "hours", "label" => "Hours" } ]
+    document = page(section(row(column(element("data_table", columns: columns, items: [ { "service" => "Review", "notes" => "Done", "hours" => "4" } ])))))
+
+    assert_equal [ [ [ "--ks-spacing", 6, 3, 3.5 ], [ "--ks-spacing", 3, 3, 3.5 ], [ "--ks-spacing", 3, 6, 3.5 ] ], [ [ "--ks-spacing", 6, 3, 4 ], [ "--ks-spacing", 3, 3, 4 ], [ "--ks-spacing", 3, 6, 4 ] ] ],
+                 drawn(document).tables.last.then { |call| [ call[1], call[2].first ].map { |table_row| table_row[:cells].pluck(:padding) } }
+  end
+
+  test "a table is drawn inside the border and rounded corners keystone_ui's table rule gives it, with its rows divided as its table body rule divides them" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal({ border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-divider" } },
+                 drawn(document).tables.last.last.except(:total, :parts_divider))
+  end
+
+  test "a table's cells are drawn in keystone_ui's body font at the small text size and its line height, as the table's cell classes size them" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal [ { size: "--text-sm", font: "--ks-font-body", leading: "--text-sm--line-height" } ],
+                 drawn(document).tables.last.then { |call| [ call[1], *call[2] ].flat_map { |table_row| table_row[:cells].map { |cell| cell.slice(:size, :font, :leading) } } }.uniq
+  end
+
+  test "a table's group row is kept on the same page as the first row of its group" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team")))))
+
+    assert_equal [ true, nil ], drawn(document).tables.last[2].pluck(:with_next)
+  end
+
+  test "a table whose host value holds no columns draws nothing, as keystone_ui's table shows no headings or cells" do
+    document = page(section(row(column(element("data_table", columns: { "value" => "columns", "fallback" => nil }, items: [ { "service" => "Review" } ])))))
+
+    assert_equal [ :row ], drawn(document, values: { "columns" => [] }).drawn.map(&:first)
+  end
+
+  test "a table's heading, body and total rows are divided by the one pixel gray line keystone_ui's divide class draws between them" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal({ width: "1px", color: "--color-gray-300" }, drawn(document).tables.last.last[:parts_divider])
   end
 
   private

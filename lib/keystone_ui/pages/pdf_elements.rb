@@ -33,6 +33,14 @@ module KeystoneUi
       ALERT_RADIUS = 0.75
       SPACING = "--ks-spacing"
       ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
+      TABLE_SIZE = "--text-sm"
+      TABLE_HEADER_LOOK = { weight: "--ks-font-weight-heading", color: "--ks-color-text-heading" }.freeze
+      TABLE_CELL_LOOKS = { first: { weight: "--ks-font-weight-medium", color: "--ks-color-text" }, middle: { color: "--ks-color-text-muted" },
+                           last: { weight: "--ks-font-weight-medium", color: "--ks-color-text" } }.freeze
+      TABLE_PADDING_ACROSS = { first: [ 6, 3 ], middle: [ 3, 3 ], last: [ 3, 6 ] }.freeze
+      TABLE_HEADER_PADDING_DOWN = 3.5
+      TABLE_CELL_PADDING_DOWN = 4
+      TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -109,6 +117,55 @@ module KeystoneUi
 
       def total?(entry)
         entry[:total].to_s == "true"
+      end
+
+      def data_table(surface, fields)
+        columns = Array(fields[:columns].presence)
+        return if columns.empty?
+
+        heading = table_row(columns, columns.map { |column| column[:label] }, header: true)
+        items = Array(fields[:items].presence).map { |item| item.to_h.stringify_keys }
+        total = fields[:total].presence&.then { |given| given.to_h.stringify_keys }
+        surface.table(heading, items.each_index.flat_map { |index| item_rows(columns, items, index, fields) },
+                      total: total && table_row(columns, columns.map { |column| total[column[:key].to_s] }, header: true),
+                      border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-divider" },
+                      parts_divider: { width: "1px", color: "--color-gray-300" })
+      end
+
+      def item_rows(columns, items, index, fields)
+        row = table_row(columns, columns.map { |column| items[index][column[:key].to_s] })
+        key = fields[:group_by].to_s
+        group = items[index][key] if key.present?
+        return [ row ] if group.nil? || (index.positive? && items[index - 1][key] == group)
+
+        [ group_row(columns, group, fields[:group_totals]), row ]
+      end
+
+      def group_row(columns, group, totals)
+        subtotals = totals.to_h.stringify_keys.fetch(group.to_s, {}).to_h.stringify_keys
+        table_row(columns, columns.each_with_index.map { |column, index| index.zero? ? group : subtotals[column[:key].to_s] }, header: true).merge(with_next: true)
+      end
+
+      def table_row(columns, texts, header: false)
+        cells = columns.zip(texts).each_with_index.map { |(column, text), index| table_cell(column, text, table_position(index, columns.size), header) }
+        { cells: cells, fill: header ? "--ks-color-table-head" : "--ks-color-table-body" }
+      end
+
+      def table_cell(column, text, position, header)
+        down = header ? TABLE_HEADER_PADDING_DOWN : TABLE_CELL_PADDING_DOWN
+        { text: text.to_s, size: TABLE_SIZE, font: "--ks-font-body", leading: line_height(TABLE_SIZE), align: table_alignment(column, position),
+          padding: [ SPACING, *TABLE_PADDING_ACROSS[position], down ] }
+          .merge(header ? TABLE_HEADER_LOOK : TABLE_CELL_LOOKS[position])
+      end
+
+      def table_position(index, count)
+        return :first if index.zero?
+
+        index == count - 1 ? :last : :middle
+      end
+
+      def table_alignment(column, position)
+        TABLE_ALIGNMENTS.fetch(column[:align].to_s) { position == :last ? :right : :left }
       end
 
       def paragraph(surface, fields)
