@@ -141,10 +141,26 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal "→", error.character
   end
 
+  test "a table draws its heading row above its rows, each row under the one before" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Name"), [ table_row("First"), table_row("Second") ], **table_look)
+
+    assert_equal %w[Name First Second], heights(surface.render).sort_by { |_text, height| -height.to_f }.map(&:first)
+  end
+
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:1px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem}")
+  end
+
+  def table_row(*texts, fill: nil)
+    { cells: texts.map { |text| { text: text, size: "--text-base", padding: [ "--ks-spacing", 6, 3, 4 ] } }, fill: fill }
+  end
+
+  def table_look
+    { border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-border" } }
   end
 
   def fill_widths(pdf)

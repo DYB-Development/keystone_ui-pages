@@ -106,11 +106,29 @@ module KeystoneUi
         @document.y = lowest
       end
 
+      def table(heading, rows, border:, radius:, divider:)
+        [ heading, *rows ].each { |table_row| drawn_table_row(table_row) }
+      end
+
       def render
         @document.render
       end
 
       private
+
+      def drawn_table_row(table_row)
+        width = @document.bounds.width / table_row[:cells].size
+        top = @document.y
+        lowest = top
+        table_row[:cells].each_with_index do |cell, index|
+          @document.y = top
+          @document.bounding_box([ width * index, @document.cursor ], width: width) do
+            text(cell[:text], **cell.except(:text, :padding))
+            lowest = [ lowest, @document.y ].min
+          end
+        end
+        @document.y = lowest
+      end
 
       def drawable!(content)
         missing = content.each_char.find { |char| !char.match?(/[[:cntrl:]]/) && !@document.font.glyph_present?(char) }
