@@ -195,6 +195,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 12 + 13.872 + 12, last_line - drawn["Review"], 0.001
   end
 
+  test "a table's total row is drawn under all of its rows" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), [ table_row("Review"), table_row("Audit") ], total: table_row("Total"), **table_look)
+
+    assert_equal %w[Service Review Audit Total], heights(surface.render).sort_by { |_text, height| -height.to_f }.map(&:first)
+  end
+
   private
 
   def look

@@ -106,8 +106,8 @@ module KeystoneUi
         @document.y = lowest
       end
 
-      def table(heading, rows, border:, radius:, divider:)
-        table_rows = [ heading, *rows ]
+      def table(heading, rows, border:, radius:, divider:, total: nil)
+        table_rows = [ heading, *rows, total ].compact
         widths = column_widths(table_rows)
         table_rows.each { |table_row| drawn_table_row(table_row, widths) }
       end
