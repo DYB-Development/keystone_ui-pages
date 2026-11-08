@@ -110,22 +110,23 @@ module KeystoneUi
         @document.move_down(@look.points(token) * steps)
       end
 
-      def row(widths, gap: nil)
+      def row(widths, gap: nil, grid: false)
         spacing = gap ? @look.points(gap.first) * gap.last : 0
+        room = grid ? @document.bounds.width - spacing * (widths.size - 1) : @document.bounds.width
         top = @document.y
         first_page = @document.page_number
         lowest = [ first_page, -top ]
         left = 0
         widths.each_with_index do |width, index|
-          column_width = @document.bounds.width * width
-          inset = index.positive? ? spacing : 0
+          column_width = room * width
+          inset = index.positive? && !grid ? spacing : 0
           @document.go_to_page(first_page)
           @document.y = top
           @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
             yield index
             lowest = [ lowest, [ @document.page_number, -@document.y ] ].max
           end
-          left += column_width
+          left += column_width + (grid ? spacing : 0)
         end
         @document.go_to_page(lowest.first)
         @document.y = -lowest.last

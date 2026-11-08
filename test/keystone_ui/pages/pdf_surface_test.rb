@@ -15,6 +15,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 1, heights(surface.render).values_at("Left", "Right").uniq.size
   end
 
+  test "a row laid out as a grid shares its gaps between its columns, so columns of equal shares are equally wide" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true) { |index| surface.text(%w[Fast Clear][index], size: "--text-base") }
+
+    assert_equal 36.0 + (540 - 18) / 2 + 18, lefts(surface.render)["Clear"]
+  end
+
   test "lines of text drawn with a line height token are spaced that many text sizes apart" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
