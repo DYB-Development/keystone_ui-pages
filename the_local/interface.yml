@@ -22,7 +22,9 @@ develop:
   - KeystoneUi::Pages.pdf_stylesheet
   - KeystoneUi::Pages.pdf_drawing
   - KeystoneUi::Pages.ruby_pdf_drawing?
+  - KeystoneUi::Pages::PrintFailed
   - KeystoneUi::Pages::NoPdfDrawing
+  - KeystoneUi::Pages::PdfSurface::UndrawableCharacter
   - "text(content"
   - "rich_text(runs"
   - "box(padding:"

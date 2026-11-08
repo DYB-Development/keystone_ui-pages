@@ -38,6 +38,12 @@ linking editors to the builder or drawing a page in the host's screens.
      missing.
    - An Active Job backend. Publishing a page that uses no host values makes its
      PDF in a job.
+   - An error reporter subscribed to `Rails.error`, such as the one Sentry,
+     Honeybadger or AppSignal installs. A PDF refused while publishing or while
+     being made ahead of time does not stop the publish, and is reported only
+     through `Rails.error` with the page's id and name. With no subscriber, that
+     refusal is seen by nobody. If the app has none, ask the developer which
+     service to use rather than choosing one.
 
 2. Add the gem to the Gemfile and install it:
 
@@ -122,27 +128,35 @@ linking editors to the builder or drawing a page in the host's screens.
      `/usr/bin/google-chrome`, `/usr/bin/google-chrome-stable`,
      `/usr/bin/chromium`, `/usr/bin/chromium-browser`, and the Google Chrome and
      Chromium apps in `/Applications` on macOS. Ask the developer how the
-     deployment installs it. Without one, everything except PDFs still works.
+     deployment installs it. Without one, everything except PDFs still works,
+     and a PDF asked for is refused with a message saying how to name a
+     browser.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
      paragraph, alert, label and value list, button and accordion elements
      print. The form, copy button and Next page elements are left out of the
-     PDF. A page holding any other element cannot be printed and raises an
-     error naming that element. Ask the developer whether the pages they plan
+     PDF. A PDF of a page holding any other element is refused with a message
+     naming that element. Ask the developer whether the pages they plan
      to print hold only those elements before choosing this drawing.
      It still needs Propshaft serving the host's stylesheet, since it reads the
      fonts, weights, text colours, fills, borders, radii and spacing from its
      `--ks-` tokens, the page's line height from its `html` rule, and the text
      sizes, line heights and letter spacing Keystone UI's text sizes give, in
      light mode and the host's default look. A token the host's own stylesheet
-     changes reaches the PDF the same way.
+     changes reaches the PDF the same way. A Keystone UI token the stylesheet
+     does not set, or sets to a colour or length the gem cannot read, refuses
+     the PDF with a message naming the token.
 
    The choice is a setting in the settings file, written in the next step.
 
    With the Ruby drawing, check the fonts the host's stylesheet uses:
 
    - A font named only by system fonts, with no `@font-face`, prints in
-     Helvetica and needs nothing.
+     Helvetica and needs nothing. Helvetica draws only Windows-1252 characters,
+     so text holding any other character refuses the PDF with a message naming
+     the element and the character. If the host's pages will hold such
+     characters, such as non-Latin scripts, ask the developer which font to
+     serve as TrueType copies that holds them.
    - A font the stylesheet loads with `@font-face` needs a TrueType copy of each
      of its files, because a PDF cannot read `.woff2` or `.woff`. Put a `.ttf`
      file beside each font file, under the same name, either in `public/` or in
@@ -157,8 +171,8 @@ linking editors to the builder or drawing a page in the host's screens.
 
      Regular, bold and italic text print from the copies whose `@font-face`
      rules give those weights and styles. A PDF asked for in a font with no
-     TrueType copy served fails with an error naming the font and the file it
-     looked for. If the host has no `.ttf` files for its font, ask the
+     TrueType copy served is refused with a message naming the font and the
+     file it looked for. If the host has no `.ttf` files for its font, ask the
      developer where to get them rather than converting or replacing the font.
 
 7. Create `config/initializers/keystone_ui_pages.rb` starting with:
@@ -193,6 +207,13 @@ linking editors to the builder or drawing a page in the host's screens.
    prints in capitals, each alert prints on its type's fill, a paragraph's
    links and a button with an address open their address, each accordion
    question prints with its answer beneath it, and the form is left out.
+
+   When a PDF link in the page list returns to the list showing a message, the
+   PDF was refused, and the message names what to fix: the browser, an
+   element, a character, a token or a font from step 6. A refused PDF keeps no
+   file, so clicking PDF again after the fix makes a new one. A refusal while
+   publishing shows nothing in the page list and reaches only the error
+   reporter from step 1.
 
    Boot stops with an `ArgumentError` naming a place when that place's settings
    are incomplete: it leaves out an element no catalog entry has, it offers the

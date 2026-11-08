@@ -136,6 +136,18 @@ Keystone UI itself must be installed first. Its own install local,
 - **PDFs are kept in Active Storage**, one per published version and set of
   values, whichever drawing made them. A page that uses no host values gets its
   PDF made when it is published.
+- **A refused PDF.** A PDF that cannot be made is refused with a message saying
+  why. The Chrome drawing refuses when no browser is found or the browser fails.
+  The Ruby drawing refuses an element with no PDF drawing, an element the
+  catalog does not have, text holding a character its font cannot draw, a
+  Keystone UI token the stylesheet does not set or sets to a value the gem
+  cannot read, and a loaded font with no TrueType copy served. Helvetica draws
+  only Windows-1252 characters, so a page using others needs a served font that
+  holds them. A refused PDF keeps no file, so asking again after the fix makes a
+  new one. An editor who clicks PDF in the page list sees the refusal's message
+  there. A PDF refused while publishing or while being made ahead of time does
+  not stop the publish, and goes to the host's error reporting with the page
+  named.
 - **The editor's screens.** The page list, the builder, the sequence screen, the
   version history and View live are open to whoever passes the host's edit
   check. The builder's undo and redo history is kept with the page.

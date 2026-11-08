@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-develop
-description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
+description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby and handling a PDF that is refused, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
 tools: Bash, Read, Write, Edit, Grep
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -199,7 +199,8 @@ inherit from the base controller, so define it there.
   with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens and the
   `--text-` size and `--tracking-` letter spacing tokens from it, so a name
   Propshaft cannot find, or a stylesheet missing a token the drawing reads,
-  makes the Ruby drawing raise a `KeyError` naming the token.
+  makes the Ruby drawing raise `KeystoneUi::Pages::PrintFailed` naming the
+  token.
 - `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
   default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
   the page in Ruby with Prawn from its sections, rows, columns and elements,
@@ -219,12 +220,15 @@ inherit from the base controller, so define it there.
   text sizes each line takes, and the space it adds is split above and below
   the text. A colour token must be an `oklch()` colour or a hex colour of
   three or six digits, and a three-digit one prints as the six-digit colour it
-  names. Each element draws through the `pdf:` drawing given to
-  `catalog.register`. Of the built-in elements `heading`, `label`,
+  names. A colour token in any other form, or a length token in a unit other
+  than `rem`, `em`, `px` or `pt` that is not zero, raises `PrintFailed` naming
+  the token and its value. Each element draws through the `pdf:` drawing given
+  to `catalog.register`. Of the built-in elements `heading`, `label`,
   `paragraph`, `alert`, `value_list`, `button` and `accordion` have one.
   `form`, `copy_button` and `next_page` have a drawing that draws nothing, so
   they are left out of the PDF and do not raise. Every other built-in element
-  raises `NoPdfDrawing`.
+  raises `NoPdfDrawing`. A page holding an element whose key the catalog does
+  not have raises `PrintFailed` naming the key.
 - **The built-in elements in the Ruby drawing.**
   - A heading draws its text at `--text-lg`, `--text-2xl` or `--text-4xl` for
     `sm`, `md` or `lg` in `--ks-font-heading` at `--ks-font-weight-heading` and
@@ -287,16 +291,36 @@ inherit from the base controller, so define it there.
   same address with a `.ttf` ending, in `public/` or among the files Propshaft
   serves. When any of the three copies is not served, `KeystoneUi::Pages.pdf`
   raises `KeystoneUi::Pages::PrintFailed` naming the font and the address it
-  looked for. A weight of 600 or more prints bold.
+  looked for. A weight of 600 or more prints bold. Helvetica draws only the
+  Windows-1252 characters, so a page holding any other character, such as most
+  emoji, needs a font served as TrueType copies that holds it.
 - `KeystoneUi::Pages.ruby_pdf_drawing?` — true when `pdf_drawing` is `:ruby` or
   `"ruby"`. Use it to decide whether to offer a PDF without checking for
   Chrome.
+- `KeystoneUi::Pages::PrintFailed` — the error `KeystoneUi::Pages.pdf` raises
+  whenever a PDF cannot be made, with a message saying why, written for an
+  editor to read. Under Chrome it is raised when no Chrome or Chromium is found,
+  when it cannot be started, or when it prints nothing. Under the Ruby drawing
+  it is raised for an element with no `pdf:` drawing, an element key the
+  catalog does not have, a character the element's font cannot draw (naming the
+  element and the character), a token the stylesheet does not set or sets to a
+  value the gem cannot read, and a font with no TrueType copy served. A refused
+  PDF keeps no record and no file, so asking again once the page or the
+  stylesheet is fixed prints a new one.
 - `KeystoneUi::Pages::NoPdfDrawing` — raised by `KeystoneUi::Pages.pdf` under
   the Ruby drawing when the page holds a shown element whose catalog entry has
   no `pdf:` drawing. Its message names the element. It is a
   `KeystoneUi::Pages::PrintFailed`, so a rescue of `PrintFailed` catches it.
   Nothing is kept when it is raised. An element hidden by a show-when condition
   for the values given is not drawn and does not raise.
+- `KeystoneUi::Pages::PdfSurface::UndrawableCharacter` — raised by the
+  surface's `text`, `rich_text` and `boxed_text` when the content holds a
+  character the font in use cannot draw, before anything is drawn. Its
+  `character` is that character, and control characters such as a line break
+  never raise it. It is a `PrintFailed`. When it is raised inside an element's
+  `pdf:` drawing, `KeystoneUi::Pages.pdf` raises a `PrintFailed` in its place
+  whose message names the element and the character, so a `pdf:` drawing does
+  not rescue it.
 
 ### Host values
 
@@ -339,10 +363,14 @@ inherit from the base controller, so define it there.
   kept, and a newly published version or different values print a new one.
   When nothing is kept it prints in the current request. `version:` takes a
   published version's number and prints that version instead, live or
-  superseded, the same way `keystone_ui_page` draws it.
+  superseded, the same way `keystone_ui_page` draws it. A PDF that cannot be
+  made raises `PrintFailed` and keeps nothing.
 - `KeystoneUi::Pages.prepare_pdf(page, values: {}, version: nil)` — queues
   `KeystoneUi::Pages::PdfJob`, which calls `KeystoneUi::Pages.pdf` with the same
-  page, values and version, so the file is kept before anyone asks for it.
+  page, values and version, so the file is kept before anyone asks for it. A
+  `PrintFailed` in the job is not raised and not retried: it is reported
+  through `Rails.error` as handled, with `page_id` and `page_name` in its
+  context, and the job finishes. Any other error is raised as usual.
 
 ### The builder and the editor's screens
 
@@ -461,8 +489,9 @@ inherit from the base controller, so define it there.
     with its index, every part starts at the same height, and drawing continues
     below the tallest.
 
-  A token the host's stylesheet does not set raises a `KeyError` naming it. An
-  element registered without `pdf:` makes the Ruby drawing raise
+  A token the host's stylesheet does not set raises `PrintFailed` naming it.
+  Text holding a character the font cannot draw raises `UndrawableCharacter`.
+  An element registered without `pdf:` makes the Ruby drawing raise
   `NoPdfDrawing` for any page showing it.
 - The built-in Form element (`:form`) holds a form name, a list of fields (each
   a label, a field name, a kind of `text`, `email`, `long_text`, `choice` or
@@ -548,7 +577,8 @@ The catalog offers these Keystone UI components by default: `button`,
    created, call `KeystoneUi::Pages.prepare_pdf(page, values: ...)` instead and
    read `KeystoneUi::Pages.pdf` later with the same values. Publishing a page
    that uses no host values queues its PDF straight away, since it looks the
-   same for everyone.
+   same for everyone. A PDF refused there leaves the page published and is
+   reported through `Rails.error`.
 
    The page must be published, since only the live version is printed.
 
@@ -574,17 +604,21 @@ The catalog offers these Keystone UI components by default: `button`,
    found. Before switching, check that every element on the pages that will be
    printed has a `pdf:` drawing, and give a host-registered element one with
    `pdf:` on `catalog.register`. A page showing an element without one raises
-   `NoPdfDrawing`, including from the PDF job queued when such a page is
-   published with no host values. Also check the fonts the stylesheet's
-   `--ks-font-heading` and `--ks-font-body` name: a family loaded with
-   `@font-face` needs a `.ttf` copy served beside each of its files, or every
-   PDF raises `PrintFailed` naming the missing file. If the host has no `.ttf`
-   files for its font, ask the developer where to get them rather than
-   converting or replacing the font.
+   `NoPdfDrawing` from `KeystoneUi::Pages.pdf`. Also check the fonts the
+   stylesheet's `--ks-font-heading` and `--ks-font-body` name: a family loaded
+   with `@font-face` needs a `.ttf` copy served beside each of its files, or
+   every PDF raises `PrintFailed` naming the missing file. A page whose text
+   holds characters outside Windows-1252 needs such a font too, or its PDF
+   raises `PrintFailed` naming the element and the character. If the host has
+   no `.ttf` files for its font, ask the developer where to get them rather
+   than converting or replacing the font.
 
-   Called from `prepare_pdf`, either error is raised inside the job, so the job
-   backend's retry rules apply. Ask the developer how a failed print should
-   reach the user before rescuing it.
+   Where the host calls `KeystoneUi::Pages.pdf` in a request, rescue
+   `KeystoneUi::Pages::PrintFailed` and show its message, which says why the
+   PDF was refused. How a refusal reaches the person who asked, such as a flash
+   message or an email, is the developer's decision, so ask before choosing.
+   From `prepare_pdf` and from publishing, a refusal reaches only
+   `Rails.error`, so the host's error reporting must be set up to see it.
 
 7. To give editors a way in, link to the page list, or to one page's builder
    with a `return_to` of the screen they came from:
@@ -668,8 +702,8 @@ The catalog offers these Keystone UI components by default: `button`,
    `pdf: ->(surface, fields) { surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted", leading: "--text-sm--line-height") }`.
    Build it from the surface's calls in the Interface, with the same tokens
    the component's Keystone UI classes use on screen.
-   Name only tokens the host's stylesheet sets, since a missing one raises a
-   `KeyError` naming it. A page that holds an element the catalog no longer offers still
+   Name only tokens the host's stylesheet sets, since a missing one raises
+   `PrintFailed` naming it. A page that holds an element the catalog no longer offers still
    draws its other elements for visitors, marks the missing one in the editor
    as no longer offered, and reports the page's id and the element's key
    through `Rails.error`, so search the pages' documents for its key before
@@ -692,7 +726,10 @@ The catalog offers these Keystone UI components by default: `button`,
   its state, and when it was last published, plus its place and access
   exception when the host names any. Each row links to Edit and Settings and has
   an Archive button, and a published page also links to View live and, when
-  `pdf_drawing` is `:ruby` or Chrome or Chromium is found, to its PDF. Show archived lists archived pages
+  `pdf_drawing` is `:ruby` or Chrome or Chromium is found, to its PDF. A PDF
+  link whose PDF is refused sends the editor back to the page list they
+  clicked it in, or to the page's place's list when the browser sends no
+  referrer, and the list shows the refusal's message in an error alert. Show archived lists archived pages
   instead, each with a Restore button.
 - **A page's title** is set in the builder's settings panel when nothing is
   selected, and reaches visitors when the page is published. The engine's
