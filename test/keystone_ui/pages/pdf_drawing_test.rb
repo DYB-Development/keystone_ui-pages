@@ -629,6 +629,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).map { |call| call.first == :bar ? :bar : call }
   end
 
+  test "a progress bar's bar is drawn at the height, pill rounding, track colour and fill colour keystone_ui's progress track and bar rules give it" do
+    document = page(section(row(column(element("progress", label: "Hours used")))))
+
+    assert_equal({ height: [ "--spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }, drawn(document).drawn.last.last)
+  end
+
   private
 
   def drawn(document, values: {})
