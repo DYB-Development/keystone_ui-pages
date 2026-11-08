@@ -649,6 +649,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.find { |call| call.first == :text }.then { |call| [ call[2], call.last.slice(:color, :leading) ] }
   end
 
+  test "a code element's code is drawn on the code block's fill and padding, inside the border and rounded corners keystone_ui's code rule gives it" do
+    document = page(section(row(column(element("code", code: "puts 42")))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-surface", 1 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }, clip: true } ],
+                   [ :box, { padding: [ "--ks-spacing", 4 ], fill: "--ks-color-code" } ], :text ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :text ? :text : call }
+  end
+
   private
 
   def drawn(document, values: {})

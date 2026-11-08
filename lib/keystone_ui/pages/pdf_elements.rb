@@ -66,6 +66,8 @@ module KeystoneUi
       PROGRESS_BAR_LOOK = { height: [ TAILWIND_SPACING, 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }.freeze
       CODE_SIZE = "--text-sm"
       CODE_FONT = "--font-mono"
+      CODE_LOOK = { padding: [ SPACING, 0 ], radius: [ "--ks-radius-surface", 1 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }, clip: true }.freeze
+      CODE_BLOCK_LOOK = { padding: [ SPACING, 4 ], fill: "--ks-color-code" }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -244,7 +246,11 @@ module KeystoneUi
       end
 
       def code(surface, fields)
-        surface.text(fields[:code], size: CODE_SIZE, font: CODE_FONT, color: "--ks-color-text-code", leading: "--leading-relaxed", preformatted: true)
+        surface.box(**CODE_LOOK) do
+          surface.box(**CODE_BLOCK_LOOK) do
+            surface.text(fields[:code], size: CODE_SIZE, font: CODE_FONT, color: "--ks-color-text-code", leading: "--leading-relaxed", preformatted: true)
+          end
+        end
       end
 
       def paragraph(surface, fields)
