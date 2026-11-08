@@ -17,6 +17,7 @@ module KeystoneUi
       ROW_GAP = 6
       SECTION_SPACING = { "sm" => 4, "md" => 6, "lg" => 8 }.freeze
       SHADED_LOOK = { padding: [ SPACING, 0 ], fill: "--ks-color-fill-muted" }.freeze
+      SIZED_SECTION_PADDING = [ SPACING, 6, 16 ].freeze
       SECTION_WIDTHS = { "sm" => "--container-2xl", "md" => "--container-4xl", "lg" => "--container-6xl", "xl" => "--container-7xl" }.freeze
 
       module_function
@@ -41,7 +42,7 @@ module KeystoneUi
 
       def sized(section, surface, &rows)
         width = SECTION_WIDTHS[section["width"]]
-        width ? surface.box(padding: [ SPACING, 0 ], width: [ width, 1 ], &rows) : yield
+        width ? surface.box(padding: SIZED_SECTION_PADDING, width: [ width, 1 ], align: :center, &rows) : yield
       end
 
       def drawn_rows(section, surface, values)

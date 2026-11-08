@@ -220,6 +220,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).laid_out.map(&:first).select { |call| call.first == :box }.map { |call| call.last.fetch(:width) }
   end
 
+  test "a section with a width setting is centred in the padding keystone_ui's page rule and the page's sized section padding give it at the printed page's width" do
+    document = page(section(row(column), width: "md"))
+
+    assert_equal({ padding: [ "--ks-spacing", 6, 16 ], align: :center }, drawn(document).laid_out.map(&:first).find { |call| call.first == :box }.last.except(:width))
+  end
+
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
     document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
                                        element("heading", text: "Large", size: "lg", note: "Updated monthly"), element("label", text: "Per seat")))))
