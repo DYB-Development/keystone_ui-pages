@@ -342,7 +342,7 @@ module KeystoneUi
       end
 
       def info_popup(surface, text, width)
-        surface.box(**INFO_POPUP_LOOK, width: width) { surface.text(text, size: INFO_SIZE) }
+        surface.box(**INFO_POPUP_LOOK, width: width) { surface.text(text, size: INFO_SIZE, font: "--ks-font-body", color: "--ks-color-on-overlay-muted", leading: line_height(INFO_SIZE)) }
       end
 
       def display_subtitle(surface, subtitle, width, align)

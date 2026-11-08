@@ -794,6 +794,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).map { |call| call.first == :text ? :text : call }
   end
 
+  test "an info block's summary and detail are drawn at the size, colour and line height keystone_ui's info popup rules and classes give them" do
+    document = page(section(row(column(element("info", summary: "How hours are counted", detail: "To the quarter hour.")))))
+
+    assert_equal [ [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-on-overlay-muted", leading: "--text-sm--line-height" } ] ] * 2,
+                 drawn(document).drawn.select { |call| call.first == :text }.map { |call| call.last(2) }
+  end
+
   private
 
   def drawn(document, values: {})
