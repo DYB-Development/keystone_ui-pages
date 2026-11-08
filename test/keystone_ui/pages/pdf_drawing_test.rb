@@ -422,6 +422,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ %w[Service Hours], [ %w[Review 4], %w[Audit 2] ] ], drawn(document).table_texts
   end
 
+  test "a table whose host value holds no items is drawn as its heading row alone" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: { "value" => "lines", "fallback" => nil })))))
+
+    assert_equal [ %w[Service Hours], [] ], drawn(document, values: { "lines" => [] }).table_texts
+  end
+
   private
 
   def drawn(document, values: {})
