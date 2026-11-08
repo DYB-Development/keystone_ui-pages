@@ -786,6 +786,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "How hours are counted", "Hours are counted to the quarter hour.\nTravel is not counted." ], drawn(document).texts
   end
 
+  test "an info block's summary and detail are each drawn in the box keystone_ui's info popup rules give them, at their own widths, the detail two spacing steps under the summary" do
+    document = page(section(row(column(element("info", summary: "How hours are counted", detail: "To the quarter hour.")))))
+    popup = { padding: [ "--ks-spacing", 3 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-overlay", border: { width: "--ks-border-width", color: "--ks-color-border" } }
+
+    assert_equal [ [ :box, popup.merge(width: [ "--spacing", 64 ]) ], :text, [ :space, "--ks-spacing", 2 ], [ :box, popup.merge(width: [ "--spacing", 80 ]) ], :text ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :text ? :text : call }
+  end
+
   private
 
   def drawn(document, values: {})

@@ -86,6 +86,10 @@ module KeystoneUi
       CARD_TEXT_SIZE = "--text-sm"
       CARD_SUMMARY_GAP = 1
       INFO_SIZE = "--text-sm"
+      INFO_GAP = 2
+      INFO_SUMMARY_WIDTH = [ TAILWIND_SPACING, 64 ].freeze
+      INFO_DETAIL_WIDTH = [ TAILWIND_SPACING, 80 ].freeze
+      INFO_POPUP_LOOK = { padding: [ SPACING, 3 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-overlay", border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
       CARD_LINK_GAP = 4
       CARD_LOOK = { padding: [ SPACING, 6, 6 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-surface", border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
       CTA_SUBTITLE_GAP = 8
@@ -330,8 +334,15 @@ module KeystoneUi
       end
 
       def info(surface, fields)
-        surface.text(fields[:summary], size: INFO_SIZE)
-        surface.text(fields[:detail], size: INFO_SIZE) if fields[:detail].present?
+        info_popup(surface, fields[:summary], INFO_SUMMARY_WIDTH)
+        return if fields[:detail].blank?
+
+        surface.space(SPACING, INFO_GAP)
+        info_popup(surface, fields[:detail], INFO_DETAIL_WIDTH)
+      end
+
+      def info_popup(surface, text, width)
+        surface.box(**INFO_POPUP_LOOK, width: width) { surface.text(text, size: INFO_SIZE) }
       end
 
       def display_subtitle(surface, subtitle, width, align)
