@@ -243,6 +243,18 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ 1, 1 ], pages(surface.render).map { |page| heights(page).keys.count("Service") }
   end
 
+  test "a table that starts part way down a page continues at the top of the next page's margin" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.text("Introduction", size: "--text-base")
+      surface.space("--ks-spacing", 40)
+      surface.table(table_row("Service"), Array.new(25) { |index| table_row("Review #{index}") }, **table_look)
+    end
+
+    assert_equal 735.384, heights(pages(surface.render).last)["Service"].to_f
+  end
+
   private
 
   def look
