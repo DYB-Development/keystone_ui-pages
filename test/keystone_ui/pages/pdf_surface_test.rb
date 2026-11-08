@@ -5,6 +5,8 @@ require "keystone_ui/pages/pdf_surface"
 require "keystone_ui/pages/pdf_look"
 
 class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
+  LONG_SERVICE = "Consulting hours for the quarterly review of accounts, the year end close, and the board pack prepared for the March meeting"
+
   test "a row drawn inside a column of another row starts each of its columns at the same height" do
     surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
 
@@ -163,6 +165,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     surface.table(table_row("Service", "Hours"), [ table_row("Consulting hours for the quarterly review of accounts", "4") ], **table_look)
 
     assert_includes lefts(surface.render).keys, "Consulting hours for the quarterly review of accounts"
+  end
+
+  test "a table too wide for its column keeps each column wide enough for its longest word and wraps the rest" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service", "Hours"), [ table_row(LONG_SERVICE, "4") ], **table_look)
+
+    assert_includes lefts(surface.render).keys, "Hours"
   end
 
   private

@@ -119,13 +119,22 @@ module KeystoneUi
       private
 
       def column_widths(table_rows)
-        natural = table_rows.map { |table_row| table_row[:cells].map { |cell| natural_width(cell) } }.transpose.map(&:max)
-        natural.map { |width| @document.bounds.width * width / natural.sum }
+        room = @document.bounds.width
+        widest = cell_widths(table_rows) { |cell| padded_width(cell, cell[:text].to_s) }
+        narrowest = cell_widths(table_rows) { |cell| cell[:text].to_s.split.map { |word| padded_width(cell, word) }.max.to_f }
+        return widest.map { |width| room * width / widest.sum } if widest.sum <= room
+
+        spare = widest.zip(narrowest).map { |most, least| most - least }
+        narrowest.zip(spare).map { |least, extra| least + (room - narrowest.sum) * extra / spare.sum }
       end
 
-      def natural_width(cell)
+      def cell_widths(table_rows, &measure)
+        table_rows.map { |table_row| table_row[:cells].map(&measure) }.transpose.map(&:max)
+      end
+
+      def padded_width(cell, content)
         left, right = cell_insets(cell)
-        text_width(cell[:text], cell[:size], cell[:font] || "--ks-font-body", cell[:weight]) + left + right
+        text_width(content, cell[:size], cell[:font] || "--ks-font-body", cell[:weight]) + left + right
       end
 
       def drawn_table_row(table_row, widths)
