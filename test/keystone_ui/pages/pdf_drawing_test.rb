@@ -503,6 +503,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).tables.last.then { |call| [ call[1], *call[2] ].flat_map { |table_row| table_row[:cells].map { |cell| cell.slice(:size, :font, :leading) } } }.uniq
   end
 
+  test "a table's group row is kept on the same page as the first row of its group" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team")))))
+
+    assert_equal [ true, nil ], drawn(document).tables.last[2].pluck(:with_next)
+  end
+
   private
 
   def drawn(document, values: {})

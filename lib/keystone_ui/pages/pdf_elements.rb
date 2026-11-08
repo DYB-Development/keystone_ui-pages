@@ -140,7 +140,7 @@ module KeystoneUi
 
       def group_row(columns, group, totals)
         subtotals = totals.to_h.stringify_keys.fetch(group.to_s, {}).to_h.stringify_keys
-        table_row(columns, columns.each_with_index.map { |column, index| index.zero? ? group : subtotals[column[:key].to_s] }, header: true)
+        table_row(columns, columns.each_with_index.map { |column, index| index.zero? ? group : subtotals[column[:key].to_s] }, header: true).merge(with_next: true)
       end
 
       def table_row(columns, texts, header: false)
