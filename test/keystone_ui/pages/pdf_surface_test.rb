@@ -280,6 +280,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ [ "Service" ], [ "Service", "Total" ] ], pages(surface.render).map { |page| heights(page).keys & [ "Service", "Total" ] }
   end
 
+  test "a table whose heading row and first row do not fit in the space left on a page starts on the next page" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.space("--ks-spacing", 223)
+    surface.table(table_row("Service"), [ table_row("Review") ], **table_look)
+
+    assert_equal 1, pages(surface.render).sum { |page| heights(page).keys.count("Service") }
+  end
+
   private
 
   def look

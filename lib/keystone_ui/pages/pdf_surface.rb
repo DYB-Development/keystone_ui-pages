@@ -112,6 +112,8 @@ module KeystoneUi
         @document.move_down(edge)
         @document.bounding_box([ edge, @document.cursor ], width: @document.bounds.width - edge * 2) do
           widths = column_widths([ heading, *rows, total ].compact)
+          opening = [ heading, (rows.first || total) ].compact.sum { |table_row| row_height(table_row, widths) }
+          restarted(frame) unless fits?(opening)
           drawn_table_row(heading, widths)
           rows.each_with_index do |table_row, position|
             kept_on_page(table_row, heading, widths, frame) { divided(divider, widths.sum) if position.positive? }
@@ -170,10 +172,14 @@ module KeystoneUi
         return (yield if block_given?) if fits?(row_height(table_row, widths))
 
         framed(frame)
+        restarted(frame)
+        drawn_table_row(heading, widths)
+      end
+
+      def restarted(frame)
         next_page
         frame[:top] = @document.y
         @document.move_down(frame[:edge])
-        drawn_table_row(heading, widths)
       end
 
       def fits?(height)
