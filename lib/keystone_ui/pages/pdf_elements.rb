@@ -41,6 +41,10 @@ module KeystoneUi
       TABLE_HEADER_PADDING_DOWN = 3.5
       TABLE_CELL_PADDING_DOWN = 4
       TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
+      STAT_LABEL_SIZE = "--text-sm"
+      STAT_VALUE_SIZE = "--text-3xl"
+      STAT_SUFFIX_SIZE = "--text-lg"
+      STAT_NOTE_SIZE = "--text-sm"
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -166,6 +170,17 @@ module KeystoneUi
 
       def table_alignment(column, position)
         TABLE_ALIGNMENTS.fetch(column[:align].to_s) { position == :last ? :right : :left }
+      end
+
+      def stat_card(surface, fields)
+        surface.text(fields[:label], size: STAT_LABEL_SIZE)
+        surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE)
+        surface.text(fields[:note], size: STAT_NOTE_SIZE) if fields[:note].present?
+      end
+
+      def stat_runs(fields)
+        suffix = [ { text: " #{fields[:suffix]}", size: STAT_SUFFIX_SIZE } ] unless fields[:suffix].nil?
+        [ { text: fields[:value].to_s }, *suffix ]
       end
 
       def paragraph(surface, fields)

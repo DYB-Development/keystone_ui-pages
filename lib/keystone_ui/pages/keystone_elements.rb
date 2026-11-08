@@ -46,7 +46,7 @@ module KeystoneUi
                     { key: :summary, label: "Summary", kind: :long_text },
                     { key: :link, label: "Link", kind: :address, default: "#" },
                     { key: :cta, label: "Link text", kind: :text, default: "Read more" } ])
-        catalog.register(key: :stat_card, name: "Stat", component: :ui_stat_card, icon: :chart, group: "Data",
+        catalog.register(key: :stat_card, name: "Stat", component: :ui_stat_card, icon: :chart, group: "Data", pdf: PdfElements.method(:stat_card),
           fields: [ { key: :label, label: "Label", kind: :text, default: "Label" },
                     { key: :value, label: "Value", kind: :text, default: "0" },
                     { key: :suffix, label: "Suffix", kind: :text },

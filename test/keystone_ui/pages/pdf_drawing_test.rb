@@ -522,6 +522,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ width: "1px", color: "--color-gray-300" }, drawn(document).tables.last.last[:parts_divider])
   end
 
+  test "a stat is drawn as its label, its value followed by its suffix, and its note" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "4,200", suffix: "USD", note: "Up on last month")))))
+
+    assert_equal [ [ "Revenue", "Up on last month" ], [ "4,200 USD" ] ], drawn(document).then { |surface| [ surface.texts, surface.paragraphs ] }
+  end
+
   private
 
   def drawn(document, values: {})
