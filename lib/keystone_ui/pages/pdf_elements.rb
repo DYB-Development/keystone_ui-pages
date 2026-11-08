@@ -91,6 +91,8 @@ module KeystoneUi
       FEATURE_GRID_SUBTITLE_GAP = 16
       FEATURE_GRID_COLUMNS = 2
       FEATURE_GRID_GAP = 6
+      FEATURE_TITLE_GAP = 2
+      FEATURE_CARD_LOOK = { padding: [ SPACING, 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-raised", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } }.freeze
       FEATURE_TITLE_SIZE = "--text-lg"
       FEATURE_DESCRIPTION_SIZE = "--text-sm"
       INFO_GAP = 2
@@ -366,8 +368,11 @@ module KeystoneUi
       end
 
       def feature(surface, feature)
-        surface.text(feature[:title], size: FEATURE_TITLE_SIZE)
-        surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE)
+        surface.box(**FEATURE_CARD_LOOK) do
+          surface.text(feature[:title], size: FEATURE_TITLE_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: line_height(FEATURE_TITLE_SIZE))
+          surface.space(SPACING, FEATURE_TITLE_GAP)
+          surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(FEATURE_DESCRIPTION_SIZE))
+        end
       end
 
       def display_subtitle(surface, subtitle, width, align)
