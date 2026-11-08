@@ -120,14 +120,15 @@ module KeystoneUi
 
       def row(widths, gap: nil, grid: false)
         spacing = gap ? @look.points(gap.first) * gap.last : 0
-        room = grid ? @document.bounds.width - spacing * (widths.size - 1) : @document.bounds.width
-        stretched = widths.each_with_index.map { |width, index| measured(room * width) { yield index } }.max if grid
+        room = grid ? @document.bounds.width + spacing : @document.bounds.width
+        lost = grid ? spacing : 0
+        stretched = widths.each_with_index.map { |width, index| measured(room * width - lost) { yield index } }.max if grid
         top = @document.y
         first_page = @document.page_number
         lowest = [ first_page, -top ]
         left = 0
         widths.each_with_index do |width, index|
-          column_width = room * width
+          column_width = room * width - lost
           inset = index.positive? && !grid ? spacing : 0
           @document.go_to_page(first_page)
           @document.y = top

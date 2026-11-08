@@ -23,6 +23,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 36.0 + (540 - 18) / 2 + 18, lefts(surface.render)["Clear"]
   end
 
+  test "a column in a row laid out as a grid spans its share of a grid whose tracks are split by the gap, so unequal shares sit as the page's twelve-column grid places them" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 3), Rational(2, 3) ], gap: [ "--ks-spacing", 6 ], grid: true) { |index| surface.text(%w[Narrow Wide][index], size: "--text-base") }
+
+    assert_equal 36.0 + ((540 - 11 * 18) / 12.0 * 4 + 3 * 18) + 18, lefts(surface.render)["Wide"]
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
