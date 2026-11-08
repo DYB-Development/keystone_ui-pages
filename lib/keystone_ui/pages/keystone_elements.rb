@@ -54,7 +54,7 @@ module KeystoneUi
                     { key: :note, label: "Note", kind: :text },
                     { key: :plain, label: "Plain", kind: :yes_or_no },
                     { key: :fallback, label: "When missing", kind: :text, default: "N/A" } ])
-        catalog.register(key: :figure, name: "Figure", component: :ui_figure, icon: :number, group: "Data",
+        catalog.register(key: :figure, name: "Figure", component: :ui_figure, icon: :number, group: "Data", pdf: PdfElements.method(:figure),
           fields: [ { key: :text, label: "Text", kind: :text, default: "0" },
                     { key: :tone, label: "Tone", kind: :one_of, options: %w[neutral success danger], default: "neutral" } ])
         catalog.register(key: :info, name: "Info", component: :ui_info, icon: :info, group: "Text", body: :detail,

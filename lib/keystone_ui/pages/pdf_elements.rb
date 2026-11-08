@@ -54,6 +54,8 @@ module KeystoneUi
       STAT_VALUE_WEIGHT = "calc(var(--ks-font-weight-heading)+100)"
       STAT_SUFFIX_SIZE = "--text-lg"
       STAT_NOTE_SIZE = "--text-sm"
+      FIGURE_SIZE = "--text-base"
+      FIGURE_COLORS = TONE_COLORS.slice("success", "danger").merge("neutral" => "--ks-color-on-page").freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -207,6 +209,10 @@ module KeystoneUi
         return { text: fields[:fallback].to_s, color: "--ks-color-text-muted" } if fields[:value].to_s.empty? && !fields[:fallback].nil?
 
         { text: fields[:value].to_s }
+      end
+
+      def figure(surface, fields)
+        surface.text(fields[:text], size: FIGURE_SIZE, color: FIGURE_COLORS.fetch(fields[:tone].to_s, FIGURE_COLORS["neutral"]))
       end
 
       def paragraph(surface, fields)

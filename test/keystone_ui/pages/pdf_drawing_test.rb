@@ -582,6 +582,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
   end
 
+  test "a figure is drawn as its text in the colour keystone_ui's tone rules give its tone, and a neutral figure in the page's text colour" do
+    document = page(section(row(column(*%w[neutral success danger].map { |tone| element("figure", text: "$#{tone.size}", tone: tone) }))))
+
+    assert_equal [ [ "$7", "--ks-color-on-page" ], [ "$7", "--ks-color-success-600" ], [ "$6", "--ks-color-danger-600" ] ],
+                 drawn(document).drawn.select { |call| call.first == :text }.map { |call| [ call[1], call.last[:color] ] }
+  end
+
   private
 
   def drawn(document, values: {})
