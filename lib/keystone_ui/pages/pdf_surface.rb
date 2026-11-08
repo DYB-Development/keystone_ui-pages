@@ -21,7 +21,7 @@ module KeystoneUi
         @document.fill_color(@look.color(color))
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
           @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) do
-            spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra) }
+            spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra, final_gap: leading.nil?) }
           end
         end
       end
@@ -109,7 +109,7 @@ module KeystoneUi
         extra = line - font.height_at(points)
         @document.move_down((line - letters) / 2)
         yield extra
-        @document.move_down(extra / 2)
+        @document.move_down((line - letters) / 2)
       end
 
       def measured(width)

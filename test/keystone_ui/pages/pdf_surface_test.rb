@@ -107,6 +107,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 756 - (24 - 11.1) / 2 - 8.616, heights(surface.render)["Book a call"].to_f, 0.001
   end
 
+  test "text drawn after a line of text with a line height token starts one line height lower" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("First", size: "--text-base", leading: "--leading-loose")
+    surface.text("Second", size: "--text-base", leading: "--leading-loose")
+
+    assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
+  end
+
   private
 
   def look
