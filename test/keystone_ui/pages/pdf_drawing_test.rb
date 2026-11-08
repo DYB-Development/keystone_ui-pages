@@ -713,6 +713,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).map { |call| call.first == :space || call.last.keys == [ :padding ] ? call : call.first }
   end
 
+  test "a call to action is drawn as its title, its subtitle and its text, in the order the page shows them" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?", subtitle: "Book a call this week.", text: "No card needed.")))))
+
+    assert_equal [ "Ready to start?", "Book a call this week.", "No card needed." ], drawn(document).texts
+  end
+
   private
 
   def drawn(document, values: {})
