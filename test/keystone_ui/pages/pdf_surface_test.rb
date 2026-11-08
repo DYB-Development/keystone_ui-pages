@@ -387,6 +387,18 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ 1, 1 ], pages(surface.render).map { |page| heights(page).keys.count("Service") }
   end
 
+  test "a box that does not fit in the space left on a page is drawn whole at the top of the next page's margin" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.text("Introduction", size: "--text-base")
+      surface.space("--ks-spacing", 200)
+      surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent") { surface.text(Array.new(10) { |line| "Line #{line}" }.join("\n"), size: "--text-base") }
+    end
+
+    assert_equal 735.384, heights(pages(surface.render).last)["Line 0"].to_f
+  end
+
   test "a table that starts part way down a page continues at the top of the next page's margin" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

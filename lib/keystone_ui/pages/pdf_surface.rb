@@ -54,8 +54,9 @@ module KeystoneUi
         across, down = insets(padding, border)
         width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
         left = align == :center ? (@document.bounds.width - width) / 2 : 0
-        top = @document.cursor
         height = measured(width - across * 2, &content) + down * 2
+        next_page unless fits?(height) || height > @document.margin_box.height
+        top = @document.cursor
         corner = radius ? @look.points(radius.first) * radius.last : 0
         if fill
           @document.fill_color(@look.color(fill))
