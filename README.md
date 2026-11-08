@@ -84,6 +84,20 @@ public/InterVariable-Italic.ttf
 
 The PDF prints regular, bold and italic text from the copies whose `@font-face` rules give those weights and styles. Asking for a PDF in a font with no TrueType copy served raises a `PrintFailed` naming the font and the file it looked for.
 
+### Giving a host element a PDF drawing
+
+A host element prints under the Ruby drawing once it is registered with a `pdf:` drawing. The drawing is anything that answers `call(surface, fields)`, such as a lambda or a method:
+
+```ruby
+KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph,
+  fields: [ { key: :text, label: "Text", default: "Hi" } ],
+  pdf: ->(surface, fields) { surface.text(fields[:text], size: "--text-base", color: "--ks-color-accent") })
+```
+
+`fields` holds each of the element's fields by its key, filled with the host's values for the fields bound to one, or with the field's fallback or default when there is none. `surface` draws the element in the column it sits in, with the calls the gem's own elements draw with: `text`, `rich_text`, `box`, `boxed_text`, `bar`, `rule`, `space`, `row` and `table`. Each call takes keystone_ui's tokens by name, such as `--text-base`, `--ks-color-accent` or `--ks-spacing`, and prints in the value the stylesheet `KeystoneUi::Pages.pdf_stylesheet` names gives each token. The gem's own drawings in `KeystoneUi::Pages::PdfElements` show each call in use.
+
+A host element registered without a `pdf:` drawing refuses the PDF with a `NoPdfDrawing` naming the element. An element a place leaves out keeps its drawing, so a page in any place that offers it prints it.
+
 ### When a PDF cannot be made
 
 A PDF that cannot be made raises `KeystoneUi::Pages::PrintFailed` with a message saying why. Under the Ruby drawing that is any of these:

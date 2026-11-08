@@ -134,10 +134,15 @@ linking editors to the builder or drawing a page in the host's screens.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
      paragraph, alert, label and value list, button, accordion, table, stat,
-     figure, badge and progress elements print. The form, copy button and Next page elements are left out of the
-     PDF. A PDF of a page holding any other element is refused with a message
-     naming that element. Ask the developer whether the pages they plan
-     to print hold only those elements before choosing this drawing.
+     figure, badge and progress elements print. The form, copy button and Next
+     page elements are left out of the PDF. An element the host adds to the
+     catalog prints only when it is registered with a PDF drawing of its own,
+     and a PDF of a page holding any other element is refused with a message
+     naming that element. An element a place leaves out keeps its drawing, so a
+     page in any place that offers it still prints it. Ask the developer whether
+     the pages they plan to print hold only those elements, or host elements
+     they will give PDF drawings, before choosing this drawing. Writing a host
+     element's PDF drawing belongs to `keystone_ui-pages-develop`.
      It still needs Propshaft serving the host's stylesheet, since it reads the
      fonts, weights, text colours, fills, borders, radii and spacing from its
      `--ks-` tokens, the page's line height from its `html` rule, and the text
@@ -220,7 +225,9 @@ linking editors to the builder or drawing a page in the host's screens.
    stat prints its label, value and note with the value in its tone's colour,
    each figure prints in its tone's colour, each badge prints its label on its
    tone's fill in a pill, each progress bar prints its label above a pill
-   filled to its share, and the form is left out.
+   filled to its share, and the form is left out. If the host registers
+   elements of its own, add each one to a page and open its PDF: one with a
+   PDF drawing prints, and one without is refused with a message naming it.
 
    When a PDF link in the page list returns to the list showing a message, the
    PDF was refused, and the message names what to fix: the browser, an

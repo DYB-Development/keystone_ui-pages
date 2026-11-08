@@ -513,10 +513,16 @@ inherit from the base controller, so define it there.
   `placed: true` also passes `element_id:` and `version:` (nil in the builder)
   to the method, which the Form element uses to build its address.
   `pdf:` is the element's Ruby PDF drawing, used only when `pdf_drawing` is
-  `:ruby`: a callable taking the drawing surface and a hash of the element's
-  field values keyed by symbol, with bound values filled in and each unset
-  field at its `default:`. A `:list` field arrives as an array of hashes with
-  symbol keys, each blank part filled with its entry's `default:`. Every call
+  `:ruby`: anything that answers `call(surface, fields)`, such as a lambda or
+  a method, taking the drawing surface and a hash of every one of the
+  element's fields keyed by symbol. A field bound to a host value holds that
+  value, or its fallback text when the value is blank, or an empty string when
+  both are blank. A field that is not bound and is left blank holds its
+  `default:`. A `:list` field arrives as an array of hashes with
+  symbol keys, each blank part filled with its entry's `default:`. The drawing
+  is found in the whole catalog, whatever the page's place, so an element one
+  place leaves out with `leaves_out:` still prints by its drawing on a page in
+  a place that offers it. Every call
   on the surface draws below what was drawn before it in the same column, and
   reads the tokens as the Ruby drawing's look describes. The surface has nine
   calls.
@@ -827,10 +833,20 @@ The catalog offers these Keystone UI components by default: `button`,
     Interface:
 
     ```ruby
-    pdf: ->(surface, fields) {
-      surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted", leading: "--text-sm--line-height")
-    }
+    KeystoneUi::Pages.catalog.register(key: :testimonial, name: "Testimonial", component: :testimonial,
+      fields: [ { key: :quote, label: "Quote", kind: :long_text, default: "It works." } ],
+      pdf: ->(surface, fields) {
+        surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted", leading: "--text-sm--line-height")
+      })
     ```
+
+    Register it with `pdf:` in the same `catalog.register` call that adds the
+    element, since registering the key again replaces the whole entry. The
+    drawing takes the surface and the field values only, so read every field
+    from `fields` by its symbol key and draw only with the surface's nine
+    calls. An element registered without `pdf:` refuses every PDF of a page
+    showing it with `NoPdfDrawing`, whose message is "The <name> element has
+    no PDF drawing, so this page cannot be drawn as a PDF without Chrome."
 
     Use the same tokens the component's Keystone UI classes use on screen, so
     the PDF matches the page. A share of something, such as a score out of a

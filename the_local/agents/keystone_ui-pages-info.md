@@ -32,8 +32,8 @@ This local declares no commands. The two working surfaces belong elsewhere:
   file → **`keystone_ui-pages-install`**.
 - **Working with it** — what each setting does, places, who may view or edit,
   host values, sequences, drawing a page in the host's own screens, PDFs and
-  which drawing makes them, view
-  and click reporting, form answers, linking to the builder and changing the
+  which drawing makes them, giving a host element a PDF drawing, view and
+  click reporting, form answers, linking to the builder and changing the
   element catalog → **`keystone_ui-pages-develop`**.
 
 ## How to use it
@@ -43,7 +43,8 @@ One decision: is Keystone UI Pages already set up in the app?
 - No, or the setup is out of date, such as a migration from a newer version not
   yet run → **`keystone_ui-pages-install`**.
 - Yes, and there is a page to draw, a PDF to make, a place or sequence to add, a
-  setting to change or an element to add → **`keystone_ui-pages-develop`**.
+  setting to change, an element to add or a PDF drawing to give one →
+  **`keystone_ui-pages-develop`**.
 
 Keystone UI itself must be installed first. Its own install local,
 `keystone_ui-install`, does that.
@@ -105,9 +106,20 @@ Keystone UI itself must be installed first. Its own install local,
   and elements with Prawn. In the Ruby drawing each element draws through its
   own PDF drawing, given when the element is added to the catalog. A page
   holding an element with no PDF drawing cannot be printed that way, and the
-  error names the element. So far the heading, label, paragraph, alert, label
-  and value list, button, accordion, table, stat, figure, badge and progress
-  elements have one.
+  error names the element. Of the gem's own elements, the heading, label,
+  paragraph, alert, label and value list, button, accordion, table, stat,
+  figure, badge and progress elements have one.
+- **A host element prints in the Ruby drawing once the host gives it a PDF
+  drawing.** The host passes the drawing when it adds the element to the
+  catalog, and an element added without one refuses the PDF with an error
+  naming it. The drawing receives the element's fields by key, each filled with
+  the host's value when it is bound to one, or else its fallback or default.
+  It draws the element in the column it sits in, with the same set of drawing
+  calls the gem's own elements use: text, styled text, boxes, text in a box,
+  bars, lines, space, rows of columns and tables. Each call names Keystone UI
+  tokens, such as a text size or a colour, and prints in the value the host's
+  stylesheet gives that token. An element one place leaves out keeps its
+  drawing, so a page in a place that offers it still prints it.
 - **Screen-only elements are left out of a Ruby-drawn PDF.** The form, copy
   button and Next page elements have a PDF drawing that prints nothing, so a
   page holding them still prints, without them.
