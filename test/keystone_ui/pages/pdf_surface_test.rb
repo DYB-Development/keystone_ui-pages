@@ -104,6 +104,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 36.0 + 6 * 3, lefts(surface.render)["Service"]
   end
 
+  test "text drawn aligned stays on one line when its widest line's measured width falls a rounding error short of the width it wraps at" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:end) { surface.text("Wide heading", size: "1.5rem", weight: "--ks-font-weight-strong") }
+
+    assert_includes lefts(surface.render).keys, "Wide heading"
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

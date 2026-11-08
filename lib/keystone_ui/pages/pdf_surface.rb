@@ -17,6 +17,7 @@ module KeystoneUi
 
       BOLD_WEIGHT = 600
       COLUMN_PLACES = { top: 0, center: Rational(1, 2), bottom: 1 }.freeze
+      WRAP_ROUNDING = 1 + Float::EPSILON * 64
       ALIGNED_PLACES = { start: 0, center: Rational(1, 2), end: 1 }.freeze
       MEASURING_HEIGHT = 14_400
       NO_BREAK_SPACE = "\u00A0"
@@ -99,7 +100,7 @@ module KeystoneUi
       end
 
       def aligned(align, &content)
-        width = reach(@document.bounds.width, &content)
+        width = [ reach(@document.bounds.width, &content) * WRAP_ROUNDING, @document.bounds.width ].min
         return yield unless width.positive?
 
         @document.bounding_box([ (@document.bounds.width - width) * ALIGNED_PLACES.fetch(align), @document.cursor ], width: width, &content)
