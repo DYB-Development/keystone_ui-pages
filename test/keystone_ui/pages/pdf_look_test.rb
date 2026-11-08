@@ -17,6 +17,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "FFFFFF", look.color("--ks-color-on-fill")
   end
 
+  test "an eight-digit hex colour is read as the six-digit hex colour it names, without its opacity" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-tint:#3b82f61a}")
+
+    assert_equal "3B82F6", look.color("--ks-color-tint")
+  end
+
   test "an oklch colour is turned into the hex colour it names" do
     look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-danger:oklch(57.7% .245 27.325)}")
 

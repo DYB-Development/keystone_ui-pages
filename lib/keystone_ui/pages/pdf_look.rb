@@ -48,8 +48,8 @@ module KeystoneUi
         return oklch_hex(css) if css.start_with?("oklch(")
 
         hex = css.delete_prefix("#").upcase
-        unreadable(name, css) unless hex.match?(/\A(\h{3}|\h{6})\z/)
-        hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex
+        unreadable(name, css) unless hex.match?(/\A(\h{3}|\h{6}|\h{8})\z/)
+        hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex[0, 6]
       end
 
       def font(name)
