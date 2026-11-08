@@ -32,7 +32,7 @@ module KeystoneUi
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         fragments = runs.map { |run| { text: run[:text], link: run[:link], styles: %i[bold italic].select { |style| run[style] } }.compact }
-        @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra) } }
+        @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
       def box(padding:, radius:, fill: nil, border: nil, &content)
