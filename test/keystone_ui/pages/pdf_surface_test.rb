@@ -185,6 +185,18 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/h\nf\n.*1\.5 w\n/m, surface.render)
   end
 
+  test "a box that clips its content inside a column strokes its border at the top of the box, level with its clipped content" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.box(padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }, clip: true) do
+        surface.box(padding: [ "--ks-spacing", 4 ], fill: "--ks-color-accent") { surface.text("puts 42", size: "--text-base") }
+      end
+    end
+
+    assert_in_delta 0.75, surface.render.then { |pdf| pdf[/1\.5 w\n[\d.]+ ([\d.]+) m/, 1].to_f - pdf[/q\n[\d.]+ ([\d.]+) m\n/, 1].to_f }, 0.001
+  end
+
   test "a box given no fill, border or rounding insets its content by its padding alone" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

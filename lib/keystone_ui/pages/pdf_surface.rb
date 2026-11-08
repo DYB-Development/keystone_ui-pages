@@ -57,6 +57,7 @@ module KeystoneUi
         height = measured(width - across * 2, &content) + down * 2
         next_page unless fits?(height) || height > @document.margin_box.height
         top = @document.cursor
+        bottom = @document.bounds.absolute_bottom
         corner = radius ? @look.points(radius.first) * radius.last : 0
         if fill
           @document.fill_color(@look.color(fill))
@@ -64,7 +65,7 @@ module KeystoneUi
         end
         bordered(border, top, width, height, corner, left) if border && !clip
         clipped(clip && [ left, top, width, height, corner, border ]) { @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content) }
-        bordered(border, top, width, height, corner, left) if border && clip
+        bordered(border, top + bottom - @document.bounds.absolute_bottom, width, height, corner, left) if border && clip
         @document.move_down(down)
       end
 
