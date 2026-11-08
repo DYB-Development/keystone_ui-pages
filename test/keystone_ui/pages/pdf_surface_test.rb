@@ -299,6 +299,19 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_includes heights(pages(surface.render).first).keys, "Side"
   end
 
+  test "what follows a row is drawn under the column that ends lowest on the row's last page" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ]) do |index|
+      surface.space("--ks-spacing", 200) if index.zero?
+      surface.table(table_row("Service"), Array.new(25) { |row| table_row("Review #{row}") }, **table_look) unless index.zero?
+    end
+    surface.text("After", size: "--text-base")
+
+    drawn = heights(pages(surface.render).last).transform_values(&:to_f)
+    assert_in_delta 12 + 13.872, drawn["Review 24"] - drawn["After"], 0.001
+  end
+
   private
 
   def look
