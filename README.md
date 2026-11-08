@@ -82,6 +82,18 @@ public/InterVariable-Italic.ttf
 
 The PDF prints regular, bold and italic text from the copies whose `@font-face` rules give those weights and styles. Asking for a PDF in a font with no TrueType copy served raises a `PrintFailed` naming the font and the file it looked for.
 
+### When a PDF cannot be made
+
+A PDF that cannot be made raises `KeystoneUi::Pages::PrintFailed` with a message saying why. Under the Ruby drawing that is any of these:
+
+- An element without a PDF drawing, named by its element.
+- An element the catalog does not have, named by its key.
+- Text holding a character its font cannot draw, named by its element and the character. Helvetica draws only the Windows-1252 characters, so a page using others needs a font served as TrueType copies that holds them.
+- A keystone_ui token the stylesheet does not set, or sets to a colour or length the gem cannot read, named by its token.
+- A font with no TrueType copy served, named by its font and the file it looked for.
+
+A refused PDF keeps no file, so asking again after the page or the stylesheet is fixed makes a new one. An editor who clicks PDF in the page list is sent back to the list with the refusal's message shown. A page whose PDF is refused when it is published, or by `prepare_pdf`, is still published, and the refusal is reported through `Rails.error` with the page's id and name, since no one is waiting on that PDF to read it.
+
 ## Reporting views and clicks to the host
 
 The gem keeps no record of who views a page or what they click. A host that wants to know registers a handler on the place, and the gem hands each view and click to it:
