@@ -149,6 +149,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 54.0, lefts(surface.render)["Book a call"]
   end
 
+  test "a box given a width narrower than the width it is drawn in is filled that wide" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 3 ], width: [ "--ks-spacing", 64 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent") { surface.text("Revenue", size: "--text-base") }
+
+    assert_in_delta 192.0, fill_widths(surface.render).first, 0.001
+  end
+
   test "a box given no fill, border or rounding insets its content by its padding alone" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
