@@ -337,6 +337,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ [], [ "Group", "Last" ] ], pages(surface.render).map { |page| heights(page).keys & [ "Group", "Last" ] }
   end
 
+  test "a table cell shorter than its row is centred in the row from top to bottom" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Begins\nEnds", "Middle"), [], **table_look)
+
+    drawn = heights(surface.render).transform_values(&:to_f)
+    assert_in_delta 13.872 / 2, drawn["Begins"] - drawn["Middle"], 0.001
+  end
+
   private
 
   def look

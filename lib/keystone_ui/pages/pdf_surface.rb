@@ -181,7 +181,7 @@ module KeystoneUi
         end
         table_row[:cells].each_with_index do |cell, index|
           left, right, down = cell_insets(cell)
-          @document.y = top - down
+          @document.y = top - (height - cell_height(cell, widths[index])) / 2 - down
           @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) { drawn_cell(cell) }
         end
         @document.y = top - height
@@ -228,10 +228,12 @@ module KeystoneUi
       end
 
       def row_height(table_row, widths)
-        table_row[:cells].each_with_index.map do |cell, index|
-          left, right, down = cell_insets(cell)
-          measured(widths[index] - left - right) { drawn_cell(cell) } + down * 2
-        end.max
+        table_row[:cells].each_with_index.map { |cell, index| cell_height(cell, widths[index]) }.max
+      end
+
+      def cell_height(cell, width)
+        left, right, down = cell_insets(cell)
+        measured(width - left - right) { drawn_cell(cell) } + down * 2
       end
 
       def drawn_cell(cell)
