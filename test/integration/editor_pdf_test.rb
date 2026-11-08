@@ -28,4 +28,16 @@ class KeystoneUi::Pages::EditorPdfTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "%PDF-1", [ "%PDF-1" ] ], [ response.body, printed ]
   end
+
+  test "an editor whose PDF is refused is sent back to the page list showing the refusal's message" do
+    page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
+    page.publish
+
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { raise KeystoneUi::Pages::PrintFailed, "The PDF needs the keystone_ui token --ks-spacing." }) do
+      get "/pages/manage/pages/#{page.id}/pdf", headers: { "Referer" => "/pages/manage/pages" }
+      follow_redirect!
+    end
+
+    assert_includes response.body, "The PDF needs the keystone_ui token --ks-spacing."
+  end
 end

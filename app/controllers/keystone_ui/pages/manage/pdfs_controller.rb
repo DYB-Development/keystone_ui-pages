@@ -10,6 +10,9 @@ module KeystoneUi
 
           pdf = KeystoneUi::Pages.pdf(page, values: sample_values(page))
           send_data pdf.file.download, filename: "#{page.slug}.pdf", type: "application/pdf"
+        rescue PrintFailed => refusal
+          flash[:pdf_refusal] = refusal.message
+          redirect_back_or_to manage_pages_path(place: page.place)
         end
 
         private

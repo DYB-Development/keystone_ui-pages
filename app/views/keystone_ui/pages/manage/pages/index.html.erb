@@ -3,6 +3,10 @@
     <% header.action { ui_button(label: "Create", href: new_manage_page_path(place: @place)) } unless @archived %>
   <% end %>
 
+  <% if flash[:pdf_refusal] %>
+    <%= ui_alert(message: flash[:pdf_refusal], type: :error) %>
+  <% end %>
+
   <p class="mb-4 text-sm">
     <%= @archived ? link_to("Show current pages", manage_pages_path(place: @place)) : link_to("Show archived", manage_pages_path(archived: 1, place: @place)) %>
   </p>
