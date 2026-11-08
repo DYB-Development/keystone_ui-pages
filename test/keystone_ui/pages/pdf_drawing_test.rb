@@ -534,6 +534,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ { text: "Not yet", color: "--ks-color-text-muted" } ], drawn(document).drawn.find { |call| call.first == :rich_text }[1]
   end
 
+  test "a stat's value is drawn in the text colour keystone_ui's tone rules give its tone" do
+    document = page(section(row(column(*%w[neutral success danger warning info].map { |tone| element("stat_card", value: "12", variant: tone) }))))
+
+    assert_equal %w[--ks-color-text --ks-color-success-600 --ks-color-danger-600 --ks-color-warning-600 --ks-color-info-600],
+                 drawn(document).drawn.select { |call| call.first == :rich_text }.map { |call| call.last[:color] }
+  end
+
   private
 
   def drawn(document, values: {})
