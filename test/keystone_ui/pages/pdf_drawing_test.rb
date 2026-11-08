@@ -761,6 +761,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ { text: "See plans", link: "https://ty-ler.com/pricing" } ], drawn(document).drawn.find { |call| call.first == :rich_text }.second
   end
 
+  test "a card is drawn in a box with the fill, border, rounded corners and padding keystone_ui's card rules give it at the printed page's width" do
+    document = page(section(row(column(element("card", title: "Pricing")))))
+
+    assert_equal [ :box, { padding: [ "--ks-spacing", 6, 6 ], radius: [ "--ks-radius-surface", 1 ], fill: "--ks-color-surface",
+                           border: { width: "--ks-border-width", color: "--ks-color-border" } } ], drawn(document).drawn.second
+  end
+
   private
 
   def drawn(document, values: {})
