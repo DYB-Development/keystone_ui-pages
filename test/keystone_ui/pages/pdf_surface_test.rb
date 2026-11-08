@@ -175,6 +175,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_includes lefts(surface.render).keys, "Hours"
   end
 
+  test "a table whose words are too wide for its column is drawn within that column" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 4), Rational(3, 4) ]) do |index|
+      surface.table(table_row("Reconciliation", "Depreciation", "Amortisation"), [], **table_look) if index.zero?
+    end
+
+    assert_operator lefts(surface.render).values.max, :<, 36 + 135
+  end
+
   private
 
   def look

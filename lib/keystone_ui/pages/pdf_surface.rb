@@ -123,6 +123,7 @@ module KeystoneUi
         widest = cell_widths(table_rows) { |cell| padded_width(cell, cell[:text].to_s) }
         narrowest = cell_widths(table_rows) { |cell| cell[:text].to_s.split.map { |word| padded_width(cell, word) }.max.to_f }
         return widest.map { |width| room * width / widest.sum } if widest.sum <= room
+        return narrowest.map { |width| room * width / narrowest.sum } if narrowest.sum >= room
 
         spare = widest.zip(narrowest).map { |most, least| most - least }
         narrowest.zip(spare).map { |least, extra| least + (room - narrowest.sum) * extra / spare.sum }
