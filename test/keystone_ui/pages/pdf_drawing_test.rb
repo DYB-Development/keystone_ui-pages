@@ -742,6 +742,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(3).map { |call| call[1] == "No card needed." ? :text : call }
   end
 
+  test "a call to action's text is drawn centred in the page's own text size, line height and colour, which it takes from the page as the call to action sets none" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?", text: "No card needed.")))))
+
+    assert_equal [ "--text-base", { font: "--ks-font-body", color: "--ks-color-on-page", leading: "line-height", align: :center } ], drawn(document).drawn.last.last(2)
+  end
+
   private
 
   def drawn(document, values: {})

@@ -303,7 +303,7 @@ module KeystoneUi
           surface.text(fields[:title], size: CTA_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(CTA_TITLE_SIZE), align: :center)
           surface.space(SPACING, CTA_TITLE_GAP)
           cta_subtitle(surface, fields[:subtitle]) if fields[:subtitle].present?
-          surface.text(fields[:text], size: CTA_TEXT_SIZE) if fields[:text].present?
+          surface.text(fields[:text], size: CTA_TEXT_SIZE, font: "--ks-font-body", color: FIGURE_COLORS["neutral"], leading: PAGE_LINE_HEIGHT, align: :center) if fields[:text].present?
         end
       end
 
