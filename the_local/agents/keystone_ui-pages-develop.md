@@ -197,7 +197,8 @@ inherit from the base controller, so define it there.
   compiled stylesheet in Propshaft. Defaults to `"tailwind.css"`. The Chrome
   drawing writes it into every PDF, and a name Propshaft cannot find prints
   with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens and the
-  `--text-` size and `--tracking-` letter spacing tokens from it, so a name
+  `--text-` size and `--tracking-` letter spacing tokens from it, and
+  `--color-gray-300` for a table's line under its heading, so a name
   Propshaft cannot find, or a stylesheet missing a token the drawing reads,
   makes the Ruby drawing raise `KeystoneUi::Pages::PrintFailed` naming the
   token.
@@ -284,8 +285,13 @@ inherit from the base controller, so define it there.
   - A table draws with the surface's `table` call, outlined with
     `--ks-border-width` in `--ks-color-border`, with corners of one
     `--ks-radius-surface`, and a line of `--ks-border-width` in
-    `--ks-color-divider` between item rows. Every cell draws at `--text-sm` in
-    `--ks-font-body` at `--text-sm--line-height`. The heading row holds each
+    `--ks-color-divider` between item rows. A line one pixel thick in
+    `--color-gray-300` draws under the heading row, wherever the heading row
+    draws, and above the total row, so the stylesheet must set
+    `--color-gray-300`. Row fills are clipped to the rounded corners inside the
+    outline. Every cell draws at `--text-sm` in
+    `--ks-font-body` at `--text-sm--line-height`, centred from top to bottom in
+    its row. The heading row holds each
     column's heading on `--ks-color-table-head`, at `--ks-font-weight-heading`
     and `--ks-color-text-heading`, padded by 3.5 `--ks-spacing` steps above and
     below. Each item row draws on `--ks-color-table-body`, padded by four steps
@@ -302,7 +308,7 @@ inherit from the base controller, so define it there.
     and then by column key, in the others. A group row always draws on the same
     page as the item after it. An item with no value for the key gets no group
     row. With `total` set, a total row keyed by column key draws last, styled
-    as the heading.
+    as the heading. A table with no columns draws nothing.
   - The form, the copy button and the Next page button draw nothing in the
     Ruby drawing. The four `--ks-spacing` steps between elements in a column
     are still kept around each of them.
@@ -511,7 +517,7 @@ inherit from the base controller, so define it there.
     of steps put before every part but the first. The block runs once per part
     with its index, every part starts at the same height, and drawing continues
     below the tallest.
-  - `table(heading, rows, border:, radius:, divider:, total: nil)` draws a table
+  - `table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)` draws a table
     the width of the column. `heading`, each entry of `rows` and `total` are
     rows, each a hash of `cells:` and optionally `fill:`, a colour token drawn
     behind the row, and `with_next: true`, which keeps the row on the same page
@@ -523,7 +529,11 @@ inherit from the base controller, so define it there.
     `color:` for the outline, `radius:` is a length token and a number of steps
     for the corners, and `divider:` is a hash of `width:` and `color:` for the
     line between item rows, never drawn under the heading or above the total.
-    `total:` is drawn last, and no total draws none. When every column's widest
+    `parts_divider:` is a hash of `width:` and `color:` for the line under the
+    heading, each time the heading draws, and above the total, and no
+    `parts_divider:` draws no line there. `total:` is drawn last, and no total
+    draws none. A cell shorter than its row is centred from top to bottom, and
+    each row's fill is clipped to the rounded corners inside the outline. When every column's widest
     cell fits on one line, the columns share the width in proportion to their
     widest cells. When they do not, each column whose widest cell fits its
     share of the width left stays on one line, and the rest wrap in the width
@@ -533,6 +543,9 @@ inherit from the base controller, so define it there.
     page, and a table longer than a page draws `heading` again at the top of
     each page it continues on.
 
+  Wherever a call takes a length token, a length written out as a number and
+  one of `rem`, `em`, `px` or `pt`, such as `"1px"`, works in its place and is
+  read in the same points.
   A token the host's stylesheet does not set raises `PrintFailed` naming it.
   Text holding a character the font cannot draw raises `UndrawableCharacter`.
   An element registered without `pdf:` makes the Ruby drawing raise

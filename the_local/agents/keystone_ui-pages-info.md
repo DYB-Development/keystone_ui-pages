@@ -131,9 +131,13 @@ Keystone UI itself must be installed first. Its own install local,
   name, with its subtotals when given, above the group's rows and on the same
   page as the first of them. A row is never split across pages, and a table
   longer than a page prints its heading row again at the top of the next page.
-  The heading, group and total rows print on the table head fill, the item rows
-  on the table body fill with divider lines between them, inside the table's
-  border and rounded corners, without the screen's shadow.
+  A table with no items prints its heading row alone, and a table with no
+  columns prints nothing. The heading, group and total rows print on the table
+  head fill and the item rows on the table body fill, with a line in the divider
+  colour between item rows. Keystone UI's one pixel gray line sits under the
+  heading row and above the total row. A cell shorter than its row is centred
+  from top to bottom. The table prints inside its border and rounded corners,
+  with the row fills clipped to the corners, without the screen's shadow.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
   fonts, font weights, text colours, tone colours, borders, corner radius and
   spacing from the host's compiled stylesheet, in light mode and in the host's

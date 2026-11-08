@@ -141,12 +141,15 @@ linking editors to the builder or drawing a page in the host's screens.
      It still needs Propshaft serving the host's stylesheet, since it reads the
      fonts, weights, text colours, fills, borders, radii and spacing from its
      `--ks-` tokens, the page's line height from its `html` rule, and the text
-     sizes, line heights and letter spacing Keystone UI's text sizes give, and
-     the table's head and body fills, header weight, divider and border, in
-     light mode and the host's default look. A token the host's own stylesheet
-     changes reaches the PDF the same way. A Keystone UI token the stylesheet
-     does not set, or sets to a colour or length the gem cannot read, refuses
-     the PDF with a message naming the token.
+     sizes, line heights and letter spacing Keystone UI's text sizes give, in
+     light mode and the host's default look. A table also reads its head and
+     body fills, header weight, divider colour, border and rounded corners from
+     the `--ks-` tokens, and the line under its heading row and above its total
+     row from Tailwind's `--color-gray-300`, so the compiled stylesheet must set
+     that variable too. A token the host's own stylesheet changes reaches the
+     PDF the same way. A token the stylesheet does not set, or sets to a colour
+     or length the gem cannot read, refuses the PDF with a message naming the
+     token.
 
    The choice is a setting in the settings file, written in the next step.
 
@@ -208,8 +211,9 @@ linking editors to the builder or drawing a page in the host's screens.
    label prints in capitals, each alert prints on its type's fill, a
    paragraph's links and a button with an address open their address, each
    accordion question prints with its answer beneath it, each table prints its
-   heading row on the table head fill with its item rows beneath it, and the
-   form is left out.
+   heading row on the table head fill with its item rows beneath it, a gray
+   line under the heading row and inside a border with rounded corners, and
+   the form is left out.
 
    When a PDF link in the page list returns to the list showing a message, the
    PDF was refused, and the message names what to fix: the browser, an
