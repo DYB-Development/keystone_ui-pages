@@ -108,7 +108,8 @@ Keystone UI itself must be installed first. Its own install local,
   holding an element with no PDF drawing cannot be printed that way, and the
   error names the element. Of the gem's own elements, the heading, label,
   paragraph, alert, label and value list, button, accordion, table, stat,
-  figure, badge and progress elements have one.
+  figure, badge, progress, code, hero, call to action, card, info and feature
+  grid elements have one. The bar chart and line chart elements have none yet.
 - **A host element prints in the Ruby drawing once the host gives it a PDF
   drawing.** The host passes the drawing when it adds the element to the
   catalog, and an element added without one refuses the PDF with an error
@@ -116,7 +117,10 @@ Keystone UI itself must be installed first. Its own install local,
   the host's value when it is bound to one, or else its fallback or default.
   It draws the element in the column it sits in, with the same set of drawing
   calls the gem's own elements use: text, styled text, boxes, text in a box,
-  bars, lines, space, rows of columns and tables. Each call names Keystone UI
+  bars, lines, space, rows of columns and tables. A box can be narrower than its
+  column, centred, or clip what it holds to its rounded corners, text in a box
+  can be centred, text can keep the spaces and tabs at the start of each line,
+  and a row can share its gap between its columns. Each call names Keystone UI
   tokens, such as a text size or a colour, and prints in the value the host's
   stylesheet gives that token. An element one place leaves out keeps its
   drawing, so a page in a place that offers it still prints it.
@@ -165,6 +169,24 @@ Keystone UI itself must be installed first. Its own install local,
   progress bar prints its label above a pill-shaped bar, the track colour behind
   and the meter colour filled to its value out of its maximum, rounded to a
   whole percent and never past full.
+- **What the Ruby drawing prints for code, a hero, a call to action, a card, an
+  info block and a feature grid.** Code prints its caption above its code,
+  keeping line breaks, leading spaces and tabs, on the code block's fill inside
+  its border and rounded corners. A hero prints its badge, title and subtitle,
+  centred when its layout is centred and from the left when it is split, since
+  a printed page is too narrow for two columns. It keeps the space above and
+  below that the page gives it but not its height. A call to action prints its
+  title, subtitle and text, centred. A card prints its title, summary and link
+  text in the card's box, and the link text opens the card's address when
+  clicked in the PDF. An info block prints its summary and its detail in full,
+  each in its own box at the width of Keystone UI's info popups, without the
+  button or the shadow. A feature grid prints its title and subtitle, then its
+  features two to a row in the feature card's box, without their icons and
+  without being stretched to the same height. Heroes, calls to action and
+  feature grids print at the sizes Keystone UI gives them on a screen as wide as
+  the printed page.
+- **A boxed element that does not fit in the space left on a page** prints
+  whole at the top of the next page.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
   fonts, font weights, text colours, tone colours, borders, corner radius and
   spacing from the host's compiled stylesheet, in light mode and in the host's
@@ -172,7 +194,7 @@ Keystone UI itself must be installed first. Its own install local,
   the text size Keystone UI's component gives it on screen, and at the line
   height it gets on screen, which is either that text size's own line height or
   the page's line height from the stylesheet. A font the stylesheet names only by system fonts
-  prints in Helvetica. A font the stylesheet loads from its own files prints
+  prints in Helvetica, and code in such a font prints in Courier. A font the stylesheet loads from its own files prints
   from a TrueType copy of each file, served beside it under the same name, since
   a PDF cannot use web font files. Asking for a PDF in a loaded font with no
   TrueType copy served fails, and the error names the font and the file it

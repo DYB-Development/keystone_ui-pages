@@ -134,8 +134,11 @@ linking editors to the builder or drawing a page in the host's screens.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
      paragraph, alert, label and value list, button, accordion, table, stat,
-     figure, badge and progress elements print. The form, copy button and Next
-     page elements are left out of the PDF. An element the host adds to the
+     figure, badge, progress, code, hero, call to action, card, info and
+     feature grid elements print. The form, copy button and Next page elements
+     are left out of the PDF. The bar chart and line chart elements have no PDF
+     drawing yet, so a page holding either one is refused under this drawing.
+     An element the host adds to the
      catalog prints only when it is registered with a PDF drawing of its own,
      and a PDF of a page holding any other element is refused with a message
      naming that element. An element a place leaves out keeps its drawing, so a
@@ -153,7 +156,14 @@ linking editors to the builder or drawing a page in the host's screens.
      row from Tailwind's `--color-gray-300`, so the compiled stylesheet must set
      that variable too. A stat, figure and badge read the fill and text
      colour each tone is given, and a progress bar reads its track, meter and
-     label colours, all from the `--ks-` tokens. A token the host's own
+     label colours, all from the `--ks-` tokens. Code reads its fills, border
+     and text colour from the `--ks-` tokens and its font from Tailwind's
+     `--font-mono`, and the title of a hero, a call to action and a feature grid reads its letter
+     spacing from Tailwind's `--tracking-tight`, so the compiled stylesheet must
+     set both. A hero's badge reads the tint fill and tint border, and a card,
+     an info block and a feature grid read the fills, borders and rounded
+     corners of Keystone UI's card, info popup and feature card from the
+     `--ks-` tokens. A token the host's own
      stylesheet changes reaches the
      PDF the same way. A token the stylesheet does not set, or sets to a colour
      or length the gem cannot read, refuses the PDF with a message naming the
@@ -164,7 +174,8 @@ linking editors to the builder or drawing a page in the host's screens.
    With the Ruby drawing, check the fonts the host's stylesheet uses:
 
    - A font named only by system fonts, with no `@font-face`, prints in
-     Helvetica and needs nothing. Helvetica draws only Windows-1252 characters,
+     Helvetica and needs nothing. Code in a code font named only by system
+     fonts prints in Courier. Helvetica draws only Windows-1252 characters,
      so text holding any other character refuses the PDF with a message naming
      the element and the character. If the host's pages will hold such
      characters, such as non-Latin scripts, ask the developer which font to
@@ -215,7 +226,8 @@ linking editors to the builder or drawing a page in the host's screens.
    page list shows a PDF link only when Chrome or Chromium was found. With the
    Ruby drawing, it always shows one, so open it on a page holding only
    headings, labels, paragraphs, alerts, label and value lists, buttons,
-   accordions, tables, stats, figures, badges, progress bars and forms to
+   accordions, tables, stats, figures, badges, progress bars, code, heroes,
+   calls to action, cards, info blocks, feature grids and forms to
    confirm the fonts and text sizes print, each
    label prints in capitals, each alert prints on its type's fill, a
    paragraph's links and a button with an address open their address, each
@@ -225,7 +237,12 @@ linking editors to the builder or drawing a page in the host's screens.
    stat prints its label, value and note with the value in its tone's colour,
    each figure prints in its tone's colour, each badge prints its label on its
    tone's fill in a pill, each progress bar prints its label above a pill
-   filled to its share, and the form is left out. If the host registers
+   filled to its share, code prints in the code font with its leading spaces
+   kept, each hero prints its badge, title and subtitle, each call to action
+   prints its title, subtitle and text centred, each card's link text opens
+   its address, each info block prints its summary and detail in full, each
+   feature grid prints its features two to a row, and the form is left out. If
+   the host registers
    elements of its own, add each one to a page and open its PDF: one with a
    PDF drawing prints, and one without is refused with a message naming it.
 
