@@ -55,8 +55,10 @@ module KeystoneUi
 
       def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, stretch: false, &content)
         across, down = insets(padding, border)
+        fixed = width
         width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
         left = align == :center ? (@document.bounds.width - width) / 2 : 0
+        reached(fixed ? width : reach(width - across * 2, &content) + across * 2, left) if @reached
         height = measured(width - across * 2, &content) + down * 2
         height = [ height, @stretched.to_f ].max if stretch
         next_page unless fits?(height) || height > @document.margin_box.height

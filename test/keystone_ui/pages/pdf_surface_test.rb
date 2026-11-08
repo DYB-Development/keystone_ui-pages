@@ -63,6 +63,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 36.0 + 540 - Prawn::Document.new.width_of("Book a call", size: 12), lefts(surface.render)["Book a call"], 0.001
   end
 
+  test "a box drawn aligned is filled as wide as what it holds and its horizontal padding" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent") { surface.text("Revenue", size: "--text-base") } }
+
+    assert_in_delta Prawn::Document.new.width_of("Revenue", size: 12) + 24, fill_widths(surface.render).first, 0.001
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
