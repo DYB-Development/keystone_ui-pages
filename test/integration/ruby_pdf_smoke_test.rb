@@ -45,4 +45,20 @@ class KeystoneUi::Pages::RubyPdfSmokeTest < ActiveSupport::TestCase
 
     assert_equal "%PDF", pdf.file.download[0, 4]
   end
+
+  test "a host that chooses the Ruby drawing gets a page holding a grouped table longer than a page, with its total, as a PDF, end to end" do
+    page = KeystoneUi::Pages::Page.create!(name: "Hours", slug: "hours")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = KeystoneUi::Pages::Operations.add(page.document, "data_table", column_id: column_id)
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"].merge!(
+      "items" => Array.new(40) { |index| { "name" => "Review #{index}", "status" => index.even? ? "Open" : "Closed" } },
+      "group_by" => "status", "group_totals" => { "Open" => { "status" => "20 open" } }, "total" => { "name" => "Total", "status" => "40" }
+    )
+    page.update!(document: document)
+    page.publish
+
+    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) }
+
+    assert_equal "%PDF", pdf.file.download[0, 4]
+  end
 end
