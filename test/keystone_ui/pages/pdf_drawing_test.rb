@@ -801,6 +801,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.select { |call| call.first == :text }.map { |call| call.last(2) }
   end
 
+  test "a feature grid is drawn as its title, its subtitle and each feature's title and description, in the order the page shows them" do
+    features = [ { "title" => "Fast", "description" => "Pages load quickly." }, { "title" => "Clear", "description" => "Every page reads plainly." } ]
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.", features: features)))))
+
+    assert_equal [ "Why teams choose us", "Three reasons.", "Fast", "Pages load quickly.", "Clear", "Every page reads plainly." ], drawn(document).texts
+  end
+
   private
 
   def drawn(document, values: {})

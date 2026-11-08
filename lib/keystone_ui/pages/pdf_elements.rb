@@ -86,6 +86,9 @@ module KeystoneUi
       CARD_TEXT_SIZE = "--text-sm"
       CARD_SUMMARY_GAP = 1
       INFO_SIZE = "--text-sm"
+      FEATURE_GRID_TITLE_SIZE = "--text-4xl"
+      FEATURE_TITLE_SIZE = "--text-lg"
+      FEATURE_DESCRIPTION_SIZE = "--text-sm"
       INFO_GAP = 2
       INFO_SUMMARY_WIDTH = [ TAILWIND_SPACING, 64 ].freeze
       INFO_DETAIL_WIDTH = [ TAILWIND_SPACING, 80 ].freeze
@@ -343,6 +346,15 @@ module KeystoneUi
 
       def info_popup(surface, text, width)
         surface.box(**INFO_POPUP_LOOK, width: width) { surface.text(text, size: INFO_SIZE, font: "--ks-font-body", color: "--ks-color-on-overlay-muted", leading: line_height(INFO_SIZE)) }
+      end
+
+      def feature_grid(surface, fields)
+        surface.text(fields[:title], size: FEATURE_GRID_TITLE_SIZE)
+        surface.text(fields[:subtitle], size: DISPLAY_SUBTITLE_SIZE) if fields[:subtitle].present?
+        Array(fields[:features].presence).each do |feature|
+          surface.text(feature[:title], size: FEATURE_TITLE_SIZE)
+          surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE)
+        end
       end
 
       def display_subtitle(surface, subtitle, width, align)

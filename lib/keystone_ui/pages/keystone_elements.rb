@@ -66,7 +66,7 @@ module KeystoneUi
         catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start", pdf: PdfElements.method(:left_out),
           fields: [ { key: :text, label: "Text to copy", kind: :text },
                     { key: :label, label: "Label", kind: :text, default: "Copy" } ])
-        catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content",
+        catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content", pdf: PdfElements.method(:feature_grid),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Why teams choose us" },
                     { key: :subtitle, label: "Subtitle", kind: :text },
                     { key: :features, label: "Features", kind: :list,
