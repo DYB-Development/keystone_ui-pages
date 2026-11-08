@@ -78,7 +78,8 @@ Keystone UI itself must be installed first. Its own install local,
   a funnel, lets staff build them side by side. The host answers a sequence by
   its key with a title, its pages in order and a back address, or refuses it.
   It may also give the address of its own screen for the sequence, which the
-  list links to as Flow. Each page in the list shows whether it is a
+  list links to as Flow, and the label of an entry the list shows after the
+  last page, such as a funnel's End step. Each page in the list shows whether it is a
   draft, published or unpublished. The gem stores no order. Each page made for a sequence keeps that sequence's
   key, which cannot be changed later.
 - **Adding a page to a sequence.** The sequence screen has an Add page button

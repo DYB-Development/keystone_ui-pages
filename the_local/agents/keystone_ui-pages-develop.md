@@ -443,7 +443,7 @@ inherit from the base controller, so define it there.
   it opens the sequence screen with `page_id:` set to the new page. The form and
   creating are refused the same way as the sequence screen when the sequence
   method answers nil, and no page is made.
-- `KeystoneUi::Pages::Sequence.new(title:, pages:, back_url:, screen_url: nil)` —
+- `KeystoneUi::Pages::Sequence.new(title:, pages:, back_url:, screen_url: nil, end_label: nil)` —
   what a sequence method answers. `title:` is the heading shown above the list.
   `pages:` is an array of `KeystoneUi::Pages::Page` records in the order a
   visitor goes through them, and the list shows them in exactly that order,
@@ -451,7 +451,9 @@ inherit from the base controller, so define it there.
   draft, published or unpublished. `back_url:` is where Back goes. These three
   are required. `screen_url:` is optional: the address of the host's own screen
   for the sequence, such as where its order is changed, and when given the list
-  shows a Flow link to it.
+  shows a Flow link to it. `end_label:` is optional: the label of an entry the
+  list shows after the last page, such as a funnel's End step, which staff
+  cannot open, change or remove and which is not offered as a page to copy.
 
 ### The element catalog
 

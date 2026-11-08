@@ -168,6 +168,8 @@ A sequence may also name `screen_url:`, the address of the host's own screen for
 KeystoneUi::Pages::Sequence.new(title: funnel.name, pages: funnel.pages_in_order, back_url: funnel_path(funnel), screen_url: funnel_flow_path(funnel))
 ```
 
+A sequence may also name `end_label:`, the label of an entry shown after its last page, such as a funnel's End step. The entry shows only its label: staff cannot open, change or remove it, and it is not offered as a page to copy. A sequence naming none shows only its pages.
+
 Staff open a sequence at `/pages/manage/sequences/<place>/<key>`. The builder shows the sequence's first page, with the sequence's title and its pages numbered from 1 beside it and the page being built marked. Choosing a page in the list opens it with the same list beside it. A sequence with no pages shows an empty page area saying no page has been added yet. The Back link goes to `back_url`, and a nil answer, or a place with no `sequence_method:`, gets the host's refusal.
 
 A place with a `sequence_method:` also names an `adds_page_method:`, and a place that names one without the other fails the app's boot. The gem calls it on the editor's controller with the sequence's key, the new page and the page that was open when Add page was pressed, or nil when the sequence had no pages:
