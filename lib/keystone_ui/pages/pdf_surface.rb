@@ -108,6 +108,7 @@ module KeystoneUi
 
       def table(heading, rows, border:, radius:, divider:, total: nil)
         edge = @look.points(border[:width])
+        top = @document.cursor
         @document.move_down(edge)
         @document.bounding_box([ edge, @document.cursor ], width: @document.bounds.width - edge * 2) do
           widths = column_widths([ heading, *rows, total ].compact)
@@ -119,6 +120,7 @@ module KeystoneUi
           drawn_table_row(total, widths) if total
         end
         @document.move_down(edge)
+        bordered(border, top, @document.bounds.width, top - @document.cursor, @look.points(radius.first) * radius.last)
       end
 
       def render

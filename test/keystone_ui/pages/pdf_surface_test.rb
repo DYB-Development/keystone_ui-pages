@@ -227,6 +227,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 55.5, lefts(surface.render)["Service"]
   end
 
+  test "a table given a border is stroked round its rows in the border's colour at the border's width" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), [], **table_look, border: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_match(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/, surface.render)
+  end
+
   private
 
   def look
