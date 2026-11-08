@@ -575,6 +575,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ text: " hours", size: "--text-lg", color: "--ks-color-text-muted" }, drawn(document).drawn.find { |call| call.first == :rich_text }[1].last)
   end
 
+  test "a stat's value and note are each drawn one of keystone_ui's spacing steps under what is above them, with the empty change row's space kept below" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", note: "This month")))))
+
+    assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 1 ], :rich_text, [ :space, "--ks-spacing", 1 ], :text, [ :space, "--ks-spacing", 1 ], [ :space, "--spacing", 5 ] ],
+                 drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
   private
 
   def drawn(document, values: {})
