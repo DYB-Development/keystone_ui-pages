@@ -255,6 +255,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 735.384, heights(pages(surface.render).last)["Service"].to_f
   end
 
+  test "a table row that does not fit in the space left on a page is drawn whole on the next page" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.space("--ks-spacing", 10)
+    surface.table(table_row("Service"), Array.new(20) { table_row("Begins\nEnds") }, **table_look)
+
+    assert_equal [ true, true ], pages(surface.render).map { |page| page.scan("<426567696e73>").size == page.scan("<456e6473>").size }
+  end
+
   private
 
   def look
