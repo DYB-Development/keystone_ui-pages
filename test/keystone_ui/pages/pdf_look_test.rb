@@ -193,4 +193,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal Float::INFINITY, look.points("--ks-radius-pill")
   end
+
+  test "a colour token set to the browser's default text colour is read as the black a browser draws it in light mode" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-on-page:CanvasText}")
+
+    assert_equal "000000", look.color("--ks-color-on-page")
+  end
 end
