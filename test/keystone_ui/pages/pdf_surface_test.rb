@@ -133,6 +133,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal "→", error.character
   end
 
+  test "rich text holding a character its font cannot draw is refused naming the character" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    error = assert_raises(KeystoneUi::Pages::PdfSurface::UndrawableCharacter) { surface.rich_text([ { text: "Next " }, { text: "→ step", bold: true } ], size: "--text-base") }
+
+    assert_equal "→", error.character
+  end
+
   private
 
   def look
