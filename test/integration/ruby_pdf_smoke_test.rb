@@ -93,4 +93,20 @@ class KeystoneUi::Pages::RubyPdfSmokeTest < ActiveSupport::TestCase
 
     assert_equal "%PDF", pdf.file.download[0, 4]
   end
+
+  test "a host that chooses the Ruby drawing gets a page of spaced, shaded and sized sections, gapped rows and aligned columns and elements as a PDF, end to end" do
+    page = KeystoneUi::Pages::Page.create!(name: "Layout", slug: "layout")
+    section = page.document["sections"][0]
+    section.merge!("spacing" => "lg", "background" => "shaded", "width" => "sm")
+    section["rows"][0].merge!("gap" => "xl", "columns" => [ section["rows"][0]["columns"][0], { "id" => SecureRandom.uuid, "align" => "bottom", "elements" => [] } ])
+    document = %w[heading value_list].reduce(page.document) { |drawn, key| KeystoneUi::Pages::Operations.add(drawn, key, column_id: section["rows"][0]["columns"][0]["id"]) }
+    document = KeystoneUi::Pages::Operations.add(document, "button", column_id: section["rows"][0]["columns"][1]["id"])
+    document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["align"] = "center"
+    page.update!(document: document)
+    page.publish
+
+    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) }
+
+    assert_equal "%PDF", pdf.file.download[0, 4]
+  end
 end
