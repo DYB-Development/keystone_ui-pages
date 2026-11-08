@@ -115,11 +115,11 @@ module KeystoneUi
 
       def data_table(surface, fields)
         columns = Array(fields[:columns].presence)
-        heading = table_row(columns, columns.map { |column| column[:label] })
+        heading = table_row(columns, columns.map { |column| column[:label] }, header: true)
         items = Array(fields[:items].presence).map { |item| item.to_h.stringify_keys }
         total = fields[:total].presence&.then { |given| given.to_h.stringify_keys }
         surface.table(heading, items.each_index.flat_map { |index| item_rows(columns, items, index, fields) },
-                      total: total && table_row(columns, columns.map { |column| total[column[:key].to_s] }))
+                      total: total && table_row(columns, columns.map { |column| total[column[:key].to_s] }, header: true))
       end
 
       def item_rows(columns, items, index, fields)
@@ -133,11 +133,12 @@ module KeystoneUi
 
       def group_row(columns, group, totals)
         subtotals = totals.to_h.stringify_keys.fetch(group.to_s, {}).to_h.stringify_keys
-        table_row(columns, columns.each_with_index.map { |column, index| index.zero? ? group : subtotals[column[:key].to_s] })
+        table_row(columns, columns.each_with_index.map { |column, index| index.zero? ? group : subtotals[column[:key].to_s] }, header: true)
       end
 
-      def table_row(columns, texts)
-        { cells: columns.zip(texts).each_with_index.map { |(column, text), index| { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, index == columns.size - 1) } } }
+      def table_row(columns, texts, header: false)
+        cells = columns.zip(texts).each_with_index.map { |(column, text), index| { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, index == columns.size - 1) } }
+        { cells: cells, fill: header ? "--ks-color-table-head" : "--ks-color-table-body" }
       end
 
       def table_alignment(column, last)
