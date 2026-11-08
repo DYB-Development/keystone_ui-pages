@@ -71,7 +71,7 @@ module KeystoneUi
       end
 
       def value(name)
-        resolved(@values.fetch(name))
+        resolved(@values.fetch(name) { raise PrintFailed, "The PDF needs the keystone_ui token #{name}, and the stylesheet does not set it." })
       end
 
       private
