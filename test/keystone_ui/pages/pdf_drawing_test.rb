@@ -213,6 +213,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ :box, { padding: [ "--ks-spacing", 0 ], fill: "--ks-color-fill-muted" } ], drawn(document).laid_out.map(&:first)[2]
   end
 
+  test "a section with a width setting draws its rows no wider than keystone_ui's page width for that setting" do
+    document = page(*%w[sm md lg xl none].map { |width| section(row(column), width: width) })
+
+    assert_equal [ [ "--container-2xl", 1 ], [ "--container-4xl", 1 ], [ "--container-6xl", 1 ], [ "--container-7xl", 1 ] ],
+                 drawn(document).laid_out.map(&:first).select { |call| call.first == :box }.map { |call| call.last.fetch(:width) }
+  end
+
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
     document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
                                        element("heading", text: "Large", size: "lg", note: "Updated monthly"), element("label", text: "Per seat")))))
