@@ -207,6 +207,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal %i[space together row text space row text together_end], drawn(document).laid_out.map { |call, _depth| call.first }
   end
 
+  test "a shaded section's rows are drawn on keystone_ui's shaded section fill, with no padding, as the page shades it" do
+    document = page(section(row(column(element("label", text: "Per seat"))), background: "shaded"))
+
+    assert_equal [ :box, { padding: [ "--ks-spacing", 0 ], fill: "--ks-color-fill-muted" } ], drawn(document).laid_out.map(&:first)[2]
+  end
+
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
     document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
                                        element("heading", text: "Large", size: "lg", note: "Updated monthly"), element("label", text: "Per seat")))))

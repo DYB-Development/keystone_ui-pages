@@ -16,6 +16,7 @@ module KeystoneUi
       ELEMENT_GAP = 4
       ROW_GAP = 6
       SECTION_SPACING = { "sm" => 4, "md" => 6, "lg" => 8 }.freeze
+      SHADED_LOOK = { padding: [ SPACING, 0 ], fill: "--ks-color-fill-muted" }.freeze
 
       module_function
 
@@ -29,8 +30,12 @@ module KeystoneUi
         values = values.to_h.stringify_keys
         shown(document["sections"], values).each do |section|
           surface.space(SPACING, SECTION_SPACING.fetch(section["spacing"] || Operations::DEFAULTS[:section]["spacing"]))
-          surface.together { drawn_rows(section, surface, values) }
+          surface.together { shaded(section, surface) { drawn_rows(section, surface, values) } }
         end
+      end
+
+      def shaded(section, surface, &rows)
+        section["background"] == "shaded" ? surface.box(**SHADED_LOOK, &rows) : yield
       end
 
       def drawn_rows(section, surface, values)
