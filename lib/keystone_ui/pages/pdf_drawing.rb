@@ -17,6 +17,7 @@ module KeystoneUi
       ROW_GAP = 6
       SECTION_SPACING = { "sm" => 4, "md" => 6, "lg" => 8 }.freeze
       SHADED_LOOK = { padding: [ SPACING, 0 ], fill: "--ks-color-fill-muted" }.freeze
+      ROW_GAPS = { "sm" => 3, "md" => 4, "lg" => 6, "xl" => 8 }.freeze
       SIZED_SECTION_PADDING = [ SPACING, 6, 16 ].freeze
       SECTION_WIDTHS = { "sm" => "--container-2xl", "md" => "--container-4xl", "lg" => "--container-6xl", "xl" => "--container-7xl" }.freeze
 
@@ -55,7 +56,8 @@ module KeystoneUi
       def drawn_row(row, surface, values)
         columns = row["columns"]
         share = Operations::SHARES.fetch(columns.size, "1/1")
-        surface.row(columns.map { |column| Rational(column["wide"] || share) }) do |index|
+        gap = [ SPACING, ROW_GAPS.fetch(row["gap"] || Operations::DEFAULTS[:row]["gap"]) ]
+        surface.row(columns.map { |column| Rational(column["wide"] || share) }, gap: gap, grid: true) do |index|
           shown(columns[index]["elements"], values).each_with_index do |element, position|
             surface.space(SPACING, ELEMENT_GAP) if position.positive?
             drawn_element(element, surface, values)

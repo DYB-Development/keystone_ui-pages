@@ -106,7 +106,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a row's columns are drawn side by side at the widths the page gives them on a wide screen" do
     document = page(section(row(column(wide: "1/4"), column)))
 
-    assert_equal [ :row, [ Rational(1, 4), Rational(1, 2) ] ], drawn(document).drawn.first
+    assert_equal [ Rational(1, 4), Rational(1, 2) ], drawn(document).drawn.first.second
   end
 
   test "a heading or label bound to a host value shows that value, or its fallback when the value is missing" do
@@ -224,6 +224,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column), width: "md"))
 
     assert_equal({ padding: [ "--ks-spacing", 6, 16 ], align: :center }, drawn(document).laid_out.map(&:first).find { |call| call.first == :box }.last.except(:width))
+  end
+
+  test "a row's columns are laid out as the page's grid, the space keystone_ui's small, medium, large and extra large grid gaps give apart, and medium when it has none" do
+    document = page(section(*%w[sm md lg xl].map { |gap| row(column, column, gap: gap) }, row(column, column)))
+
+    assert_equal [ 3, 4, 6, 8, 4 ].map { |steps| { gap: [ "--ks-spacing", steps ], grid: true } }, drawn(document).drawn.select { |call| call.first == :row }.map(&:last)
   end
 
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
