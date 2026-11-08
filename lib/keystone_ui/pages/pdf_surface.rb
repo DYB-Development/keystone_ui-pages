@@ -16,6 +16,7 @@ module KeystoneUi
       end
 
       BOLD_WEIGHT = 600
+      COLUMN_PLACES = { top: 0, center: Rational(1, 2), bottom: 1 }.freeze
       MEASURING_HEIGHT = 14_400
       NO_BREAK_SPACE = "\u00A0"
       TAB_SIZE = "tab-size"
@@ -118,11 +119,12 @@ module KeystoneUi
         @document.move_down(@look.points(token) * steps)
       end
 
-      def row(widths, gap: nil, grid: false)
+      def row(widths, gap: nil, grid: false, align: [])
         spacing = gap ? @look.points(gap.first) * gap.last : 0
         room = grid ? @document.bounds.width + spacing : @document.bounds.width
         lost = grid ? spacing : 0
-        stretched = widths.each_with_index.map { |width, index| measured(room * width - lost) { yield index } }.max if grid
+        heights = widths.each_with_index.map { |width, index| measured(room * width - lost) { yield index } } if grid
+        stretched = heights&.max
         top = @document.y
         first_page = @document.page_number
         lowest = [ first_page, -top ]
@@ -131,7 +133,7 @@ module KeystoneUi
           column_width = room * width - lost
           inset = index.positive? && !grid ? spacing : 0
           @document.go_to_page(first_page)
-          @document.y = top
+          @document.y = top - (heights ? (stretched - heights[index]) * COLUMN_PLACES.fetch(align[index] || :top) : 0)
           @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
             @stretched = stretched
             yield index
