@@ -355,16 +355,28 @@ module KeystoneUi
       end
 
       def feature_grid(surface, fields)
+        rows = Array(fields[:features].presence).each_slice(FEATURE_GRID_COLUMNS).to_a
+        surface.together do
+          feature_grid_heading(surface, fields)
+          feature_row(surface, rows.first) if rows.any?
+        end
+        rows.drop(1).each do |features|
+          surface.space(SPACING, FEATURE_GRID_GAP)
+          feature_row(surface, features)
+        end
+      end
+
+      def feature_grid_heading(surface, fields)
         surface.text(fields[:title], size: FEATURE_GRID_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(FEATURE_GRID_TITLE_SIZE), align: :center)
         surface.space(SPACING, FEATURE_GRID_TITLE_GAP)
-        if fields[:subtitle].present?
-          display_subtitle(surface, fields[:subtitle], DISPLAY_SUBTITLE_WIDE, :center)
-          surface.space(SPACING, FEATURE_GRID_SUBTITLE_GAP)
-        end
-        Array(fields[:features].presence).each_slice(FEATURE_GRID_COLUMNS).with_index do |features, position|
-          surface.space(SPACING, FEATURE_GRID_GAP) if position.positive?
-          surface.row([ Rational(1, FEATURE_GRID_COLUMNS) ] * FEATURE_GRID_COLUMNS, gap: [ SPACING, FEATURE_GRID_GAP ], grid: true) { |index| feature(surface, features[index]) if features[index] }
-        end
+        return if fields[:subtitle].blank?
+
+        display_subtitle(surface, fields[:subtitle], DISPLAY_SUBTITLE_WIDE, :center)
+        surface.space(SPACING, FEATURE_GRID_SUBTITLE_GAP)
+      end
+
+      def feature_row(surface, features)
+        surface.row([ Rational(1, FEATURE_GRID_COLUMNS) ] * FEATURE_GRID_COLUMNS, gap: [ SPACING, FEATURE_GRID_GAP ], grid: true) { |index| feature(surface, features[index]) if features[index] }
       end
 
       def feature(surface, feature)

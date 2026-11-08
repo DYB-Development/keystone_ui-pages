@@ -35,6 +35,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :boxed_text, content, size, style ]
     end
 
+    def together
+      @drawn << [ :together ]
+      yield
+      @drawn << [ :together_end ]
+    end
+
     def rule(**style)
       @drawn << [ :rule, style ]
     end
@@ -834,7 +840,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                    [ :text, "Fast", "--text-lg", { font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: "--text-lg--line-height" } ],
                    [ :space, "--ks-spacing", 2 ],
                    [ :text, "Pages load quickly.", "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-sm--line-height" } ] ],
-                 drawn(document).drawn.last(4)
+                 drawn(document).drawn.reject { |call| call.first == :together_end }.last(4)
+  end
+
+  test "a feature grid's title and subtitle are drawn together with its first row of features, so they are never printed on a page apart from it" do
+    features = %w[Fast Clear Yours].map { |title| { "title" => title, "description" => "#{title} pages." } }
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.", features: features)))))
+
+    assert_equal %i[together text space box text space row box text space text box text together_end space row box text space text],
+                 drawn(document).drawn.drop(1).map(&:first)
   end
 
   private
