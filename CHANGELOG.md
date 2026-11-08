@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-08
+
 ### Added
 - `KeystoneUi::Pages::Sequence` takes an optional `end_label:`, the label of an entry the sequence's list shows after its last page, such as a funnel's End step. The entry cannot be opened, changed or removed from the builder and is not offered as a page to copy.
 
