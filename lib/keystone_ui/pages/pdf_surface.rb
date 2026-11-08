@@ -134,6 +134,7 @@ module KeystoneUi
       end
 
       def row(widths, gap: nil, grid: false, align: [])
+        reached(@document.bounds.width) if @reached
         spacing = gap ? @look.points(gap.first) * gap.last : 0
         room = grid ? @document.bounds.width + spacing : @document.bounds.width
         lost = grid ? spacing : 0

@@ -88,6 +88,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 36.0 + (540 - widths) / 2, lefts(surface.render)["Book "], 0.001
   end
 
+  test "a row drawn aligned to the centre stays as wide as the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.row([ Rational(1, 2), Rational(1, 2) ]) { |index| surface.text(%w[Rate $150][index], size: "--text-base") } }
+
+    assert_equal 36.0, lefts(surface.render)["Rate"]
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
