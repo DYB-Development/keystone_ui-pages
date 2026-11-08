@@ -9,6 +9,7 @@ module KeystoneUi
     class PdfLook
       Font = Data.define(:name, :files)
       BUILT_IN_FONT = Font.new(name: "Helvetica", files: nil)
+      BUILT_IN_MONOSPACE_FONT = Font.new(name: "Courier", files: nil)
 
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
       WRITTEN_LENGTH = /\A\d+(\.\d+)?(rem|em|px|pt)\z/
@@ -53,8 +54,9 @@ module KeystoneUi
 
       def font(name)
         families = value(name) == "inherit" ? value("font-family") : value(name)
-        family = split(families, ",").map { |listed| listed.strip.delete("\"'") }.find { |listed| @faces.key?(listed) }
-        return BUILT_IN_FONT unless family
+        listed = split(families, ",").map { |family| family.strip.delete("\"'") }
+        family = listed.find { |named| @faces.key?(named) }
+        return listed.include?("monospace") ? BUILT_IN_MONOSPACE_FONT : BUILT_IN_FONT unless family
 
         Font.new(name: family, files: FONT_STYLES.transform_values { |(style, weight)| true_type(face(family, style, weight)) })
       end

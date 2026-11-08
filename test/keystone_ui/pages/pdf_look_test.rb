@@ -65,6 +65,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "Helvetica", look.font("--ks-font-body").name
   end
 
+  test "a font token naming only system monospace fonts, with no font files, prints in Courier" do
+    look = KeystoneUi::Pages::PdfLook.new(':root{--font-mono:ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace}')
+
+    assert_equal "Courier", look.font("--font-mono").name
+  end
+
   test "a font the stylesheet loads from files prints from the TrueType copies served beside them, in regular, bold and italic" do
     served = { "/Inter-Regular.ttf" => "/public/Inter-Regular.ttf", "/Inter-Bold.ttf" => "/public/Inter-Bold.ttf", "/Inter-Italic.ttf" => "/public/Inter-Italic.ttf" }
     look = KeystoneUi::Pages::PdfLook.new(":root{--ks-font-body:Inter, sans-serif}" \
