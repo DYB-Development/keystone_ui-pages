@@ -274,7 +274,10 @@ module KeystoneUi
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         width = 0
-        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) { width = @document.width_of(content.to_s, size: @look.points(size)) }
+        @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
+          drawable!(content.to_s)
+          width = @document.width_of(content.to_s, size: @look.points(size))
+        end
         width
       end
 

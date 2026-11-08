@@ -312,6 +312,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 12 + 13.872, drawn["Review 24"] - drawn["After"], 0.001
   end
 
+  test "a table cell holding a character its font cannot draw is refused naming the character" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    error = assert_raises(KeystoneUi::Pages::PdfSurface::UndrawableCharacter) { surface.table(table_row("Service"), [ table_row("Next → step") ], **table_look) }
+
+    assert_equal "→", error.character
+  end
+
   private
 
   def look
