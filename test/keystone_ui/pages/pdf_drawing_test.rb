@@ -562,6 +562,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.select { |call| call.first == :text }.map { |call| call.last(2) }
   end
 
+  test "a stat's value is drawn at the size, weight and line height keystone_ui's stat value rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12")))))
+
+    assert_equal [ "--text-3xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", leading: "--text-3xl--line-height" } ],
+                 drawn(document).drawn.find { |call| call.first == :rich_text }.then { |call| [ call[2], call.last.except(:color) ] }
+  end
+
   private
 
   def drawn(document, values: {})

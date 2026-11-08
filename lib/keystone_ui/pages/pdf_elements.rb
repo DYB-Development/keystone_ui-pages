@@ -48,6 +48,7 @@ module KeystoneUi
       STAT_PLAIN_LOOK = { padding: [ SPACING, 4, 0 ] }.freeze
       STAT_LABEL_SIZE = "--text-sm"
       STAT_VALUE_SIZE = "--text-3xl"
+      STAT_VALUE_WEIGHT = "calc(var(--ks-font-weight-heading)+100)"
       STAT_SUFFIX_SIZE = "--text-lg"
       STAT_NOTE_SIZE = "--text-sm"
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
@@ -180,7 +181,8 @@ module KeystoneUi
       def stat_card(surface, fields)
         surface.box(**(fields[:plain].to_s == "true" ? STAT_PLAIN_LOOK : STAT_CARD_LOOK)) do
           surface.text(fields[:label], size: STAT_LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-muted", leading: line_height(STAT_LABEL_SIZE))
-          surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE, color: TONE_COLORS.fetch(fields[:variant].to_s, TONE_COLORS["neutral"]))
+          surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE, font: "--ks-font-body", weight: STAT_VALUE_WEIGHT, color: TONE_COLORS.fetch(fields[:variant].to_s, TONE_COLORS["neutral"]),
+                                               leading: line_height(STAT_VALUE_SIZE))
           surface.text(fields[:note], size: STAT_NOTE_SIZE, font: "--ks-font-body", color: "--ks-color-text-muted", leading: line_height(STAT_NOTE_SIZE)) if fields[:note].present?
         end
       end
