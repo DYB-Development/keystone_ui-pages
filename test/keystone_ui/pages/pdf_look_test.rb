@@ -187,4 +187,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal 700, look.weight("calc(var(--ks-font-weight-heading)+100)")
   end
+
+  test "a length token keystone_ui sets to an infinite number of pixels, such as its pill rounding, is read as infinitely long" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-radius-pill:calc(infinity * 1px)}")
+
+    assert_equal Float::INFINITY, look.points("--ks-radius-pill")
+  end
 end
