@@ -71,6 +71,15 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_equal "/funnels/spring-sale/flow", URI(find("[data-sequence-pages] a", text: "Flow")[:href]).path
   end
 
+  test "the sequence's list shows the host's entry after its last page" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence_with_end, adds_page_method: :add_funnel_page)
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal [ "1 Landing Draft", "End" ], all("[data-sequence-pages] ol > li").map { |entry| entry.text.squish }
+  end
+
   test "the page being built is marked in the sequence's list" do
     KeystoneUi::Pages::Page.create!(name: "Thanks", slug: "thanks", place: "funnel", sequence_key: "spring-sale")
     KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")

@@ -50,6 +50,10 @@ class ApplicationController < ActionController::Base
     funnel_sequence(key).with(screen_url: "/funnels/#{key}/flow")
   end
 
+  def funnel_sequence_with_end(key)
+    funnel_sequence(key).with(end_label: "End")
+  end
+
   def add_funnel_page(key, page, after)
     funnel_additions << [ key, page, after ]
   end
