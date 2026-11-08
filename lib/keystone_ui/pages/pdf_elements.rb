@@ -188,7 +188,7 @@ module KeystoneUi
       end
 
       def stat_runs(fields)
-        suffix = [ { text: " #{fields[:suffix]}", size: STAT_SUFFIX_SIZE } ] unless fields[:suffix].nil?
+        suffix = [ { text: " #{fields[:suffix]}", size: STAT_SUFFIX_SIZE, color: "--ks-color-text-muted" } ] unless fields[:suffix].nil?
         [ stat_value_run(fields), *suffix ]
       end
 

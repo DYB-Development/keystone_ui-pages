@@ -569,6 +569,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.find { |call| call.first == :rich_text }.then { |call| [ call[2], call.last.except(:color) ] }
   end
 
+  test "a stat's suffix is drawn at the size and in the muted colour keystone_ui's stat suffix rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", suffix: "hours")))))
+
+    assert_equal({ text: " hours", size: "--text-lg", color: "--ks-color-text-muted" }, drawn(document).drawn.find { |call| call.first == :rich_text }[1].last)
+  end
+
   private
 
   def drawn(document, values: {})
