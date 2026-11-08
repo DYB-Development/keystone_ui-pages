@@ -84,6 +84,8 @@ module KeystoneUi
         height = measured(width - across * 2, &drawn) + down * 2
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
         left = align == :center ? (width - fill_width) / 2 : 0
+        return reached(fill_width, left) if @reached
+
         corner = corner(radius, fill_width, height)
         linked(link, fill_width, height, left) if link
         translucent(fill) do
