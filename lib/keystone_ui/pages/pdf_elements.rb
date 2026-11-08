@@ -317,7 +317,7 @@ module KeystoneUi
       def card(surface, fields)
         surface.text(fields[:title], size: CARD_TITLE_SIZE)
         surface.text(fields[:summary], size: CARD_TEXT_SIZE) if fields[:summary].present?
-        surface.rich_text([ { text: fields[:cta].to_s } ], size: CARD_TEXT_SIZE)
+        surface.rich_text([ { text: fields[:cta].to_s, link: fields[:link].presence }.compact ], size: CARD_TEXT_SIZE)
       end
 
       def display_subtitle(surface, subtitle, width, align)

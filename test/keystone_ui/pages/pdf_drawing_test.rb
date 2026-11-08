@@ -755,6 +755,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.filter_map { |call| call[1] if call.first == :text || call.first == :rich_text }.map { |content| content.is_a?(Array) ? content.sum("") { |run| run[:text] } : content }
   end
 
+  test "a card's link text is drawn opening the card's address when clicked" do
+    document = page(section(row(column(element("card", title: "Pricing", link: "https://ty-ler.com/pricing", cta: "See plans")))))
+
+    assert_equal [ { text: "See plans", link: "https://ty-ler.com/pricing" } ], drawn(document).drawn.find { |call| call.first == :rich_text }.second
+  end
+
   private
 
   def drawn(document, values: {})
