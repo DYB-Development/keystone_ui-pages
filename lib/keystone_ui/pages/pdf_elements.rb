@@ -180,7 +180,13 @@ module KeystoneUi
 
       def stat_runs(fields)
         suffix = [ { text: " #{fields[:suffix]}", size: STAT_SUFFIX_SIZE } ] unless fields[:suffix].nil?
-        [ { text: fields[:value].to_s }, *suffix ]
+        [ stat_value_run(fields), *suffix ]
+      end
+
+      def stat_value_run(fields)
+        return { text: fields[:fallback].to_s, color: "--ks-color-text-muted" } if fields[:value].to_s.empty? && !fields[:fallback].nil?
+
+        { text: fields[:value].to_s }
       end
 
       def paragraph(surface, fields)

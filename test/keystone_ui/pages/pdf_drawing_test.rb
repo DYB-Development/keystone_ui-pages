@@ -528,6 +528,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ [ "Revenue", "Up on last month" ], [ "4,200 USD" ] ], drawn(document).then { |surface| [ surface.texts, surface.paragraphs ] }
   end
 
+  test "a stat whose value is missing shows its When missing text in the muted colour keystone_ui's stat fallback rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: { "value" => "revenue" }, fallback: "Not yet")))))
+
+    assert_equal [ { text: "Not yet", color: "--ks-color-text-muted" } ], drawn(document).drawn.find { |call| call.first == :rich_text }[1]
+  end
+
   private
 
   def drawn(document, values: {})
