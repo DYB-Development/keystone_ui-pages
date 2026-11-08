@@ -108,7 +108,7 @@ module KeystoneUi
 
       def table(heading, rows, border:, radius:, divider:, total: nil)
         edge = @look.points(border[:width])
-        top = @document.cursor
+        frame = { border: border, edge: edge, corner: @look.points(radius.first) * radius.last, left: @document.bounds.absolute_left, width: @document.bounds.width, top: @document.y }
         @document.move_down(edge)
         @document.bounding_box([ edge, @document.cursor ], width: @document.bounds.width - edge * 2) do
           widths = column_widths([ heading, *rows, total ].compact)
@@ -117,15 +117,17 @@ module KeystoneUi
             if fits?(row_height(table_row, widths))
               divided(divider, widths.sum) if position.positive?
             else
+              framed(frame)
               next_page
+              frame[:top] = @document.y
+              @document.move_down(edge)
               drawn_table_row(heading, widths)
             end
             drawn_table_row(table_row, widths)
           end
           drawn_table_row(total, widths) if total
+          framed(frame)
         end
-        @document.move_down(edge)
-        bordered(border, top, @document.bounds.width, top - @document.cursor, @look.points(radius.first) * radius.last)
       end
 
       def render
@@ -171,6 +173,12 @@ module KeystoneUi
 
       def fits?(height)
         @document.y - height >= @document.margin_box.absolute_bottom
+      end
+
+      def framed(frame)
+        @document.move_down(frame[:edge])
+        top = frame[:top] - @document.bounds.absolute_bottom
+        bordered(frame[:border], top, frame[:width], frame[:top] - @document.y, frame[:corner], frame[:left] - @document.bounds.absolute_left)
       end
 
       def next_page
@@ -233,13 +241,13 @@ module KeystoneUi
         [ @look.points(padding.first) * padding[1] + edge, @look.points(padding.first) * padding.last + edge ]
       end
 
-      def bordered(border, top, width, height, corner)
+      def bordered(border, top, width, height, corner, left = 0)
         thickness = @look.points(border[:width])
         return unless thickness.positive?
 
         @document.stroke_color(@look.color(border[:color]))
         @document.line_width(thickness)
-        @document.stroke_rounded_rectangle([ thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
+        @document.stroke_rounded_rectangle([ left + thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
       end
 
       def linked(address, width, height)

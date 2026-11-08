@@ -264,6 +264,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ true, true ], pages(surface.render).map { |page| page.scan("<426567696e73>").size == page.scan("<456e6473>").size }
   end
 
+  test "a bordered table that runs onto the next page is stroked round its part on each page" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), Array.new(25) { |index| table_row("Review #{index}") }, **table_look, border: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_equal [ 1, 1 ], pages(surface.render).map { |page| page.scan(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/).size }
+  end
+
   private
 
   def look
