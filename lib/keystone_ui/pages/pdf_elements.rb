@@ -43,6 +43,8 @@ module KeystoneUi
       TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
       TONE_COLORS = { "neutral" => "--ks-color-text", "success" => "--ks-color-success-600", "danger" => "--ks-color-danger-600",
                       "warning" => "--ks-color-warning-600", "info" => "--ks-color-info-600" }.freeze
+      STAT_CARD_LOOK = { padding: [ SPACING, 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-overlay",
+                         border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
       STAT_LABEL_SIZE = "--text-sm"
       STAT_VALUE_SIZE = "--text-3xl"
       STAT_SUFFIX_SIZE = "--text-lg"
@@ -175,9 +177,11 @@ module KeystoneUi
       end
 
       def stat_card(surface, fields)
-        surface.text(fields[:label], size: STAT_LABEL_SIZE)
-        surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE, color: TONE_COLORS.fetch(fields[:variant].to_s, TONE_COLORS["neutral"]))
-        surface.text(fields[:note], size: STAT_NOTE_SIZE) if fields[:note].present?
+        surface.box(**STAT_CARD_LOOK) do
+          surface.text(fields[:label], size: STAT_LABEL_SIZE)
+          surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE, color: TONE_COLORS.fetch(fields[:variant].to_s, TONE_COLORS["neutral"]))
+          surface.text(fields[:note], size: STAT_NOTE_SIZE) if fields[:note].present?
+        end
       end
 
       def stat_runs(fields)

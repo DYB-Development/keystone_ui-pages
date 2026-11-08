@@ -541,6 +541,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.select { |call| call.first == :rich_text }.map { |call| call.last[:color] }
   end
 
+  test "a stat is drawn in a box with the fill, border, rounded corners and padding keystone_ui's metric card rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12")))))
+
+    assert_equal({ padding: [ "--ks-spacing", 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-overlay", border: { width: "--ks-border-width", color: "--ks-color-border" } },
+                 drawn(document).drawn.find { |call| call.first == :box }&.last)
+  end
+
   private
 
   def drawn(document, values: {})
