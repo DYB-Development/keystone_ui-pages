@@ -621,6 +621,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Hours used", Rational(33, 100) ], drawn(document).drawn.then { |calls| [ calls.find { |call| call.first == :text }[1], calls.find { |call| call.first == :bar }&.at(1) ] }
   end
 
+  test "a progress bar's label is drawn in the look keystone_ui's meter label rule gives it, one of keystone_ui's spacing steps above the bar" do
+    document = page(section(row(column(element("progress", label: "Hours used")))))
+
+    assert_equal [ [ :text, "Hours used", "--text-sm", { font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-meter-label", leading: "--text-sm--line-height" } ],
+                   [ :space, "--ks-spacing", 1 ], :bar ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :bar ? :bar : call }
+  end
+
   private
 
   def drawn(document, values: {})

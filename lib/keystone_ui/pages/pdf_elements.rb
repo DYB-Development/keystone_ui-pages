@@ -62,6 +62,7 @@ module KeystoneUi
       NEUTRAL_BADGE_COLORS = [ "--ks-color-badge-neutral", "--ks-color-text-label" ].freeze
       BADGE_TONES = %w[success danger warning info].freeze
       PROGRESS_LABEL_SIZE = "--text-sm"
+      PROGRESS_LABEL_GAP = 1
       PROGRESS_BAR_LOOK = { height: [ TAILWIND_SPACING, 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
@@ -235,7 +236,8 @@ module KeystoneUi
       end
 
       def progress(surface, fields)
-        surface.text(fields[:label], size: PROGRESS_LABEL_SIZE)
+        surface.text(fields[:label], size: PROGRESS_LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-meter-label", leading: line_height(PROGRESS_LABEL_SIZE))
+        surface.space(SPACING, PROGRESS_LABEL_GAP)
         surface.bar(Rational([ (fields[:value].to_f / fields[:max].to_f * 100).round, 100 ].min, 100), **PROGRESS_BAR_LOOK)
       end
 
