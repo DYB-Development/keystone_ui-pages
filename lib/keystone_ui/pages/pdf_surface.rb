@@ -49,7 +49,8 @@ module KeystoneUi
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         fragments = runs.map { |run| fragment(bold?(weight) ? run.merge(bold: true) : run) }
-        fragments.each { |fragment| @document.font(typeface.name, style: fragment[:styles].join("_").presence&.to_sym || :normal) { drawable!(fragment[:text].to_s) } }
+        fragments.each { |fragment| @document.font(typeface.name, style: fragment_style(fragment)) { drawable!(fragment[:text].to_s) } }
+        reached(runs_width(fragments, typeface, points)) if @reached
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
@@ -189,6 +190,23 @@ module KeystoneUi
       def fragment(run)
         { text: run[:text], link: run[:link], size: run[:size] && @look.points(run[:size]), color: run[:color] && @look.color(run[:color]),
           styles: %i[bold italic].select { |style| run[style] } }.compact
+      end
+
+      def fragment_style(fragment)
+        fragment[:styles].join("_").presence&.to_sym || :normal
+      end
+
+      def runs_width(fragments, typeface, points)
+        lines = [ 0 ]
+        fragments.each do |fragment|
+          @document.font(typeface.name, style: fragment_style(fragment)) do
+            fragment[:text].to_s.split("\n", -1).each_with_index do |piece, index|
+              lines << 0 if index.positive?
+              lines[-1] += @document.width_of(piece, size: fragment[:size] || points)
+            end
+          end
+        end
+        lines.max
       end
 
       def column_widths(table_rows)

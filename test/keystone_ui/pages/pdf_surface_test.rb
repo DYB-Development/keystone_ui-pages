@@ -79,6 +79,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 36.0 + 540 - Prawn::Document.new.width_of("Book a call", size: 12) - 12, lefts(surface.render)["Book a call"], 0.001
   end
 
+  test "rich text drawn aligned to the centre is drawn centred, as wide as its runs on its widest line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.rich_text([ { text: "Book " }, { text: "a call", bold: true } ], size: "--text-base") }
+
+    widths = Prawn::Document.new.then { |pdf| pdf.width_of("Book ", size: 12) + pdf.font("Helvetica", style: :bold).compute_width_of("a call", size: 12) }
+    assert_in_delta 36.0 + (540 - widths) / 2, lefts(surface.render)["Book "], 0.001
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
