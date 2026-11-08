@@ -17,14 +17,16 @@ module KeystoneUi
 
       BOLD_WEIGHT = 600
       MEASURING_HEIGHT = 14_400
+      NO_BREAK_SPACE = "\u00A0"
 
       def initialize(look)
         @look = look
         @document = Prawn::Document.new
       end
 
-      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)
+      def text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil, preformatted: false)
         content = content.to_s.upcase if uppercase
+        content = kept_spaces(content.to_s) if preformatted
         points = @look.points(size)
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
@@ -358,6 +360,10 @@ module KeystoneUi
           width = @document.width_of(content.to_s, size: @look.points(size))
         end
         width
+      end
+
+      def kept_spaces(content)
+        content.gsub(/^ +/) { |spaces| NO_BREAK_SPACE * spaces.length }
       end
 
       def translucent(color, &painting)

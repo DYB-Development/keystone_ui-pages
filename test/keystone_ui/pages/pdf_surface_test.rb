@@ -219,6 +219,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
+  test "preformatted text keeps the spaces at the start of each line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("def total\n  42", size: "--text-base", preformatted: true)
+
+    assert_includes lefts(surface.render).keys, "  42".encode(Encoding::Windows_1252).b
+  end
+
   test "text holding a character its font cannot draw is refused naming the character" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
