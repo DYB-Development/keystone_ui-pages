@@ -101,8 +101,13 @@ module KeystoneUi
       private
 
       def spaced(points, leading)
-        extra = leading ? @look.ratio(leading) * points - @document.font.height_at(points) : 0
-        @document.move_down(extra / 2)
+        return yield 0 unless leading
+
+        line = @look.ratio(leading) * points
+        font = @document.font
+        letters = (font.ascender + font.descender) / @document.font_size * points
+        extra = line - font.height_at(points)
+        @document.move_down((line - letters) / 2)
         yield extra
         @document.move_down(extra / 2)
       end

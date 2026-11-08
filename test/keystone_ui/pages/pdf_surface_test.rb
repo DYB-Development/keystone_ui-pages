@@ -99,6 +99,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 55.5, lefts(surface.render)["Book a call"]
   end
 
+  test "a line of text drawn with a line height token sits with the space its line height leaves split evenly above and below its letters" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("Book a call", size: "--text-base", leading: "--leading-loose")
+
+    assert_in_delta 756 - (24 - 11.1) / 2 - 8.616, heights(surface.render)["Book a call"].to_f, 0.001
+  end
+
   private
 
   def look
