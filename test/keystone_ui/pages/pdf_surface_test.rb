@@ -55,6 +55,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 36.0 + (540 - Prawn::Document.new.width_of("Book a call", size: 12)) / 2, lefts(surface.render)["Book a call"], 0.001
   end
 
+  test "text drawn aligned to the end is drawn against the right of the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:end) { surface.text("Book a call", size: "--text-base") }
+
+    assert_in_delta 36.0 + 540 - Prawn::Document.new.width_of("Book a call", size: 12), lefts(surface.render)["Book a call"], 0.001
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

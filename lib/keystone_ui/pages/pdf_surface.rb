@@ -17,6 +17,7 @@ module KeystoneUi
 
       BOLD_WEIGHT = 600
       COLUMN_PLACES = { top: 0, center: Rational(1, 2), bottom: 1 }.freeze
+      ALIGNED_PLACES = { start: 0, center: Rational(1, 2), end: 1 }.freeze
       MEASURING_HEIGHT = 14_400
       NO_BREAK_SPACE = "\u00A0"
       TAB_SIZE = "tab-size"
@@ -92,11 +93,11 @@ module KeystoneUi
         @document.move_down(down)
       end
 
-      def aligned(_align, &content)
+      def aligned(align, &content)
         width = reach(@document.bounds.width, &content)
         return yield unless width.positive?
 
-        @document.bounding_box([ (@document.bounds.width - width) / 2, @document.cursor ], width: width, &content)
+        @document.bounding_box([ (@document.bounds.width - width) * ALIGNED_PLACES.fetch(align), @document.cursor ], width: width, &content)
       end
 
       def together(&content)
