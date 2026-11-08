@@ -272,6 +272,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ 1, 1 ], pages(surface.render).map { |page| page.scan(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/).size }
   end
 
+  test "a table's total row that does not fit on the page is drawn on the next page under the heading row" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), Array.new(18) { |index| table_row("Review #{index}") }, total: table_row("Total"), **table_look)
+
+    assert_equal [ [ "Service" ], [ "Service", "Total" ] ], pages(surface.render).map { |page| heights(page).keys & [ "Service", "Total" ] }
+  end
+
   private
 
   def look
