@@ -47,6 +47,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 58.692 + 24, fill_widths(surface.render).first, 0.001
   end
 
+  test "a boxed line of text rounded more than its height allows is rounded into a pill as wide as the text and its horizontal padding" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-pill", 1 ])
+
+    assert_in_delta 58.692 + 24, fill_widths(surface.render).first, 0.001
+  end
+
   test "a boxed line of text given an address opens that address when clicked" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -366,7 +374,7 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem;--ks-radius-pill:calc(infinity * 1px)}")
   end
 
   def table_row(*texts, fill: nil)

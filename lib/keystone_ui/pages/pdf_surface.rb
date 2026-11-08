@@ -69,10 +69,11 @@ module KeystoneUi
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
         height = measured(width - across * 2, &drawn) + down * 2
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
+        corner = corner(radius, fill_width, height)
         linked(link, fill_width, height) if link
         @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, @look.points(radius.first) * radius.last)
-        bordered(border, top, fill_width, height, @look.points(radius.first) * radius.last) if border
+        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, corner)
+        bordered(border, top, fill_width, height, corner) if border
         @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
         @document.move_down(down)
       end
@@ -301,6 +302,10 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def corner(radius, width, height)
+        [ @look.points(radius.first) * radius.last, width / 2, height / 2 ].min
       end
 
       def insets(padding, border)
