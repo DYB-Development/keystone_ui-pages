@@ -289,6 +289,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 1, pages(surface.render).sum { |page| heights(page).keys.count("Service") }
   end
 
+  test "a row's later column starts on the page the row starts on when an earlier column runs onto the next page" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ]) do |index|
+      index.zero? ? surface.table(table_row("Service"), Array.new(25) { |row| table_row("Review #{row}") }, **table_look) : surface.text("Side", size: "--text-base")
+    end
+
+    assert_includes heights(pages(surface.render).first).keys, "Side"
+  end
+
   private
 
   def look

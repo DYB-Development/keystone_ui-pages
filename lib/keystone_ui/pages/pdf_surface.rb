@@ -91,19 +91,22 @@ module KeystoneUi
       def row(widths, gap: nil)
         spacing = gap ? @look.points(gap.first) * gap.last : 0
         top = @document.y
-        lowest = top
+        first_page = @document.page_number
+        lowest = [ first_page, -top ]
         left = 0
         widths.each_with_index do |width, index|
           column_width = @document.bounds.width * width
           inset = index.positive? ? spacing : 0
+          @document.go_to_page(first_page)
           @document.y = top
           @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
             yield index
-            lowest = [ lowest, @document.y ].min
+            lowest = [ lowest, [ @document.page_number, -@document.y ] ].max
           end
           left += column_width
         end
-        @document.y = lowest
+        @document.go_to_page(lowest.first)
+        @document.y = -lowest.last
       end
 
       def table(heading, rows, border:, radius:, divider:, total: nil)
