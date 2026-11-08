@@ -39,6 +39,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal heights(surface.render)["Third"], heights(surface.render)["Last"]
   end
 
+  test "a column aligned to the centre of a row laid out as a grid is drawn halfway down the space the row's tallest column leaves it" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true, align: %i[top center]) { |index| surface.text([ "First\nSecond\nThird", "Middle" ][index], size: "--text-base") }
+
+    assert_equal heights(surface.render)["Second"], heights(surface.render)["Middle"]
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
