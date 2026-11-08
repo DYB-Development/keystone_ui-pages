@@ -680,6 +680,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.find { |call| call[1] == "Quotes in minutes" }.then { |call| [ call[2], call.last.except(:align) ] }
   end
 
+  test "a hero's subtitle is drawn at the size, colour and line height keystone_ui's hero subtitle rule and classes give it, no wider than its large width limit" do
+    document = page(section(row(column(element("hero", title: "Quotes in minutes", subtitle: "Build a quote from your price list.")))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-lg", 1 ] } ],
+                   [ :text, "Build a quote from your price list.", "--text-lg", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-lg--line-height" } ] ],
+                 drawn(document).drawn.each_cons(2).find { |_box, call| call[1] == "Build a quote from your price list." }.map { |call| [ *call.first(call.size - 1), call.last.except(:align) ] }
+  end
+
   private
 
   def drawn(document, values: {})

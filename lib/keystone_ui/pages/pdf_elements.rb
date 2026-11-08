@@ -73,7 +73,8 @@ module KeystoneUi
       DISPLAY_TITLE_LOOK = { font: "--ks-font-body", weight: STAT_VALUE_WEIGHT, color: "--ks-color-text-display", tracking: "--tracking-tight" }.freeze
       HERO_BADGE_SIZE = "--text-sm"
       HERO_TITLE_SIZE = "--text-5xl"
-      HERO_SUBTITLE_SIZE = "--text-lg"
+      DISPLAY_SUBTITLE_SIZE = "--text-lg"
+      HERO_SUBTITLE_WIDTH = [ "--container-lg", 1 ].freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -268,7 +269,13 @@ module KeystoneUi
       def hero(surface, fields)
         surface.text(fields[:badge], size: HERO_BADGE_SIZE) if fields[:badge].present?
         surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE))
-        surface.text(fields[:subtitle], size: HERO_SUBTITLE_SIZE) if fields[:subtitle].present?
+        display_subtitle(surface, fields[:subtitle], HERO_SUBTITLE_WIDTH) if fields[:subtitle].present?
+      end
+
+      def display_subtitle(surface, subtitle, width)
+        surface.box(padding: [ SPACING, 0 ], width: width) do
+          surface.text(subtitle, size: DISPLAY_SUBTITLE_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(DISPLAY_SUBTITLE_SIZE))
+        end
       end
 
       def paragraph(surface, fields)
