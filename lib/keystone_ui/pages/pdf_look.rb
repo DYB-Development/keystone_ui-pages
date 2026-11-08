@@ -52,6 +52,11 @@ module KeystoneUi
         hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex[0, 6]
       end
 
+      def opacity(name)
+        alpha = value(name)[/\A#\h{6}(\h{2})\z/, 1]
+        alpha ? (alpha.to_i(16) / 255.0).round(3) : 1.0
+      end
+
       def font(name)
         families = value(name) == "inherit" ? value("font-family") : value(name)
         listed = split(families, ",").map { |family| family.strip.delete("\"'") }

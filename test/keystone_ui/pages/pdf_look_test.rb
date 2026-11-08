@@ -23,6 +23,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "3B82F6", look.color("--ks-color-tint")
   end
 
+  test "a colour token's opacity is read from the last two digits of an eight-digit hex colour, and a colour with none is fully opaque" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-tint:#3b82f633;--ks-color-text:#000000}")
+
+    assert_equal [ 0.2, 1.0 ], [ look.opacity("--ks-color-tint"), look.opacity("--ks-color-text") ]
+  end
+
   test "an oklch colour is turned into the hex colour it names" do
     look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-danger:oklch(57.7% .245 27.325)}")
 
