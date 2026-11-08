@@ -229,7 +229,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a row's columns are laid out as the page's grid, the space keystone_ui's small, medium, large and extra large grid gaps give apart, and medium when it has none" do
     document = page(section(*%w[sm md lg xl].map { |gap| row(column, column, gap: gap) }, row(column, column)))
 
-    assert_equal [ 3, 4, 6, 8, 4 ].map { |steps| { gap: [ "--ks-spacing", steps ], grid: true } }, drawn(document).drawn.select { |call| call.first == :row }.map(&:last)
+    assert_equal [ 3, 4, 6, 8, 4 ].map { |steps| { gap: [ "--ks-spacing", steps ], grid: true } }, drawn(document).drawn.select { |call| call.first == :row }.map { |call| call.last.slice(:gap, :grid) }
+  end
+
+  test "a row's columns are placed at the top, centre or bottom of the row as each column is aligned, and at the top when it has no alignment" do
+    document = page(section(row(column(align: "top"), column(align: "center"), column(align: "bottom"), column)))
+
+    assert_equal %i[top center bottom top], drawn(document).drawn.first.last[:align]
   end
 
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do

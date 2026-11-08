@@ -57,7 +57,8 @@ module KeystoneUi
         columns = row["columns"]
         share = Operations::SHARES.fetch(columns.size, "1/1")
         gap = [ SPACING, ROW_GAPS.fetch(row["gap"] || Operations::DEFAULTS[:row]["gap"]) ]
-        surface.row(columns.map { |column| Rational(column["wide"] || share) }, gap: gap, grid: true) do |index|
+        align = columns.map { |column| (column["align"] || Operations::DEFAULTS[:column]["align"]).to_sym }
+        surface.row(columns.map { |column| Rational(column["wide"] || share) }, gap: gap, grid: true, align: align) do |index|
           shown(columns[index]["elements"], values).each_with_index do |element, position|
             surface.space(SPACING, ELEMENT_GAP) if position.positive?
             drawn_element(element, surface, values)
