@@ -31,6 +31,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
+  test "a run of rich text given its own text size is drawn at that size, and the runs beside it at the paragraph's size" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "42" }, { text: " hours", size: "--text-lg" } ], size: "--text-base")
+
+    assert_equal [ "12", "13.5" ], surface.render.scan(%r{/F[\d.]+ ([\d.]+) Tf}).flatten
+  end
+
   test "a boxed line of text is drawn inset from its fill's left edge by the padding's horizontal steps" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -374,7 +382,7 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem;--ks-radius-pill:calc(infinity * 1px)}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--text-lg:1.125rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem;--ks-radius-pill:calc(infinity * 1px)}")
   end
 
   def table_row(*texts, fill: nil)
