@@ -510,6 +510,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ true, nil ], drawn(document).tables.last[2].pluck(:with_next)
   end
 
+  test "a table whose host value holds no columns draws nothing, as keystone_ui's table shows no headings or cells" do
+    document = page(section(row(column(element("data_table", columns: { "value" => "columns", "fallback" => nil }, items: [ { "service" => "Review" } ])))))
+
+    assert_equal [ :row ], drawn(document, values: { "columns" => [] }).drawn.map(&:first)
+  end
+
   private
 
   def drawn(document, values: {})

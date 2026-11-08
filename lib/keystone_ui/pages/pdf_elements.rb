@@ -121,6 +121,8 @@ module KeystoneUi
 
       def data_table(surface, fields)
         columns = Array(fields[:columns].presence)
+        return if columns.empty?
+
         heading = table_row(columns, columns.map { |column| column[:label] }, header: true)
         items = Array(fields[:items].presence).map { |item| item.to_h.stringify_keys }
         total = fields[:total].presence&.then { |given| given.to_h.stringify_keys }
