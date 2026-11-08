@@ -87,6 +87,8 @@ module KeystoneUi
       CARD_SUMMARY_GAP = 1
       INFO_SIZE = "--text-sm"
       FEATURE_GRID_TITLE_SIZE = "--text-4xl"
+      FEATURE_GRID_TITLE_GAP = 4
+      FEATURE_GRID_SUBTITLE_GAP = 16
       FEATURE_TITLE_SIZE = "--text-lg"
       FEATURE_DESCRIPTION_SIZE = "--text-sm"
       INFO_GAP = 2
@@ -349,8 +351,12 @@ module KeystoneUi
       end
 
       def feature_grid(surface, fields)
-        surface.text(fields[:title], size: FEATURE_GRID_TITLE_SIZE)
-        surface.text(fields[:subtitle], size: DISPLAY_SUBTITLE_SIZE) if fields[:subtitle].present?
+        surface.text(fields[:title], size: FEATURE_GRID_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(FEATURE_GRID_TITLE_SIZE), align: :center)
+        surface.space(SPACING, FEATURE_GRID_TITLE_GAP)
+        if fields[:subtitle].present?
+          display_subtitle(surface, fields[:subtitle], DISPLAY_SUBTITLE_WIDE, :center)
+          surface.space(SPACING, FEATURE_GRID_SUBTITLE_GAP)
+        end
         Array(fields[:features].presence).each do |feature|
           surface.text(feature[:title], size: FEATURE_TITLE_SIZE)
           surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE)

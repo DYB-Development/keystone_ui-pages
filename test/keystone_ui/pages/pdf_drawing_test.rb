@@ -808,6 +808,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Why teams choose us", "Three reasons.", "Fast", "Pages load quickly.", "Clear", "Every page reads plainly." ], drawn(document).texts
   end
 
+  test "a feature grid's title and subtitle are drawn centred in the looks keystone_ui's feature grid title and subtitle rules give them, spaced as the page spaces them" do
+    document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.")))))
+
+    assert_equal [ [ :text, "Why teams choose us", "--text-4xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display",
+                                                                    tracking: "--tracking-tight", leading: "--text-4xl--line-height", align: :center } ],
+                   [ :space, "--ks-spacing", 4 ], [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-2xl", 1 ], align: :center } ], :text, [ :space, "--ks-spacing", 16 ] ],
+                 drawn(document).drawn.drop(1).first(5).map { |call| call[1] == "Three reasons." ? :text : call }
+  end
+
   private
 
   def drawn(document, values: {})
