@@ -157,6 +157,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 54.0, lefts(surface.render)["Name"]
   end
 
+  test "a table's column is wide enough for its widest cell's text on one line when the table has room for it" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service", "Hours"), [ table_row("Consulting hours for the quarterly review of accounts", "4") ], **table_look)
+
+    assert_includes lefts(surface.render).keys, "Consulting hours for the quarterly review of accounts"
+  end
+
   private
 
   def look
@@ -176,10 +184,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
   end
 
   def lefts(pdf)
-    pdf.scan(/([\d.]+) [\d.]+ Td\n[^\n]*\n\[<(\h+)>\] TJ/).to_h { |left, text| [ [ text ].pack("H*"), left.to_f ] }
+    pdf.scan(/([\d.]+) [\d.]+ Td\n[^\n]*\n\[([^\]]*)\] TJ/).to_h { |left, text| [ shown(text), left.to_f ] }
   end
 
   def heights(pdf)
-    pdf.scan(/[\d.]+ ([\d.]+) Td\n[^\n]*\n\[<(\h+)>\] TJ/).to_h { |height, text| [ [ text ].pack("H*"), height ] }
+    pdf.scan(/[\d.]+ ([\d.]+) Td\n[^\n]*\n\[([^\]]*)\] TJ/).to_h { |height, text| [ shown(text), height ] }
+  end
+
+  def shown(kerned)
+    kerned.scan(/<(\h+)>/).flatten.join.then { |text| [ text ].pack("H*") }
   end
 end

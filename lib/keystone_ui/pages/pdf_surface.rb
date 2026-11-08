@@ -107,7 +107,9 @@ module KeystoneUi
       end
 
       def table(heading, rows, border:, radius:, divider:)
-        [ heading, *rows ].each { |table_row| drawn_table_row(table_row) }
+        table_rows = [ heading, *rows ]
+        widths = column_widths(table_rows)
+        table_rows.each { |table_row| drawn_table_row(table_row, widths) }
       end
 
       def render
@@ -116,14 +118,23 @@ module KeystoneUi
 
       private
 
-      def drawn_table_row(table_row)
-        width = @document.bounds.width / table_row[:cells].size
+      def column_widths(table_rows)
+        natural = table_rows.map { |table_row| table_row[:cells].map { |cell| natural_width(cell) } }.transpose.map(&:max)
+        natural.map { |width| @document.bounds.width * width / natural.sum }
+      end
+
+      def natural_width(cell)
+        left, right = cell_insets(cell)
+        text_width(cell[:text], cell[:size], cell[:font] || "--ks-font-body", cell[:weight]) + left + right
+      end
+
+      def drawn_table_row(table_row, widths)
         top = @document.y
         lowest = top
         table_row[:cells].each_with_index do |cell, index|
           left, right, down = cell_insets(cell)
           @document.y = top - down
-          @document.bounding_box([ width * index + left, @document.cursor ], width: width - left - right) do
+          @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) do
             text(cell[:text], **cell.except(:text, :padding))
             lowest = [ lowest, @document.y - down ].min
           end
