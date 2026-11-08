@@ -162,6 +162,8 @@ module KeystoneUi
       end
 
       def table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)
+        return reached(@document.bounds.width) if @reached
+
         edge = @look.points(border[:width])
         frame = { border: border, edge: edge, corner: @look.points(radius.first) * radius.last, left: @document.bounds.absolute_left, width: @document.bounds.width, top: @document.y }
         @document.move_down(edge)

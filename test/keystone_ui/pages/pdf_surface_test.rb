@@ -96,6 +96,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 36.0, lefts(surface.render)["Rate"]
   end
 
+  test "a table drawn aligned to the centre stays as wide as the width it is drawn in, as it fills its column unaligned" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.table(table_row("Service"), [ table_row("Review") ], **table_look) }
+
+    assert_equal 36.0 + 6 * 3, lefts(surface.render)["Service"]
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
