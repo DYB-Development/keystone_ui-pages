@@ -90,6 +90,12 @@ module KeystoneUi
         @document.move_down(down)
       end
 
+      def together(&content)
+        height = measured(@document.bounds.width, &content)
+        next_page unless fits?(height) || height > @document.margin_box.height
+        yield
+      end
+
       def bar(share, height:, radius:, track:, fill:)
         thickness = @look.points(height.first) * height.last
         width = @document.bounds.width

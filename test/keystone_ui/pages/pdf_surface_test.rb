@@ -429,6 +429,21 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 735.384, heights(pages(surface.render).last)["Line 0"].to_f
   end
 
+  test "what is drawn together that does not fit in the space left on a page starts at the top of the next page's margin" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ 1 ]) do
+      surface.text("Introduction", size: "--text-base")
+      surface.space("--ks-spacing", 200)
+      surface.together do
+        surface.text("Why teams choose us", size: "--text-base")
+        surface.text(Array.new(10) { |line| "Line #{line}" }.join("\n"), size: "--text-base")
+      end
+    end
+
+    assert_equal 747.384, heights(pages(surface.render).last)["Why teams choose us"].to_f
+  end
+
   test "a table that starts part way down a page continues at the top of the next page's margin" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
