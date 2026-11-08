@@ -139,8 +139,28 @@ module KeystoneUi
       def column_widths(table_rows)
         room = @document.bounds.width
         widest = cell_widths(table_rows) { |cell| padded_width(cell, cell[:text].to_s) }
-        narrowest = cell_widths(table_rows) { |cell| cell[:text].to_s.split.map { |word| padded_width(cell, word) }.max.to_f }
         return widest.map { |width| room * width / widest.sum } if widest.sum <= room
+
+        narrowest = cell_widths(table_rows) { |cell| cell[:text].to_s.split.map { |word| padded_width(cell, word) }.max.to_f }
+        kept = kept_columns(widest, room)
+        wrapped = widest.each_index.to_a - kept
+        shared = wrapped_widths(widest.values_at(*wrapped), narrowest.values_at(*wrapped), room - widest.values_at(*kept).sum)
+        widest.each_index.map { |index| kept.include?(index) ? widest[index] : shared[wrapped.index(index)] }
+      end
+
+      def kept_columns(widest, room)
+        kept = []
+        loop do
+          wrapped = widest.each_index.to_a - kept
+          share = (room - widest.values_at(*kept).sum) / wrapped.size
+          fitting = wrapped.select { |index| widest[index] <= share }
+          return kept if fitting.empty?
+
+          kept += fitting
+        end
+      end
+
+      def wrapped_widths(widest, narrowest, room)
         return narrowest.map { |width| room * width / narrowest.sum } if narrowest.sum >= room
 
         spare = widest.zip(narrowest).map { |most, least| most - least }

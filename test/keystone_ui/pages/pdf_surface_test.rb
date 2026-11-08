@@ -320,6 +320,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal "→", error.character
   end
 
+  test "a table too wide for its column keeps on one line each column whose text fits its share of the width, and wraps the rest" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service", "Notes", "Hours"), [ table_row("Review 12", LONG_SERVICE, "4") ], **table_look)
+
+    assert_includes lefts(surface.render).keys, "Review 12"
+  end
+
   private
 
   def look
