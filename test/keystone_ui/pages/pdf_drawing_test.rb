@@ -40,6 +40,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       record [ :boxed_text, content, size, style ]
     end
 
+    def aligned(align)
+      record [ :aligned, align ]
+      yield
+    end
+
     def together
       record [ :together ]
       yield
@@ -238,6 +243,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal %i[top center bottom top], drawn(document).drawn.first.last[:align]
   end
 
+  test "an element aligned to the start, centre or end is drawn there in its column, a stretched one across it, and each as its catalog entry aligns it when it has no alignment" do
+    document = page(section(row(column(element("label", text: "Start").merge("align" => "start"), element("label", text: "Centre").merge("align" => "center"),
+                                       element("label", text: "End").merge("align" => "end"), element("label", text: "Stretch").merge("align" => "stretch"),
+                                       element("label", text: "Default"), element("button", label: "Book")))))
+
+    assert_equal %i[start center end start], drawn(document).drawn.select { |call| call.first == :aligned }.map(&:last)
+  end
+
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
     document = page(section(row(column(element("heading", text: "Small", size: "sm"), element("heading", text: "Medium", size: "md"),
                                        element("heading", text: "Large", size: "lg", note: "Updated monthly"), element("label", text: "Per seat")))))
@@ -432,7 +445,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     keystone_elements = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }
 
-    assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first)
+    assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first) - [ :aligned ]
   end
 
   test "a button with no address is drawn as its label, in the look keystone_ui's primary medium button rules give it" do

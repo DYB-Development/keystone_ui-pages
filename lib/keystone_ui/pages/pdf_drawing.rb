@@ -15,6 +15,7 @@ module KeystoneUi
       SPACING = "--ks-spacing"
       ELEMENT_GAP = 4
       ROW_GAP = 6
+      STRETCHED = "stretch"
       SECTION_SPACING = { "sm" => 4, "md" => 6, "lg" => 8 }.freeze
       SHADED_LOOK = { padding: [ SPACING, 0 ], fill: "--ks-color-fill-muted" }.freeze
       ROW_GAPS = { "sm" => 3, "md" => 4, "lg" => 6, "xl" => 8 }.freeze
@@ -75,10 +76,16 @@ module KeystoneUi
         raise PrintFailed, "The page holds a #{element["key"]} element, which the catalog does not have, so this page cannot be drawn as a PDF." unless definition
         raise NoPdfDrawing, "The #{definition.name} element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome." unless definition.pdf
 
-        definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, filled_field(field, element, values) ] })
+        placed(element["align"] || definition.align || Operations::DEFAULTS[:element]["align"], surface) do
+          definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, filled_field(field, element, values) ] })
+        end
       rescue PdfSurface::UndrawableCharacter => error
         raise PrintFailed, format("The %s element holds the character %s (U+%04X), which its font cannot draw, so this page cannot be drawn as a PDF.",
                                   definition.name, error.character, error.character.ord)
+      end
+
+      def placed(align, surface, &drawing)
+        align == STRETCHED ? yield : surface.aligned(align.to_sym, &drawing)
       end
 
       def filled_field(field, element, values)
