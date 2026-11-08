@@ -211,6 +211,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n36\.0 718\.128 540\.0 37\.872 re\nf/, surface.render)
   end
 
+  test "a table's rows are divided by a line of the divider's width and colour, with none above the first row" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), [ table_row("Review"), table_row("Audit") ], **table_look, divider: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_equal 1, surface.render.scan(/0\.0 0\.0 0\.0 scn\n36\.0 [\d.]+ 540\.0 1\.5 re\nf/).size
+  end
+
   private
 
   def look

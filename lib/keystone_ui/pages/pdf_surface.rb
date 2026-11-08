@@ -107,9 +107,13 @@ module KeystoneUi
       end
 
       def table(heading, rows, border:, radius:, divider:, total: nil)
-        table_rows = [ heading, *rows, total ].compact
-        widths = column_widths(table_rows)
-        table_rows.each { |table_row| drawn_table_row(table_row, widths) }
+        widths = column_widths([ heading, *rows, total ].compact)
+        drawn_table_row(heading, widths)
+        rows.each_with_index do |table_row, position|
+          divided(divider, widths.sum) if position.positive?
+          drawn_table_row(table_row, widths)
+        end
+        drawn_table_row(total, widths) if total
       end
 
       def render
@@ -151,6 +155,13 @@ module KeystoneUi
           @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) { drawn_cell(cell) }
         end
         @document.y = top - height
+      end
+
+      def divided(divider, width)
+        thickness = @look.points(divider[:width])
+        @document.fill_color(@look.color(divider[:color]))
+        @document.fill_rectangle([ 0, @document.cursor ], width, thickness)
+        @document.move_down(thickness)
       end
 
       def row_height(table_row, widths)
