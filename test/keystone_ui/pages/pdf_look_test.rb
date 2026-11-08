@@ -181,4 +181,10 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal 0.75, look.points("1px")
   end
+
+  test "a weight a keystone_ui class writes out as a token plus a number, such as a stat value's weight, is read as their sum" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--font-weight-semibold:600;--ks-font-weight-heading:var(--font-weight-semibold)}")
+
+    assert_equal 700, look.weight("calc(var(--ks-font-weight-heading)+100)")
+  end
 end

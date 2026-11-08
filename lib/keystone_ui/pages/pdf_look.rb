@@ -57,6 +57,8 @@ module KeystoneUi
       end
 
       def weight(name)
+        return resolved(name).delete_prefix("calc(").delete_suffix(")").split("+").sum(&:to_i) if name.start_with?("calc(")
+
         value(name).to_i
       end
 
