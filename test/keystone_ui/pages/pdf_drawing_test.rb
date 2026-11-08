@@ -673,6 +673,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.select { |call| %i[text boxed_text].include?(call.first) }.map(&:second)
   end
 
+  test "a hero's title is drawn at the size, weight, colour, letter spacing and line height keystone_ui's hero title rule and classes give it at the printed page's width" do
+    document = page(section(row(column(element("hero", title: "Quotes in minutes")))))
+
+    assert_equal [ "--text-5xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display", tracking: "--tracking-tight", leading: "--text-5xl--line-height" } ],
+                 drawn(document).drawn.find { |call| call[1] == "Quotes in minutes" }.then { |call| [ call[2], call.last.except(:align) ] }
+  end
+
   private
 
   def drawn(document, values: {})

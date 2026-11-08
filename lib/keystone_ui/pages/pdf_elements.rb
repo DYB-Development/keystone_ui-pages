@@ -70,6 +70,7 @@ module KeystoneUi
       CODE_BLOCK_LOOK = { padding: [ SPACING, 4 ], fill: "--ks-color-code" }.freeze
       CODE_CAPTION_LOOK = { padding: [ SPACING, 4, 2 ], fill: "--ks-color-fill-muted" }.freeze
       CODE_CAPTION_SIZE = "--text-xs"
+      DISPLAY_TITLE_LOOK = { font: "--ks-font-body", weight: STAT_VALUE_WEIGHT, color: "--ks-color-text-display", tracking: "--tracking-tight" }.freeze
       HERO_BADGE_SIZE = "--text-sm"
       HERO_TITLE_SIZE = "--text-5xl"
       HERO_SUBTITLE_SIZE = "--text-lg"
@@ -266,7 +267,7 @@ module KeystoneUi
 
       def hero(surface, fields)
         surface.text(fields[:badge], size: HERO_BADGE_SIZE) if fields[:badge].present?
-        surface.text(fields[:title], size: HERO_TITLE_SIZE)
+        surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE))
         surface.text(fields[:subtitle], size: HERO_SUBTITLE_SIZE) if fields[:subtitle].present?
       end
 
