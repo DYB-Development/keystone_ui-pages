@@ -437,6 +437,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).tables.map { |call| [ call[1], *call[2] ].map { |table_row| table_row[:cells].pluck(:align) } }
   end
 
+  test "a table grouped by a key draws each group's name above its rows, with the group's subtotals when they are given" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" }, { "team" => "Ops", "service" => "Audit", "hours" => "2" }, { "team" => "Sales", "service" => "Pitch", "hours" => "1" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team", group_totals: { "Ops" => { "hours" => "6" } })))))
+
+    assert_equal [ %w[Ops 6], %w[Review 4], %w[Audit 2], [ "Sales", "" ], %w[Pitch 1] ], drawn(document).table_texts.last
+  end
+
   private
 
   def drawn(document, values: {})

@@ -116,8 +116,22 @@ module KeystoneUi
       def data_table(surface, fields)
         columns = Array(fields[:columns].presence)
         heading = table_row(columns, columns.map { |column| column[:label] })
-        rows = Array(fields[:items].presence).map { |item| table_row(columns, columns.map { |column| item.to_h.stringify_keys[column[:key].to_s] }) }
-        surface.table(heading, rows)
+        items = Array(fields[:items].presence).map { |item| item.to_h.stringify_keys }
+        surface.table(heading, items.each_index.flat_map { |index| item_rows(columns, items, index, fields) })
+      end
+
+      def item_rows(columns, items, index, fields)
+        row = table_row(columns, columns.map { |column| items[index][column[:key].to_s] })
+        key = fields[:group_by].to_s
+        group = items[index][key] if key.present?
+        return [ row ] if group.nil? || (index.positive? && items[index - 1][key] == group)
+
+        [ group_row(columns, group, fields[:group_totals]), row ]
+      end
+
+      def group_row(columns, group, totals)
+        subtotals = totals.to_h.stringify_keys.fetch(group.to_s, {}).to_h.stringify_keys
+        table_row(columns, columns.each_with_index.map { |column, index| index.zero? ? group : subtotals[column[:key].to_s] })
       end
 
       def table_row(columns, texts)
