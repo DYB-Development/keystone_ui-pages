@@ -789,7 +789,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "an info block is drawn as its summary with its detail shown in full beneath it, as the page shows them once opened" do
     document = page(section(row(column(element("info", summary: "How hours are counted", detail: "Hours are counted to the quarter hour.\nTravel is not counted.")))))
 
-    assert_equal [ "How hours are counted", "Hours are counted to the quarter hour.\nTravel is not counted." ], drawn(document).texts
+    assert_equal [ "How hours are counted", "Hours are counted to the quarter hour. Travel is not counted." ], drawn(document).texts
   end
 
   test "an info block's summary and detail are each drawn in the box keystone_ui's info popup rules give them, at their own widths, the detail two spacing steps under the summary" do
@@ -849,6 +849,19 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     assert_equal %i[together text space box text space row box text space text box text space text together_end space row box text space text],
                  drawn(document).drawn.drop(1).map(&:first)
+  end
+
+  test "every element the page shows as ordinary text joins a stored line break into a space, as the browser does, and only code keeps its line breaks" do
+    broken = "Two\nlines"
+    elements = [ element("heading", text: broken, note: broken), element("label", text: broken), element("paragraph", text: broken), element("alert", title: broken, message: broken),
+                 element("value_list", rows: [ { "label" => broken, "value" => broken, "note" => broken } ]), element("button", label: broken), element("accordion", items: [ { "question" => broken, "answer" => broken } ]),
+                 element("data_table", columns: [ { "key" => "name", "label" => broken } ], items: [ { "name" => broken } ]), element("stat_card", label: broken, value: broken, suffix: broken, note: broken),
+                 element("figure", text: broken), element("badge", label: broken), element("progress", label: broken), element("hero", badge: broken, title: broken, subtitle: broken),
+                 element("cta_banner", title: broken, subtitle: broken, text: broken), element("card", title: broken, summary: broken, cta: broken), element("info", summary: broken, detail: broken),
+                 element("feature_grid", title: broken, subtitle: broken, features: [ { "title" => broken, "description" => broken } ]), element("code", code: broken) ]
+    strings = ->(drawn) { drawn.is_a?(String) ? [ drawn ] : Array(drawn.is_a?(Hash) ? drawn.values : drawn).flat_map { |part| part.is_a?(String) || part.is_a?(Array) || part.is_a?(Hash) ? strings.(part) : [] } }
+
+    assert_equal [ broken ], strings.(drawn(page(section(row(column(*elements))))).drawn).select { |text| text.include?("\n") }.uniq
   end
 
   private

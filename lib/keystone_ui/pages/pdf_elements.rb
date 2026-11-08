@@ -112,6 +112,19 @@ module KeystoneUi
 
       module_function
 
+      def flowing(drawing)
+        ->(surface, fields) { method(drawing).call(surface, flowed(fields)) }
+      end
+
+      def flowed(value)
+        case value
+        when String then value.gsub(/\s+/, " ").strip
+        when Array then value.map { |part| flowed(part) }
+        when Hash then value.transform_values { |part| flowed(part) }
+        else value
+        end
+      end
+
       def heading(surface, fields)
         size = HEADING_SIZES.fetch(fields[:size].to_s, HEADING_SIZES["md"])
         surface.text(fields[:text], size: size, font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text", leading: line_height(size))

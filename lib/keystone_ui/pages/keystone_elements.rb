@@ -9,44 +9,44 @@ module KeystoneUi
       module_function
 
       def register(catalog)
-        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start", pdf: PdfElements.method(:button),
+        catalog.register(key: :button, name: "Button", component: :ui_button, icon: :cursor, group: "Basics", align: "start", pdf: PdfElements.flowing(:button),
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
         catalog.register(key: :next_page, name: "Next page", component: :pages_next_page, icon: :cursor, group: "Basics", align: "start", placed: true, pdf: PdfElements.method(:left_out),
           fields: [ { key: :label, label: "Label", default: "Next" } ])
-        catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data", pdf: PdfElements.method(:progress),
+        catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data", pdf: PdfElements.flowing(:progress),
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
-        catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text", pdf: PdfElements.method(:alert),
+        catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text", pdf: PdfElements.flowing(:alert),
           fields: [ { key: :message, label: "Message", kind: :long_text, default: "Something worth knowing." }, { key: :title, label: "Title", kind: :text },
                     { key: :type, label: "Type", kind: :one_of, options: %w[info success warning error], default: "info" },
                     { key: :dismissible, label: "Can be dismissed", kind: :yes_or_no } ])
         catalog.register(key: :code, name: "Code", component: :ui_code, icon: :code, group: "Text", body: :code, pdf: PdfElements.method(:code),
           fields: [ { key: :code, label: "Code", kind: :long_text, default: "puts \"Hello\"" }, { key: :language, label: "Language", kind: :text },
                     { key: :caption, label: "Caption", kind: :text } ])
-        catalog.register(key: :heading, name: "Heading", component: :ui_heading, icon: :heading, group: "Text", pdf: PdfElements.method(:heading),
+        catalog.register(key: :heading, name: "Heading", component: :ui_heading, icon: :heading, group: "Text", pdf: PdfElements.flowing(:heading),
           fields: [ { key: :text, label: "Text", kind: :text, default: "Heading" },
                     { key: :size, label: "Size", kind: :one_of, options: %w[sm md lg], default: "md" },
                     { key: :note, label: "Note", kind: :text } ])
-        catalog.register(key: :label, name: "Label", component: :ui_caption, icon: :tag, group: "Text", pdf: PdfElements.method(:label),
+        catalog.register(key: :label, name: "Label", component: :ui_caption, icon: :tag, group: "Text", pdf: PdfElements.flowing(:label),
           fields: [ { key: :text, label: "Text", kind: :text, default: "Label" } ])
-        catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text", pdf: PdfElements.method(:paragraph),
+        catalog.register(key: :paragraph, name: "Paragraph", component: :pages_paragraph, icon: :text, group: "Text", pdf: PdfElements.flowing(:paragraph),
           fields: [ { key: :text, label: "Text", kind: :rich_text, default: "Write the text of this paragraph here." } ])
-        catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text", pdf: PdfElements.method(:hero),
+        catalog.register(key: :hero, name: "Hero", component: :ui_hero, icon: :heading, group: "Text", pdf: PdfElements.flowing(:hero),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Headline" },
                     { key: :subtitle, label: "Subtitle", kind: :long_text },
                     { key: :badge, label: "Badge", kind: :text },
                     { key: :layout, label: "Layout", kind: :one_of, options: %w[split centered], default: "split" },
                     { key: :height, label: "Height", kind: :one_of, options: %w[content tall full_screen], default: "tall",
                       classes: { "content" => "[&_.ks-hero]:min-h-0", "tall" => "[&_.ks-hero]:min-h-[28rem]", "full_screen" => "[&_.ks-hero]:min-h-screen" } } ])
-        catalog.register(key: :cta_banner, name: "Call to action", component: :ui_cta_banner, icon: :megaphone, group: "Content", body: :text, pdf: PdfElements.method(:cta_banner),
+        catalog.register(key: :cta_banner, name: "Call to action", component: :ui_cta_banner, icon: :megaphone, group: "Content", body: :text, pdf: PdfElements.flowing(:cta_banner),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Ready to start?" },
                     { key: :subtitle, label: "Subtitle", kind: :text },
                     { key: :text, label: "Text", kind: :long_text } ])
-        catalog.register(key: :card, name: "Card", component: :ui_card, icon: :card, group: "Content", pdf: PdfElements.method(:card),
+        catalog.register(key: :card, name: "Card", component: :ui_card, icon: :card, group: "Content", pdf: PdfElements.flowing(:card),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Card title" },
                     { key: :summary, label: "Summary", kind: :long_text },
                     { key: :link, label: "Link", kind: :address, default: "#" },
                     { key: :cta, label: "Link text", kind: :text, default: "Read more" } ])
-        catalog.register(key: :stat_card, name: "Stat", component: :ui_stat_card, icon: :chart, group: "Data", pdf: PdfElements.method(:stat_card),
+        catalog.register(key: :stat_card, name: "Stat", component: :ui_stat_card, icon: :chart, group: "Data", pdf: PdfElements.flowing(:stat_card),
           fields: [ { key: :label, label: "Label", kind: :text, default: "Label" },
                     { key: :value, label: "Value", kind: :text, default: "0" },
                     { key: :suffix, label: "Suffix", kind: :text },
@@ -54,19 +54,19 @@ module KeystoneUi
                     { key: :note, label: "Note", kind: :text },
                     { key: :plain, label: "Plain", kind: :yes_or_no },
                     { key: :fallback, label: "When missing", kind: :text, default: "N/A" } ])
-        catalog.register(key: :figure, name: "Figure", component: :ui_figure, icon: :number, group: "Data", pdf: PdfElements.method(:figure),
+        catalog.register(key: :figure, name: "Figure", component: :ui_figure, icon: :number, group: "Data", pdf: PdfElements.flowing(:figure),
           fields: [ { key: :text, label: "Text", kind: :text, default: "0" },
                     { key: :tone, label: "Tone", kind: :one_of, options: %w[neutral success danger], default: "neutral" } ])
-        catalog.register(key: :info, name: "Info", component: :ui_info, icon: :info, group: "Text", body: :detail, pdf: PdfElements.method(:info),
+        catalog.register(key: :info, name: "Info", component: :ui_info, icon: :info, group: "Text", body: :detail, pdf: PdfElements.flowing(:info),
           fields: [ { key: :summary, label: "Summary", kind: :text, default: "More information" },
                     { key: :detail, label: "Detail", kind: :long_text } ])
-        catalog.register(key: :badge, name: "Badge", component: :ui_badge, icon: :tag, group: "Basics", align: "start", pdf: PdfElements.method(:badge),
+        catalog.register(key: :badge, name: "Badge", component: :ui_badge, icon: :tag, group: "Basics", align: "start", pdf: PdfElements.flowing(:badge),
           fields: [ { key: :label, label: "Label", kind: :text, default: "Badge" },
                     { key: :variant, label: "Tone", kind: :one_of, options: %w[neutral success danger warning info], default: "neutral" } ])
         catalog.register(key: :copy_button, name: "Copy button", component: :ui_copy_button, icon: :copy, group: "Basics", align: "start", pdf: PdfElements.method(:left_out),
           fields: [ { key: :text, label: "Text to copy", kind: :text },
                     { key: :label, label: "Label", kind: :text, default: "Copy" } ])
-        catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content", pdf: PdfElements.method(:feature_grid),
+        catalog.register(key: :feature_grid, name: "Feature grid", component: :ui_feature_grid, icon: :card, group: "Content", pdf: PdfElements.flowing(:feature_grid),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Why teams choose us" },
                     { key: :subtitle, label: "Subtitle", kind: :text },
                     { key: :features, label: "Features", kind: :list,
@@ -89,12 +89,12 @@ module KeystoneUi
                     { key: :thank_you, label: "Thank-you message", kind: :long_text, default: "Thanks, we will be in touch." },
                     { key: :after_submitting, label: "After submitting", kind: :one_of, options: %w[thank_you address next_page], default: "thank_you" },
                     { key: :next_address, label: "Address to send the visitor to", kind: :address } ])
-        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text", pdf: PdfElements.method(:accordion),
+        catalog.register(key: :accordion, name: "Accordion", component: :ui_accordion, icon: :code, group: "Text", pdf: PdfElements.flowing(:accordion),
           fields: [ { key: :items, label: "Questions", kind: :list,
                       entry: [ { key: :question, label: "Question", kind: :text }, { key: :answer, label: "Answer", kind: :long_text } ],
                       default: [ { "question" => "What is this?", "answer" => "A question visitors often ask." },
                                  { "question" => "How does it work?", "answer" => "The answer opens below its question." } ] } ])
-        catalog.register(key: :data_table, name: "Table", component: :ui_data_table, icon: :card, group: "Data", pdf: PdfElements.method(:data_table),
+        catalog.register(key: :data_table, name: "Table", component: :ui_data_table, icon: :card, group: "Data", pdf: PdfElements.flowing(:data_table),
           fields: [ { key: :items, label: "Rows", kind: :data,
                       default: [ { "name" => "First row", "status" => "Open" }, { "name" => "Second row", "status" => "Closed" } ] },
                     { key: :columns, label: "Columns", kind: :list, as: :pairs,
@@ -104,7 +104,7 @@ module KeystoneUi
                     { key: :group_by, label: "Group rows by key", kind: :text, as: :key },
                     { key: :group_totals, label: "Group subtotals", kind: :data },
                     { key: :total, label: "Total row", kind: :data } ])
-        catalog.register(key: :value_list, name: "Label and value list", component: :ui_value_list, icon: :list, group: "Data", pdf: PdfElements.method(:value_list),
+        catalog.register(key: :value_list, name: "Label and value list", component: :ui_value_list, icon: :list, group: "Data", pdf: PdfElements.flowing(:value_list),
           fields: [ { key: :rows, label: "Rows", kind: :list,
                       entry: [ { key: :label, label: "Label", kind: :text }, { key: :value, label: "Value", kind: :text },
                                { key: :note, label: "Note", kind: :text }, { key: :total, label: "Total", kind: :yes_or_no },
