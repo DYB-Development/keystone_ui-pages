@@ -185,6 +185,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_operator lefts(surface.render).values.max, :<, 36 + 135
   end
 
+  test "a table cell's text too long for its cell wraps onto more lines, and the next row starts under its last line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service", "Hours"), [ table_row(LONG_SERVICE, "4"), table_row("Review", "2") ], **table_look)
+
+    drawn = heights(surface.render).transform_values(&:to_f)
+    last_line = drawn.select { |text, _height| LONG_SERVICE.end_with?(text) && text.length > 1 && text != LONG_SERVICE }.values.first
+    assert_in_delta 12 + 13.872 + 12, last_line - drawn["Review"], 0.001
+  end
+
   private
 
   def look
