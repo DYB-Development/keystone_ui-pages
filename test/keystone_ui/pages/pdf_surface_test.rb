@@ -23,6 +23,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 36.0 + (540 - 18) / 2 + 18, lefts(surface.render)["Clear"]
   end
 
+  test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true) do |index|
+      surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent", stretch: true) { surface.text([ "Fast", "Clear\nPlain\nShort" ][index], size: "--text-base") }
+    end
+
+    assert_equal 1, fill_heights(surface.render).map { |height| height.round(3) }.uniq.size
+  end
+
   test "lines of text drawn with a line height token are spaced that many text sizes apart" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -555,6 +565,10 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
 
   def fill_widths(pdf)
     pdf.scan(/scn\n((?:[\d. ]+ [mlc]\n)+)h\nf\n/).map { |(path)| path.scan(/[\d.]+/).each_slice(2).map { |left, _| left.to_f }.minmax.then { |least, most| most - least } }
+  end
+
+  def fill_heights(pdf)
+    pdf.scan(/scn\n((?:[\d. ]+ [mlc]\n)+)h\nf\n/).map { |(path)| path.scan(/[\d.]+/).each_slice(2).map { |_, height| height.to_f }.minmax.then { |least, most| most - least } }
   end
 
   def lefts(pdf)

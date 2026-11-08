@@ -50,11 +50,12 @@ module KeystoneUi
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
-      def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, &content)
+      def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, stretch: false, &content)
         across, down = insets(padding, border)
         width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
         left = align == :center ? (@document.bounds.width - width) / 2 : 0
         height = measured(width - across * 2, &content) + down * 2
+        height = [ height, @stretched.to_f ].max if stretch
         next_page unless fits?(height) || height > @document.margin_box.height
         top = @document.cursor
         bottom = @document.bounds.absolute_bottom
@@ -67,6 +68,7 @@ module KeystoneUi
         clipped(clip && [ left, top, width, height, corner, border ]) { @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content) }
         bordered(border, top + bottom - @document.bounds.absolute_bottom, width, height, corner, left) if border && clip
         @document.move_down(down)
+        @document.y = bottom + top - height if stretch
       end
 
       def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil, align: nil)
@@ -113,6 +115,7 @@ module KeystoneUi
       def row(widths, gap: nil, grid: false)
         spacing = gap ? @look.points(gap.first) * gap.last : 0
         room = grid ? @document.bounds.width - spacing * (widths.size - 1) : @document.bounds.width
+        stretched = widths.each_with_index.map { |width, index| measured(room * width) { yield index } }.max if grid
         top = @document.y
         first_page = @document.page_number
         lowest = [ first_page, -top ]
@@ -123,7 +126,9 @@ module KeystoneUi
           @document.go_to_page(first_page)
           @document.y = top
           @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
+            @stretched = stretched
             yield index
+            @stretched = nil
             lowest = [ lowest, [ @document.page_number, -@document.y ] ].max
           end
           left += column_width + (grid ? spacing : 0)
