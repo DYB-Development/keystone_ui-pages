@@ -39,6 +39,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :rule, style ]
     end
 
+    def bar(share, **style)
+      @drawn << [ :bar, share, style ]
+    end
+
     def row(widths, **layout)
       @drawn << [ :row, widths, layout.presence ].compact
       widths.each_index { |index| yield index }
@@ -609,6 +613,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     assert_equal [ "--text-xs", { font: "--ks-font-body", weight: "--ks-font-weight-medium", leading: "--text-xs--line-height", padding: [ "--ks-spacing", 2, 1 ], radius: [ "--ks-radius-pill", 1 ] } ],
                  drawn(document).drawn.last.then { |call| [ call[2], call.last.except(:fill, :color) ] }
+  end
+
+  test "a progress bar is drawn as its label above a bar filled to its value's share of its maximum, rounded to a whole percent as the page rounds it" do
+    document = page(section(row(column(element("progress", label: "Hours used", value: "1", max: "3")))))
+
+    assert_equal [ "Hours used", Rational(33, 100) ], drawn(document).drawn.then { |calls| [ calls.find { |call| call.first == :text }[1], calls.find { |call| call.first == :bar }&.at(1) ] }
   end
 
   private

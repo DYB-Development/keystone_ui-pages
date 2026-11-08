@@ -13,7 +13,7 @@ module KeystoneUi
           fields: [ { key: :label, label: "Label", default: "Button" }, { key: :href, label: "Address" } ])
         catalog.register(key: :next_page, name: "Next page", component: :pages_next_page, icon: :cursor, group: "Basics", align: "start", placed: true, pdf: PdfElements.method(:left_out),
           fields: [ { key: :label, label: "Label", default: "Next" } ])
-        catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data",
+        catalog.register(key: :progress, name: "Progress", component: :ui_progress, icon: :progress, group: "Data", pdf: PdfElements.method(:progress),
           fields: [ { key: :value, label: "Value", kind: :number, default: "0" }, { key: :max, label: "Out of", kind: :number, default: "100" }, { key: :label, label: "Label", kind: :text, default: "Progress" } ])
         catalog.register(key: :alert, name: "Alert", component: :ui_alert, icon: :alert, group: "Text", pdf: PdfElements.method(:alert),
           fields: [ { key: :message, label: "Message", kind: :long_text, default: "Something worth knowing." }, { key: :title, label: "Title", kind: :text },
