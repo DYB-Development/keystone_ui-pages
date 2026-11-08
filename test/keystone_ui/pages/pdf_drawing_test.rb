@@ -768,6 +768,18 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                            border: { width: "--ks-border-width", color: "--ks-color-border" } } ], drawn(document).drawn.second
   end
 
+  test "a card's title, summary and link text are drawn in the looks keystone_ui's card title, summary and link rules give them, spaced as the card's body and link rows space them" do
+    document = page(section(row(column(element("card", title: "Pricing", summary: "Plans for every team.", link: "https://ty-ler.com/pricing", cta: "See plans")))))
+
+    assert_equal [ [ :text, "Pricing", "--text-lg", { font: "--ks-font-heading", weight: "--ks-font-weight-heading", color: "--ks-color-text", leading: "--text-lg--line-height" } ],
+                   [ :space, "--ks-spacing", 1 ],
+                   [ :text, "Plans for every team.", "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-muted", leading: "--text-sm--line-height" } ],
+                   [ :space, "--ks-spacing", 4 ],
+                   [ :rich_text, [ { text: "See plans", link: "https://ty-ler.com/pricing" } ], "--text-sm",
+                     { font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-link", leading: "--text-sm--line-height" } ] ],
+                 drawn(document).drawn.drop(2)
+  end
+
   private
 
   def drawn(document, values: {})
