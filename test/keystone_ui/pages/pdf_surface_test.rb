@@ -149,6 +149,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ 540.0, 135.0 ], fill_widths(surface.render).map { |width| width.round(3) }
   end
 
+  test "a bar given no share is drawn as its track alone" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.bar(0, height: [ "--ks-spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-border", fill: "--ks-color-accent")
+
+    assert_no_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n/, surface.render)
+  end
+
   test "text drawn after a bar starts the bar's height lower" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

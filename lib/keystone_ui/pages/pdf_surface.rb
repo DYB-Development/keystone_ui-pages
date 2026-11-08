@@ -82,7 +82,7 @@ module KeystoneUi
         thickness = @look.points(height.first) * height.last
         width = @document.bounds.width
         top = @document.cursor
-        [ [ track, width ], [ fill, width * share ] ].each do |color, length|
+        [ [ track, width ], [ fill, width * share ] ].select { |_color, length| length.positive? }.each do |color, length|
           @document.fill_color(@look.color(color))
           @document.fill_rounded_rectangle([ 0, top ], length, thickness, corner(radius, length, thickness))
         end
