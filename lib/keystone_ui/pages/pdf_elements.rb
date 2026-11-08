@@ -77,6 +77,7 @@ module KeystoneUi
       HERO_TITLE_SIZE = "--text-5xl"
       DISPLAY_SUBTITLE_SIZE = "--text-lg"
       HERO_SUBTITLE_WIDTH = [ "--container-lg", 1 ].freeze
+      HERO_ALIGNMENTS = { "centered" => :center }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -269,14 +270,15 @@ module KeystoneUi
       end
 
       def hero(surface, fields)
-        surface.boxed_text(fields[:badge], size: HERO_BADGE_SIZE, **HERO_BADGE_LOOK) if fields[:badge].present?
-        surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE))
-        display_subtitle(surface, fields[:subtitle], HERO_SUBTITLE_WIDTH) if fields[:subtitle].present?
+        align = HERO_ALIGNMENTS[fields[:layout].to_s]
+        surface.boxed_text(fields[:badge], size: HERO_BADGE_SIZE, **HERO_BADGE_LOOK, align: align) if fields[:badge].present?
+        surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE), align: align)
+        display_subtitle(surface, fields[:subtitle], HERO_SUBTITLE_WIDTH, align) if fields[:subtitle].present?
       end
 
-      def display_subtitle(surface, subtitle, width)
-        surface.box(padding: [ SPACING, 0 ], width: width) do
-          surface.text(subtitle, size: DISPLAY_SUBTITLE_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(DISPLAY_SUBTITLE_SIZE))
+      def display_subtitle(surface, subtitle, width, align)
+        surface.box(padding: [ SPACING, 0 ], width: width, align: align) do
+          surface.text(subtitle, size: DISPLAY_SUBTITLE_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(DISPLAY_SUBTITLE_SIZE), align: align)
         end
       end
 

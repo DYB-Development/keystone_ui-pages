@@ -696,6 +696,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.find { |call| call[1] == "New" }.then { |call| [ *call.first(3), call.last.except(:align) ] }
   end
 
+  test "a centred hero draws its badge, title and subtitle centred, and a split hero draws them from the left, as the page lays them out at the printed page's width" do
+    aligned = %w[centered split].map do |layout|
+      document = page(section(row(column(element("hero", layout: layout, badge: "New", title: "Quotes in minutes", subtitle: "Build a quote.")))))
+      drawn(document).drawn.select { |call| %i[box boxed_text text].include?(call.first) }.map { |call| call.last[:align] }
+    end
+
+    assert_equal [ [ :center ] * 4, [ nil ] * 4 ], aligned
+  end
+
   private
 
   def drawn(document, values: {})
