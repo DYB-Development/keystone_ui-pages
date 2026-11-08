@@ -297,7 +297,7 @@ module KeystoneUi
 
       def cta_banner(surface, fields)
         surface.box(**CTA_LOOK) do
-          surface.text(fields[:title], size: CTA_TITLE_SIZE)
+          surface.text(fields[:title], size: CTA_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(CTA_TITLE_SIZE), align: :center)
           surface.text(fields[:subtitle], size: DISPLAY_SUBTITLE_SIZE) if fields[:subtitle].present?
           surface.text(fields[:text], size: CTA_TEXT_SIZE) if fields[:text].present?
         end

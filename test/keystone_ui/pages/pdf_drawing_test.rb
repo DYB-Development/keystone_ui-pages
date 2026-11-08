@@ -726,6 +726,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                            border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } } ], drawn(document).drawn.second
   end
 
+  test "a call to action's title is drawn centred at the size, weight, colour, letter spacing and line height keystone_ui's call to action title rule and classes give it" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?")))))
+
+    assert_equal [ "--text-4xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display", tracking: "--tracking-tight",
+                                   leading: "--text-4xl--line-height", align: :center } ], drawn(document).drawn.find { |call| call.first == :text }.last(2)
+  end
+
   private
 
   def drawn(document, values: {})
