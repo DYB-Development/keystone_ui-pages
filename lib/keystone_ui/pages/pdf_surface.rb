@@ -78,6 +78,16 @@ module KeystoneUi
         @document.move_down(down)
       end
 
+      def bar(share, height:, radius:, track:, fill:)
+        thickness = @look.points(height.first) * height.last
+        width = @document.bounds.width
+        top = @document.cursor
+        [ [ track, width ], [ fill, width * share ] ].each do |color, length|
+          @document.fill_color(@look.color(color))
+          @document.fill_rounded_rectangle([ 0, top ], length, thickness, corner(radius, length, thickness))
+        end
+      end
+
       def rule(width:, color:)
         thickness = @look.points(width)
         @document.fill_color(@look.color(color))

@@ -141,6 +141,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 55.5, lefts(surface.render)["Book a call"]
   end
 
+  test "a bar is drawn as a track across the whole width with its fill over the share of the width it is given" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.bar(Rational(1, 4), height: [ "--ks-spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-border", fill: "--ks-color-accent")
+
+    assert_equal [ 540.0, 135.0 ], fill_widths(surface.render).map { |width| width.round(3) }
+  end
+
   test "a line of text drawn with a line height token sits with the space its line height leaves split evenly above and below its letters" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
