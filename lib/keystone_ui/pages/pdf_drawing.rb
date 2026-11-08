@@ -29,7 +29,7 @@ module KeystoneUi
         values = values.to_h.stringify_keys
         shown(document["sections"], values).each do |section|
           surface.space(SPACING, SECTION_SPACING.fetch(section["spacing"] || Operations::DEFAULTS[:section]["spacing"]))
-          drawn_rows(section, surface, values)
+          surface.together { drawn_rows(section, surface, values) }
         end
       end
 
