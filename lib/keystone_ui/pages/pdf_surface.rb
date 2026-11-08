@@ -121,13 +121,19 @@ module KeystoneUi
         top = @document.y
         lowest = top
         table_row[:cells].each_with_index do |cell, index|
-          @document.y = top
-          @document.bounding_box([ width * index, @document.cursor ], width: width) do
+          left, right, down = cell_insets(cell)
+          @document.y = top - down
+          @document.bounding_box([ width * index + left, @document.cursor ], width: width - left - right) do
             text(cell[:text], **cell.except(:text, :padding))
-            lowest = [ lowest, @document.y ].min
+            lowest = [ lowest, @document.y - down ].min
           end
         end
         @document.y = lowest
+      end
+
+      def cell_insets(cell)
+        token, *steps = cell[:padding]
+        steps.map { |step| @look.points(token) * step }
       end
 
       def drawable!(content)

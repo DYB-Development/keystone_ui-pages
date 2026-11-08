@@ -149,10 +149,18 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal %w[Name First Second], heights(surface.render).sort_by { |_text, height| -height.to_f }.map(&:first)
   end
 
+  test "a table cell's text is inset from the cell's left edge by its padding's left steps" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Name"), [], **table_look)
+
+    assert_equal 54.0, lefts(surface.render)["Name"]
+  end
+
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:1px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem}")
   end
 
   def table_row(*texts, fill: nil)
