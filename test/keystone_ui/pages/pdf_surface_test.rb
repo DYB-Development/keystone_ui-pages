@@ -175,6 +175,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/ c\nh\nW n\n[^W]*scn\n(?:[\d. ]+ [mlc]\n)+h\nf\n/, surface.render)
   end
 
+  test "a box that clips its content strokes its border over what is drawn inside it" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 0 ], radius: [ "--ks-radius-control", 1 ], border: { width: "--ks-border-width-control", color: "--ks-color-text" }, clip: true) do
+      surface.box(padding: [ "--ks-spacing", 4 ], fill: "--ks-color-accent") { surface.text("puts 42", size: "--text-base") }
+    end
+
+    assert_match(/h\nf\n.*1\.5 w\n/m, surface.render)
+  end
+
   test "a box given no fill, border or rounding insets its content by its padding alone" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

@@ -61,8 +61,9 @@ module KeystoneUi
           @document.fill_color(@look.color(fill))
           @document.fill_rounded_rectangle([ left, top ], width, height, corner)
         end
-        bordered(border, top, width, height, corner, left) if border
+        bordered(border, top, width, height, corner, left) if border && !clip
         clipped(clip && [ left, top, width, height, corner, border ]) { @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content) }
+        bordered(border, top, width, height, corner, left) if border && clip
         @document.move_down(down)
       end
 
