@@ -1,10 +1,20 @@
 # frozen_string_literal: true
 
 require "prawn"
+require "keystone_ui/pages/printer"
 
 module KeystoneUi
   module Pages
     class PdfSurface
+      class UndrawableCharacter < PrintFailed
+        attr_reader :character
+
+        def initialize(character)
+          @character = character
+          super(format("The PDF's font cannot draw the character %s (U+%04X).", character, character.ord))
+        end
+      end
+
       BOLD_WEIGHT = 600
       MEASURING_HEIGHT = 14_400
 
@@ -20,6 +30,7 @@ module KeystoneUi
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
+          drawable!(content.to_s)
           @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) do
             spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra, final_gap: leading.nil?) }
           end
@@ -99,6 +110,11 @@ module KeystoneUi
       end
 
       private
+
+      def drawable!(content)
+        missing = content.each_char.find { |char| !char.match?(/[[:cntrl:]]/) && !@document.font.glyph_present?(char) }
+        raise UndrawableCharacter, missing if missing
+      end
 
       def spaced(points, leading)
         return yield 0 unless leading
