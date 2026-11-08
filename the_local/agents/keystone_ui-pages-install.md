@@ -160,8 +160,11 @@ linking editors to the builder or drawing a page in the host's screens.
        code; `--tracking-tight`, for the titles of a hero, a call to action
        and a feature grid; `--tracking-wider`, for labels; `--font-mono`, for
        code; `--color-gray-300`, for the line under a table's heading row and
-       above its total row; and `--container-lg` and `--container-2xl`, for
-       the width of a hero's and a call to action's subtitle.
+       above its total row; `--container-lg` and `--container-2xl`, for the
+       width of a hero's and a call to action's subtitle; and
+       `--container-2xl`, `--container-4xl`, `--container-6xl` and
+       `--container-7xl`, for the widest a section with a small, medium,
+       large or extra large width setting prints.
 
      A token the host's own stylesheet changes reaches the PDF the same way. A
      token the stylesheet does not set, or sets to a colour or length the gem
@@ -231,6 +234,11 @@ linking editors to the builder or drawing a page in the host's screens.
    page holding only the elements step 6 lists as printing, plus a form, and
    confirm:
 
+   - each row prints its columns side by side at the share of the row the
+     builder gives each, a shaded section prints on a shaded fill, and a
+     section with a width setting prints centred and narrower than the page;
+   - a section that fits on one page is not split across two, and a section
+     taller than a page breaks between its rows;
    - the fonts and text sizes print, and each label prints in capitals;
    - each alert prints on its type's fill;
    - a paragraph's links, a button with an address and a card's link text open

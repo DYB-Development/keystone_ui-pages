@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-info
-description: Use to learn what Keystone UI Pages offers — the page builder, places, published versions, host values, sequences, PDFs, view and click reporting and the element catalog — and the vocabulary the install and develop locals assume.
+description: Use to learn what Keystone UI Pages offers — the page builder, page layout, places, published versions, host values, sequences, PDFs, view and click reporting and the element catalog — and the vocabulary the install and develop locals assume.
 tools: Read
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -30,9 +30,9 @@ This local declares no commands. The two working surfaces belong elsewhere:
 - **Getting the gem into a host app** — adding it, running the engine's and
   Active Storage's migrations, mounting the engine, the layouts and the settings
   file → **`keystone_ui-pages-install`**.
-- **Working with it** — what each setting does, places, who may view or edit,
-  host values, sequences, drawing a page in the host's own screens, PDFs and
-  which drawing makes them, giving a host element a PDF drawing, view and
+- **Working with it** — every setting, places, who may view or edit, host
+  values, sequences, drawing a page in the host's own screens, making PDFs,
+  choosing how they are drawn, giving a host element a PDF drawing, view and
   click reporting, form answers, linking to the builder and changing the
   element catalog → **`keystone_ui-pages-develop`**.
 
@@ -51,179 +51,62 @@ Keystone UI itself must be installed first. Its own install local,
 
 ## Conventions
 
+- **Layout.** A page holds sections, a section holds rows, a row holds columns
+  on a twelve-column grid, and a column holds elements. A section has a spacing
+  of small, medium or large, can be shaded, and can be held to one of Keystone
+  UI's page widths. A row has a gap between its columns. A column can be aligned
+  to the top, centre or bottom, and an element to the start, centre or end of
+  its column or stretched across it. Elements do not hold other elements.
 - **Draft and versions.** A page's document is its draft. Publish copies the
-  draft into a new version marked live and marks the previous live version
-  superseded. Only the live version is shown outside the builder. A page is in
-  one of four states: draft (never published), published, unpublished (has
-  versions but none live) or archived (hidden from the list and unpublished).
-- **Pages belong to an owner.** A page has a name, a slug that is its address,
-  and an optional owner, which is any record. When the host names an owner
-  method, every lookup is limited to the current owner's pages, and a slug is
-  unique per owner.
+  draft into a new numbered version marked live, and the previous live version
+  is marked superseded. A page is a draft (never published), published,
+  unpublished (has versions but none live) or archived (hidden from the list and
+  unpublished). The builder's undo and redo history is kept with the page.
+- **Owner and slug.** A page has a name, a slug that is its address, and an
+  optional owner, which can be any record. When the host names an owner, every
+  lookup is limited to the current owner's pages, and a slug is unique per
+  owner.
 - **Places.** Every page sits in a place the host defines, such as a marketing
   site or a client portal. A place sets the default name of new pages, which
   catalog elements its pages may use, whether it appears in the page list, and
-  optional handlers for views and clicks, form answers and sequences.
-- **Who sees what.** The host decides who may edit pages and who may view a
-  published one, each through a method on its own controller. An access
-  exception is a named setting an editor puts on one page to let it past the
-  view check, such as a public preview. A refused request gets the host's
-  refusal, or a not found when the host names none.
-- **Host values.** The host names the values a page can use, such as a client's
-  name or whether someone has purchased. An editor binds an element's field to
-  one, with fallback text for when it is blank, or shows a section, row or
-  element only when a value equals something. The host supplies the values when
-  it draws the page, and can offer sample visitors so the builder previews each
-  version.
-- **Sequences.** A host that keeps pages in its own order, such as the steps of
-  a funnel, lets staff build them side by side. The host answers a sequence by
-  its key with a title, its pages in order and a back address, or refuses it.
-  It may also give the address of its own screen for the sequence, which the
-  list links to as Flow, and the label of an entry the list shows after the
-  last page, such as a funnel's End step. Each page in the list shows whether it is a
-  draft, published or unpublished. The gem stores no order. Each page made for a sequence keeps that sequence's
-  key, which cannot be changed later.
-- **Adding a page to a sequence.** The sequence screen has an Add page button
-  that asks for a name, with the place's default name used when it is left
-  blank, and whether to start blank or as a copy of another page in the same
-  place. The gem makes the page and tells the host which sequence it joins and
-  which page was open, so the host decides where it goes in the order. The new
-  page then opens in the builder beside the list. A place that answers
-  sequences must also handle pages added this way.
-- **The catalog.** The builder offers a fixed list of Keystone UI components as
-  elements. A host adds elements drawn by its own components and leaves out ones
-  it does not want. Navigation, form inputs, page frames and components whose
-  data the catalog cannot describe are not offered. The one form element sends
-  its answers to the place's form handler, and a place that offers it must have
-  one.
+  optional handlers for views and clicks, form answers, sequences and the next
+  page.
+- **Edit check, view check and access exceptions.** The host decides who may
+  edit pages and who may view a published one, through methods on its own
+  controller. An access exception is a named setting an editor puts on one page
+  to let it past the view check, such as a public preview.
+- **Host values.** Values the host names, such as a client's name or whether
+  someone has purchased. An editor binds an element's field to one, with
+  fallback text, or shows a section, row or element only when a value equals
+  something. The host supplies the values each time it draws or prints a page.
+- **Sequences.** Pages the host keeps in its own order, such as the steps of a
+  funnel, built side by side in the builder. The host answers each sequence by
+  its key, and the gem stores no order. A page made for a sequence keeps that
+  sequence's key.
+- **The catalog.** The list of Keystone UI components the builder offers as
+  elements. A host adds elements drawn by its own components and leaves out
+  ones it does not want.
 - **Views and clicks.** The gem records nothing about visitors. A place with a
-  handler is told of each view and each click on the live page, and the browser
-  fires matching events a third-party analytics tag can listen for.
-- **PDFs come from one of two drawings, chosen by the host.** The Chrome
-  drawing, the default, prints the page with a Chromium-based browser on the
-  server from the host's compiled stylesheet, so the PDF looks as the page does.
-  The Ruby drawing needs no browser and draws the page's sections, rows, columns
-  and elements with Prawn. In the Ruby drawing each element draws through its
-  own PDF drawing, given when the element is added to the catalog. A page
-  holding an element with no PDF drawing cannot be printed that way, and the
-  error names the element. Of the gem's own elements, the heading, label,
-  paragraph, alert, label and value list, button, accordion, table, stat,
-  figure, badge, progress, code, hero, call to action, card, info and feature
-  grid elements have one. The bar chart and line chart elements have none yet.
-- **A host element prints in the Ruby drawing once the host gives it a PDF
-  drawing.** The host passes the drawing when it adds the element to the
-  catalog, and an element added without one refuses the PDF with an error
-  naming it. The drawing receives the element's fields by key, each filled with
-  the host's value when it is bound to one, or else its fallback or default.
-  It draws the element in the column it sits in, with the same set of drawing
-  calls the gem's own elements use: text, styled text, boxes, text in a box,
-  bars, lines, space, rows of columns and tables. A box can be narrower than its
-  column, centred, or clip what it holds to its rounded corners, text in a box
-  can be centred, text can keep the spaces and tabs at the start of each line,
-  and a row can share its gap between its columns. A box in such a row can be
-  stretched to the height of the row's tallest column, and a group of calls can
-  be kept together so it starts on the next page when it does not fit. Each call names Keystone UI
-  tokens, such as a text size or a colour, and prints in the value the host's
-  stylesheet gives that token. An element one place leaves out keeps its
-  drawing, so a page in a place that offers it still prints it.
-- **Screen-only elements are left out of a Ruby-drawn PDF.** The form, copy
-  button and Next page elements have a PDF drawing that prints nothing, so a
-  page holding them still prints, without them.
-- **What the Ruby drawing prints for each of those.** A heading prints its text
-  and its note. A label prints in capitals with the caption's wider letter
-  spacing, as it shows on screen. A paragraph keeps its bold, italic, line breaks
-  and links, and a link opens its address when clicked in the PDF. An alert
-  prints its title and message in a rounded box tinted in its tone: info,
-  success, warning or error. A label and value list prints one row per entry
-  with a line between rows, a note under a label, a total row in the strong
-  weight, and the values set to the right when the element is aligned to the
-  end. A button prints its label in the look of Keystone UI's primary button,
-  and one with an address opens it when clicked in the PDF. An accordion prints
-  every question in its own bordered box with its answer shown beneath it, as an
-  opened question shows on screen, without the arrow.
-- **What the Ruby drawing prints for a table.** A table prints its heading
-  row, one row per item, and its total row when it has one, filling the width
-  of the column it sits in. When every column fits on one line, the columns
-  share the width in proportion to their widest cells. When they do not, a column whose text fits its share of the width
-  stays on one line and the other columns wrap, never narrower than their
-  longest word. A column set to end, and the last column unless it is set to
-  start, is aligned to the right. A table grouped by a key prints each group's
-  name, with its subtotals when given, above the group's rows and on the same
-  page as the first of them. A row is never split across pages, and a table
-  longer than a page prints its heading row again at the top of the next page.
-  A table with no items prints its heading row alone, and a table with no
-  columns prints nothing. The heading, group and total rows print on the table
-  head fill and the item rows on the table body fill, with a line in the divider
-  colour between item rows. Keystone UI's one pixel gray line sits under the
-  heading row and above the total row. A cell shorter than its row is centred
-  from top to bottom. The table prints inside its border and rounded corners,
-  with the row fills clipped to the corners, without the screen's shadow.
-- **What the Ruby drawing prints for a stat, figure, badge and progress bar.**
-  A stat prints its label, its value with its suffix, and its note, with the
-  value in its tone's colour. A stat whose value is missing prints its When
-  missing text in place of the value. A stat prints in the stat card's box with
-  its border, fill and rounded corners, or without the box when it is plain,
-  and it keeps the empty space the page leaves under a stat for a change from an
-  earlier period. A plain stat prints without the dividing line the page draws
-  between plain stats in neighbouring columns. A figure prints its text in its
-  tone's colour, and a neutral figure in the page's default text colour. A badge
-  prints its label in a small pill on its tone's fill and text colour. A
-  progress bar prints its label above a pill-shaped bar, the track colour behind
-  and the meter colour filled to its value out of its maximum, rounded to a
-  whole percent and never past full.
-- **What the Ruby drawing prints for code, a hero, a call to action, a card, an
-  info block and a feature grid.** Code prints its caption above its code,
-  keeping line breaks, leading spaces and tabs, on the code block's fill inside
-  its border and rounded corners. A hero prints its badge, title and subtitle,
-  centred when its layout is centred and from the left when it is split, since
-  a printed page is too narrow for two columns. It keeps the space above and
-  below that the page gives it but not its height. A call to action prints its
-  title, subtitle and text, centred. A card prints its title, summary and link
-  text in the card's box, and the link text opens the card's address when
-  clicked in the PDF. An info block prints its summary and its detail in full,
-  each in its own box at the width of Keystone UI's info popups, without the
-  button or the shadow. A feature grid prints its title and subtitle, then its
-  features two to a row in the feature card's box, without their icons. The two
-  features in a row are stretched to the same height, as they are on screen.
-  The title and subtitle print on the same page as the first row of features.
-  Heroes, calls to action and
-  feature grids print at the sizes Keystone UI gives them on a screen as wide as
-  the printed page.
-- **A boxed element that does not fit in the space left on a page** prints
-  whole at the top of the next page.
-- **Stored line breaks print as spaces, except in code.** Every element but
-  code joins a line break or run of spaces stored in its text into one space,
-  as a browser shows it. Code keeps its line breaks, spaces and tabs. A
-  paragraph's own line breaks, set in the builder, still print.
-- **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
-  fonts, font weights, text colours, tone colours, borders, corner radius and
-  spacing from the host's compiled stylesheet, in light mode and in the host's
-  default look, so a token the host changes reaches the PDF. Each text prints at
-  the text size Keystone UI's component gives it on screen, and at the line
-  height it gets on screen, which is either that text size's own line height or
-  the page's line height from the stylesheet. A font the stylesheet names only by system fonts
-  prints in Helvetica, and code in such a font prints in Courier. A font the stylesheet loads from its own files prints
-  from a TrueType copy of each file, served beside it under the same name, since
-  a PDF cannot use web font files. Asking for a PDF in a loaded font with no
-  TrueType copy served fails, and the error names the font and the file it
-  looked for.
-- **PDFs are kept in Active Storage**, one per published version and set of
-  values, whichever drawing made them. A page that uses no host values gets its
-  PDF made when it is published.
+  handler is told of each view and click on the live page, and the browser fires
+  matching events an analytics tag can listen for.
+- **PDFs and the two drawings.** A PDF is made from a published version and a
+  set of host values, and kept in Active Storage so the same request returns the
+  same file. The Chrome drawing, the default, prints the page with Chrome or
+  Chromium on the server from the host's stylesheet. The Ruby drawing needs no
+  browser: it lays out the page's sections, rows, columns and elements as a
+  screen as wide as the printed page would, and draws each element with Prawn.
+- **PDF drawing.** Under the Ruby drawing each catalog element prints through
+  its own PDF drawing, given when the element is registered. It draws with a
+  fixed set of calls, such as text, boxes, rows and tables, each naming Keystone
+  UI tokens like `--text-base` or `--ks-color-accent`, and prints in the values
+  the host's stylesheet gives those tokens in light mode. A page holding an
+  element with no PDF drawing cannot be printed that way. The bar chart and line
+  chart have none yet, and the form, copy button and Next page elements print
+  nothing.
 - **A refused PDF.** A PDF that cannot be made is refused with a message saying
-  why. The Chrome drawing refuses when no browser is found or the browser fails.
-  The Ruby drawing refuses an element with no PDF drawing, an element the
-  catalog does not have, text holding a character its font cannot draw, a
-  Keystone UI token the stylesheet does not set or sets to a value the gem
-  cannot read, and a loaded font with no TrueType copy served. Helvetica draws
-  only Windows-1252 characters, so a page using others needs a served font that
-  holds them. A refused PDF keeps no file, so asking again after the fix makes a
-  new one. An editor who clicks PDF in the page list sees the refusal's message
-  there. A PDF refused while publishing or while being made ahead of time does
-  not stop the publish, and goes to the host's error reporting with the page
-  named.
-- **The editor's screens.** The page list, the builder, the sequence screen, the
-  version history and View live are open to whoever passes the host's edit
-  check. The builder's undo and redo history is kept with the page.
-- Ruby >= 3.2. Rails >= 7.1. It depends on keystone_ui >= 0.49.0,
+  why, such as a missing browser, an element with no PDF drawing, a character
+  the font cannot draw, an unreadable token or a font with no TrueType copy. A
+  refused PDF keeps no file, and a refusal while publishing does not stop the
+  publish.
+- Ruby >= 3.2 and Rails >= 7.1. It depends on keystone_ui >= 0.49.0,
   keystone_ui-styles >= 0.24.0, keystone_ui-react >= 0.1.3 and prawn ~> 2.5.
