@@ -34,6 +34,7 @@ module KeystoneUi
       SPACING = "--ks-spacing"
       ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
       TABLE_SIZE = "--text-sm"
+      TABLE_HEADER_LOOK = { weight: "--ks-font-weight-heading", color: "--ks-color-text-heading" }.freeze
       TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
@@ -137,7 +138,9 @@ module KeystoneUi
       end
 
       def table_row(columns, texts, header: false)
-        cells = columns.zip(texts).each_with_index.map { |(column, text), index| { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, index == columns.size - 1) } }
+        cells = columns.zip(texts).each_with_index.map do |(column, text), index|
+          { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, index == columns.size - 1) }.merge(header ? TABLE_HEADER_LOOK : {})
+        end
         { cells: cells, fill: header ? "--ks-color-table-head" : "--ks-color-table-body" }
       end
 

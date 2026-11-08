@@ -458,6 +458,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal %w[--ks-color-table-head --ks-color-table-head --ks-color-table-body --ks-color-table-head], [ table[1], *table[2], table.last[:total] ].pluck(:fill)
   end
 
+  test "a table's heading, group and total cells are drawn at the weight and in the colour keystone_ui's table header rule gives them" do
+    items = [ { "team" => "Ops", "service" => "Review", "hours" => "4" } ]
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: items, group_by: "team", total: { "service" => "Total", "hours" => "4" })))))
+
+    table = drawn(document).tables.last
+    header = { weight: "--ks-font-weight-heading", color: "--ks-color-text-heading" }
+    assert_equal [ [ header, header ] ] * 3, [ table[1], table[2].first, table.last[:total] ].map { |table_row| table_row[:cells].map { |cell| cell.slice(:weight, :color) } }
+  end
+
   private
 
   def drawn(document, values: {})
