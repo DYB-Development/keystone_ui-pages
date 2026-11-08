@@ -19,6 +19,7 @@ export default function SequencePages({ sequence }) {
             {entry.remove_url && <a href={entry.remove_url} aria-label={`Remove ${entry.name}`} className="ml-auto text-xs text-(--ks-color-icon) hover:underline">Remove</a>}
           </li>
         ))}
+        {sequence.end_label && <li>{sequence.end_label}</li>}
       </ol>
       <Button href={sequence.add_page_url} size="sm" variant="secondary">Add page</Button>
       {sequence.publish_url && (
