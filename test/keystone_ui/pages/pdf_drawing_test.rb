@@ -493,7 +493,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
 
     assert_equal({ border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-divider" } },
-                 drawn(document).tables.last.last.except(:total))
+                 drawn(document).tables.last.last.except(:total, :parts_divider))
   end
 
   test "a table's cells are drawn in keystone_ui's body font at the small text size and its line height, as the table's cell classes size them" do
@@ -514,6 +514,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("data_table", columns: { "value" => "columns", "fallback" => nil }, items: [ { "service" => "Review" } ])))))
 
     assert_equal [ :row ], drawn(document, values: { "columns" => [] }).drawn.map(&:first)
+  end
+
+  test "a table's heading, body and total rows are divided by the one pixel gray line keystone_ui's divide class draws between them" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal({ width: "1px", color: "--color-gray-300" }, drawn(document).tables.last.last[:parts_divider])
   end
 
   private

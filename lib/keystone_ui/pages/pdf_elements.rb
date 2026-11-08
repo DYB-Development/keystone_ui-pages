@@ -128,7 +128,8 @@ module KeystoneUi
         total = fields[:total].presence&.then { |given| given.to_h.stringify_keys }
         surface.table(heading, items.each_index.flat_map { |index| item_rows(columns, items, index, fields) },
                       total: total && table_row(columns, columns.map { |column| total[column[:key].to_s] }, header: true),
-                      border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-divider" })
+                      border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-divider" },
+                      parts_divider: { width: "1px", color: "--color-gray-300" })
       end
 
       def item_rows(columns, items, index, fields)
