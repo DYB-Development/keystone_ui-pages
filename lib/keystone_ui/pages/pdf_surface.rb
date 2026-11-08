@@ -71,8 +71,10 @@ module KeystoneUi
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
         corner = corner(radius, fill_width, height)
         linked(link, fill_width, height) if link
-        @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, corner)
+        translucent(fill) do
+          @document.fill_color(@look.color(fill))
+          @document.fill_rounded_rectangle([ 0, top ], fill_width, height, corner)
+        end
         bordered(border, top, fill_width, height, corner) if border
         @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
         @document.move_down(down)
@@ -353,6 +355,11 @@ module KeystoneUi
           width = @document.width_of(content.to_s, size: @look.points(size))
         end
         width
+      end
+
+      def translucent(color, &painting)
+        opacity = @look.opacity(color)
+        opacity < 1 ? @document.transparent(opacity, &painting) : yield
       end
 
       def bold?(weight)

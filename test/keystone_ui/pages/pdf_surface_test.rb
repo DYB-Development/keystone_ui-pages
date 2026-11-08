@@ -105,6 +105,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 49.5, lefts(surface.render)["Book a call"]
   end
 
+  test "a boxed line of text on a translucent fill is filled at the fill colour's opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new(":root{--text-sm:.875rem;--ks-spacing:.25rem;--ks-radius-pill:calc(infinity * 1px);--ks-color-tint:#3b82f633;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
+
+    surface.boxed_text("New", size: "--text-sm", fill: "--ks-color-tint", padding: [ "--ks-spacing", 4, 1.5 ], radius: [ "--ks-radius-pill", 1 ])
+
+    assert_match(%r{/ca 0\.2\b}, surface.render)
+  end
+
   test "a box given a border and no fill is stroked in the border's colour at the border's width" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
