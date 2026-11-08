@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
 require "keystone_ui/pages/operations"
+require "keystone_ui/pages/printer"
 
 class KeystoneUi::Pages::PagePublishPdfTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -20,5 +22,19 @@ class KeystoneUi::Pages::PagePublishPdfTest < ActiveSupport::TestCase
     page.update!(document: document)
 
     assert_no_enqueued_jobs(only: KeystoneUi::Pages::PdfJob) { page.publish }
+  end
+
+  test "publishing a page whose PDF is refused still publishes it" do
+    page = KeystoneUi::Pages::Page.create!(name: "Home", slug: "home")
+
+    refusing { perform_enqueued_jobs { page.publish } }
+
+    assert_equal 1, page.versions.live.count
+  end
+
+  private
+
+  def refusing(&publishing)
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { raise KeystoneUi::Pages::PrintFailed, "No font" }, &publishing)
   end
 end
