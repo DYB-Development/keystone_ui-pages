@@ -37,12 +37,12 @@ module KeystoneUi
         end
       end
 
-      def rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text", leading: nil)
+      def rich_text(runs, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
         points = @look.points(size)
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
-        fragments = runs.map { |run| fragment(run) }
+        fragments = runs.map { |run| fragment(bold?(weight) ? run.merge(bold: true) : run) }
         fragments.each { |fragment| @document.font(typeface.name, style: fragment[:styles].join("_").presence&.to_sym || :normal) { drawable!(fragment[:text].to_s) } }
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end

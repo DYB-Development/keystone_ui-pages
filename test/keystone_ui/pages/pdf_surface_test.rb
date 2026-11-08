@@ -47,6 +47,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n/, surface.render)
   end
 
+  test "rich text given a bold weight token draws all of its runs bold" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "42" } ], size: "--text-base", weight: "--ks-font-weight-strong")
+
+    assert_includes surface.render, "/Helvetica-Bold"
+  end
+
   test "a boxed line of text is drawn inset from its fill's left edge by the padding's horizontal steps" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -390,7 +398,7 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--text-lg:1.125rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem;--ks-radius-pill:calc(infinity * 1px)}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--text-lg:1.125rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem;--ks-radius-pill:calc(infinity * 1px);--ks-font-weight-strong:600}")
   end
 
   def table_row(*texts, fill: nil)
