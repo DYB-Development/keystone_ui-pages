@@ -50,7 +50,7 @@ module KeystoneUi
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
-      def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, &content)
+      def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, &content)
         across, down = insets(padding, border)
         width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
         left = align == :center ? (@document.bounds.width - width) / 2 : 0
@@ -62,7 +62,7 @@ module KeystoneUi
           @document.fill_rounded_rectangle([ left, top ], width, height, corner)
         end
         bordered(border, top, width, height, corner, left) if border
-        @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content)
+        clipped(clip && [ left, top, width, height, corner, border ]) { @document.bounding_box([ left + across, top - down ], width: width - across * 2, &content) }
         @document.move_down(down)
       end
 
@@ -362,6 +362,18 @@ module KeystoneUi
           width = @document.width_of(content.to_s, size: @look.points(size))
         end
         width
+      end
+
+      def clipped(shape)
+        return yield unless shape
+
+        left, top, width, height, corner, border = shape
+        edge = border ? @look.points(border[:width]) : 0
+        @document.save_graphics_state do
+          @document.rounded_rectangle([ left + edge, top - edge ], width - edge * 2, height - edge * 2, [ corner - edge, 0 ].max)
+          @document.add_content("W n")
+          yield
+        end
       end
 
       def kept_spaces(content)
