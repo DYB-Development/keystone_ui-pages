@@ -496,6 +496,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).tables.last.last.except(:total))
   end
 
+  test "a table's cells are drawn in keystone_ui's body font at the small text size and its line height, as the table's cell classes size them" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal [ { size: "--text-sm", font: "--ks-font-body", leading: "--text-sm--line-height" } ],
+                 drawn(document).tables.last.then { |call| [ call[1], *call[2] ].flat_map { |table_row| table_row[:cells].map { |cell| cell.slice(:size, :font, :leading) } } }.uniq
+  end
+
   private
 
   def drawn(document, values: {})

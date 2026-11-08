@@ -150,7 +150,8 @@ module KeystoneUi
 
       def table_cell(column, text, position, header)
         down = header ? TABLE_HEADER_PADDING_DOWN : TABLE_CELL_PADDING_DOWN
-        { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, position), padding: [ SPACING, *TABLE_PADDING_ACROSS[position], down ] }
+        { text: text.to_s, size: TABLE_SIZE, font: "--ks-font-body", leading: line_height(TABLE_SIZE), align: table_alignment(column, position),
+          padding: [ SPACING, *TABLE_PADDING_ACROSS[position], down ] }
           .merge(header ? TABLE_HEADER_LOOK : TABLE_CELL_LOOKS[position])
       end
 
