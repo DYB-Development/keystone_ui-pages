@@ -719,6 +719,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "Ready to start?", "Book a call this week.", "No card needed." ], drawn(document).texts
   end
 
+  test "a call to action is drawn in a box with the fill, border, rounded corners and padding keystone_ui's call to action rule gives it at the printed page's width" do
+    document = page(section(row(column(element("cta_banner", title: "Ready to start?")))))
+
+    assert_equal [ :box, { padding: [ "--ks-spacing", 6, 12 ], radius: [ "--ks-radius-surface", 2 ], fill: "--ks-color-fill-muted",
+                           border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } } ], drawn(document).drawn.second
+  end
+
   private
 
   def drawn(document, values: {})

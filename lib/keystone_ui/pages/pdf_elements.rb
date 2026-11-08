@@ -81,6 +81,7 @@ module KeystoneUi
       HERO_TOP = 24
       CTA_TITLE_SIZE = "--text-4xl"
       CTA_TEXT_SIZE = "--text-base"
+      CTA_LOOK = { padding: [ SPACING, 6, 12 ], radius: [ "--ks-radius-surface", 2 ], fill: "--ks-color-fill-muted", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } }.freeze
       HERO_PADDING_ACROSS = 6
       HERO_PADDING_DOWN = 24
       HERO_GAP = 8
@@ -295,9 +296,11 @@ module KeystoneUi
       end
 
       def cta_banner(surface, fields)
-        surface.text(fields[:title], size: CTA_TITLE_SIZE)
-        surface.text(fields[:subtitle], size: DISPLAY_SUBTITLE_SIZE) if fields[:subtitle].present?
-        surface.text(fields[:text], size: CTA_TEXT_SIZE) if fields[:text].present?
+        surface.box(**CTA_LOOK) do
+          surface.text(fields[:title], size: CTA_TITLE_SIZE)
+          surface.text(fields[:subtitle], size: DISPLAY_SUBTITLE_SIZE) if fields[:subtitle].present?
+          surface.text(fields[:text], size: CTA_TEXT_SIZE) if fields[:text].present?
+        end
       end
 
       def display_subtitle(surface, subtitle, width, align)
