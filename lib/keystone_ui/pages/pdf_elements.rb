@@ -368,7 +368,7 @@ module KeystoneUi
       end
 
       def feature(surface, feature)
-        surface.box(**FEATURE_CARD_LOOK) do
+        surface.box(**FEATURE_CARD_LOOK, stretch: true) do
           surface.text(feature[:title], size: FEATURE_TITLE_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: line_height(FEATURE_TITLE_SIZE))
           surface.space(SPACING, FEATURE_TITLE_GAP)
           surface.text(feature[:description], size: FEATURE_DESCRIPTION_SIZE, font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: line_height(FEATURE_DESCRIPTION_SIZE))

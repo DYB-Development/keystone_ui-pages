@@ -826,10 +826,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).select { |call| call.first == :row || call == [ :space, "--ks-spacing", 6 ] }
   end
 
-  test "a feature is drawn in the box of keystone_ui's feature card, its title and description in the looks the feature card's title and description rules give them" do
+  test "a feature is drawn in the box of keystone_ui's feature card, stretched to its row's height as the grid stretches it, its title and description in the looks the feature card's title and description rules give them" do
     document = page(section(row(column(element("feature_grid", title: "Why teams choose us", features: [ { "title" => "Fast", "description" => "Pages load quickly." } ])))))
 
-    assert_equal [ [ :box, { padding: [ "--ks-spacing", 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-raised", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" } } ],
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-raised", border: { width: "--ks-border-width", color: "--ks-color-border-subtle" },
+                             stretch: true } ],
                    [ :text, "Fast", "--text-lg", { font: "--ks-font-body", weight: "--ks-font-weight-heading", color: "--ks-color-text-display", leading: "--text-lg--line-height" } ],
                    [ :space, "--ks-spacing", 2 ],
                    [ :text, "Pages load quickly.", "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-display-muted", leading: "--text-sm--line-height" } ] ],
