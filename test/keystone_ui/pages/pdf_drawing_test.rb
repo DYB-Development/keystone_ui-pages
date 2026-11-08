@@ -444,6 +444,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ %w[Ops 6], %w[Review 4], %w[Audit 2], [ "Sales", "" ], %w[Pitch 1] ], drawn(document).table_texts.last
   end
 
+  test "a table's total row is drawn as its total row, with each column's total" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ], total: { "service" => "Total", "hours" => "4" })))))
+
+    assert_equal %w[Total 4], drawn(document).tables.last.last[:total][:cells].pluck(:text)
+  end
+
   private
 
   def drawn(document, values: {})

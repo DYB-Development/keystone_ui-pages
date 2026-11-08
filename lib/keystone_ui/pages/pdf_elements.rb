@@ -117,7 +117,9 @@ module KeystoneUi
         columns = Array(fields[:columns].presence)
         heading = table_row(columns, columns.map { |column| column[:label] })
         items = Array(fields[:items].presence).map { |item| item.to_h.stringify_keys }
-        surface.table(heading, items.each_index.flat_map { |index| item_rows(columns, items, index, fields) })
+        total = fields[:total].presence&.then { |given| given.to_h.stringify_keys }
+        surface.table(heading, items.each_index.flat_map { |index| item_rows(columns, items, index, fields) },
+                      total: total && table_row(columns, columns.map { |column| total[column[:key].to_s] }))
       end
 
       def item_rows(columns, items, index, fields)
