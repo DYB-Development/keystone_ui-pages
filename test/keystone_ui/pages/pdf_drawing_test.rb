@@ -39,6 +39,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn << [ :rule, style ]
     end
 
+    def bar(share, **style)
+      @drawn << [ :bar, share, style ]
+    end
+
     def row(widths, **layout)
       @drawn << [ :row, widths, layout.presence ].compact
       widths.each_index { |index| yield index }
@@ -520,6 +524,115 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
 
     assert_equal({ width: "1px", color: "--color-gray-300" }, drawn(document).tables.last.last[:parts_divider])
+  end
+
+  test "a stat is drawn as its label, its value followed by its suffix, and its note" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "4,200", suffix: "USD", note: "Up on last month")))))
+
+    assert_equal [ [ "Revenue", "Up on last month" ], [ "4,200 USD" ] ], drawn(document).then { |surface| [ surface.texts, surface.paragraphs ] }
+  end
+
+  test "a stat whose value is missing shows its When missing text in the muted colour keystone_ui's stat fallback rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: { "value" => "revenue" }, fallback: "Not yet")))))
+
+    assert_equal [ { text: "Not yet", color: "--ks-color-text-muted" } ], drawn(document).drawn.find { |call| call.first == :rich_text }[1]
+  end
+
+  test "a stat's value is drawn in the text colour keystone_ui's tone rules give its tone" do
+    document = page(section(row(column(*%w[neutral success danger warning info].map { |tone| element("stat_card", value: "12", variant: tone) }))))
+
+    assert_equal %w[--ks-color-text --ks-color-success-600 --ks-color-danger-600 --ks-color-warning-600 --ks-color-info-600],
+                 drawn(document).drawn.select { |call| call.first == :rich_text }.map { |call| call.last[:color] }
+  end
+
+  test "a stat is drawn in a box with the fill, border, rounded corners and padding keystone_ui's metric card rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12")))))
+
+    assert_equal({ padding: [ "--ks-spacing", 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-overlay", border: { width: "--ks-border-width", color: "--ks-color-border" } },
+                 drawn(document).drawn.find { |call| call.first == :box }&.last)
+  end
+
+  test "a plain stat is drawn without its box, inset by the padding keystone_ui's plain metric rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", plain: "true")))))
+
+    assert_equal({ padding: [ "--ks-spacing", 4, 0 ] }, drawn(document).drawn.find { |call| call.first == :box }&.last)
+  end
+
+  test "a stat's label and note are drawn at the size, weight, colour and line height keystone_ui's stat label and note rules give them" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", note: "This month")))))
+
+    assert_equal [ [ "--text-sm", { font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-muted", leading: "--text-sm--line-height" } ],
+                   [ "--text-sm", { font: "--ks-font-body", color: "--ks-color-text-muted", leading: "--text-sm--line-height" } ] ],
+                 drawn(document).drawn.select { |call| call.first == :text }.map { |call| call.last(2) }
+  end
+
+  test "a stat's value is drawn at the size, weight and line height keystone_ui's stat value rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12")))))
+
+    assert_equal [ "--text-3xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", leading: "--text-3xl--line-height" } ],
+                 drawn(document).drawn.find { |call| call.first == :rich_text }.then { |call| [ call[2], call.last.except(:color) ] }
+  end
+
+  test "a stat's suffix is drawn at the size and in the muted colour keystone_ui's stat suffix rule gives it" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", suffix: "hours")))))
+
+    assert_equal({ text: " hours", size: "--text-lg", color: "--ks-color-text-muted" }, drawn(document).drawn.find { |call| call.first == :rich_text }[1].last)
+  end
+
+  test "a stat's value and note are each drawn one of keystone_ui's spacing steps under what is above them, with the empty change row's space kept below" do
+    document = page(section(row(column(element("stat_card", label: "Revenue", value: "12", note: "This month")))))
+
+    assert_equal [ :row, :box, :text, [ :space, "--ks-spacing", 1 ], :rich_text, [ :space, "--ks-spacing", 1 ], :text, [ :space, "--ks-spacing", 1 ], [ :space, "--spacing", 5 ] ],
+                 drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "a figure is drawn as its text in the colour keystone_ui's tone rules give its tone, and a neutral figure in the page's text colour" do
+    document = page(section(row(column(*%w[neutral success danger].map { |tone| element("figure", text: "$#{tone.size}", tone: tone) }))))
+
+    assert_equal [ [ "$7", "--ks-color-on-page" ], [ "$7", "--ks-color-success-600" ], [ "$6", "--ks-color-danger-600" ] ],
+                 drawn(document).drawn.select { |call| call.first == :text }.map { |call| [ call[1], call.last[:color] ] }
+  end
+
+  test "a figure is drawn in the body font at the text size and line height the stylesheet gives the page" do
+    document = page(section(row(column(element("figure", text: "$12")))))
+
+    assert_equal [ "--text-base", { font: "--ks-font-body", leading: "line-height" } ], drawn(document).drawn.last.then { |call| [ call[2], call.last.except(:color) ] }
+  end
+
+  test "a badge is drawn as its label in a box on the fill and in the text colour keystone_ui's badge rules give its tone" do
+    document = page(section(row(column(*%w[neutral success danger warning info].map { |tone| element("badge", label: tone.capitalize, variant: tone) }))))
+
+    assert_equal [ %w[Neutral --ks-color-badge-neutral --ks-color-text-label], %w[Success --ks-color-success-100 --ks-color-success-700],
+                   %w[Danger --ks-color-danger-100 --ks-color-danger-700], %w[Warning --ks-color-warning-100 --ks-color-warning-700],
+                   %w[Info --ks-color-info-100 --ks-color-info-700] ],
+                 drawn(document).drawn.select { |call| call.first == :boxed_text }.map { |call| [ call[1], call.last[:fill], call.last[:color] ] }
+  end
+
+  test "a badge is drawn at the size, weight, line height, padding and pill rounding keystone_ui's badge rule gives it" do
+    document = page(section(row(column(element("badge", label: "Paid")))))
+
+    assert_equal [ "--text-xs", { font: "--ks-font-body", weight: "--ks-font-weight-medium", leading: "--text-xs--line-height", padding: [ "--ks-spacing", 2, 1 ], radius: [ "--ks-radius-pill", 1 ] } ],
+                 drawn(document).drawn.last.then { |call| [ call[2], call.last.except(:fill, :color) ] }
+  end
+
+  test "a progress bar is drawn as its label above a bar filled to its value's share of its maximum, rounded to a whole percent as the page rounds it" do
+    document = page(section(row(column(element("progress", label: "Hours used", value: "1", max: "3")))))
+
+    assert_equal [ "Hours used", Rational(33, 100) ], drawn(document).drawn.then { |calls| [ calls.find { |call| call.first == :text }[1], calls.find { |call| call.first == :bar }&.at(1) ] }
+  end
+
+  test "a progress bar's label is drawn in the look keystone_ui's meter label rule gives it, one of keystone_ui's spacing steps above the bar" do
+    document = page(section(row(column(element("progress", label: "Hours used")))))
+
+    assert_equal [ [ :text, "Hours used", "--text-sm", { font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-meter-label", leading: "--text-sm--line-height" } ],
+                   [ :space, "--ks-spacing", 1 ], :bar ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :bar ? :bar : call }
+  end
+
+  test "a progress bar's bar is drawn at the height, pill rounding, track colour and fill colour keystone_ui's progress track and bar rules give it" do
+    document = page(section(row(column(element("progress", label: "Hours used")))))
+
+    assert_equal({ height: [ "--spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }, drawn(document).drawn.last.last)
   end
 
   private

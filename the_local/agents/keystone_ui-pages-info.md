@@ -106,7 +106,8 @@ Keystone UI itself must be installed first. Its own install local,
   own PDF drawing, given when the element is added to the catalog. A page
   holding an element with no PDF drawing cannot be printed that way, and the
   error names the element. So far the heading, label, paragraph, alert, label
-  and value list, button, accordion and table elements have one.
+  and value list, button, accordion, table, stat, figure, badge and progress
+  elements have one.
 - **Screen-only elements are left out of a Ruby-drawn PDF.** The form, copy
   button and Next page elements have a PDF drawing that prints nothing, so a
   page holding them still prints, without them.
@@ -139,6 +140,19 @@ Keystone UI itself must be installed first. Its own install local,
   heading row and above the total row. A cell shorter than its row is centred
   from top to bottom. The table prints inside its border and rounded corners,
   with the row fills clipped to the corners, without the screen's shadow.
+- **What the Ruby drawing prints for a stat, figure, badge and progress bar.**
+  A stat prints its label, its value with its suffix, and its note, with the
+  value in its tone's colour. A stat whose value is missing prints its When
+  missing text in place of the value. A stat prints in the stat card's box with
+  its border, fill and rounded corners, or without the box when it is plain,
+  and it keeps the empty space the page leaves under a stat for a change from an
+  earlier period. A plain stat prints without the dividing line the page draws
+  between plain stats in neighbouring columns. A figure prints its text in its
+  tone's colour, and a neutral figure in the page's default text colour. A badge
+  prints its label in a small pill on its tone's fill and text colour. A
+  progress bar prints its label above a pill-shaped bar, the track colour behind
+  and the meter colour filled to its value out of its maximum, rounded to a
+  whole percent and never past full.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
   fonts, font weights, text colours, tone colours, borders, corner radius and
   spacing from the host's compiled stylesheet, in light mode and in the host's

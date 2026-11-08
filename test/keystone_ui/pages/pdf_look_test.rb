@@ -181,4 +181,22 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
 
     assert_equal 0.75, look.points("1px")
   end
+
+  test "a weight a keystone_ui class writes out as a token plus a number, such as a stat value's weight, is read as their sum" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--font-weight-semibold:600;--ks-font-weight-heading:var(--font-weight-semibold)}")
+
+    assert_equal 700, look.weight("calc(var(--ks-font-weight-heading)+100)")
+  end
+
+  test "a length token keystone_ui sets to an infinite number of pixels, such as its pill rounding, is read as infinitely long" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-radius-pill:calc(infinity * 1px)}")
+
+    assert_equal Float::INFINITY, look.points("--ks-radius-pill")
+  end
+
+  test "a colour token set to the browser's default text colour is read as the black a browser draws it in light mode" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-on-page:CanvasText}")
+
+    assert_equal "000000", look.color("--ks-color-on-page")
+  end
 end

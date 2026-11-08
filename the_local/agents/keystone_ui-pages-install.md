@@ -133,8 +133,8 @@ linking editors to the builder or drawing a page in the host's screens.
      browser.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
-     paragraph, alert, label and value list, button, accordion and table
-     elements print. The form, copy button and Next page elements are left out of the
+     paragraph, alert, label and value list, button, accordion, table, stat,
+     figure, badge and progress elements print. The form, copy button and Next page elements are left out of the
      PDF. A PDF of a page holding any other element is refused with a message
      naming that element. Ask the developer whether the pages they plan
      to print hold only those elements before choosing this drawing.
@@ -146,7 +146,10 @@ linking editors to the builder or drawing a page in the host's screens.
      body fills, header weight, divider colour, border and rounded corners from
      the `--ks-` tokens, and the line under its heading row and above its total
      row from Tailwind's `--color-gray-300`, so the compiled stylesheet must set
-     that variable too. A token the host's own stylesheet changes reaches the
+     that variable too. A stat, figure and badge read the fill and text
+     colour each tone is given, and a progress bar reads its track, meter and
+     label colours, all from the `--ks-` tokens. A token the host's own
+     stylesheet changes reaches the
      PDF the same way. A token the stylesheet does not set, or sets to a colour
      or length the gem cannot read, refuses the PDF with a message naming the
      token.
@@ -207,13 +210,17 @@ linking editors to the builder or drawing a page in the host's screens.
    page list shows a PDF link only when Chrome or Chromium was found. With the
    Ruby drawing, it always shows one, so open it on a page holding only
    headings, labels, paragraphs, alerts, label and value lists, buttons,
-   accordions, tables and forms to confirm the fonts and text sizes print, each
+   accordions, tables, stats, figures, badges, progress bars and forms to
+   confirm the fonts and text sizes print, each
    label prints in capitals, each alert prints on its type's fill, a
    paragraph's links and a button with an address open their address, each
    accordion question prints with its answer beneath it, each table prints its
    heading row on the table head fill with its item rows beneath it, a gray
-   line under the heading row and inside a border with rounded corners, and
-   the form is left out.
+   line under the heading row and inside a border with rounded corners, each
+   stat prints its label, value and note with the value in its tone's colour,
+   each figure prints in its tone's colour, each badge prints its label on its
+   tone's fill in a pill, each progress bar prints its label above a pill
+   filled to its share, and the form is left out.
 
    When a PDF link in the page list returns to the list showing a message, the
    PDF was refused, and the message names what to fix: the browser, an

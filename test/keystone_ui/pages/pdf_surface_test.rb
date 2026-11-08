@@ -31,6 +31,30 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 24.0, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
+  test "a run of rich text given its own text size is drawn at that size, and the runs beside it at the paragraph's size" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "42" }, { text: " hours", size: "--text-lg" } ], size: "--text-base")
+
+    assert_equal [ "12", "13.5" ], surface.render.scan(%r{/F[\d.]+ ([\d.]+) Tf}).flatten
+  end
+
+  test "a run of rich text given its own colour is drawn in that colour" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "42" }, { text: " hours", color: "--ks-color-accent" } ], size: "--text-base", color: "--ks-color-text")
+
+    assert_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n/, surface.render)
+  end
+
+  test "rich text given a bold weight token draws all of its runs bold" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "42" } ], size: "--text-base", weight: "--ks-font-weight-strong")
+
+    assert_includes surface.render, "/Helvetica-Bold"
+  end
+
   test "a boxed line of text is drawn inset from its fill's left edge by the padding's horizontal steps" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -43,6 +67,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
     surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ])
+
+    assert_in_delta 58.692 + 24, fill_widths(surface.render).first, 0.001
+  end
+
+  test "a boxed line of text rounded more than its height allows is rounded into a pill as wide as the text and its horizontal padding" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-pill", 1 ])
 
     assert_in_delta 58.692 + 24, fill_widths(surface.render).first, 0.001
   end
@@ -91,6 +123,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 54.0, lefts(surface.render)["Book a call"]
   end
 
+  test "a box given no fill, border or rounding insets its content by its padding alone" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.box(padding: [ "--ks-spacing", 4, 0 ]) { surface.text("Revenue", size: "--text-base") }
+
+    assert_equal 48.0, lefts(surface.render)["Revenue"]
+  end
+
   test "a box given a border insets its content by the border's width as well as its padding" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
@@ -99,6 +139,32 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     end
 
     assert_equal 55.5, lefts(surface.render)["Book a call"]
+  end
+
+  test "a bar is drawn as a track across the whole width with its fill over the share of the width it is given" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.bar(Rational(1, 4), height: [ "--ks-spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-border", fill: "--ks-color-accent")
+
+    assert_equal [ 540.0, 135.0 ], fill_widths(surface.render).map { |width| width.round(3) }
+  end
+
+  test "a bar given no share is drawn as its track alone" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.bar(0, height: [ "--ks-spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-border", fill: "--ks-color-accent")
+
+    assert_no_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n/, surface.render)
+  end
+
+  test "text drawn after a bar starts the bar's height lower" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("First", size: "--text-base")
+    surface.bar(1, height: [ "--ks-spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-border", fill: "--ks-color-accent")
+    surface.text("Second", size: "--text-base")
+
+    assert_in_delta 6.0 + 13.872, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
   test "a line of text drawn with a line height token sits with the space its line height leaves split evenly above and below its letters" do
@@ -366,7 +432,7 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
   private
 
   def look
-    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem}")
+    KeystoneUi::Pages::PdfLook.new(":root{--text-base:1rem;--text-lg:1.125rem;--leading-loose:2;--ks-spacing:0.25rem;--ks-radius-control:0.5rem;--ks-border-width-control:2px;--ks-color-accent:#2563EB;--ks-color-text:#000000;--ks-font-body:sans-serif;--ks-border-width:0px;--ks-color-border:#D1D5DB;--ks-radius-surface:0.5rem;--ks-radius-pill:calc(infinity * 1px);--ks-font-weight-strong:600}")
   end
 
   def table_row(*texts, fill: nil)

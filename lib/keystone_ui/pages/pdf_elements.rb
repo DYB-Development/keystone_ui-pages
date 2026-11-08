@@ -41,6 +41,29 @@ module KeystoneUi
       TABLE_HEADER_PADDING_DOWN = 3.5
       TABLE_CELL_PADDING_DOWN = 4
       TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
+      TONE_COLORS = { "neutral" => "--ks-color-text", "success" => "--ks-color-success-600", "danger" => "--ks-color-danger-600",
+                      "warning" => "--ks-color-warning-600", "info" => "--ks-color-info-600" }.freeze
+      STAT_CARD_LOOK = { padding: [ SPACING, 6 ], radius: [ "--ks-radius-surface", 1.5 ], fill: "--ks-color-overlay",
+                         border: { width: "--ks-border-width", color: "--ks-color-border" } }.freeze
+      TAILWIND_SPACING = "--spacing"
+      STAT_GAP = 1
+      STAT_CHANGE_HEIGHT = 5
+      STAT_PLAIN_LOOK = { padding: [ SPACING, 4, 0 ] }.freeze
+      STAT_LABEL_SIZE = "--text-sm"
+      STAT_VALUE_SIZE = "--text-3xl"
+      STAT_VALUE_WEIGHT = "calc(var(--ks-font-weight-heading)+100)"
+      STAT_SUFFIX_SIZE = "--text-lg"
+      STAT_NOTE_SIZE = "--text-sm"
+      FIGURE_SIZE = "--text-base"
+      FIGURE_COLORS = TONE_COLORS.slice("success", "danger").merge("neutral" => "--ks-color-on-page").freeze
+      BADGE_SIZE = "--text-xs"
+      BADGE_PADDING_ACROSS = 2
+      BADGE_PADDING_DOWN = 1
+      NEUTRAL_BADGE_COLORS = [ "--ks-color-badge-neutral", "--ks-color-text-label" ].freeze
+      BADGE_TONES = %w[success danger warning info].freeze
+      PROGRESS_LABEL_SIZE = "--text-sm"
+      PROGRESS_LABEL_GAP = 1
+      PROGRESS_BAR_LOOK = { height: [ TAILWIND_SPACING, 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -166,6 +189,56 @@ module KeystoneUi
 
       def table_alignment(column, position)
         TABLE_ALIGNMENTS.fetch(column[:align].to_s) { position == :last ? :right : :left }
+      end
+
+      def stat_card(surface, fields)
+        surface.box(**(fields[:plain].to_s == "true" ? STAT_PLAIN_LOOK : STAT_CARD_LOOK)) do
+          surface.text(fields[:label], size: STAT_LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-muted", leading: line_height(STAT_LABEL_SIZE))
+          surface.space(SPACING, STAT_GAP)
+          surface.rich_text(stat_runs(fields), size: STAT_VALUE_SIZE, font: "--ks-font-body", weight: STAT_VALUE_WEIGHT, color: TONE_COLORS.fetch(fields[:variant].to_s, TONE_COLORS["neutral"]),
+                                               leading: line_height(STAT_VALUE_SIZE))
+          stat_note(surface, fields[:note]) if fields[:note].present?
+          surface.space(SPACING, STAT_GAP)
+          surface.space(TAILWIND_SPACING, STAT_CHANGE_HEIGHT)
+        end
+      end
+
+      def stat_note(surface, note)
+        surface.space(SPACING, STAT_GAP)
+        surface.text(note, size: STAT_NOTE_SIZE, font: "--ks-font-body", color: "--ks-color-text-muted", leading: line_height(STAT_NOTE_SIZE))
+      end
+
+      def stat_runs(fields)
+        suffix = [ { text: " #{fields[:suffix]}", size: STAT_SUFFIX_SIZE, color: "--ks-color-text-muted" } ] unless fields[:suffix].nil?
+        [ stat_value_run(fields), *suffix ]
+      end
+
+      def stat_value_run(fields)
+        return { text: fields[:fallback].to_s, color: "--ks-color-text-muted" } if fields[:value].to_s.empty? && !fields[:fallback].nil?
+
+        { text: fields[:value].to_s }
+      end
+
+      def figure(surface, fields)
+        surface.text(fields[:text], size: FIGURE_SIZE, font: "--ks-font-body", color: FIGURE_COLORS.fetch(fields[:tone].to_s, FIGURE_COLORS["neutral"]), leading: PAGE_LINE_HEIGHT)
+      end
+
+      def badge(surface, fields)
+        fill, color = badge_colors(fields[:variant].to_s)
+        surface.boxed_text(fields[:label], size: BADGE_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: color, leading: line_height(BADGE_SIZE),
+                                           fill: fill, padding: [ SPACING, BADGE_PADDING_ACROSS, BADGE_PADDING_DOWN ], radius: [ "--ks-radius-pill", 1 ])
+      end
+
+      def badge_colors(tone)
+        return [ "--ks-color-#{tone}-100", "--ks-color-#{tone}-700" ] if BADGE_TONES.include?(tone)
+
+        NEUTRAL_BADGE_COLORS
+      end
+
+      def progress(surface, fields)
+        surface.text(fields[:label], size: PROGRESS_LABEL_SIZE, font: "--ks-font-body", weight: "--ks-font-weight-medium", color: "--ks-color-text-meter-label", leading: line_height(PROGRESS_LABEL_SIZE))
+        surface.space(SPACING, PROGRESS_LABEL_GAP)
+        surface.bar(Rational([ (fields[:value].to_f / fields[:max].to_f * 100).round, 100 ].min, 100), **PROGRESS_BAR_LOOK)
       end
 
       def paragraph(surface, fields)

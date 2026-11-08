@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-develop
-description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby and handling a PDF that is refused, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
+description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby and handling a PDF that is refused, giving a host element a Ruby PDF drawing, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
 tools: Bash, Read, Write, Edit, Grep
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -20,11 +20,12 @@ version in its own screens, prints it to PDF, and supplies values such as a
 client's name that bound fields and conditions read.
 
 Fire on any request to draw a page in a host screen, make or send a page as a
-PDF, give editors a link to the builder, let staff build a host's ordered
-set of pages side by side and add pages to it, supply values to pages, add a
-host-drawn element or remove one from the builder, or change who may view or
-edit pages. If the engine is not mounted or its migrations have not run, that
-is the `keystone_ui-pages-install` local's job, not this one's.
+PDF, give an element a Ruby PDF drawing, give editors a link to the builder,
+let staff build a host's ordered set of pages side by side and add pages to it,
+supply values to pages, add a host-drawn element or remove one from the
+builder, or change who may view or edit pages. If the engine is not mounted or
+its migrations have not run, that is the `keystone_ui-pages-install` local's
+job, not this one's.
 
 ## Interface
 
@@ -196,12 +197,12 @@ inherit from the base controller, so define it there.
 - `KeystoneUi::Pages.pdf_stylesheet = "tailwind.css"` — the name of the host's
   compiled stylesheet in Propshaft. Defaults to `"tailwind.css"`. The Chrome
   drawing writes it into every PDF, and a name Propshaft cannot find prints
-  with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens and the
-  `--text-` size and `--tracking-` letter spacing tokens from it, and
-  `--color-gray-300` for a table's line under its heading, so a name
-  Propshaft cannot find, or a stylesheet missing a token the drawing reads,
-  makes the Ruby drawing raise `KeystoneUi::Pages::PrintFailed` naming the
-  token.
+  with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens, the
+  `--text-` size and `--tracking-` letter spacing tokens, `--spacing` for a
+  stat's and a progress bar's spacing, and `--color-gray-300` for a table's
+  line under its heading from it, so a name Propshaft cannot find, or a
+  stylesheet missing a token the drawing reads, makes the Ruby drawing raise
+  `KeystoneUi::Pages::PrintFailed` naming the token.
 - `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
   default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
   the page in Ruby with Prawn from its sections, rows, columns and elements,
@@ -212,21 +213,27 @@ inherit from the base controller, so define it there.
   default Keystone UI look: values set inside `@media` rules or under any
   selector other than `:root`, `:host`, `html` or the default look's
   `[data-look=...]` are left out, a host's own value outside a layer wins over
-  Keystone UI's layered one, and the look's value wins over the root's. Rows
+  Keystone UI's layered one, and the look's value wins over the root's. A
+  token whose value is `var(--other)` reads that token, or the fallback given
+  after a comma when the stylesheet does not set it. Rows
   in a section sit six `--ks-spacing` steps apart and elements in a column four,
   where `rem` counts as 12 points, `px` as 0.75 and `pt` as 1. An `em` counts
   as 12 points, except in a letter spacing token, where it counts as the size
-  of the text it spaces. A line height token, such as `--text-sm--line-height`
+  of the text it spaces. A length written as `calc(infinity * <length>)` has no
+  limit, and is used for fully rounded corners. A weight token may be a number
+  or `calc(<weight>+<number>)`, such as `calc(var(--ks-font-weight-heading)+100)`.
+  A line height token, such as `--text-sm--line-height`
   or `--leading-relaxed`, is read as a number or a `calc(a / b)` and counts the
   text sizes each line takes, and the space it adds is split above and below
-  the text. A colour token must be an `oklch()` colour or a hex colour of
-  three or six digits, and a three-digit one prints as the six-digit colour it
-  names. A colour token in any other form, or a length token in a unit other
+  the text. A colour token must be an `oklch()` colour, a hex colour of
+  three or six digits, or `CanvasText`, which prints black. A three-digit hex
+  colour prints as the six-digit colour it names. A colour token in any other
+  form, or a length token in a unit other
   than `rem`, `em`, `px` or `pt` that is not zero, raises `PrintFailed` naming
   the token and its value. Each element draws through the `pdf:` drawing given
   to `catalog.register`. Of the built-in elements `heading`, `label`,
-  `paragraph`, `alert`, `value_list`, `button`, `accordion` and `data_table`
-  have one.
+  `paragraph`, `alert`, `value_list`, `button`, `accordion`, `data_table`,
+  `stat_card`, `figure`, `badge` and `progress` have one.
   `form`, `copy_button` and `next_page` have a drawing that draws nothing, so
   they are left out of the PDF and do not raise. Every other built-in element
   raises `NoPdfDrawing`. A page holding an element whose key the catalog does
@@ -309,6 +316,41 @@ inherit from the base controller, so define it there.
     page as the item after it. An item with no value for the key gets no group
     row. With `total` set, a total row keyed by column key draws last, styled
     as the heading. A table with no columns draws nothing.
+  - A stat draws in a rounded box the width of its column, filled with
+    `--ks-color-overlay`, outlined with `--ks-border-width` in
+    `--ks-color-border`, padded by six `--ks-spacing` steps, with corners of 1.5
+    times `--ks-radius-surface`. A plain stat draws with no box, padded by four
+    `--ks-spacing` steps across and none down. Its label draws at `--text-sm` in
+    `--ks-font-body` at `--ks-font-weight-medium` and `--ks-color-text-muted`, at
+    `--text-sm--line-height`, then one `--ks-spacing` step. Its value draws at
+    `--text-3xl` at 100 more than `--ks-font-weight-heading`, at
+    `--text-3xl--line-height`, in the colour of its tone: `--ks-color-text` for
+    `neutral`, and `--ks-color-<tone>-600` for `success`, `danger`, `warning`
+    and `info`. Its suffix, when set, follows the value after a space at
+    `--text-lg` in `--ks-color-text-muted`. A blank value draws the When missing
+    text in `--ks-color-text-muted` in its place. Its note, when set, draws one
+    `--ks-spacing` step under the value at `--text-sm` in
+    `--ks-color-text-muted`, at `--text-sm--line-height`. One `--ks-spacing` step
+    and five `--spacing` steps of empty space follow, the space the page keeps
+    for a change from an earlier period.
+  - A figure draws its text at `--text-base` in `--ks-font-body`, at the line
+    height the stylesheet's `html` rule gives, in `--ks-color-success-600` for
+    `success`, `--ks-color-danger-600` for `danger`, and `--ks-color-on-page`
+    for `neutral`.
+  - A badge draws its label at `--text-xs` in `--ks-font-body` at
+    `--ks-font-weight-medium`, at `--text-xs--line-height`, on a box as wide as
+    the label and its padding, padded by two `--ks-spacing` steps across and one
+    down, with corners of one `--ks-radius-pill`, which rounds it into a pill.
+    A `success`, `danger`, `warning` or `info` badge is filled with
+    `--ks-color-<tone>-100` and its label is in `--ks-color-<tone>-700`. A
+    `neutral` badge is filled with `--ks-color-badge-neutral` and its label is
+    in `--ks-color-text-label`.
+  - A progress bar draws its label at `--text-sm` in `--ks-font-body` at
+    `--ks-font-weight-medium` and `--ks-color-text-meter-label`, at
+    `--text-sm--line-height`, then one `--ks-spacing` step, then the surface's
+    `bar` two `--spacing` steps tall with corners of one `--ks-radius-pill`, on
+    `--ks-color-track` and filled in `--ks-color-meter`. The fill is its value
+    out of its maximum, rounded to a whole percent and never past full.
   - The form, the copy button and the Next page button draw nothing in the
     Ruby drawing. The four `--ks-spacing` steps between elements in a column
     are still kept around each of them.
@@ -476,27 +518,33 @@ inherit from the base controller, so define it there.
   field at its `default:`. A `:list` field arrives as an array of hashes with
   symbol keys, each blank part filled with its entry's `default:`. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has eight
+  reads the tokens as the Ruby drawing's look describes. The surface has nine
   calls.
   - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
     never a number of points. `font:`, `weight:` and `color:` name `--ks-`
-    tokens, with no weight meaning regular. `uppercase: true` writes the
+    tokens, with no weight meaning regular, and a weight of 600 or more
+    printing bold. `uppercase: true` writes the
     content in capitals. `tracking:` names a letter spacing token, such as
     `"--tracking-wider"`, and no tracking means none. `align:` is `:left` (the
     default), `:center` or `:right`. `leading:` names a line height token, such
     as `"--text-sm--line-height"`, or `"line-height"` for the line height the
     stylesheet's `html` rule gives, and no leading means the font's own height.
-  - `rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text", leading: nil)`
-    writes one paragraph from an array of runs. Each run is a hash with
-    `text:`, and optionally `link:` (an address the run opens when clicked),
-    `bold: true` and `italic: true`. A run whose text is `"\n"` breaks the line.
-  - `box(padding:, radius:, fill: nil, border: nil) { ... }` draws a rounded
-    box the width of the column, as tall as what the block draws, and draws the
+  - `rich_text(runs, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)`
+    writes one paragraph from an array of runs. `size:`, `font:`, `weight:`,
+    `color:` and `leading:` work as they do for `text`, and a weight of 600 or
+    more prints every run bold. Each run is a hash with `text:`, and optionally
+    `link:` (an address the run opens when clicked), `bold: true`,
+    `italic: true`, `size:` (a length token for that run alone) and `color:` (a
+    colour token for that run alone). A run whose text is `"\n"` breaks the
+    line.
+  - `box(padding:, radius: nil, fill: nil, border: nil) { ... }` draws a box
+    the width of the column, as tall as what the block draws, and draws the
     block inside it. `padding:` is a length token and a number of steps, such
     as `[ "--ks-spacing", 4 ]`, or a token and two numbers of steps, across and
     then down, such as `[ "--ks-spacing", 6, 4 ]`. `radius:` is a length token
-    and a number of steps for the corners. `fill:` names a colour token, and no
+    and a number of steps for the corners, and no radius means square corners.
+    `fill:` names a colour token, and no
     fill leaves the box unfilled. `border:` is a hash of `width:`, a length
     token for the outline's thickness, and `color:`, a colour token, such as
     `{ width: "--ks-border-width", color: "--ks-color-border-subtle" }`. The
@@ -506,9 +554,19 @@ inherit from the base controller, so define it there.
     writes the content on a rounded box as wide as the content and its padding,
     and never wider than the column. `size:`, `font:`, `weight:`, `color:` and
     `leading:` work as they do for `text`. `fill:` names the box's colour token,
-    and `padding:`, `radius:` and `border:` work as they do for `box`. `link:`
+    and `padding:`, `radius:` and `border:` work as they do for `box`. The
+    corners are never rounder than half the box's height or width, so a radius
+    token such as `--ks-radius-pill` rounds it into a pill. `link:`
     is an address the whole box opens when clicked in the PDF, and no link
     means none.
+  - `bar(share, height:, radius:, track:, fill:)` draws a bar across the
+    column. `share` is the part of the bar filled, from 0 to 1, such as
+    `Rational(40, 100)`. `height:` is a length token and a number of steps for
+    its thickness, such as `[ "--spacing", 2 ]`, and `radius:` is a length token
+    and a number of steps for its corners, never rounder than half its
+    thickness. `track:` names the colour token of the whole bar, and `fill:` the
+    colour token of the filled part drawn over it from the left. A share of
+    zero draws the track alone.
   - `rule(width:, color:)` draws a line across the column. `width:` names a
     length token for its thickness and `color:` a colour token.
   - `space(token, steps)` moves down by that many steps of a length token, such
@@ -647,9 +705,9 @@ The catalog offers these Keystone UI components by default: `button`,
    elements with a `pdf:` drawing, in Keystone UI's fonts, weights, text sizes,
    line heights, letter spacing, colours, fills, borders and spacing read from
    the host's stylesheet. Of the built-in elements it draws headings, labels,
-   paragraphs, alerts, label and value lists, buttons, accordions and tables,
-   and it
-   leaves forms, copy buttons and Next page buttons out of the PDF.
+   paragraphs, alerts, label and value lists, buttons, accordions, tables,
+   stats, figures, badges and progress bars, and it leaves forms, copy buttons
+   and Next page buttons out of the PDF.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
@@ -758,16 +816,29 @@ The catalog offers these Keystone UI components by default: `button`,
 
    The method must be reachable in the engine's views and in any host view that
    calls `keystone_ui_page`. A `helper_method` on the base controller covers
-   both. When the host uses the Ruby drawing, also pass `pdf:`, such as
-   `pdf: ->(surface, fields) { surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted", leading: "--text-sm--line-height") }`.
-   Build it from the surface's calls in the Interface, with the same tokens
-   the component's Keystone UI classes use on screen.
-   Name only tokens the host's stylesheet sets, since a missing one raises
-   `PrintFailed` naming it. A page that holds an element the catalog no longer offers still
+   both. A page that holds an element the catalog no longer offers still
    draws its other elements for visitors, marks the missing one in the editor
    as no longer offered, and reports the page's id and the element's key
    through `Rails.error`, so search the pages' documents for its key before
    leaving it out.
+
+10. When the host uses the Ruby drawing, give each host element a `pdf:`
+    drawing on `catalog.register`, built from the surface's calls in the
+    Interface:
+
+    ```ruby
+    pdf: ->(surface, fields) {
+      surface.text(fields[:quote], size: "--text-sm", color: "--ks-color-text-muted", leading: "--text-sm--line-height")
+    }
+    ```
+
+    Use the same tokens the component's Keystone UI classes use on screen, so
+    the PDF matches the page. A share of something, such as a score out of a
+    maximum, draws with `bar`, and a pill-shaped label with `boxed_text` and a
+    `--ks-radius-pill` radius. Name only tokens the host's stylesheet sets,
+    since a missing one raises `PrintFailed` naming it. Whether an element is
+    left out of the PDF, with a drawing that draws nothing, or drawn on paper is
+    the developer's decision, so ask before choosing.
 
 ## Conventions
 
@@ -775,6 +846,10 @@ The catalog offers these Keystone UI components by default: `button`,
   Never draw `page.document` or a version's document by hand, and never print a
   PDF another way, because the gem's drawing applies bound values, conditions,
   layout and print rules together.
+- **A `pdf:` drawing draws only through the surface.** It takes the surface and
+  the field values and calls the surface's nine calls, never Prawn directly,
+  since the surface places each call in the element's column and reads the
+  host's tokens.
 - **Only the live version leaves the builder.** The draft is what editors
   change. Visitors, `keystone_ui_page` and PDFs show the live version, so an
   unpublished change shows nowhere else. `keystone_ui_page` and PDFs with

@@ -12,7 +12,9 @@ module KeystoneUi
 
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
       WRITTEN_LENGTH = /\A\d+(\.\d+)?(rem|em|px|pt)\z/
+      INFINITE_LENGTH = /\Acalc\(infinity \* \d+(\.\d+)?(rem|em|px|pt)\)\z/
       POINTS_PER_UNIT = { "rem" => 12.0, "em" => 12.0, "px" => 0.75, "pt" => 1.0 }.freeze
+      SYSTEM_COLORS = { "CanvasText" => "000000" }.freeze
       ROOTS = [ ":root", ":host", "html" ].freeze
       LMS_TO_SRGB = [ [ 4.0767416621, -3.3077115913, 0.2309699292 ], [ -1.2684380046, 2.6097574011, -0.3413193965 ], [ -0.0041960863, -0.7034186147, 1.7076147010 ] ].freeze
 
@@ -41,6 +43,7 @@ module KeystoneUi
 
       def color(name)
         css = value(name)
+        return SYSTEM_COLORS[css] if SYSTEM_COLORS.key?(css)
         return oklch_hex(css) if css.start_with?("oklch(")
 
         hex = css.delete_prefix("#").upcase
@@ -57,6 +60,8 @@ module KeystoneUi
       end
 
       def weight(name)
+        return resolved(name).delete_prefix("calc(").delete_suffix(")").split("+").sum(&:to_i) if name.start_with?("calc(")
+
         value(name).to_i
       end
 
@@ -66,6 +71,8 @@ module KeystoneUi
 
       def points(name, size: nil)
         length = name.match?(WRITTEN_LENGTH) ? name : value(name)
+        return Float::INFINITY if length.match?(INFINITE_LENGTH)
+
         unit = length[/[a-z]+\z/]
         return length.to_f * size if unit == "em" && size
 

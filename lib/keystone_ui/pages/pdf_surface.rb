@@ -37,22 +37,22 @@ module KeystoneUi
         end
       end
 
-      def rich_text(runs, size:, font: "--ks-font-body", color: "--ks-color-text", leading: nil)
+      def rich_text(runs, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
         points = @look.points(size)
         typeface = @look.font(font)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
-        fragments = runs.map { |run| { text: run[:text], link: run[:link], styles: %i[bold italic].select { |style| run[style] } }.compact }
+        fragments = runs.map { |run| fragment(bold?(weight) ? run.merge(bold: true) : run) }
         fragments.each { |fragment| @document.font(typeface.name, style: fragment[:styles].join("_").presence&.to_sym || :normal) { drawable!(fragment[:text].to_s) } }
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
-      def box(padding:, radius:, fill: nil, border: nil, &content)
+      def box(padding:, radius: nil, fill: nil, border: nil, &content)
         across, down = insets(padding, border)
         width = @document.bounds.width
         top = @document.cursor
         height = measured(width - across * 2, &content) + down * 2
-        corner = @look.points(radius.first) * radius.last
+        corner = radius ? @look.points(radius.first) * radius.last : 0
         if fill
           @document.fill_color(@look.color(fill))
           @document.fill_rounded_rectangle([ 0, top ], width, height, corner)
@@ -69,12 +69,24 @@ module KeystoneUi
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
         height = measured(width - across * 2, &drawn) + down * 2
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
+        corner = corner(radius, fill_width, height)
         linked(link, fill_width, height) if link
         @document.fill_color(@look.color(fill))
-        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, @look.points(radius.first) * radius.last)
-        bordered(border, top, fill_width, height, @look.points(radius.first) * radius.last) if border
+        @document.fill_rounded_rectangle([ 0, top ], fill_width, height, corner)
+        bordered(border, top, fill_width, height, corner) if border
         @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
         @document.move_down(down)
+      end
+
+      def bar(share, height:, radius:, track:, fill:)
+        thickness = @look.points(height.first) * height.last
+        width = @document.bounds.width
+        top = @document.cursor
+        [ [ track, width ], [ fill, width * share ] ].select { |_color, length| length.positive? }.each do |color, length|
+          @document.fill_color(@look.color(color))
+          @document.fill_rounded_rectangle([ 0, top ], length, thickness, corner(radius, length, thickness))
+        end
+        @document.move_down(thickness)
       end
 
       def rule(width:, color:)
@@ -135,6 +147,11 @@ module KeystoneUi
       end
 
       private
+
+      def fragment(run)
+        { text: run[:text], link: run[:link], size: run[:size] && @look.points(run[:size]), color: run[:color] && @look.color(run[:color]),
+          styles: %i[bold italic].select { |style| run[style] } }.compact
+      end
 
       def column_widths(table_rows)
         room = @document.bounds.width
@@ -301,6 +318,10 @@ module KeystoneUi
         top - @document.cursor
       ensure
         @document = drawing
+      end
+
+      def corner(radius, width, height)
+        [ @look.points(radius.first) * radius.last, width / 2, height / 2 ].min
       end
 
       def insets(padding, border)
