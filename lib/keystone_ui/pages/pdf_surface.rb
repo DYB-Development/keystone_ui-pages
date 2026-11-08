@@ -119,10 +119,12 @@ module KeystoneUi
           separators = below.each_index.map { |position| position == rows.size ? parts_divider : (divider if position.positive?) }
           heading_lines = { row: heading, line: parts_divider }
           restarted(frame) unless fits?(headed_height(heading_lines, widths) + rows_height(kept_together(below, 0), widths))
-          headed(heading_lines, widths)
+          headed(heading_lines, widths, frame, below.empty?)
           below.each_with_index do |table_row, position|
             kept_on_page(kept_together(below, position), separators[position], heading_lines, widths, frame) { divided(separators[position], widths.sum) }
-            drawn_table_row(table_row, widths)
+            following = line_thickness(separators[position + 1]) + rows_height(kept_together(below, position + 1), widths)
+            closing = position == below.size - 1 || !fits?(row_height(table_row, widths) + following)
+            drawn_table_row(table_row, widths, frame, closing)
           end
           framed(frame)
         end
@@ -174,19 +176,27 @@ module KeystoneUi
         text_width(content, cell[:size], cell[:font] || "--ks-font-body", cell[:weight]) + left + right
       end
 
-      def drawn_table_row(table_row, widths)
+      def drawn_table_row(table_row, widths, frame, closing)
         top = @document.y
         height = row_height(table_row, widths)
-        if table_row[:fill]
-          @document.fill_color(@look.color(table_row[:fill]))
-          @document.fill_rectangle([ 0, @document.cursor ], widths.sum, height)
-        end
+        filled(table_row[:fill], widths.sum, height, frame, closing) if table_row[:fill]
         table_row[:cells].each_with_index do |cell, index|
           left, right, down = cell_insets(cell)
           @document.y = top - (height - cell_height(cell, widths[index])) / 2 - down
           @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) { drawn_cell(cell) }
         end
         @document.y = top - height
+      end
+
+      def filled(fill, width, height, frame, closing)
+        inside_top = frame[:top] - frame[:edge]
+        inside_bottom = @document.y - height - (closing ? 0 : frame[:corner])
+        @document.save_graphics_state do
+          @document.rounded_rectangle([ 0, inside_top - @document.bounds.absolute_bottom ], width, inside_top - inside_bottom, [ frame[:corner] - frame[:edge], 0 ].max)
+          @document.add_content("W n")
+          @document.fill_color(@look.color(fill))
+          @document.fill_rectangle([ 0, @document.cursor ], width, height)
+        end
       end
 
       def kept_together(rows, position)
@@ -198,11 +208,11 @@ module KeystoneUi
 
         framed(frame)
         restarted(frame)
-        headed(heading_lines, widths)
+        headed(heading_lines, widths, frame, false)
       end
 
-      def headed(heading_lines, widths)
-        drawn_table_row(heading_lines[:row], widths)
+      def headed(heading_lines, widths, frame, closing)
+        drawn_table_row(heading_lines[:row], widths, frame, closing)
         divided(heading_lines[:line], widths.sum)
       end
 

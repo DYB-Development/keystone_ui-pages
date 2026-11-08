@@ -355,6 +355,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 2, surface.render.scan(/0\.0 0\.0 0\.0 scn\n36\.0 [\d.]+ 540\.0 1\.5 re\nf/).size
   end
 
+  test "a table's row fills are clipped to the rounded corners inside its border" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service", fill: "--ks-color-accent"), [], **table_look, border: { width: "--ks-border-width-control", color: "--ks-color-text" })
+
+    assert_match(/ c\n(?:h\n)?W n\n[^W]*scn\n37\.5 [\d.]+ 537\.0 [\d.]+ re\nf\n/, surface.render)
+  end
+
   private
 
   def look
