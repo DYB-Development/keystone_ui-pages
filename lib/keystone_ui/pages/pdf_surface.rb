@@ -62,21 +62,22 @@ module KeystoneUi
         @document.move_down(down)
       end
 
-      def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil)
+      def boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil, align: nil)
         across, down = insets(padding, border)
         width = @document.bounds.width
         top = @document.cursor
         drawn = -> { text(content, size: size, font: font, weight: weight, color: color, leading: leading) }
         height = measured(width - across * 2, &drawn) + down * 2
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
+        left = align == :center ? (width - fill_width) / 2 : 0
         corner = corner(radius, fill_width, height)
-        linked(link, fill_width, height) if link
+        linked(link, fill_width, height, left) if link
         translucent(fill) do
           @document.fill_color(@look.color(fill))
-          @document.fill_rounded_rectangle([ 0, top ], fill_width, height, corner)
+          @document.fill_rounded_rectangle([ left, top ], fill_width, height, corner)
         end
-        bordered(border, top, fill_width, height, corner) if border
-        @document.bounding_box([ across, top - down ], width: width - across * 2, &drawn)
+        bordered(border, top, fill_width, height, corner, left) if border
+        @document.bounding_box([ left + across, top - down ], width: width - left - across * 2, &drawn)
         @document.move_down(down)
       end
 
@@ -342,8 +343,8 @@ module KeystoneUi
         end
       end
 
-      def linked(address, width, height)
-        left = @document.bounds.absolute_left
+      def linked(address, width, height, offset = 0)
+        left = @document.bounds.absolute_left + offset
         top = @document.y
         @document.link_annotation([ left, top - height, left + width, top ], Border: [ 0, 0, 0 ], A: { Type: :Action, S: :URI, URI: PDF::Core::LiteralString.new(address) })
       end

@@ -105,6 +105,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 49.5, lefts(surface.render)["Book a call"]
   end
 
+  test "a boxed line of text aligned to the centre is drawn with its fill centred in the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ], align: :center)
+
+    assert_in_delta 36 + (540 - (58.692 + 24)) / 2 + 12, lefts(surface.render)["Book a call"], 0.001
+  end
+
   test "a boxed line of text on a translucent fill is filled at the fill colour's opacity" do
     surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new(":root{--text-sm:.875rem;--ks-spacing:.25rem;--ks-radius-pill:calc(infinity * 1px);--ks-color-tint:#3b82f633;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
 
