@@ -817,11 +817,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).first(5).map { |call| call[1] == "Three reasons." ? :text : call }
   end
 
-  test "a feature grid's features are drawn two to a row, six spacing steps apart across and down, as keystone_ui's feature grid lays them out at the printed page's width" do
+  test "a feature grid's features are drawn two to a row of equal columns, six spacing steps apart across and down, as keystone_ui's feature grid lays them out at the printed page's width" do
     features = %w[Fast Clear Yours].map { |title| { "title" => title, "description" => "#{title} pages." } }
     document = page(section(row(column(element("feature_grid", title: "Why teams choose us", features: features)))))
 
-    assert_equal [ [ :row, [ Rational(1, 2), Rational(1, 2) ], { gap: [ "--ks-spacing", 6 ] } ], [ :space, "--ks-spacing", 6 ], [ :row, [ Rational(1, 2), Rational(1, 2) ], { gap: [ "--ks-spacing", 6 ] } ] ],
+    assert_equal [ [ :row, [ Rational(1, 2), Rational(1, 2) ], { gap: [ "--ks-spacing", 6 ], grid: true } ], [ :space, "--ks-spacing", 6 ],
+                   [ :row, [ Rational(1, 2), Rational(1, 2) ], { gap: [ "--ks-spacing", 6 ], grid: true } ] ],
                  drawn(document).drawn.drop(1).select { |call| call.first == :row || call == [ :space, "--ks-spacing", 6 ] }
   end
 

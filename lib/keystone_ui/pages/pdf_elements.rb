@@ -363,7 +363,7 @@ module KeystoneUi
         end
         Array(fields[:features].presence).each_slice(FEATURE_GRID_COLUMNS).with_index do |features, position|
           surface.space(SPACING, FEATURE_GRID_GAP) if position.positive?
-          surface.row([ Rational(1, FEATURE_GRID_COLUMNS) ] * FEATURE_GRID_COLUMNS, gap: [ SPACING, FEATURE_GRID_GAP ]) { |index| feature(surface, features[index]) if features[index] }
+          surface.row([ Rational(1, FEATURE_GRID_COLUMNS) ] * FEATURE_GRID_COLUMNS, gap: [ SPACING, FEATURE_GRID_GAP ], grid: true) { |index| feature(surface, features[index]) if features[index] }
         end
       end
 
