@@ -328,6 +328,15 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_includes lefts(surface.render).keys, "Review 12"
   end
 
+  test "a table row kept with the next row is drawn on the next page when the row after it does not fit" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    rows = Array.new(17) { |index| table_row("Review #{index}") } + [ table_row("Group").merge(with_next: true), table_row("Last") ]
+    surface.table(table_row("Service"), rows, **table_look)
+
+    assert_equal [ [], [ "Group", "Last" ] ], pages(surface.render).map { |page| heights(page).keys & [ "Group", "Last" ] }
+  end
+
   private
 
   def look

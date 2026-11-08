@@ -114,17 +114,13 @@ module KeystoneUi
         frame = { border: border, edge: edge, corner: @look.points(radius.first) * radius.last, left: @document.bounds.absolute_left, width: @document.bounds.width, top: @document.y }
         @document.move_down(edge)
         @document.bounding_box([ edge, @document.cursor ], width: @document.bounds.width - edge * 2) do
-          widths = column_widths([ heading, *rows, total ].compact)
-          opening = [ heading, (rows.first || total) ].compact.sum { |table_row| row_height(table_row, widths) }
-          restarted(frame) unless fits?(opening)
+          below = [ *rows, total ].compact
+          widths = column_widths([ heading, *below ])
+          restarted(frame) unless fits?([ heading, *kept_together(below, 0) ].sum { |table_row| row_height(table_row, widths) })
           drawn_table_row(heading, widths)
-          rows.each_with_index do |table_row, position|
-            kept_on_page(table_row, heading, widths, frame) { divided(divider, widths.sum) if position.positive? }
+          below.each_with_index do |table_row, position|
+            kept_on_page(kept_together(below, position), heading, widths, frame) { divided(divider, widths.sum) if position.positive? && position < rows.size }
             drawn_table_row(table_row, widths)
-          end
-          if total
-            kept_on_page(total, heading, widths, frame)
-            drawn_table_row(total, widths)
           end
           framed(frame)
         end
@@ -191,8 +187,12 @@ module KeystoneUi
         @document.y = top - height
       end
 
-      def kept_on_page(table_row, heading, widths, frame)
-        return (yield if block_given?) if fits?(row_height(table_row, widths))
+      def kept_together(rows, position)
+        rows[position]&.dig(:with_next) ? rows[position, 2] : rows[position, 1]
+      end
+
+      def kept_on_page(table_rows, heading, widths, frame)
+        return yield if fits?(table_rows.sum { |table_row| row_height(table_row, widths) })
 
         framed(frame)
         restarted(frame)
