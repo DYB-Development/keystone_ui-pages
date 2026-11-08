@@ -688,6 +688,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.each_cons(2).find { |_box, call| call[1] == "Build a quote from your price list." }.map { |call| [ *call.first(call.size - 1), call.last.except(:align) ] }
   end
 
+  test "a hero's badge is drawn as its text in a pill with the fill, border, padding and text colour keystone_ui's hero badge rule gives it" do
+    document = page(section(row(column(element("hero", badge: "New", title: "Quotes in minutes")))))
+
+    assert_equal [ :boxed_text, "New", "--text-sm", { font: "--ks-font-body", color: "--ks-color-link", leading: "--text-sm--line-height", fill: "--ks-color-tint",
+                                                      padding: [ "--ks-spacing", 4, 1.5 ], radius: [ "--ks-radius-pill", 1 ], border: { width: "--ks-border-width", color: "--ks-color-tint-border" } } ],
+                 drawn(document).drawn.find { |call| call[1] == "New" }.then { |call| [ *call.first(3), call.last.except(:align) ] }
+  end
+
   private
 
   def drawn(document, values: {})
