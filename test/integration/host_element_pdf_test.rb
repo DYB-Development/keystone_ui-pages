@@ -4,6 +4,7 @@ require "test_helper"
 require "minitest/mock"
 require "keystone_ui/pages/printer"
 require "keystone_ui/pages/operations"
+require "keystone_ui/pages/pdf_look"
 
 class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
   QUOTE_DRAWING = ->(surface, fields) { surface.text(fields[:text], size: "--text-base") }
@@ -47,7 +48,21 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     assert_equal %w[Badge Boxed Cell Heading Left Plain Rich Right], texts(pdf.file.download).sort
   end
 
+  test "a host element's PDF drawing that names a keystone_ui colour token draws in the value the host's stylesheet gives that token" do
+    drawing = ->(surface, fields) { surface.text(fields[:text], size: "--text-base", color: "--ks-color-accent") }
+    KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph, fields: [ { key: :text, label: "Text", default: "Hi" } ], pdf: drawing)
+    accent = KeystoneUi::Pages::PdfLook.host.color("--ks-color-accent").scan(/\h\h/).map { |pair| (pair.to_i(16) / 255.0).round(3) }
+
+    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page_holding(:quote, "text" => "Plain"), values: {}) }
+
+    assert_includes fill_colors(pdf.file.download), accent
+  end
+
   private
+
+  def fill_colors(pdf)
+    pdf.scan(/([\d.]+) ([\d.]+) ([\d.]+) scn/).map { |rgb| rgb.map { |part| part.to_f.round(3) } }
+  end
 
   def page_holding(key, fields)
     page = KeystoneUi::Pages::Page.create!(name: "Report", slug: "report")
