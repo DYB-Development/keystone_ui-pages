@@ -33,6 +33,7 @@ module KeystoneUi
       ALERT_RADIUS = 0.75
       SPACING = "--ks-spacing"
       ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
+      TABLE_SIZE = "--text-sm"
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -109,6 +110,17 @@ module KeystoneUi
 
       def total?(entry)
         entry[:total].to_s == "true"
+      end
+
+      def data_table(surface, fields)
+        columns = Array(fields[:columns].presence)
+        heading = table_row(columns.map { |column| column[:label] })
+        rows = Array(fields[:items].presence).map { |item| table_row(columns.map { |column| item.to_h.stringify_keys[column[:key].to_s] }) }
+        surface.table(heading, rows)
+      end
+
+      def table_row(texts)
+        { cells: texts.map { |text| { text: text.to_s, size: TABLE_SIZE } } }
       end
 
       def paragraph(surface, fields)

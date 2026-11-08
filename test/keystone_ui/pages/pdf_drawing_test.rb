@@ -44,6 +44,18 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       widths.each_index { |index| yield index }
     end
 
+    def table(heading, rows, **style)
+      @drawn << [ :table, heading, rows, style ]
+    end
+
+    def tables
+      @drawn.select { |call| call.first == :table }
+    end
+
+    def table_texts
+      tables.last.then { |call| [ call[1][:cells].pluck(:text), call[2].map { |table_row| table_row[:cells].pluck(:text) } ] }
+    end
+
     def texts
       @drawn.select { |call| call.first == :text }.map { |call| call[1] }
     end
@@ -56,6 +68,8 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
       @drawn.select { |call| call.first == :text }.map(&:last)
     end
   end
+
+  SERVICE_COLUMNS = [ { "key" => "service", "label" => "Service" }, { "key" => "hours", "label" => "Hours" } ].freeze
 
   test "the PDF draws each heading and label in the order the page shows them" do
     document = page(
@@ -400,6 +414,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     gap = [ :space, "--ks-spacing", 4 ]
     assert_equal [ :row, :box, :text, gap, :text, gap, :box, :text, gap, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "a table is drawn as a heading row of its column headings and one row per item" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" }, { "service" => "Audit", "hours" => "2" } ])))))
+
+    assert_equal [ %w[Service Hours], [ %w[Review 4], %w[Audit 2] ] ], drawn(document).table_texts
   end
 
   private
