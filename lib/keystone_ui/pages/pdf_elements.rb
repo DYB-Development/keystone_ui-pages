@@ -35,6 +35,8 @@ module KeystoneUi
       ALERT_TONES = { "info" => "info", "success" => "success", "warning" => "warning", "error" => "danger" }.freeze
       TABLE_SIZE = "--text-sm"
       TABLE_HEADER_LOOK = { weight: "--ks-font-weight-heading", color: "--ks-color-text-heading" }.freeze
+      TABLE_CELL_LOOKS = { first: { weight: "--ks-font-weight-medium", color: "--ks-color-text" }, middle: { color: "--ks-color-text-muted" },
+                           last: { weight: "--ks-font-weight-medium", color: "--ks-color-text" } }.freeze
       TABLE_ALIGNMENTS = { "start" => :left, "end" => :right }.freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
@@ -139,13 +141,20 @@ module KeystoneUi
 
       def table_row(columns, texts, header: false)
         cells = columns.zip(texts).each_with_index.map do |(column, text), index|
-          { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, index == columns.size - 1) }.merge(header ? TABLE_HEADER_LOOK : {})
+          position = table_position(index, columns.size)
+          { text: text.to_s, size: TABLE_SIZE, align: table_alignment(column, position) }.merge(header ? TABLE_HEADER_LOOK : TABLE_CELL_LOOKS[position])
         end
         { cells: cells, fill: header ? "--ks-color-table-head" : "--ks-color-table-body" }
       end
 
-      def table_alignment(column, last)
-        TABLE_ALIGNMENTS.fetch(column[:align].to_s) { last ? :right : :left }
+      def table_position(index, count)
+        return :first if index.zero?
+
+        index == count - 1 ? :last : :middle
+      end
+
+      def table_alignment(column, position)
+        TABLE_ALIGNMENTS.fetch(column[:align].to_s) { position == :last ? :right : :left }
       end
 
       def paragraph(surface, fields)

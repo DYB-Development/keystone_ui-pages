@@ -467,6 +467,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ [ header, header ] ] * 3, [ table[1], table[2].first, table.last[:total] ].map { |table_row| table_row[:cells].map { |cell| cell.slice(:weight, :color) } }
   end
 
+  test "a table's item cells are drawn at the weights and in the colours keystone_ui's first, middle and last table cell rules give them" do
+    columns = [ { "key" => "service", "label" => "Service" }, { "key" => "notes", "label" => "Notes" }, { "key" => "hours", "label" => "Hours" } ]
+    document = page(section(row(column(element("data_table", columns: columns, items: [ { "service" => "Review", "notes" => "Done", "hours" => "4" } ])))))
+
+    assert_equal [ { weight: "--ks-font-weight-medium", color: "--ks-color-text" }, { color: "--ks-color-text-muted" }, { weight: "--ks-font-weight-medium", color: "--ks-color-text" } ],
+                 drawn(document).tables.last[2].first[:cells].map { |cell| cell.slice(:weight, :color) }
+  end
+
   private
 
   def drawn(document, values: {})
