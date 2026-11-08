@@ -595,6 +595,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--text-base", { font: "--ks-font-body", leading: "line-height" } ], drawn(document).drawn.last.then { |call| [ call[2], call.last.except(:color) ] }
   end
 
+  test "a badge is drawn as its label in a box on the fill and in the text colour keystone_ui's badge rules give its tone" do
+    document = page(section(row(column(*%w[neutral success danger warning info].map { |tone| element("badge", label: tone.capitalize, variant: tone) }))))
+
+    assert_equal [ %w[Neutral --ks-color-badge-neutral --ks-color-text-label], %w[Success --ks-color-success-100 --ks-color-success-700],
+                   %w[Danger --ks-color-danger-100 --ks-color-danger-700], %w[Warning --ks-color-warning-100 --ks-color-warning-700],
+                   %w[Info --ks-color-info-100 --ks-color-info-700] ],
+                 drawn(document).drawn.select { |call| call.first == :boxed_text }.map { |call| [ call[1], call.last[:fill], call.last[:color] ] }
+  end
+
   private
 
   def drawn(document, values: {})

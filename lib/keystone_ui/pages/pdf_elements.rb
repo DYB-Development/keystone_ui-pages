@@ -56,6 +56,11 @@ module KeystoneUi
       STAT_NOTE_SIZE = "--text-sm"
       FIGURE_SIZE = "--text-base"
       FIGURE_COLORS = TONE_COLORS.slice("success", "danger").merge("neutral" => "--ks-color-on-page").freeze
+      BADGE_SIZE = "--text-xs"
+      BADGE_PADDING_ACROSS = 2
+      BADGE_PADDING_DOWN = 1
+      NEUTRAL_BADGE_COLORS = [ "--ks-color-badge-neutral", "--ks-color-text-label" ].freeze
+      BADGE_TONES = %w[success danger warning info].freeze
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -213,6 +218,17 @@ module KeystoneUi
 
       def figure(surface, fields)
         surface.text(fields[:text], size: FIGURE_SIZE, font: "--ks-font-body", color: FIGURE_COLORS.fetch(fields[:tone].to_s, FIGURE_COLORS["neutral"]), leading: PAGE_LINE_HEIGHT)
+      end
+
+      def badge(surface, fields)
+        fill, color = badge_colors(fields[:variant].to_s)
+        surface.boxed_text(fields[:label], size: BADGE_SIZE, color: color, fill: fill, padding: [ SPACING, BADGE_PADDING_ACROSS, BADGE_PADDING_DOWN ], radius: [ "--ks-radius-pill", 1 ])
+      end
+
+      def badge_colors(tone)
+        return [ "--ks-color-#{tone}-100", "--ks-color-#{tone}-700" ] if BADGE_TONES.include?(tone)
+
+        NEUTRAL_BADGE_COLORS
       end
 
       def paragraph(surface, fields)
