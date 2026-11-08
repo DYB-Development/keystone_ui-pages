@@ -36,6 +36,7 @@ module KeystoneUi
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
           drawable!(content.to_s)
           @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) do
+            reached(content.to_s.lines.map { |line| @document.width_of(line.chomp, size: points) }.max.to_f) if @reached
             spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra, final_gap: leading.nil?) }
           end
         end
@@ -89,6 +90,13 @@ module KeystoneUi
         bordered(border, top, fill_width, height, corner, left) if border
         @document.bounding_box([ left + across, top - down ], width: width - left - across * 2, &drawn)
         @document.move_down(down)
+      end
+
+      def aligned(_align, &content)
+        width = reach(@document.bounds.width, &content)
+        return yield unless width.positive?
+
+        @document.bounding_box([ (@document.bounds.width - width) / 2, @document.cursor ], width: width, &content)
       end
 
       def together(&content)
@@ -333,6 +341,19 @@ module KeystoneUi
         @document.move_down((line - letters) / 2)
         yield extra
         @document.move_down((line - letters) / 2)
+      end
+
+      def reach(width)
+        outer = @reached
+        @reached = 0
+        measured(width) { yield }
+        @reached
+      ensure
+        @reached = outer
+      end
+
+      def reached(width, left = 0)
+        @reached = [ @reached, @document.bounds.absolute_left + left + [ width, @document.bounds.width - left ].min ].max
       end
 
       def measured(width)

@@ -47,6 +47,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal heights(surface.render)["Second"], heights(surface.render)["Middle"]
   end
 
+  test "text drawn aligned to the centre is drawn centred in the width it is drawn in, as wide as its widest line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.text("Book\nBook a call", size: "--text-base") }
+
+    assert_in_delta 36.0 + (540 - Prawn::Document.new.width_of("Book a call", size: 12)) / 2, lefts(surface.render)["Book a call"], 0.001
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
