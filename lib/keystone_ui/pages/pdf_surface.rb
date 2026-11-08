@@ -114,7 +114,12 @@ module KeystoneUi
           widths = column_widths([ heading, *rows, total ].compact)
           drawn_table_row(heading, widths)
           rows.each_with_index do |table_row, position|
-            divided(divider, widths.sum) if position.positive?
+            if fits?(row_height(table_row, widths))
+              divided(divider, widths.sum) if position.positive?
+            else
+              next_page
+              drawn_table_row(heading, widths)
+            end
             drawn_table_row(table_row, widths)
           end
           drawn_table_row(total, widths) if total
@@ -162,6 +167,15 @@ module KeystoneUi
           @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) { drawn_cell(cell) }
         end
         @document.y = top - height
+      end
+
+      def fits?(height)
+        @document.y - height >= @document.margin_box.absolute_bottom
+      end
+
+      def next_page
+        @document.bounds.move_past_bottom
+        @document.y = @document.margin_box.absolute_top
       end
 
       def divided(divider, width)

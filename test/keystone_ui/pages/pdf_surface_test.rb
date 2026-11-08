@@ -235,6 +235,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(/0\.0 0\.0 0\.0 SCN\n1\.5 w\n/, surface.render)
   end
 
+  test "a table longer than a page continues on the next page with its heading row drawn again at the top" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service"), Array.new(25) { |index| table_row("Review #{index}") }, **table_look)
+
+    assert_equal [ 1, 1 ], pages(surface.render).map { |page| heights(page).keys.count("Service") }
+  end
+
   private
 
   def look
@@ -259,6 +267,10 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
 
   def heights(pdf)
     pdf.scan(/[\d.]+ ([\d.]+) Td\n[^\n]*\n\[([^\]]*)\] TJ/).to_h { |height, text| [ shown(text), height ] }
+  end
+
+  def pages(pdf)
+    pdf.split("endstream").select { |stream| stream.include?(" Td\n") }
   end
 
   def shown(kerned)
