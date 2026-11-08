@@ -93,6 +93,30 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "The PDF needs a TrueType copy of the Inter font at /Inter.ttf, beside the font file the stylesheet loads, and none is served.", error.message
   end
 
+  test "a token the stylesheet does not set is refused with a print failure naming the token" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-text:#000000}")
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { look.color("--ks-color-accent") }
+
+    assert_equal "The PDF needs the keystone_ui token --ks-color-accent, and the stylesheet does not set it.", error.message
+  end
+
+  test "a colour token in a form the gem cannot read is refused with a print failure naming the token" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-color-text:rgb(0 0 0)}")
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { look.color("--ks-color-text") }
+
+    assert_equal "The PDF cannot read the keystone_ui token --ks-color-text, whose value is rgb(0 0 0).", error.message
+  end
+
+  test "a length token in a unit the gem cannot read is refused with a print failure naming the token" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{--ks-spacing:1vw}")
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { look.points("--ks-spacing") }
+
+    assert_equal "The PDF cannot read the keystone_ui token --ks-spacing, whose value is 1vw.", error.message
+  end
+
   test "a font token set to inherit takes the font the page's html element is given" do
     look = KeystoneUi::Pages::PdfLook.new(":root{--default-font-family:Inter;--ks-font-body:inherit}html,:host{font-family:var(--default-font-family,sans-serif)}" \
                                           '@font-face{font-family:Inter;src:url("/Inter.woff2") format("woff2")}',

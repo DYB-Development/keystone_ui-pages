@@ -99,6 +99,14 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     KeystoneUi::Pages.pdf_drawing = nil
   end
 
+  test "a refused PDF keeps no file, so asking again after the fix makes a new one" do
+    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { raise KeystoneUi::Pages::PrintFailed, "No font" }) do
+      assert_raises(KeystoneUi::Pages::PrintFailed) { KeystoneUi::Pages.pdf(@page, values: {}) }
+    end
+
+    assert_equal "%PDF-printed", printing { KeystoneUi::Pages.pdf(@page, values: {}) }.file.download
+  end
+
   private
 
   def labelled(label)

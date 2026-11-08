@@ -98,6 +98,24 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal "The Code element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
+  test "a page holding an element the catalog does not have is refused with a print failure naming the element's key" do
+    document = page(section(row(column(element("pricing_table")))))
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
+
+    assert_equal "The page holds a pricing_table element, which the catalog does not have, so this page cannot be drawn as a PDF.", error.message
+  end
+
+  test "an element whose text holds a character its font cannot draw is refused with a print failure naming the element and the character" do
+    document = page(section(row(column(element("heading", text: "Next → step")))))
+    surface = RecordingSurface.new
+    surface.define_singleton_method(:text) { |*, **| raise KeystoneUi::Pages::PdfSurface::UndrawableCharacter, "→" }
+
+    error = assert_raises(KeystoneUi::Pages::PrintFailed) { KeystoneUi::Pages::PdfDrawing.draw(document, surface) }
+
+    assert_equal "The Heading element holds the character → (U+2192), which its font cannot draw, so this page cannot be drawn as a PDF.", error.message
+  end
+
   test "a heading's note is drawn under its text" do
     document = page(section(row(column(element("heading", text: "Pricing", note: "Updated monthly")))))
 

@@ -51,9 +51,13 @@ module KeystoneUi
 
       def drawn_element(element, surface, values)
         definition = Pages.catalog.find(element["key"])
+        raise PrintFailed, "The page holds a #{element["key"]} element, which the catalog does not have, so this page cannot be drawn as a PDF." unless definition
         raise NoPdfDrawing, "The #{definition.name} element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome." unless definition.pdf
 
         definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, filled_field(field, element, values) ] })
+      rescue PdfSurface::UndrawableCharacter => error
+        raise PrintFailed, format("The %s element holds the character %s (U+%04X), which its font cannot draw, so this page cannot be drawn as a PDF.",
+                                  definition.name, error.character, error.character.ord)
       end
 
       def filled_field(field, element, values)

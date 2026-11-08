@@ -43,6 +43,7 @@ module KeystoneUi
         return oklch_hex(css) if css.start_with?("oklch(")
 
         hex = css.delete_prefix("#").upcase
+        unreadable(name, css) unless hex.match?(/\A(\h{3}|\h{6})\z/)
         hex.length == 3 ? hex.chars.map { |digit| digit * 2 }.join : hex
       end
 
@@ -67,14 +68,18 @@ module KeystoneUi
         unit = length[/[a-z]+\z/]
         return length.to_f * size if unit == "em" && size
 
-        length.to_f * POINTS_PER_UNIT.fetch(unit, 0.0)
+        length.to_f * POINTS_PER_UNIT.fetch(unit) { length.to_f.zero? ? 0.0 : unreadable(name, length) }
       end
 
       def value(name)
-        resolved(@values.fetch(name))
+        resolved(@values.fetch(name) { raise PrintFailed, "The PDF needs the keystone_ui token #{name}, and the stylesheet does not set it." })
       end
 
       private
+
+      def unreadable(name, css)
+        raise PrintFailed, "The PDF cannot read the keystone_ui token #{name}, whose value is #{css}."
+      end
 
       def resolved(css)
         start = css.index("var(")
