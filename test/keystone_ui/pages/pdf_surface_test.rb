@@ -39,6 +39,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal [ "12", "13.5" ], surface.render.scan(%r{/F[\d.]+ ([\d.]+) Tf}).flatten
   end
 
+  test "a run of rich text given its own colour is drawn in that colour" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.rich_text([ { text: "42" }, { text: " hours", color: "--ks-color-accent" } ], size: "--text-base", color: "--ks-color-text")
+
+    assert_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n/, surface.render)
+  end
+
   test "a boxed line of text is drawn inset from its fill's left edge by the padding's horizontal steps" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
