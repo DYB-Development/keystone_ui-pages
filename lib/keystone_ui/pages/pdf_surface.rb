@@ -335,9 +335,11 @@ module KeystoneUi
         thickness = @look.points(border[:width])
         return unless thickness.positive?
 
-        @document.stroke_color(@look.color(border[:color]))
-        @document.line_width(thickness)
-        @document.stroke_rounded_rectangle([ left + thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
+        translucent(border[:color]) do
+          @document.stroke_color(@look.color(border[:color]))
+          @document.line_width(thickness)
+          @document.stroke_rounded_rectangle([ left + thickness / 2, top - thickness / 2 ], width - thickness, height - thickness, corner)
+        end
       end
 
       def linked(address, width, height)

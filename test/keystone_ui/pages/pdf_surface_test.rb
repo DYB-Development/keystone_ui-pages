@@ -113,6 +113,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_match(%r{/ca 0\.2\b}, surface.render)
   end
 
+  test "a boxed line of text given a translucent border is stroked at the border colour's opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new(":root{--text-sm:.875rem;--ks-spacing:.25rem;--ks-radius-pill:calc(infinity * 1px);--ks-border-width:1px;" \
+                                                                               "--ks-color-tint:#3b82f6;--ks-color-tint-border:#3b82f633;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
+
+    surface.boxed_text("New", size: "--text-sm", fill: "--ks-color-tint", padding: [ "--ks-spacing", 4, 1.5 ], radius: [ "--ks-radius-pill", 1 ],
+                              border: { width: "--ks-border-width", color: "--ks-color-tint-border" })
+
+    assert_match(%r{/CA 0\.2\b}, surface.render)
+  end
+
   test "a box given a border and no fill is stroked in the border's colour at the border's width" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
