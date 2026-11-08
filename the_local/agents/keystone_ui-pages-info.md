@@ -120,7 +120,9 @@ Keystone UI itself must be installed first. Its own install local,
   bars, lines, space, rows of columns and tables. A box can be narrower than its
   column, centred, or clip what it holds to its rounded corners, text in a box
   can be centred, text can keep the spaces and tabs at the start of each line,
-  and a row can share its gap between its columns. Each call names Keystone UI
+  and a row can share its gap between its columns. A box in such a row can be
+  stretched to the height of the row's tallest column, and a group of calls can
+  be kept together so it starts on the next page when it does not fit. Each call names Keystone UI
   tokens, such as a text size or a colour, and prints in the value the host's
   stylesheet gives that token. An element one place leaves out keeps its
   drawing, so a page in a place that offers it still prints it.
@@ -181,12 +183,18 @@ Keystone UI itself must be installed first. Its own install local,
   clicked in the PDF. An info block prints its summary and its detail in full,
   each in its own box at the width of Keystone UI's info popups, without the
   button or the shadow. A feature grid prints its title and subtitle, then its
-  features two to a row in the feature card's box, without their icons and
-  without being stretched to the same height. Heroes, calls to action and
+  features two to a row in the feature card's box, without their icons. The two
+  features in a row are stretched to the same height, as they are on screen.
+  The title and subtitle print on the same page as the first row of features.
+  Heroes, calls to action and
   feature grids print at the sizes Keystone UI gives them on a screen as wide as
   the printed page.
 - **A boxed element that does not fit in the space left on a page** prints
   whole at the top of the next page.
+- **Stored line breaks print as spaces, except in code.** Every element but
+  code joins a line break or run of spaces stored in its text into one space,
+  as a browser shows it. Code keeps its line breaks, spaces and tabs. A
+  paragraph's own line breaks, set in the builder, still print.
 - **The Ruby drawing takes Keystone UI's look.** It reads the `--ks-` tokens for
   fonts, font weights, text colours, tone colours, borders, corner radius and
   spacing from the host's compiled stylesheet, in light mode and in the host's

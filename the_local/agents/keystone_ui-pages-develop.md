@@ -253,7 +253,7 @@ inherit from the base controller, so define it there.
     `--tracking-wider` letter spacing, at `--text-xs--line-height`.
   - A paragraph draws each of its stored paragraphs at `--text-base` in
     `--ks-font-body` and `--ks-color-text`, at `--leading-relaxed`. Line breaks
-    and links are kept, and a link opens its address when clicked in the PDF.
+    the editor adds in the builder and links are kept, and a link opens its address when clicked in the PDF.
     Bold and italic marks stored in the text print bold and italic. Scripts,
     styles and every other tag are dropped. A paragraph saved as a plain string
     draws as one paragraph.
@@ -415,10 +415,16 @@ inherit from the base controller, so define it there.
     at `--ks-font-weight-heading` in `--ks-color-text-display`, then two steps,
     and its description at `--text-sm` in `--ks-color-text-display-muted`, each
     at its size's `--line-height` token. Icons are not drawn, and two features
-    in a row are not stretched to the same height.
+    in a row are stretched to the same height. The title, the subtitle and the
+    first row of features are drawn together, so the title never sits alone at
+    the bottom of a page.
   - The form, the copy button and the Next page button draw nothing in the
     Ruby drawing. The four `--ks-spacing` steps between elements in a column
     are still kept around each of them.
+  - Every one of the gem's own elements but code joins each line break or run
+    of spaces in its text fields into one space, and trims the ends, before
+    drawing, as a browser shows that text. Code keeps them. A host element's
+    `pdf:` drawing is handed its fields as stored, with nothing joined.
 - **Fonts in the Ruby drawing.** A font token is read as a list of families,
   and `inherit` takes the `html` element's `font-family`. The first family the
   stylesheet loads with `@font-face` is used. A list with no such family prints
@@ -589,7 +595,7 @@ inherit from the base controller, so define it there.
   place leaves out with `leaves_out:` still prints by its drawing on a page in
   a place that offers it. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has nine
+  reads the tokens as the Ruby drawing's look describes. The surface has ten
   calls.
   - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil, preformatted: false)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
@@ -613,7 +619,7 @@ inherit from the base controller, so define it there.
     `italic: true`, `size:` (a length token for that run alone) and `color:` (a
     colour token for that run alone). A run whose text is `"\n"` breaks the
     line.
-  - `box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false) { ... }` draws a box
+  - `box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, stretch: false) { ... }` draws a box
     the width of the column, as tall as what the block draws, and draws the
     block inside it. A box that does not fit in the space left on the page
     starts on the next page, unless it is taller than a page. `width:` is a
@@ -631,6 +637,8 @@ inherit from the base controller, so define it there.
     `{ width: "--ks-border-width", color: "--ks-color-border-subtle" }`. The
     outline is drawn inside the box and its thickness is added to the padding.
     A thickness of zero draws no outline, and no border means none.
+    `stretch: true` in a part of a `row` given `grid: true` draws the box as
+    tall as the row's tallest part, and outside such a row it changes nothing.
   - `boxed_text(content, size:, fill:, padding:, radius:, border: nil, link: nil, font: "--ks-font-body", weight: nil, color: "--ks-color-text", leading: nil, align: nil)`
     writes the content on a rounded box as wide as the content and its padding,
     and never wider than the column. `size:`, `font:`, `weight:`, `color:` and
@@ -661,6 +669,9 @@ inherit from the base controller, so define it there.
     the shares split what remains, so equal shares draw equal columns. The block runs once per part
     with its index, every part starts at the same height, and drawing continues
     below the tallest.
+  - `together { ... }` draws what the block draws, starting it on the next page
+    when it does not fit in the space left on the page, unless it is taller
+    than a page.
   - `table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)` draws a table
     the width of the column. `heading`, each entry of `rows` and `total` are
     rows, each a hash of `cells:` and optionally `fill:`, a colour token drawn
@@ -922,7 +933,7 @@ The catalog offers these Keystone UI components by default: `button`,
     Register it with `pdf:` in the same `catalog.register` call that adds the
     element, since registering the key again replaces the whole entry. The
     drawing takes the surface and the field values only, so read every field
-    from `fields` by its symbol key and draw only with the surface's nine
+    from `fields` by its symbol key and draw only with the surface's ten
     calls. An element registered without `pdf:` refuses every PDF of a page
     showing it with `NoPdfDrawing`, whose message is "The <name> element has
     no PDF drawing, so this page cannot be drawn as a PDF without Chrome."
@@ -942,7 +953,7 @@ The catalog offers these Keystone UI components by default: `button`,
   PDF another way, because the gem's drawing applies bound values, conditions,
   layout and print rules together.
 - **A `pdf:` drawing draws only through the surface.** It takes the surface and
-  the field values and calls the surface's nine calls, never Prawn directly,
+  the field values and calls the surface's ten calls, never Prawn directly,
   since the surface places each call in the element's column and reads the
   host's tokens.
 - **Only the live version leaves the builder.** The draft is what editors
