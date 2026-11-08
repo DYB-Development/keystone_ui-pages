@@ -847,7 +847,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     features = %w[Fast Clear Yours].map { |title| { "title" => title, "description" => "#{title} pages." } }
     document = page(section(row(column(element("feature_grid", title: "Why teams choose us", subtitle: "Three reasons.", features: features)))))
 
-    assert_equal %i[together text space box text space row box text space text box text together_end space row box text space text],
+    assert_equal %i[together text space box text space row box text space text box text space text together_end space row box text space text],
                  drawn(document).drawn.drop(1).map(&:first)
   end
 
