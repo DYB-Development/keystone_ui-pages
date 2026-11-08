@@ -699,10 +699,18 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a centred hero draws its badge, title and subtitle centred, and a split hero draws them from the left, as the page lays them out at the printed page's width" do
     aligned = %w[centered split].map do |layout|
       document = page(section(row(column(element("hero", layout: layout, badge: "New", title: "Quotes in minutes", subtitle: "Build a quote.")))))
-      drawn(document).drawn.select { |call| %i[box boxed_text text].include?(call.first) }.map { |call| call.last[:align] }
+      drawn(document).drawn.select { |call| %i[boxed_text text].include?(call.first) || (call.first == :box && call.last.key?(:width)) }.map { |call| call.last[:align] }
     end
 
     assert_equal [ [ :center ] * 4, [ nil ] * 4 ], aligned
+  end
+
+  test "a hero is drawn inside the space and padding keystone_ui's hero rules give it, its badge, title, subtitle and empty actions row eight spacing steps apart" do
+    document = page(section(row(column(element("hero", badge: "New", title: "Quotes in minutes", subtitle: "Build a quote.")))))
+
+    assert_equal [ [ :space, "--ks-spacing", 24 ], [ :box, { padding: [ "--ks-spacing", 6, 24 ] } ], :boxed_text, [ :space, "--ks-spacing", 8 ], :text,
+                   [ :space, "--ks-spacing", 8 ], :box, :text, [ :space, "--ks-spacing", 8 ] ],
+                 drawn(document).drawn.drop(1).map { |call| call.first == :space || call.last.keys == [ :padding ] ? call : call.first }
   end
 
   private

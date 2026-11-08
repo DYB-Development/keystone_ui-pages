@@ -78,6 +78,10 @@ module KeystoneUi
       DISPLAY_SUBTITLE_SIZE = "--text-lg"
       HERO_SUBTITLE_WIDTH = [ "--container-lg", 1 ].freeze
       HERO_ALIGNMENTS = { "centered" => :center }.freeze
+      HERO_TOP = 24
+      HERO_PADDING_ACROSS = 6
+      HERO_PADDING_DOWN = 24
+      HERO_GAP = 8
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -271,9 +275,21 @@ module KeystoneUi
 
       def hero(surface, fields)
         align = HERO_ALIGNMENTS[fields[:layout].to_s]
-        surface.boxed_text(fields[:badge], size: HERO_BADGE_SIZE, **HERO_BADGE_LOOK, align: align) if fields[:badge].present?
-        surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE), align: align)
-        display_subtitle(surface, fields[:subtitle], HERO_SUBTITLE_WIDTH, align) if fields[:subtitle].present?
+        surface.space(SPACING, HERO_TOP)
+        surface.box(padding: [ SPACING, HERO_PADDING_ACROSS, HERO_PADDING_DOWN ]) do
+          hero_badge(surface, fields[:badge], align) if fields[:badge].present?
+          surface.text(fields[:title], size: HERO_TITLE_SIZE, **DISPLAY_TITLE_LOOK, leading: line_height(HERO_TITLE_SIZE), align: align)
+          surface.space(SPACING, HERO_GAP)
+          if fields[:subtitle].present?
+            display_subtitle(surface, fields[:subtitle], HERO_SUBTITLE_WIDTH, align)
+            surface.space(SPACING, HERO_GAP)
+          end
+        end
+      end
+
+      def hero_badge(surface, badge, align)
+        surface.boxed_text(badge, size: HERO_BADGE_SIZE, **HERO_BADGE_LOOK, align: align)
+        surface.space(SPACING, HERO_GAP)
       end
 
       def display_subtitle(surface, subtitle, width, align)
