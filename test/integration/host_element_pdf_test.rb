@@ -5,6 +5,7 @@ require "minitest/mock"
 require "keystone_ui/pages/printer"
 require "keystone_ui/pages/operations"
 require "keystone_ui/pages/pdf_look"
+require "keystone_ui/pages/pdf_drawing"
 
 class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
   QUOTE_DRAWING = ->(surface, fields) { surface.text(fields[:text], size: "--text-base") }
@@ -56,6 +57,15 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page_holding(:quote, "text" => "Plain"), values: {}) }
 
     assert_includes fill_colors(pdf.file.download), accent
+  end
+
+  test "a host element registered without a PDF drawing refuses the PDF with a message naming the element" do
+    KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph, fields: [ { key: :text, label: "Text", default: "Hi" } ])
+    page = page_holding(:quote, "text" => "Plain")
+
+    error = assert_raises(KeystoneUi::Pages::NoPdfDrawing) { KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) } }
+
+    assert_equal "The Quote element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   private
