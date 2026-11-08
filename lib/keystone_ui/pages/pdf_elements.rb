@@ -212,7 +212,7 @@ module KeystoneUi
       end
 
       def figure(surface, fields)
-        surface.text(fields[:text], size: FIGURE_SIZE, color: FIGURE_COLORS.fetch(fields[:tone].to_s, FIGURE_COLORS["neutral"]))
+        surface.text(fields[:text], size: FIGURE_SIZE, font: "--ks-font-body", color: FIGURE_COLORS.fetch(fields[:tone].to_s, FIGURE_COLORS["neutral"]), leading: PAGE_LINE_HEIGHT)
       end
 
       def paragraph(surface, fields)

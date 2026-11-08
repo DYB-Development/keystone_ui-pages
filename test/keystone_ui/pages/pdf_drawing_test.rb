@@ -589,6 +589,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.select { |call| call.first == :text }.map { |call| [ call[1], call.last[:color] ] }
   end
 
+  test "a figure is drawn in the body font at the text size and line height the stylesheet gives the page" do
+    document = page(section(row(column(element("figure", text: "$12")))))
+
+    assert_equal [ "--text-base", { font: "--ks-font-body", leading: "line-height" } ], drawn(document).drawn.last.then { |call| [ call[2], call.last.except(:color) ] }
+  end
+
   private
 
   def drawn(document, values: {})
