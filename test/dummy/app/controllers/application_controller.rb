@@ -43,7 +43,7 @@ class ApplicationController < ActionController::Base
   def funnel_sequence(key)
     return if request.headers["X-Sequence"] == "refused"
 
-    KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.current.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}", screen_url: request.headers["X-Sequence-Screen"])
+    KeystoneUi::Pages::Sequence.new(title: "Spring sale funnel", pages: KeystoneUi::Pages::Page.current.where(sequence_key: key).order(:name).to_a, back_url: "/funnels/#{key}", screen_url: request.headers["X-Sequence-Screen"], end_label: request.headers["X-Sequence-End"])
   end
 
   def funnel_sequence_with_screen(key)

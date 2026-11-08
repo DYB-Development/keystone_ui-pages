@@ -63,6 +63,12 @@ class KeystoneUi::Pages::SequenceScreenTest < ActionDispatch::IntegrationTest
     assert_equal "/funnels/spring-sale/flow", sequence_props["screen_url"]
   end
 
+  test "the sequence screen gives the label of the entry the host's sequence shows after its last page" do
+    get "/pages/manage/sequences/funnel/spring-sale", headers: { "X-Sequence-End" => "End" }
+
+    assert_equal "End", sequence_props["end_label"]
+  end
+
   private
 
   def sequence_props
