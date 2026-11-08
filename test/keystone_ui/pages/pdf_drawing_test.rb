@@ -748,6 +748,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--text-base", { font: "--ks-font-body", color: "--ks-color-on-page", leading: "line-height", align: :center } ], drawn(document).drawn.last.last(2)
   end
 
+  test "a card is drawn as its title, its summary and its link text, in the order the page shows them" do
+    document = page(section(row(column(element("card", title: "Pricing", summary: "Plans for every team.", link: "https://ty-ler.com/pricing", cta: "See plans")))))
+
+    assert_equal [ "Pricing", "Plans for every team.", "See plans" ],
+                 drawn(document).drawn.filter_map { |call| call[1] if call.first == :text || call.first == :rich_text }.map { |content| content.is_a?(Array) ? content.sum("") { |run| run[:text] } : content }
+  end
+
   private
 
   def drawn(document, values: {})

@@ -41,7 +41,7 @@ module KeystoneUi
           fields: [ { key: :title, label: "Title", kind: :text, default: "Ready to start?" },
                     { key: :subtitle, label: "Subtitle", kind: :text },
                     { key: :text, label: "Text", kind: :long_text } ])
-        catalog.register(key: :card, name: "Card", component: :ui_card, icon: :card, group: "Content",
+        catalog.register(key: :card, name: "Card", component: :ui_card, icon: :card, group: "Content", pdf: PdfElements.method(:card),
           fields: [ { key: :title, label: "Title", kind: :text, default: "Card title" },
                     { key: :summary, label: "Summary", kind: :long_text },
                     { key: :link, label: "Link", kind: :address, default: "#" },
