@@ -89,6 +89,15 @@ class KeystoneUi::Pages::BuilderSequenceTest < KeystoneUi::Pages::ApplicationSys
     assert_empty find("[data-sequence-pages] ol > li", text: "End").all("a")
   end
 
+  test "the host's entry after a sequence's last page offers no Remove when the place removes pages" do
+    KeystoneUi::Pages.register_place("funnel", label: "Funnel", listed: false, sequence_method: :funnel_sequence_with_end, adds_page_method: :add_funnel_page, removes_page_method: :remove_funnel_page)
+    KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
+
+    visit "/pages/manage/sequences/funnel/spring-sale"
+
+    assert_equal "End", find("[data-sequence-pages] ol > li:last-child").text.squish
+  end
+
   test "the sequence's list holds only its pages when the host's sequence names no entry after them" do
     KeystoneUi::Pages::Page.create!(name: "Landing", slug: "landing", place: "funnel", sequence_key: "spring-sale")
 
