@@ -68,6 +68,8 @@ module KeystoneUi
       CODE_FONT = "--font-mono"
       CODE_LOOK = { padding: [ SPACING, 0 ], radius: [ "--ks-radius-surface", 1 ], border: { width: "--ks-border-width", color: "--ks-color-border-subtle" }, clip: true }.freeze
       CODE_BLOCK_LOOK = { padding: [ SPACING, 4 ], fill: "--ks-color-code" }.freeze
+      CODE_CAPTION_LOOK = { padding: [ SPACING, 4, 2 ], fill: "--ks-color-fill-muted" }.freeze
+      CODE_CAPTION_SIZE = "--text-xs"
       PARAGRAPH_TAGS = %w[p br a strong b em i].freeze
       PARAGRAPH_MARKS = { "strong" => :bold, "b" => :bold, "em" => :italic, "i" => :italic }.freeze
 
@@ -247,10 +249,16 @@ module KeystoneUi
 
       def code(surface, fields)
         surface.box(**CODE_LOOK) do
+          code_caption(surface, fields[:caption]) if fields[:caption].present?
           surface.box(**CODE_BLOCK_LOOK) do
             surface.text(fields[:code], size: CODE_SIZE, font: CODE_FONT, color: "--ks-color-text-code", leading: "--leading-relaxed", preformatted: true)
           end
         end
+      end
+
+      def code_caption(surface, caption)
+        surface.box(**CODE_CAPTION_LOOK) { surface.text(caption, size: CODE_CAPTION_SIZE, font: CODE_FONT, color: "--ks-color-text-display-muted", leading: line_height(CODE_CAPTION_SIZE)) }
+        surface.rule(width: "--ks-border-width", color: "--ks-color-border-subtle")
       end
 
       def paragraph(surface, fields)

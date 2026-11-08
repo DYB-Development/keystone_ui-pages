@@ -657,6 +657,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).drawn.drop(1).map { |call| call.first == :text ? :text : call }
   end
 
+  test "a code element's caption is drawn above its code, as the page shows it, in the look keystone_ui's code caption rule gives it with its line beneath" do
+    document = page(section(row(column(element("code", code: "puts 42", caption: "total.rb")))))
+
+    assert_equal [ [ :box, { padding: [ "--ks-spacing", 4, 2 ], fill: "--ks-color-fill-muted" } ],
+                   [ :text, "total.rb", "--text-xs", { font: "--font-mono", color: "--ks-color-text-display-muted", leading: "--text-xs--line-height" } ],
+                   [ :rule, { width: "--ks-border-width", color: "--ks-color-border-subtle" } ], [ :box, { padding: [ "--ks-spacing", 4 ], fill: "--ks-color-code" } ] ],
+                 drawn(document).drawn.drop(2).first(4)
+  end
+
   private
 
   def drawn(document, values: {})
