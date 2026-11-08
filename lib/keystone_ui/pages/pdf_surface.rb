@@ -18,6 +18,7 @@ module KeystoneUi
       BOLD_WEIGHT = 600
       MEASURING_HEIGHT = 14_400
       NO_BREAK_SPACE = "\u00A0"
+      TAB_SIZE = "tab-size"
 
       def initialize(look)
         @look = look
@@ -363,7 +364,14 @@ module KeystoneUi
       end
 
       def kept_spaces(content)
-        content.gsub(/^ +/) { |spaces| NO_BREAK_SPACE * spaces.length }
+        content.lines.map { |line| tab_stopped(line) }.join.gsub(/^ +/) { |spaces| NO_BREAK_SPACE * spaces.length }
+      end
+
+      def tab_stopped(line)
+        return line unless line.include?("\t")
+
+        stop = @look.value(TAB_SIZE).to_i
+        line.each_char.with_object(+"") { |char, spaced| spaced << (char == "\t" ? " " * (stop - spaced.length % stop) : char) }
       end
 
       def translucent(color, &painting)

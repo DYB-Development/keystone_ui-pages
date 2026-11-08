@@ -227,6 +227,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_includes lefts(surface.render).keys, "  42".encode(Encoding::Windows_1252).b
   end
 
+  test "preformatted text draws a tab as the spaces up to the next tab stop the stylesheet's tab size sets" do
+    surface = KeystoneUi::Pages::PdfSurface.new(KeystoneUi::Pages::PdfLook.new("html{tab-size:4}:root{--text-base:1rem;--ks-color-text:#000000;--ks-font-body:sans-serif}"))
+
+    surface.text("ab\t42", size: "--text-base", preformatted: true)
+
+    assert_includes lefts(surface.render).keys, "ab  42"
+  end
+
   test "text holding a character its font cannot draw is refused naming the character" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
