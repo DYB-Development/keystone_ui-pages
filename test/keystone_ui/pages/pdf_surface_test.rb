@@ -203,6 +203,14 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal %w[Service Review Audit Total], heights(surface.render).sort_by { |_text, height| -height.to_f }.map(&:first)
   end
 
+  test "a table row given a fill is drawn on that fill across the table's whole width and the row's height" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.table(table_row("Service", fill: "--ks-color-accent"), [], **table_look)
+
+    assert_match(/0\.145\d* 0\.388\d* 0\.92\d* scn\n36\.0 718\.128 540\.0 37\.872 re\nf/, surface.render)
+  end
+
   private
 
   def look

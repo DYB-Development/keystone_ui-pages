@@ -140,16 +140,28 @@ module KeystoneUi
 
       def drawn_table_row(table_row, widths)
         top = @document.y
-        lowest = top
+        height = row_height(table_row, widths)
+        if table_row[:fill]
+          @document.fill_color(@look.color(table_row[:fill]))
+          @document.fill_rectangle([ 0, @document.cursor ], widths.sum, height)
+        end
         table_row[:cells].each_with_index do |cell, index|
           left, right, down = cell_insets(cell)
           @document.y = top - down
-          @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) do
-            text(cell[:text], **cell.except(:text, :padding))
-            lowest = [ lowest, @document.y - down ].min
-          end
+          @document.bounding_box([ widths.take(index).sum + left, @document.cursor ], width: widths[index] - left - right) { drawn_cell(cell) }
         end
-        @document.y = lowest
+        @document.y = top - height
+      end
+
+      def row_height(table_row, widths)
+        table_row[:cells].each_with_index.map do |cell, index|
+          left, right, down = cell_insets(cell)
+          measured(widths[index] - left - right) { drawn_cell(cell) } + down * 2
+        end.max
+      end
+
+      def drawn_cell(cell)
+        text(cell[:text], **cell.except(:text, :padding))
       end
 
       def cell_insets(cell)
