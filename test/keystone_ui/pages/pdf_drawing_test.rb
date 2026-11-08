@@ -489,6 +489,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).tables.last.then { |call| [ call[1], call[2].first ].map { |table_row| table_row[:cells].pluck(:padding) } }
   end
 
+  test "a table is drawn inside the border and rounded corners keystone_ui's table rule gives it, with its rows divided as its table body rule divides them" do
+    document = page(section(row(column(element("data_table", columns: SERVICE_COLUMNS, items: [ { "service" => "Review", "hours" => "4" } ])))))
+
+    assert_equal({ border: { width: "--ks-border-width", color: "--ks-color-border" }, radius: [ "--ks-radius-surface", 1 ], divider: { width: "--ks-border-width", color: "--ks-color-divider" } },
+                 drawn(document).tables.last.last.except(:total))
+  end
+
   private
 
   def drawn(document, values: {})
