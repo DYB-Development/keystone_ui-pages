@@ -820,7 +820,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ [ :text, "Why teams choose us", "--text-4xl", { font: "--ks-font-body", weight: "calc(var(--ks-font-weight-heading)+100)", color: "--ks-color-text-display",
                                                                     tracking: "--tracking-tight", leading: "--text-4xl--line-height", align: :center } ],
                    [ :space, "--ks-spacing", 4 ], [ :box, { padding: [ "--ks-spacing", 0 ], width: [ "--container-2xl", 1 ], align: :center } ], :text, [ :space, "--ks-spacing", 16 ] ],
-                 drawn(document).drawn.drop(1).first(5).map { |call| call[1] == "Three reasons." ? :text : call }
+                 drawn(document).drawn.drop(2).first(5).map { |call| call[1] == "Three reasons." ? :text : call }
   end
 
   test "a feature grid's features are drawn two to a row of equal columns, six spacing steps apart across and down, as keystone_ui's feature grid lays them out at the printed page's width" do
