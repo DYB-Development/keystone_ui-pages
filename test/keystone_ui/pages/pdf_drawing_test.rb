@@ -872,6 +872,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).plotted(:label).select { |call| call.last == style }.map { |call| [ call[1], call[2].map { |length| length.round(3) }, call[3] ] }
   end
 
+  test "a line chart draws Chart.js's faint axis line along the bottom of the chart, over the grid and beneath the lines" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    lines = drawn(document).plotted(:line)
+    assert_equal [ [ [ 20.625, 181.85 ], [ 493.813, 181.85 ] ], { width: "1px", color: "#0000001A" } ], lines[-2].drop(1).then { |points, style| [ points.map { |point| point.map { |length| length.round(3) } }, style ] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

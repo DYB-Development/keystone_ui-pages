@@ -30,6 +30,7 @@ module KeystoneUi
       AXIS_TEXT = { size: AXIS_SIZE, color: "--ks-color-text-muted" }.freeze
       TICK_LENGTH = "8px"
       TICK_PADDING = "3px"
+      AXIS_BORDER = { width: "1px", color: "#0000001A" }.freeze
       LEGEND_SIZE = "12px"
       LEGEND_FONT = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
       LEGEND_BOX_WIDTH = "40px"
@@ -56,6 +57,7 @@ module KeystoneUi
           area = line_chart_area(plot, series, labels)
           line_chart_ticks(plot, area)
           line_chart_labels(plot, area, labels)
+          plot.line([ [ area[:left], area[:bottom] ], [ area[:right], area[:bottom] ] ], **AXIS_BORDER)
           series.zip(series_colors(series)).each { |entry, color| series_lines(plot, area, labels, entry, color) }
         end
       end
