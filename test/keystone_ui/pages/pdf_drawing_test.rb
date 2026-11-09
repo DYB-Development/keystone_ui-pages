@@ -782,7 +782,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
 
     muted = { size: "--text-xs", color: "--ks-color-text-muted", anchor: :middle }
-    assert_equal [ [ :label, "Mon", [ 147.5, 195.5 ], muted ], [ :label, "Tue", [ 382.5, 195.5 ], muted ] ], drawn(document).plotted(:label)
+    assert_equal [ [ :label, "Mon", [ 147.5, 195.5 ], muted ], [ :label, "Tue", [ 382.5, 195.5 ], muted ] ], drawn(document).plotted(:label).select { |call| call.last[:anchor] == :middle }
+  end
+
+  test "a bar chart writes each tick of its axis at the tick's height, ending just left of the bars in keystone_ui's small muted chart text" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    ticks = drawn(document).plotted(:label).select { |call| call.last[:anchor] == :end }
+    assert_equal [ [ "0", 182.0 ], [ "2", 126.187 ], [ "4", 70.373 ], [ "6", 14.56 ] ].map { |text, down| [ :label, text, [ 25.5, down ], { size: "--text-xs", color: "--ks-color-text-muted", anchor: :end, baseline: :middle } ] },
+                 ticks.map { |call| [ call[0], call[1], [ call[2].first, call[2].last.round(3) ], call[3] ] }
   end
 
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
