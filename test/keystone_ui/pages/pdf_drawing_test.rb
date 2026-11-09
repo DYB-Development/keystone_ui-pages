@@ -824,7 +824,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
 
     assert_equal [ [ [ 20.625, 181.85 ], [ 178.354, 102.925 ], [ 336.083, 142.388 ], [ 493.813, 24.0 ] ] ],
-                 drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call[1].map { |point| point.map { |length| length.round(3) } } }
+                 series_lines(drawn(document)).map { |call| call[1].map { |point| point.map { |length| length.round(3) } } }
   end
 
   test "a line chart draws its series in keystone_ui's five chart colours in turn, starting again after the fifth" do
@@ -832,21 +832,21 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
 
     assert_equal %w[1 2 3 4 5 1].map { |position| "--ks-color-chart-#{position}" },
-                 drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:color] }
+                 series_lines(drawn(document)).map { |call| call.last[:color] }
   end
 
   test "a line chart draws a series given its own colour in that colour, and the series without one take the chart colours in turn" do
     series = [ { "name" => "Target", "data" => [ 1, 2 ], "color" => "var(--ks-color-danger-600)" }, { "name" => "Visits", "data" => [ 1, 2 ] }, { "name" => "Sales", "data" => [ 1, 2 ], "color" => "#123456" } ]
     document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
 
-    assert_equal [ "--ks-color-danger-600", "--ks-color-chart-1", "#123456" ], drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:color] }
+    assert_equal [ "--ks-color-danger-600", "--ks-color-chart-1", "#123456" ], series_lines(drawn(document)).map { |call| call.last[:color] }
   end
 
   test "a line chart draws a dashed series in the dashes keystone_ui's line chart gives it" do
     series = [ { "name" => "Target", "data" => [ 1, 2 ], "dashed" => true }, { "name" => "Visits", "data" => [ 1, 2 ] } ]
     document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
 
-    assert_equal [ "6px", nil ], drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:dash] }
+    assert_equal [ "6px", nil ], series_lines(drawn(document)).map { |call| call.last[:dash] }
   end
 
   test "a line chart writes each tick Chart.js gives its values at the tick's height, ending just left of the lines in keystone_ui's muted text" do
@@ -861,7 +861,9 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
 
     grid = Array.new(9) { |index| (24 + (8 - index) * 157.85 / 8).round(3) }.map { |down| [ [ [ 14.625, down ], [ 493.813, down ] ], { width: "1px", color: "--ks-color-border" } ] }
-    assert_equal grid + [ :series ], drawn(document).plotted(:line).map { |call| call.last[:width] == "1.5px" ? :series : [ call[1].map { |point| point.map { |length| length.round(3) } }, call[2] ] }.reject { |call| call != :series && call.last[:color] != "--ks-color-border" }
+    surface = drawn(document)
+    assert_equal grid + [ :series ], surface.plotted(:line).map { |call| series_lines(surface).include?(call) ? :series : [ call[1].map { |point| point.map { |length| length.round(3) } }, call[2] ] }
+                                            .select { |call| call == :series || call.last[:color] == "--ks-color-border" }
   end
 
   test "a line chart writes each of its labels centred under its place along the chart, below the chart's tick marks, in keystone_ui's muted text" do
@@ -877,6 +879,15 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     lines = drawn(document).plotted(:line)
     assert_equal [ [ [ 20.625, 181.85 ], [ 493.813, 181.85 ] ], { width: "1px", color: "#0000001A" } ], lines[-2].drop(1).then { |points, style| [ points.map { |point| point.map { |length| length.round(3) } }, style ] }
+  end
+
+  test "a line chart draws Chart.js's legend centred above the chart, each series as a box outlined in its colour beside its name" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    outline = [ [ 219.25, 7.5 ], [ 249.25, 7.5 ], [ 249.25, 16.5 ], [ 219.25, 16.5 ], [ 219.25, 7.5 ] ]
+    assert_equal [ [ :rect, [ 219.25, 7.5, 30.0, 9.0 ], { color: "#0000001A" } ], [ :line, outline, { width: "1.5px", color: "--ks-color-chart-1", dash: nil } ],
+                   [ :label, "Visits", [ 253.75, 12.0 ], { size: "12px", color: "#666", font: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", baseline: :middle } ] ],
+                 drawn(document).plotted.first(3)
   end
 
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
@@ -1103,6 +1114,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   private
+
+  def series_lines(surface)
+    surface.plotted(:line).select { |call| call.last[:width] == "1.5px" && call[1].first != call[1].last }
+  end
 
   def drawn(document, values: {})
     RecordingSurface.new.tap { |surface| KeystoneUi::Pages::PdfDrawing.draw(document, surface, values: values) }

@@ -35,6 +35,8 @@ module KeystoneUi
       LEGEND_FONT = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
       LEGEND_BOX_WIDTH = "40px"
       LEGEND_PADDING = "10px"
+      LEGEND_COLOR = "#666"
+      LEGEND_FILL = "#0000001A"
 
       module_function
 
@@ -54,11 +56,13 @@ module KeystoneUi
         series = entries(fields[:series])
         labels = Array(fields[:labels].presence).map(&:to_s)
         surface.plot(height: LINE_CHART_HEIGHT) do |plot|
+          colors = series_colors(series)
           area = line_chart_area(plot, series, labels)
+          legend(plot, series, colors)
           line_chart_ticks(plot, area)
           line_chart_labels(plot, area, labels)
           plot.line([ [ area[:left], area[:bottom] ], [ area[:right], area[:bottom] ] ], **AXIS_BORDER)
-          series.zip(series_colors(series)).each { |entry, color| series_lines(plot, area, labels, entry, color) }
+          series.zip(colors).each { |entry, color| series_lines(plot, area, labels, entry, color) }
         end
       end
 
@@ -95,7 +99,7 @@ module KeystoneUi
       def series_lines(plot, area, labels, entry, color)
         numbers(entry[:data]).first(labels.size).each_with_index.map { |value, index| value && [ across(area, index, labels.size), down(area, value) ] }
                              .chunk_while { |point, following| point && following }.select { |points| points.compact.size > 1 }
-                             .each { |points| plot.line(points, width: LINE_WIDTH, color: color, dash: (DASH if entry[:dashed])) }
+                             .each { |points| plot.line(points, width: LINE_WIDTH, color: color, dash: dash(entry)) }
       end
 
       def across(area, index, count)
@@ -119,6 +123,30 @@ module KeystoneUi
         text.nil? ? 0 : plot.text_width(text, size: AXIS_SIZE)
       end
 
+      def dash(entry)
+        DASH if entry[:dashed]
+      end
+
+      def legend(plot, series, colors)
+        padding = plot.points(LEGEND_PADDING)
+        legend_rows(plot, series).each_with_index do |row, position|
+          left = (padding + plot.width - row.sum { |item| item[:width] + padding }) / 2
+          top = padding + position * (plot.points(LEGEND_SIZE) + padding)
+          row.each do |item|
+            legend_item(plot, item[:entry], colors[item[:index]], left, top)
+            left += item[:width] + padding
+          end
+        end
+      end
+
+      def legend_item(plot, entry, color, left, top)
+        box = plot.points(LEGEND_BOX_WIDTH)
+        tall = plot.points(LEGEND_SIZE)
+        plot.rect(left, top, box, tall, color: LEGEND_FILL)
+        plot.line([ [ left, top ], [ left + box, top ], [ left + box, top + tall ], [ left, top + tall ], [ left, top ] ], width: LINE_WIDTH, color: color, dash: dash(entry))
+        plot.label(entry[:name].to_s, left + box + tall / 2, top + tall / 2, size: LEGEND_SIZE, color: LEGEND_COLOR, font: LEGEND_FONT, baseline: :middle)
+      end
+
       def legend_height(plot, series)
         padding = plot.points(LEGEND_PADDING)
         legend_rows(plot, series).size * (plot.points(LEGEND_SIZE) + padding) + padding
@@ -126,10 +154,10 @@ module KeystoneUi
 
       def legend_rows(plot, series)
         padding = plot.points(LEGEND_PADDING)
-        series.each_with_object([]) do |entry, rows|
+        series.each_with_index.each_with_object([]) do |(entry, index), rows|
           width = legend_item_width(plot, entry)
           rows << [] if rows.empty? || rows.last.sum { |item| item[:width] + padding } + width + padding * 2 > plot.width
-          rows.last << { entry: entry, width: width }
+          rows.last << { entry: entry, index: index, width: width }
         end
       end
 
