@@ -2,6 +2,7 @@
 
 require "prawn"
 require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_plot"
 
 module KeystoneUi
   module Pages
@@ -121,6 +122,16 @@ module KeystoneUi
           @document.fill_rounded_rectangle([ 0, top ], length, thickness, corner(radius, length, thickness))
         end
         @document.move_down(thickness)
+      end
+
+      def plot(height:)
+        width = @document.bounds.width
+        return reached(width) if @reached
+
+        tall = @look.points(height.first) * height.last
+        next_page unless fits?(tall)
+        yield PdfPlot.new(@document, @look, width, tall)
+        @document.move_down(tall)
       end
 
       def rule(width:, color:)
