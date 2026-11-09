@@ -207,17 +207,17 @@ inherit from the base controller, so define it there.
   default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
   the page in Ruby with Prawn from its sections, rows, columns and elements,
   with no Chrome needed. A string works too. The Ruby drawing honours bound
-  values and show-when conditions and lays out each row's columns side by side
-  at their widths, with no host print rules. It takes Keystone UI's look from
+  values and show-when conditions and lays out sections, rows, columns and
+  elements as the page layout below describes, with no host print rules. It
+  takes Keystone UI's look from
   the `pdf_stylesheet`'s `--ks-` tokens, in light mode and in the host's
   default Keystone UI look: values set inside `@media` rules or under any
   selector other than `:root`, `:host`, `html` or the default look's
   `[data-look=...]` are left out, a host's own value outside a layer wins over
   Keystone UI's layered one, and the look's value wins over the root's. A
   token whose value is `var(--other)` reads that token, or the fallback given
-  after a comma when the stylesheet does not set it. Rows
-  in a section sit six `--ks-spacing` steps apart and elements in a column four,
-  where `rem` counts as 12 points, `px` as 0.75 and `pt` as 1. An `em` counts
+  after a comma when the stylesheet does not set it. A
+  length token in `rem` counts 12 points to the `rem`, `px` 0.75 and `pt` 1. An `em` counts
   as 12 points, except in a letter spacing token, where it counts as the size
   of the text it spaces. A length written as `calc(infinity * <length>)` has no
   limit, and is used for fully rounded corners. A weight token may be a number
@@ -243,6 +243,38 @@ inherit from the base controller, so define it there.
   not have raises `PrintFailed` naming the key. A boxed element that does not
   fit in the space left on a page draws whole at the top of the next page,
   unless it is taller than a page.
+- **The page layout in the Ruby drawing.** Each step below is a
+  `--ks-spacing` step.
+  - Each shown section draws below a space of four, six or eight steps for its
+    spacing of `sm`, `md` or `lg`, and `md` when it has none. A section that
+    fits on a page is never split: one that does not fit in the space left
+    starts on the next page. A section taller than a page breaks between its
+    rows.
+  - A shaded section draws its rows on a box the width of the page filled with
+    `--ks-color-fill-muted`, with no padding.
+  - A section with a width of `sm`, `md`, `lg` or `xl` draws its rows centred
+    in a box no wider than `--container-2xl`, `--container-4xl`,
+    `--container-6xl` or `--container-7xl`, padded by six steps across and 16
+    down. A section that is both shaded and sized draws the sized box inside
+    the shaded one. The stylesheet must set the container token a page's
+    sections use, or the PDF raises `PrintFailed` naming it.
+  - Rows in a section sit six steps apart. A row that fits on a page is never
+    split across two.
+  - A row's columns draw side by side on a grid, each at its share of the row,
+    or at an even share of one, a half, a third or a quarter for one to four
+    columns when it has none. The gap between them is three, four, six or
+    eight steps for a row gap of `sm`, `md`, `lg` or `xl`, and four when it has
+    none.
+  - A column aligned to `center` or `bottom` draws its elements halfway down or
+    at the bottom of the space the row's tallest column leaves it, and one
+    aligned to `top`, the default, at the top.
+  - Elements in a column sit four steps apart.
+  - An element's alignment is its own `align` setting, then the `align:` given
+    to `catalog.register`, then `stretch`. A `stretch` element draws across its
+    column. A `start`, `center` or `end` element draws through the surface's
+    `aligned` call: as wide as what it draws, at that side of its column. A
+    label and value list and a table keep the full width of their column when
+    aligned.
 - **The built-in elements in the Ruby drawing.**
   - A heading draws its text at `--text-lg`, `--text-2xl` or `--text-4xl` for
     `sm`, `md` or `lg` in `--ks-font-heading` at `--ks-font-weight-heading` and
@@ -580,7 +612,9 @@ inherit from the base controller, so define it there.
   `:list` `:info` `:code` `:alert` `:card` `:megaphone` `:chart` `:bars`
   `:number` `:progress`, and any other value shows a box. `group:` is the
   palette heading it sits under, `"Other"` when unset. `align:` is the default
-  placement in its column: `"stretch"`, `"start"`, `"center"` or `"end"`.
+  placement in its column: `"stretch"`, `"start"`, `"center"` or `"end"`, used
+  on screen and in the Ruby drawing when the element has no `align` setting of
+  its own.
   `placed: true` also passes `element_id:` and `version:` (nil in the builder)
   to the method, which the Form element uses to build its address.
   `pdf:` is the element's Ruby PDF drawing, used only when `pdf_drawing` is
@@ -593,9 +627,11 @@ inherit from the base controller, so define it there.
   symbol keys, each blank part filled with its entry's `default:`. The drawing
   is found in the whole catalog, whatever the page's place, so an element one
   place leaves out with `leaves_out:` still prints by its drawing on a page in
-  a place that offers it. Every call
+  a place that offers it. The drawing is called several times for one PDF,
+  since sections, rows, columns and aligned elements are measured before they
+  are drawn, so it must change nothing outside the surface. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has ten
+  reads the tokens as the Ruby drawing's look describes. The surface has eleven
   calls.
   - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil, preformatted: false)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
@@ -661,17 +697,32 @@ inherit from the base controller, so define it there.
     length token for its thickness and `color:` a colour token.
   - `space(token, steps)` moves down by that many steps of a length token, such
     as `space("--ks-spacing", 2)`.
-  - `row(widths, gap: nil, grid: false) { |index| ... }` splits the column side by side.
+  - `row(widths, gap: nil, grid: false, align: []) { |index| ... }` splits the column side by side.
     `widths` lists each part's share of the column, such as
     `[ Rational(2, 5), Rational(3, 5) ]`. `gap:` is a length token and a number
     of steps put before every part but the first, taken out of that part's
     share. With `grid: true` the gaps are taken out of the column first and
     the shares split what remains, so equal shares draw equal columns. The block runs once per part
     with its index, every part starts at the same height, and drawing continues
-    below the tallest.
+    below the tallest. `align:` lists `:top`, `:center` or `:bottom` for each
+    part, and with `grid: true` a part shorter than the tallest is drawn at
+    the top, halfway down or at the bottom of the space left beside it. A part
+    with no entry is drawn at the top, and without `grid: true` `align:`
+    changes nothing.
   - `together { ... }` draws what the block draws, starting it on the next page
     when it does not fit in the space left on the page, unless it is taller
     than a page.
+  - `aligned(align) { ... }` draws what the block draws as wide as it is, and
+    places it at the left, the centre or the right of the column for `align`
+    of `:start`, `:center` or `:end`. Any other value raises `KeyError`. How
+    wide the block is comes from what it draws: the widest line of `text` and
+    `rich_text`, a `box` as wide as what it holds and its padding or as its
+    `width:`, a `boxed_text` as wide as its fill, and a `row` or a `table` the
+    whole column. `bar`, `rule` and `space` add no width, so a `bar` or a
+    `rule` beside text is drawn as wide as the text, and a block drawing
+    nothing with width is drawn across the column. A `pdf:` drawing does not
+    need to call it for its own element's placement, since the drawing places
+    an element aligned to `start`, `center` or `end` through it.
   - `table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)` draws a table
     the width of the column. `heading`, each entry of `rows` and `total` are
     rows, each a hash of `cells:` and optionally `fill:`, a colour token drawn
@@ -933,7 +984,7 @@ The catalog offers these Keystone UI components by default: `button`,
     Register it with `pdf:` in the same `catalog.register` call that adds the
     element, since registering the key again replaces the whole entry. The
     drawing takes the surface and the field values only, so read every field
-    from `fields` by its symbol key and draw only with the surface's ten
+    from `fields` by its symbol key and draw only with the surface's eleven
     calls. An element registered without `pdf:` refuses every PDF of a page
     showing it with `NoPdfDrawing`, whose message is "The <name> element has
     no PDF drawing, so this page cannot be drawn as a PDF without Chrome."
@@ -946,6 +997,12 @@ The catalog offers these Keystone UI components by default: `button`,
     left out of the PDF, with a drawing that draws nothing, or drawn on paper is
     the developer's decision, so ask before choosing.
 
+    An element aligned to `start`, `center` or `end`, by its own setting or by
+    the `align:` it was registered with, is drawn only as wide as its drawing
+    reports. A drawing meant to fill its column whatever the alignment, such as
+    one built on a `bar` or a `rule` under a short label, should draw inside a
+    `row([ 1 ])`, which takes the whole column.
+
 ## Conventions
 
 - **Draw through the gem.** Use `keystone_ui_page` and `KeystoneUi::Pages.pdf`.
@@ -953,7 +1010,7 @@ The catalog offers these Keystone UI components by default: `button`,
   PDF another way, because the gem's drawing applies bound values, conditions,
   layout and print rules together.
 - **A `pdf:` drawing draws only through the surface.** It takes the surface and
-  the field values and calls the surface's ten calls, never Prawn directly,
+  the field values and calls the surface's eleven calls, never Prawn directly,
   since the surface places each call in the element's column and reads the
   host's tokens.
 - **Only the live version leaves the builder.** The draft is what editors

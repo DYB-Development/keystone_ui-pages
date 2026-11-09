@@ -8,58 +8,70 @@ require "keystone_ui/pages/keystone_elements"
 
 class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   class RecordingSurface
-    attr_reader :drawn
+    attr_reader :laid_out
 
     def initialize
-      @drawn = []
+      @laid_out = []
+      @depth = 0
+    end
+
+    def drawn
+      @laid_out.select { |call, depth| depth.positive? || call.first == :row }.map(&:first)
     end
 
     def text(content, size:, **style)
-      @drawn << [ :text, content, size, style ]
+      record [ :text, content, size, style ]
     end
 
     def space(token, steps)
-      @drawn << [ :space, token, steps ]
+      record [ :space, token, steps ]
     end
 
     def rich_text(runs, size:, **style)
-      @drawn << [ :rich_text, runs, size, style ]
+      record [ :rich_text, runs, size, style ]
     end
 
     def box(**style)
-      @drawn << [ :box, style ]
+      record [ :box, style ]
       yield
     end
 
     def boxed_text(content, size:, **style)
-      @drawn << [ :boxed_text, content, size, style ]
+      record [ :boxed_text, content, size, style ]
+    end
+
+    def aligned(align)
+      record [ :aligned, align ]
+      yield
     end
 
     def together
-      @drawn << [ :together ]
+      record [ :together ]
       yield
-      @drawn << [ :together_end ]
+      record [ :together_end ]
     end
 
     def rule(**style)
-      @drawn << [ :rule, style ]
+      record [ :rule, style ]
     end
 
     def bar(share, **style)
-      @drawn << [ :bar, share, style ]
+      record [ :bar, share, style ]
     end
 
     def row(widths, **layout)
-      @drawn << [ :row, widths, layout.presence ].compact
+      record [ :row, widths, layout.presence ].compact
+      @depth += 1
       widths.each_index { |index| yield index }
+      @depth -= 1
     end
 
     def table(heading, rows, **style)
-      @drawn << [ :table, heading, rows, style ]
+      record [ :table, heading, rows, style ]
     end
 
     def tables
-      @drawn.select { |call| call.first == :table }
+      drawn.select { |call| call.first == :table }
     end
 
     def table_texts
@@ -67,15 +79,21 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     end
 
     def texts
-      @drawn.select { |call| call.first == :text }.map { |call| call[1] }
+      drawn.select { |call| call.first == :text }.map { |call| call[1] }
     end
 
     def paragraphs
-      @drawn.select { |call| call.first == :rich_text }.map { |call| call[1].sum("") { |run| run[:text] } }
+      drawn.select { |call| call.first == :rich_text }.map { |call| call[1].sum("") { |run| run[:text] } }
     end
 
     def styles
-      @drawn.select { |call| call.first == :text }.map(&:last)
+      drawn.select { |call| call.first == :text }.map(&:last)
+    end
+
+    private
+
+    def record(call)
+      @laid_out << [ call, @depth ]
     end
   end
 
@@ -93,7 +111,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a row's columns are drawn side by side at the widths the page gives them on a wide screen" do
     document = page(section(row(column(wide: "1/4"), column)))
 
-    assert_equal [ :row, [ Rational(1, 4), Rational(1, 2) ] ], drawn(document).drawn.first
+    assert_equal [ Rational(1, 4), Rational(1, 2) ], drawn(document).drawn.first.second
   end
 
   test "a heading or label bound to a host value shows that value, or its fallback when the value is missing" do
@@ -179,7 +197,64 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "rows in a section are drawn six of keystone_ui's spacing steps apart, as the page spaces them on screen" do
     document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
 
-    assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+    assert_equal [ :row, :text, [ :space, "--ks-spacing", 6 ], :row, :text ], drawn(document).laid_out.map(&:first).reject { |call| call.first.start_with?("together") }.drop(1).map { |call| call.first == :space ? call : call.first }
+  end
+
+  test "a section is drawn below the space keystone_ui's small, medium and large section spacing gives it, and medium when it has none" do
+    document = page(section(row(column), spacing: "sm"), section(row(column), spacing: "md"), section(row(column), spacing: "lg"), section(row(column)))
+
+    assert_equal [ 4, 6, 8, 6 ], drawn(document).laid_out.map(&:first).select { |call| call.first == :space }.map(&:last)
+  end
+
+  test "a section's rows are drawn together, so a section that fits on one page is never split across two" do
+    document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
+
+    assert_equal %i[space together row text space row text together_end], drawn(document).laid_out.map { |call, _depth| call.first }.values_at(0, 1, 3, 4, 6, 8, 9, -1)
+  end
+
+  test "a shaded section's rows are drawn on keystone_ui's shaded section fill, with no padding, as the page shades it" do
+    document = page(section(row(column(element("label", text: "Per seat"))), background: "shaded"))
+
+    assert_equal [ :box, { padding: [ "--ks-spacing", 0 ], fill: "--ks-color-fill-muted" } ], drawn(document).laid_out.map(&:first)[2]
+  end
+
+  test "a section with a width setting draws its rows no wider than keystone_ui's page width for that setting" do
+    document = page(*%w[sm md lg xl none].map { |width| section(row(column), width: width) })
+
+    assert_equal [ [ "--container-2xl", 1 ], [ "--container-4xl", 1 ], [ "--container-6xl", 1 ], [ "--container-7xl", 1 ] ],
+                 drawn(document).laid_out.map(&:first).select { |call| call.first == :box }.map { |call| call.last.fetch(:width) }
+  end
+
+  test "a section with a width setting is centred in the padding keystone_ui's page rule and the page's sized section padding give it at the printed page's width" do
+    document = page(section(row(column), width: "md"))
+
+    assert_equal({ padding: [ "--ks-spacing", 6, 16 ], align: :center }, drawn(document).laid_out.map(&:first).find { |call| call.first == :box }.last.except(:width))
+  end
+
+  test "a row's columns are laid out as the page's grid, the space keystone_ui's small, medium, large and extra large grid gaps give apart, and medium when it has none" do
+    document = page(section(*%w[sm md lg xl].map { |gap| row(column, column, gap: gap) }, row(column, column)))
+
+    assert_equal [ 3, 4, 6, 8, 4 ].map { |steps| { gap: [ "--ks-spacing", steps ], grid: true } }, drawn(document).drawn.select { |call| call.first == :row }.map { |call| call.last.slice(:gap, :grid) }
+  end
+
+  test "a row's columns are placed at the top, centre or bottom of the row as each column is aligned, and at the top when it has no alignment" do
+    document = page(section(row(column(align: "top"), column(align: "center"), column(align: "bottom"), column)))
+
+    assert_equal %i[top center bottom top], drawn(document).drawn.first.last[:align]
+  end
+
+  test "an element aligned to the start, centre or end is drawn there in its column, a stretched one across it, and each as its catalog entry aligns it when it has no alignment" do
+    document = page(section(row(column(element("label", text: "Start").merge("align" => "start"), element("label", text: "Centre").merge("align" => "center"),
+                                       element("label", text: "End").merge("align" => "end"), element("label", text: "Stretch").merge("align" => "stretch"),
+                                       element("label", text: "Default"), element("button", label: "Book")))))
+
+    assert_equal %i[start center end start], drawn(document).drawn.select { |call| call.first == :aligned }.map(&:last)
+  end
+
+  test "each row of a section is drawn together, so a section taller than a page breaks between its rows" do
+    document = page(section(row(column(element("label", text: "Per seat"))), row(column(element("label", text: "Billed monthly")))))
+
+    assert_equal %i[together row text together_end space together row text together_end], drawn(document).laid_out.map(&:first).map(&:first)[2..-2]
   end
 
   test "headings, a heading's note and a label are drawn at the text sizes keystone_ui gives them" do
@@ -306,14 +381,20 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   test "a label and value row is padded above and below by two of keystone_ui's spacing steps, as its row rule pads it" do
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" } ])))))
 
-    assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.map { |call| call.first == :space ? call : call.first }
+    assert_equal [ :row, [ :space, "--ks-spacing", 2 ], :row, :text, :text, [ :space, "--ks-spacing", 2 ] ], drawn(document).drawn.reject { |call| call.first.start_with?("together") }.map { |call| call.first == :space ? call : call.first }
   end
 
   test "label and value rows are divided by a line of keystone_ui's border width and colour, and the first row has none above it" do
     document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
 
     assert_equal [ :row, :space, :row, :text, :text, :space, [ :rule, { width: "--ks-border-width", color: "--ks-color-border" } ], :space, :row, :text, :text, :space ],
-                 drawn(document).drawn.map { |call| call.first == :rule ? call : call.first }
+                 drawn(document).drawn.reject { |call| call.first.start_with?("together") }.map { |call| call.first == :rule ? call : call.first }
+  end
+
+  test "each label and value row is drawn together with the line above it, so a row is never split across two pages" do
+    document = page(section(row(column(element("value_list", rows: [ { "label" => "Rate", "value" => "$150.00" }, { "label" => "Hours", "value" => "12" } ])))))
+
+    assert_equal %i[row together space row text text space together_end together rule space row text text space together_end], drawn(document).drawn.map(&:first)
   end
 
   test "a label and value row draws its value four of keystone_ui's spacing steps from its label, as its row rule spaces them" do
@@ -370,7 +451,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     keystone_elements = KeystoneUi::Pages::Catalog.new.tap { |catalog| KeystoneUi::Pages::KeystoneElements.register(catalog) }
 
-    assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first)
+    assert_equal [ :row, :space, :space ], KeystoneUi::Pages.stub(:catalog, keystone_elements) { drawn(document) }.drawn.map(&:first) - [ :aligned ]
   end
 
   test "a button with no address is drawn as its label, in the look keystone_ui's primary medium button rules give it" do

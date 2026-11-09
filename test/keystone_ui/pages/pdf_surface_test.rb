@@ -23,6 +23,95 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_equal 36.0 + (540 - 18) / 2 + 18, lefts(surface.render)["Clear"]
   end
 
+  test "a column in a row laid out as a grid spans its share of a grid whose tracks are split by the gap, so unequal shares sit as the page's twelve-column grid places them" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 3), Rational(2, 3) ], gap: [ "--ks-spacing", 6 ], grid: true) { |index| surface.text(%w[Narrow Wide][index], size: "--text-base") }
+
+    assert_equal 36.0 + ((540 - 11 * 18) / 12.0 * 4 + 3 * 18) + 18, lefts(surface.render)["Wide"]
+  end
+
+  test "a column aligned to the bottom of a row laid out as a grid ends level with the row's tallest column" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true, align: %i[top bottom]) { |index| surface.text([ "First\nSecond\nThird", "Last" ][index], size: "--text-base") }
+
+    assert_equal heights(surface.render)["Third"], heights(surface.render)["Last"]
+  end
+
+  test "a column aligned to the centre of a row laid out as a grid is drawn halfway down the space the row's tallest column leaves it" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.row([ Rational(1, 2), Rational(1, 2) ], gap: [ "--ks-spacing", 6 ], grid: true, align: %i[top center]) { |index| surface.text([ "First\nSecond\nThird", "Middle" ][index], size: "--text-base") }
+
+    assert_equal heights(surface.render)["Second"], heights(surface.render)["Middle"]
+  end
+
+  test "text drawn aligned to the centre is drawn centred in the width it is drawn in, as wide as its widest line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.text("Book\nBook a call", size: "--text-base") }
+
+    assert_in_delta 36.0 + (540 - Prawn::Document.new.width_of("Book a call", size: 12)) / 2, lefts(surface.render)["Book a call"], 0.001
+  end
+
+  test "text drawn aligned to the end is drawn against the right of the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:end) { surface.text("Book a call", size: "--text-base") }
+
+    assert_in_delta 36.0 + 540 - Prawn::Document.new.width_of("Book a call", size: 12), lefts(surface.render)["Book a call"], 0.001
+  end
+
+  test "a box drawn aligned is filled as wide as what it holds and its horizontal padding" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.box(padding: [ "--ks-spacing", 4 ], radius: [ "--ks-radius-control", 1 ], fill: "--ks-color-accent") { surface.text("Revenue", size: "--text-base") } }
+
+    assert_in_delta Prawn::Document.new.width_of("Revenue", size: 12) + 24, fill_widths(surface.render).first, 0.001
+  end
+
+  test "a boxed line of text drawn aligned to the end is drawn with its fill against the right of the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:end) { surface.boxed_text("Book a call", size: "--text-base", fill: "--ks-color-accent", padding: [ "--ks-spacing", 4, 2 ], radius: [ "--ks-radius-control", 1 ]) }
+
+    assert_in_delta 36.0 + 540 - Prawn::Document.new.width_of("Book a call", size: 12) - 12, lefts(surface.render)["Book a call"], 0.001
+  end
+
+  test "rich text drawn aligned to the centre is drawn centred, as wide as its runs on its widest line" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.rich_text([ { text: "Book " }, { text: "a call", bold: true } ], size: "--text-base") }
+
+    widths = Prawn::Document.new.then { |pdf| pdf.width_of("Book ", size: 12) + pdf.font("Helvetica", style: :bold).compute_width_of("a call", size: 12) }
+    assert_in_delta 36.0 + (540 - widths) / 2, lefts(surface.render)["Book "], 0.001
+  end
+
+  test "a row drawn aligned to the centre stays as wide as the width it is drawn in" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.row([ Rational(1, 2), Rational(1, 2) ]) { |index| surface.text(%w[Rate $150][index], size: "--text-base") } }
+
+    assert_equal 36.0, lefts(surface.render)["Rate"]
+  end
+
+  test "a table drawn aligned to the centre stays as wide as the width it is drawn in, as it fills its column unaligned" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:center) { surface.table(table_row("Service"), [ table_row("Review") ], **table_look) }
+
+    assert_equal 36.0 + 6 * 3, lefts(surface.render)["Service"]
+  end
+
+  test "text drawn aligned stays on one line when its widest line's measured width falls a rounding error short of the width it wraps at" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.aligned(:end) { surface.text("Wide heading", size: "1.5rem", weight: "--ks-font-weight-strong") }
+
+    assert_includes lefts(surface.render).keys, "Wide heading"
+  end
+
   test "boxes that stretch in a row laid out as a grid are drawn as tall as the row's tallest column" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 

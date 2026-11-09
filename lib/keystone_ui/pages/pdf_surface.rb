@@ -16,6 +16,9 @@ module KeystoneUi
       end
 
       BOLD_WEIGHT = 600
+      COLUMN_PLACES = { top: 0, center: Rational(1, 2), bottom: 1 }.freeze
+      WRAP_ROUNDING = 1 + Float::EPSILON * 64
+      ALIGNED_PLACES = { start: 0, center: Rational(1, 2), end: 1 }.freeze
       MEASURING_HEIGHT = 14_400
       NO_BREAK_SPACE = "\u00A0"
       TAB_SIZE = "tab-size"
@@ -35,6 +38,7 @@ module KeystoneUi
         @document.font(typeface.name, style: bold?(weight) ? :bold : :normal) do
           drawable!(content.to_s)
           @document.character_spacing(tracking ? @look.points(tracking, size: points) : 0) do
+            reached(content.to_s.lines.map { |line| @document.width_of(line.chomp, size: points) }.max.to_f) if @reached
             spaced(points, leading) { |extra| @document.text(content.to_s, size: points, align: align || :left, leading: extra, final_gap: leading.nil?) }
           end
         end
@@ -46,14 +50,17 @@ module KeystoneUi
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         fragments = runs.map { |run| fragment(bold?(weight) ? run.merge(bold: true) : run) }
-        fragments.each { |fragment| @document.font(typeface.name, style: fragment[:styles].join("_").presence&.to_sym || :normal) { drawable!(fragment[:text].to_s) } }
+        fragments.each { |fragment| @document.font(typeface.name, style: fragment_style(fragment)) { drawable!(fragment[:text].to_s) } }
+        reached(runs_width(fragments, typeface, points)) if @reached
         @document.font(typeface.name) { spaced(points, leading) { |extra| @document.formatted_text(fragments, size: points, leading: extra, final_gap: leading.nil?) } }
       end
 
       def box(padding:, width: nil, align: nil, radius: nil, fill: nil, border: nil, clip: false, stretch: false, &content)
         across, down = insets(padding, border)
+        fixed = width
         width = width ? [ @look.points(width.first) * width.last, @document.bounds.width ].min : @document.bounds.width
         left = align == :center ? (@document.bounds.width - width) / 2 : 0
+        reached(fixed ? width : reach(width - across * 2, &content) + across * 2, left) if @reached
         height = measured(width - across * 2, &content) + down * 2
         height = [ height, @stretched.to_f ].max if stretch
         next_page unless fits?(height) || height > @document.margin_box.height
@@ -79,6 +86,8 @@ module KeystoneUi
         height = measured(width - across * 2, &drawn) + down * 2
         fill_width = [ text_width(content, size, font, weight) + across * 2, width ].min
         left = align == :center ? (width - fill_width) / 2 : 0
+        return reached(fill_width, left) if @reached
+
         corner = corner(radius, fill_width, height)
         linked(link, fill_width, height, left) if link
         translucent(fill) do
@@ -88,6 +97,13 @@ module KeystoneUi
         bordered(border, top, fill_width, height, corner, left) if border
         @document.bounding_box([ left + across, top - down ], width: width - left - across * 2, &drawn)
         @document.move_down(down)
+      end
+
+      def aligned(align, &content)
+        width = [ reach(@document.bounds.width, &content) * WRAP_ROUNDING, @document.bounds.width ].min
+        return yield unless width.positive?
+
+        @document.bounding_box([ (@document.bounds.width - width) * ALIGNED_PLACES.fetch(align), @document.cursor ], width: width, &content)
       end
 
       def together(&content)
@@ -118,19 +134,22 @@ module KeystoneUi
         @document.move_down(@look.points(token) * steps)
       end
 
-      def row(widths, gap: nil, grid: false)
+      def row(widths, gap: nil, grid: false, align: [])
+        reached(@document.bounds.width) if @reached
         spacing = gap ? @look.points(gap.first) * gap.last : 0
-        room = grid ? @document.bounds.width - spacing * (widths.size - 1) : @document.bounds.width
-        stretched = widths.each_with_index.map { |width, index| measured(room * width) { yield index } }.max if grid
+        room = grid ? @document.bounds.width + spacing : @document.bounds.width
+        lost = grid ? spacing : 0
+        heights = widths.each_with_index.map { |width, index| measured(room * width - lost) { yield index } } if grid
+        stretched = heights&.max
         top = @document.y
         first_page = @document.page_number
         lowest = [ first_page, -top ]
         left = 0
         widths.each_with_index do |width, index|
-          column_width = room * width
+          column_width = room * width - lost
           inset = index.positive? && !grid ? spacing : 0
           @document.go_to_page(first_page)
-          @document.y = top
+          @document.y = top - (heights ? (stretched - heights[index]) * COLUMN_PLACES.fetch(align[index] || :top) : 0)
           @document.bounding_box([ left + inset, @document.cursor ], width: column_width - inset) do
             @stretched = stretched
             yield index
@@ -144,6 +163,8 @@ module KeystoneUi
       end
 
       def table(heading, rows, border:, radius:, divider:, total: nil, parts_divider: nil)
+        return reached(@document.bounds.width) if @reached
+
         edge = @look.points(border[:width])
         frame = { border: border, edge: edge, corner: @look.points(radius.first) * radius.last, left: @document.bounds.absolute_left, width: @document.bounds.width, top: @document.y }
         @document.move_down(edge)
@@ -173,6 +194,23 @@ module KeystoneUi
       def fragment(run)
         { text: run[:text], link: run[:link], size: run[:size] && @look.points(run[:size]), color: run[:color] && @look.color(run[:color]),
           styles: %i[bold italic].select { |style| run[style] } }.compact
+      end
+
+      def fragment_style(fragment)
+        fragment[:styles].join("_").presence&.to_sym || :normal
+      end
+
+      def runs_width(fragments, typeface, points)
+        lines = [ 0 ]
+        fragments.each do |fragment|
+          @document.font(typeface.name, style: fragment_style(fragment)) do
+            fragment[:text].to_s.split("\n", -1).each_with_index do |piece, index|
+              lines << 0 if index.positive?
+              lines[-1] += @document.width_of(piece, size: fragment[:size] || points)
+            end
+          end
+        end
+        lines.max
       end
 
       def column_widths(table_rows)
@@ -330,6 +368,19 @@ module KeystoneUi
         @document.move_down((line - letters) / 2)
         yield extra
         @document.move_down((line - letters) / 2)
+      end
+
+      def reach(width)
+        outer = @reached
+        @reached = 0
+        measured(width) { yield }
+        @reached
+      ensure
+        @reached = outer
+      end
+
+      def reached(width, left = 0)
+        @reached = [ @reached, @document.bounds.absolute_left + left + [ width, @document.bounds.width - left ].min ].max
       end
 
       def measured(width)
