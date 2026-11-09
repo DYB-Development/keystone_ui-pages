@@ -7,6 +7,39 @@ require "keystone_ui/pages/catalog"
 require "keystone_ui/pages/keystone_elements"
 
 class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
+  class RecordingPlot
+    LENGTHS = { "--spacing" => 3.0, "--text-xs" => 9.0, "11px" => 8.25, "12px" => 9.0 }.freeze
+
+    attr_reader :calls
+
+    def initialize
+      @calls = []
+    end
+
+    def width = 500.0
+    def height = 200.0
+
+    def points(length)
+      LENGTHS.fetch(length) { length.end_with?("px") ? length.to_f * 0.75 : raise(KeyError, length) }
+    end
+
+    def text_width(content, size:, font: "--ks-font-body")
+      content.to_s.length * points(size) / 2
+    end
+
+    def rect(*place, **style)
+      @calls << [ :rect, place, style ]
+    end
+
+    def line(points, **style)
+      @calls << [ :line, points, style ]
+    end
+
+    def label(content, *place, **style)
+      @calls << [ :label, content, place, style ]
+    end
+  end
+
   class RecordingSurface
     attr_reader :laid_out
 
@@ -68,6 +101,16 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     def table(heading, rows, **style)
       record [ :table, heading, rows, style ]
+    end
+
+    def plot(**style)
+      plotted = RecordingPlot.new
+      yield plotted
+      record [ :plot, style, plotted.calls ]
+    end
+
+    def plotted(call = nil)
+      drawn.select { |drawn_call| drawn_call.first == :plot }.flat_map(&:last).select { |plot_call| call.nil? || plot_call.first == call }
     end
 
     def tables
@@ -133,11 +176,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
-    document = page(section(row(column(element("heading", text: "Pricing"), element("bar_chart")))))
+    document = page(section(row(column(element("heading", text: "Pricing"), element("testimonial")))))
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Bar chart element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Testimonial element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   test "a page holding an element the catalog does not have is refused with a print failure naming the element's key" do
@@ -720,6 +763,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("progress", label: "Hours used")))))
 
     assert_equal({ height: [ "--spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }, drawn(document).drawn.last.last)
+  end
+
+  test "a bar chart is drawn as one bar per entry, each as tall as its value against the chart's top tick, in the area right of the tick labels and above the bar labels" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    assert_equal [ [ 65.25, 98.28, 164.5, 83.72 ], [ 300.25, 42.467, 164.5, 139.533 ] ],
+                 drawn(document).plotted(:rect).map { |call| call[1].map { |length| length.round(3) } }
   end
 
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
