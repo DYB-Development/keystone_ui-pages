@@ -793,6 +793,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  ticks.map { |call| [ call[0], call[1], [ call[2].first, call[2].last.round(3) ], call[3] ] }
   end
 
+  test "a bar chart draws a grid line in keystone_ui's border colour across the bars at each tick, beneath the bars" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    assert_equal [ 182.0, 126.187, 70.373, 14.56 ].map { |down| [ :line, [ [ 30.0, down ], [ 500.0, down ] ], { width: "1px", color: "--ks-color-border" } ] } + %i[rect rect],
+                 drawn(document).plotted.reject { |call| call.first == :label }.map { |call| call.first == :rect ? :rect : [ call[0], call[1].map { |(across, down)| [ across, down.round(3) ] }, call[2] ] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

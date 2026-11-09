@@ -12,6 +12,7 @@ module KeystoneUi
       BAR_COLOR = "--ks-color-chart-1"
       BAR_LABEL_RISE = "6px"
       TICK_GAP = "6px"
+      GRID_LINE = { width: "1px", color: "--ks-color-border" }.freeze
       CHART_TEXT = { size: "--text-xs", color: "--ks-color-text-muted" }.freeze
 
       module_function
@@ -20,6 +21,7 @@ module KeystoneUi
         chart = Keystone::Ui::BarChartComponent.new(bars: entries(fields[:bars]), show_values: fields[:show_values].to_s == "true")
         surface.plot(height: BAR_CHART_HEIGHT, ratio: BAR_CHART_RATIO) do |plot|
           area = bar_chart_area(plot)
+          chart.ticks.each { |tick| plot.line([ placed(area, 0, tick[:y]), placed(area, FULL, tick[:y]) ], **GRID_LINE) }
           chart.ticks.each { |tick| plot.label(tick[:label], area[:left] - plot.points(TICK_GAP), placed(area, 0, tick[:y]).last, **CHART_TEXT, anchor: :end, baseline: :middle) }
           chart.drawn_bars.each { |bar| plot.rect(*placed(area, bar[:x], bar[:y]), *sized(area, bar[:width], bar[:height]), color: BAR_COLOR) }
           chart.drawn_bars.each { |bar| plot.label(bar[:label], placed(area, bar[:center], 0).first, plot.height - plot.points(BAR_LABEL_RISE), **CHART_TEXT, anchor: :middle) }
