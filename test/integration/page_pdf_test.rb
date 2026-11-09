@@ -91,6 +91,14 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     assert_equal "%PDF-drawn", pdf.file.download
   end
 
+  test "a host that still chooses the Chrome drawing gets its PDF from the Ruby drawing" do
+    KeystoneUi::Pages.pdf_drawing = :chrome
+
+    pdf = KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { "%PDF-drawn" }) { KeystoneUi::Pages.pdf(@page, values: {}) }
+
+    assert_equal "%PDF-drawn", pdf.file.download
+  end
+
   test "a refused PDF keeps no file, so asking again after the fix makes a new one" do
     KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { raise KeystoneUi::Pages::PrintFailed, "No font" }) do
       assert_raises(KeystoneUi::Pages::PrintFailed) { KeystoneUi::Pages.pdf(@page, values: {}) }
