@@ -897,6 +897,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ 142.75, 24.0 ], drawn(document).plotted(:rect).last[1].first(2)
   end
 
+  test "a line chart breaks a series' line where it has no value, as Chart.js leaves a gap there" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 1, 2, nil, 3, 4 ] } ], labels: %w[Mon Tue Wed Thu Fri])))))
+
+    assert_equal [ 2, 2 ], series_lines(drawn(document)).map { |call| call[1].size }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
