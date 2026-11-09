@@ -772,6 +772,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).plotted(:rect).map { |call| call[1].map { |length| length.round(3) } }
   end
 
+  test "a bar chart's bars are drawn in keystone_ui's first chart colour" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" } ])))))
+
+    assert_equal [ { color: "--ks-color-chart-1" } ], drawn(document).plotted(:rect).map(&:last)
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

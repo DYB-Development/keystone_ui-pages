@@ -9,6 +9,7 @@ module KeystoneUi
       BAR_CHART_RATIO = Rational(2, 5)
       BAR_CHART_AXIS_WIDTH = 10
       BAR_CHART_LABEL_HEIGHT = 6
+      BAR_COLOR = "--ks-color-chart-1"
 
       module_function
 
@@ -16,7 +17,7 @@ module KeystoneUi
         chart = Keystone::Ui::BarChartComponent.new(bars: entries(fields[:bars]), show_values: fields[:show_values].to_s == "true")
         surface.plot(height: BAR_CHART_HEIGHT, ratio: BAR_CHART_RATIO) do |plot|
           area = bar_chart_area(plot)
-          chart.drawn_bars.each { |bar| plot.rect(*placed(area, bar[:x], bar[:y]), *sized(area, bar[:width], bar[:height])) }
+          chart.drawn_bars.each { |bar| plot.rect(*placed(area, bar[:x], bar[:y]), *sized(area, bar[:width], bar[:height]), color: BAR_COLOR) }
         end
       end
 
