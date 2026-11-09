@@ -27,6 +27,7 @@ module KeystoneUi
       SERIES_COLORS = Array.new(5) { |index| "--ks-color-chart-#{index + 1}" }.freeze
       AXIS_SIZE = "11px"
       CHART_LINE_HEIGHT = 1.2
+      AXIS_TEXT = { size: AXIS_SIZE, color: "--ks-color-text-muted" }.freeze
       TICK_LENGTH = "8px"
       TICK_PADDING = "3px"
       LEGEND_SIZE = "12px"
@@ -53,6 +54,7 @@ module KeystoneUi
         labels = Array(fields[:labels].presence).map(&:to_s)
         surface.plot(height: LINE_CHART_HEIGHT) do |plot|
           area = line_chart_area(plot, series, labels)
+          line_chart_ticks(plot, area)
           series.zip(series_colors(series)).each { |entry, color| series_lines(plot, area, labels, entry, color) }
         end
       end
@@ -63,6 +65,13 @@ module KeystoneUi
         ticks = PdfLineTicks.new(series.flat_map { |entry| numbers(entry[:data]) }.compact, (bottom - top) / axis_line(plot))
         left = [ plot.points(TICK_LENGTH) + plot.points(TICK_PADDING) + ticks.labels.map { |label| axis_width(plot, label) }.max, axis_width(plot, labels.first) / 2 ].max
         { left: left, right: plot.width - axis_width(plot, labels.last) / 2, top: top, bottom: bottom, ticks: ticks }
+      end
+
+      def line_chart_ticks(plot, area)
+        ticks = area[:ticks]
+        ticks.values.zip(ticks.labels).each do |value, label|
+          plot.label(label, area[:left] - plot.points(TICK_LENGTH) - plot.points(TICK_PADDING), down(area, value), **AXIS_TEXT, anchor: :end, baseline: :middle)
+        end
       end
 
       def series_colors(series)

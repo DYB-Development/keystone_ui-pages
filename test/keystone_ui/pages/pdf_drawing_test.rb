@@ -849,6 +849,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "6px", nil ], drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:dash] }
   end
 
+  test "a line chart writes each tick Chart.js gives its values at the tick's height, ending just left of the lines in keystone_ui's muted text" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    ticks = drawn(document).plotted(:label).select { |call| call.last[:anchor] == :end }
+    expected = %w[7.0 6.5 6.0 5.5 5.0 4.5 4.0 3.5 3.0].each_with_index.map { |text, index| [ text, 12.375, (24 + index * 157.85 / 8).round(3), { size: "11px", color: "--ks-color-text-muted", anchor: :end, baseline: :middle } ] }
+    assert_equal expected.reverse, ticks.map { |call| [ call[1], call[2].first.round(3), call[2].last.round(3), call[3] ] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
