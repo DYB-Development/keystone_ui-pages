@@ -104,6 +104,14 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_match(%r{/ca 0\.102\b}, surface.render)
   end
 
+  test "a line stroked in a colour with its own opacity is stroked at that opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| plot.line([ [ 0, 10 ], [ 40, 0 ] ], width: "1px", color: "#0000001A") }
+
+    assert_match(%r{/CA 0\.102\b}, surface.render)
+  end
+
   private
 
   def look
