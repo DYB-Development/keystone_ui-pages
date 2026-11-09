@@ -17,6 +17,12 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal [ "666666", "000000", 0.102 ], [ look.color("#666"), look.color("#0000001A"), look.opacity("#0000001A") ]
   end
 
+  test "a font written out as a quoted list of families rather than named by a token is read as written" do
+    look = KeystoneUi::Pages::PdfLook.new(":root{}")
+
+    assert_equal "Helvetica", look.font("'Helvetica Neue', 'Helvetica', 'Arial', sans-serif").name
+  end
+
   test "a three-digit hex colour is read as the six-digit hex colour it names" do
     look = KeystoneUi::Pages::PdfLook.new(":root{--color-white:#fff;--ks-color-on-fill:var(--color-white)}")
 
