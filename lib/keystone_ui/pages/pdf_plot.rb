@@ -12,6 +12,11 @@ module KeystoneUi
         @height = height
         @top = document.cursor
       end
+
+      def rect(left, top, across, down, color:)
+        @document.fill_color(@look.color(color))
+        @document.fill_rectangle([ left, @top - top ], across, down)
+      end
     end
   end
 end
