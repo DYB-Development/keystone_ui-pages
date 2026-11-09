@@ -782,7 +782,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
 
     muted = { size: "--text-xs", color: "--ks-color-text-muted", anchor: :middle }
-    assert_equal [ [ :label, "Mon", [ 147.5, 195.5 ], muted ], [ :label, "Tue", [ 382.5, 195.5 ], muted ] ], drawn(document).plotted(:label).select { |call| call.last[:anchor] == :middle }
+    assert_equal [ [ :label, "Mon", [ 147.5, 195.5 ], muted ], [ :label, "Tue", [ 382.5, 195.5 ], muted ] ], drawn(document).plotted(:label).select { |call| call.last == muted }
   end
 
   test "a bar chart writes each tick of its axis at the tick's height, ending just left of the bars in keystone_ui's small muted chart text" do
@@ -804,6 +804,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Sat", "value" => "1", "shaded" => true } ])))))
 
     assert_equal [ { color: "--ks-color-chart-1" }, { color: "--ks-color-chart-1", opacity: 0.4 } ], drawn(document).plotted(:rect).map(&:last)
+  end
+
+  test "a bar chart set to show values writes each bar's value centred just above the bar in keystone_ui's small chart value text" do
+    document = page(section(row(column(element("bar_chart", show_values: "true", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    values = drawn(document).plotted(:label).select { |call| call.last[:color] == "--ks-color-text" }
+    assert_equal [ [ "3", [ 147.5, 95.28 ] ], [ "5", [ 382.5, 39.467 ] ] ].map { |text, place| [ :label, text, place, { size: "--text-xs", color: "--ks-color-text", anchor: :middle } ] },
+                 values.map { |call| [ call[0], call[1], call[2].map { |length| length.round(3) }, call[3] ] }
   end
 
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
