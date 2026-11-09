@@ -800,6 +800,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).plotted.reject { |call| call.first == :label }.map { |call| call.first == :rect ? :rect : [ call[0], call[1].map { |(across, down)| [ across, down.round(3) ] }, call[2] ] }
   end
 
+  test "a bar chart's shaded bar is drawn in the bar colour at the opacity keystone_ui's shaded bar rule gives it" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Sat", "value" => "1", "shaded" => true } ])))))
+
+    assert_equal [ { color: "--ks-color-chart-1" }, { color: "--ks-color-chart-1", opacity: 0.4 } ], drawn(document).plotted(:rect).map(&:last)
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
