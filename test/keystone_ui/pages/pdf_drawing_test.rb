@@ -890,6 +890,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).plotted.first(3)
   end
 
+  test "a line chart's legend too wide for one row carries its next series onto a row of their own, centred below the first" do
+    series = Array.new(3) { |index| { "name" => index.to_s * 40, "data" => [ 1, 2 ] } }
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal [ 142.75, 24.0 ], drawn(document).plotted(:rect).last[1].first(2)
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
