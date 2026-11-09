@@ -37,6 +37,7 @@ module KeystoneUi
         points = @look.points(size)
         @document.fill_color(@look.color(color))
         @document.font(typeface.name) do
+          drawable!(content.to_s)
           shift = @document.width_of(content.to_s, size: points) * ANCHORS.fetch(anchor)
           @document.draw_text(content.to_s, at: placed([ left - shift, top + lowered(baseline, points) ]), size: points)
         end
@@ -53,6 +54,11 @@ module KeystoneUi
       end
 
       private
+
+      def drawable!(content)
+        missing = content.each_char.find { |char| !char.match?(/[[:cntrl:]]/) && !@document.font.glyph_present?(char) }
+        raise PdfSurface::UndrawableCharacter, missing if missing
+      end
 
       def typeface(font)
         @look.font(font).tap { |typeface| @document.font_families[typeface.name] = typeface.files if typeface.files }

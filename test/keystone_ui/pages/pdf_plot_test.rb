@@ -86,6 +86,16 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_equal [ 3.0, 4.5 ], measured
   end
 
+  test "a label holding a character its font cannot draw is refused naming the character" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    error = assert_raises(KeystoneUi::Pages::PdfSurface::UndrawableCharacter) do
+      surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| plot.label("Next → step", 0, 0, size: "--text-xs", color: "--ks-color-accent") }
+    end
+
+    assert_equal "→", error.character
+  end
+
   private
 
   def look
