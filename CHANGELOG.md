@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-08
+
 ### Added
 - `KeystoneUi::Pages::Sequence` takes an optional `end_label:`, the label of an entry the sequence's list shows after its last page, such as a funnel's End step. The entry cannot be opened, changed or removed from the builder and is not offered as a page to copy.
+- `KeystoneUi::Pages.pdf_drawing = :ruby` draws a published page's PDF in Ruby for a host with no Chrome. The default stays `:chrome`.
+- A Ruby-drawn PDF uses keystone_ui's fonts, colours, sizes and spacing, and prints paragraphs, alerts, label and value lists, buttons, accordions, tables, stats, figures, badges, progress bars and host elements, leaving out elements meant only for the screen.
+- An editor or host whose page PDF cannot be made is told why.
 
 ## [0.14.0] - 2026-11-07
 
