@@ -29,6 +29,14 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_match(/0\.0 0\.0 1\.0 SCN\n1\.5 w\n36\.0 746\.0 m\n56\.0 726\.0 l\n76\.0 756\.0 l\nS/, surface.render)
   end
 
+  test "a line given a dash is stroked in dashes and gaps of the lengths it names" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| plot.line([ [ 0, 10 ], [ 40, 0 ] ], width: "2px", color: "--ks-color-accent", dash: "6px") }
+
+    assert_match(/\[4\.5 4\.5\] 0\.0 d\n36\.0 746\.0 m/, surface.render)
+  end
+
   private
 
   def look

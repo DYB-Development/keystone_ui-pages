@@ -20,12 +20,14 @@ module KeystoneUi
         end
       end
 
-      def line(points, width:, color:)
+      def line(points, width:, color:, dash: nil)
         @document.stroke_color(@look.color(color))
         @document.line_width(@look.points(width))
+        @document.dash(@look.points(dash)) if dash
         @document.move_to(placed(points.first))
         points.drop(1).each { |point| @document.line_to(placed(point)) }
         @document.stroke
+        @document.undash if dash
       end
 
       private
