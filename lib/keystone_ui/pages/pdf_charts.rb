@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "keystone_ui/pages/pdf_line_ticks"
+
 module KeystoneUi
   module Pages
     module PdfCharts
@@ -18,6 +20,16 @@ module KeystoneUi
       CHART_TEXT = { size: "--text-xs", color: "--ks-color-text-muted" }.freeze
       VALUE_TEXT = { size: "--text-xs", color: "--ks-color-text", anchor: :middle }.freeze
       VALUE_RISE = "4px"
+      LINE_CHART_HEIGHT = [ TAILWIND_SPACING, 64 ].freeze
+      LINE_LOOK = { width: "1.5px", color: "--ks-color-chart-1" }.freeze
+      AXIS_SIZE = "11px"
+      CHART_LINE_HEIGHT = 1.2
+      TICK_LENGTH = "8px"
+      TICK_PADDING = "3px"
+      LEGEND_SIZE = "12px"
+      LEGEND_FONT = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+      LEGEND_BOX_WIDTH = "40px"
+      LEGEND_PADDING = "10px"
 
       module_function
 
@@ -31,6 +43,68 @@ module KeystoneUi
           chart.drawn_bars.each { |bar| bar_value(plot, area, bar) } if chart.show_values?
           chart.drawn_bars.each { |bar| plot.label(bar[:label], placed(area, bar[:center], 0).first, plot.height - plot.points(BAR_LABEL_RISE), **CHART_TEXT, anchor: :middle) }
         end
+      end
+
+      def line_chart(surface, fields)
+        series = entries(fields[:series])
+        labels = Array(fields[:labels].presence).map(&:to_s)
+        surface.plot(height: LINE_CHART_HEIGHT) do |plot|
+          area = line_chart_area(plot, series, labels)
+          series.each { |entry| series_lines(plot, area, labels, entry) }
+        end
+      end
+
+      def line_chart_area(plot, series, labels)
+        top = legend_height(plot, series)
+        bottom = plot.height - plot.points(TICK_LENGTH) - plot.points(TICK_PADDING) - axis_line(plot)
+        ticks = PdfLineTicks.new(series.flat_map { |entry| numbers(entry[:data]) }.compact, (bottom - top) / axis_line(plot))
+        left = [ plot.points(TICK_LENGTH) + plot.points(TICK_PADDING) + ticks.labels.map { |label| axis_width(plot, label) }.max, axis_width(plot, labels.first) / 2 ].max
+        { left: left, right: plot.width - axis_width(plot, labels.last) / 2, top: top, bottom: bottom, ticks: ticks }
+      end
+
+      def series_lines(plot, area, labels, entry)
+        numbers(entry[:data]).first(labels.size).each_with_index.map { |value, index| value && [ across(area, index, labels.size), down(area, value) ] }
+                             .chunk_while { |point, following| point && following }.select { |points| points.compact.size > 1 }
+                             .each { |points| plot.line(points, **LINE_LOOK) }
+      end
+
+      def across(area, index, count)
+        area[:left] + (count > 1 ? index.to_f / (count - 1) : 0) * (area[:right] - area[:left])
+      end
+
+      def down(area, value)
+        ticks = area[:ticks]
+        area[:top] + (ticks.most - value) / (ticks.most - ticks.least) * (area[:bottom] - area[:top])
+      end
+
+      def numbers(data)
+        Array(data).map { |value| value.nil? ? nil : Float(value, exception: false) }
+      end
+
+      def axis_line(plot)
+        plot.points(AXIS_SIZE) * CHART_LINE_HEIGHT
+      end
+
+      def axis_width(plot, text)
+        text.nil? ? 0 : plot.text_width(text, size: AXIS_SIZE)
+      end
+
+      def legend_height(plot, series)
+        padding = plot.points(LEGEND_PADDING)
+        legend_rows(plot, series).size * (plot.points(LEGEND_SIZE) + padding) + padding
+      end
+
+      def legend_rows(plot, series)
+        padding = plot.points(LEGEND_PADDING)
+        series.each_with_object([]) do |entry, rows|
+          width = legend_item_width(plot, entry)
+          rows << [] if rows.empty? || rows.last.sum { |item| item[:width] + padding } + width + padding * 2 > plot.width
+          rows.last << { entry: entry, width: width }
+        end
+      end
+
+      def legend_item_width(plot, entry)
+        plot.points(LEGEND_BOX_WIDTH) + plot.points(LEGEND_SIZE) / 2 + plot.text_width(entry[:name].to_s, size: LEGEND_SIZE, font: LEGEND_FONT)
       end
 
       def bar_value(plot, area, bar)

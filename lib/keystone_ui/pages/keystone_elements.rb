@@ -119,7 +119,7 @@ module KeystoneUi
                       default: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" }, { "label" => "Wed", "value" => "2" },
                                  { "label" => "Sat", "value" => "1", "shaded" => true } ] },
                     { key: :show_values, label: "Show values", kind: :yes_or_no, default: "true" } ])
-        catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data",
+        catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data", pdf: PdfCharts.method(:line_chart),
           fields: [ { key: :series, label: "Series", kind: :data, default: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ] },
                     { key: :labels, label: "Labels", kind: :data, default: %w[Mon Tue Wed Thu] } ])
       end

@@ -820,6 +820,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_empty drawn(document).plotted(:label).select { |call| call.last[:color] == "--ks-color-text" }
   end
 
+  test "a line chart is drawn as one line per series through its values across its labels, between its legend, its tick labels and its labels" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    assert_equal [ [ [ 20.625, 181.85 ], [ 178.354, 102.925 ], [ 336.083, 142.388 ], [ 493.813, 24.0 ] ] ],
+                 drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call[1].map { |point| point.map { |length| length.round(3) } } }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
