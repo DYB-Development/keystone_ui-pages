@@ -814,6 +814,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  values.map { |call| [ call[0], call[1], call[2].map { |length| length.round(3) }, call[3] ] }
   end
 
+  test "a bar chart not set to show values writes no value above its bars" do
+    document = page(section(row(column(element("bar_chart", show_values: "false", bars: [ { "label" => "Mon", "value" => "3" } ])))))
+
+    assert_empty drawn(document).plotted(:label).select { |call| call.last[:color] == "--ks-color-text" }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
