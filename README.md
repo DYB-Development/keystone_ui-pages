@@ -55,19 +55,14 @@ KeystoneUi::Pages.prepare_pdf(page, values: { "client_name" => "Acme" })
 
 Publishing a page that uses no host values makes its PDF straight away, since it looks the same for everyone.
 
-The PDF is printed by Chrome or Chromium on the server, from the page drawn with the host's compiled stylesheet, so it looks exactly as the page does. The host needs:
+The PDF is drawn in Ruby, with Prawn, from the page's sections, rows, columns and elements, so the server needs no browser installed. The host needs:
 
 - Active Storage set up, which keeps the files.
-- Chrome or Chromium installed. Set `KeystoneUi::Pages.chrome_path` to it, or set `CHROME_BIN`, or install it in a usual place, such as `/usr/bin/chromium`. Chrome runs hidden on the server, so nobody needs it as their browser. When none is found, the page list leaves out its PDF links and asking for a PDF raises an error saying how to name one.
-- Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`.
+- Its stylesheet served by Propshaft. `KeystoneUi::Pages.pdf_stylesheet` names it and defaults to `tailwind.css`. The PDF reads keystone_ui's tokens from it.
 
-A host with no Chrome can have the PDF drawn in Ruby instead, from the page's sections, rows, columns and elements:
+A host that still sets `KeystoneUi::Pages.pdf_drawing` or `KeystoneUi::Pages.chrome_path` from an earlier version starts as before, and neither setting changes how the PDF is made.
 
-```ruby
-KeystoneUi::Pages.pdf_drawing = :ruby
-```
-
-It defaults to `:chrome`. The Ruby drawing needs no Chrome, so the page list shows its PDF links either way. Each element draws through its own PDF drawing, given to `catalog.register` as `pdf:`, and a page holding an element without one raises `KeystoneUi::Pages::NoPdfDrawing`, a `PrintFailed`, naming the element. So far the heading, label, paragraph, alert, label and value list, button, accordion, table, stat, figure, badge, progress, code, hero, call to action, card, info, feature grid, bar chart and line chart elements have PDF drawings, and the form, copy button and Next page elements have drawings that leave them out of the PDF. A paragraph prints its paragraphs, line breaks and links, and a link opens its address when clicked in the PDF. A button prints as its label, and one with an address opens it when clicked in the PDF. An accordion prints every question with its answer shown beneath it, as the page shows an opened question, without the arrow beside the question. Bold and italic marks stored in a paragraph print bold and italic, though the builder does not offer them yet. A stat prints its label, its value with its suffix, and its note, and a stat whose value is missing prints its When missing text in place of the value. A figure prints as its text. A badge prints as its label in a small rounded box. A progress bar prints its label above a bar filled to its value out of its maximum, rounded to a whole percent and never past full, as the page fills it. A code element prints its code with its line breaks, leading spaces and tabs kept, and its caption above it, as the page shows them. A hero prints its badge, title and subtitle, centred when its layout is centred and from the left when it is split, since a printed page is too narrow for the split layout's two columns. A call to action prints its title, subtitle and text. A card prints its title, its summary and its link text, which opens the card's address when clicked in the PDF. An info block prints its summary and its detail in full, each in its own box, as the page shows them once opened, without the button the page shows in their place. A feature grid prints its title, its subtitle and each feature's title and description, two features to a row, and its title and subtitle print on the same page as its first row. Every element but code joins a line break or run of spaces stored in its text into one space, as the browser does, and code keeps them.
+Each element draws through its own PDF drawing, given to `catalog.register` as `pdf:`, and a page holding an element without one raises `KeystoneUi::Pages::NoPdfDrawing`, a `PrintFailed`, naming the element. So far the heading, label, paragraph, alert, label and value list, button, accordion, table, stat, figure, badge, progress, code, hero, call to action, card, info, feature grid, bar chart and line chart elements have PDF drawings, and the form, copy button and Next page elements have drawings that leave them out of the PDF. A paragraph prints its paragraphs, line breaks and links, and a link opens its address when clicked in the PDF. A button prints as its label, and one with an address opens it when clicked in the PDF. An accordion prints every question with its answer shown beneath it, as the page shows an opened question, without the arrow beside the question. Bold and italic marks stored in a paragraph print bold and italic, though the builder does not offer them yet. A stat prints its label, its value with its suffix, and its note, and a stat whose value is missing prints its When missing text in place of the value. A figure prints as its text. A badge prints as its label in a small rounded box. A progress bar prints its label above a bar filled to its value out of its maximum, rounded to a whole percent and never past full, as the page fills it. A code element prints its code with its line breaks, leading spaces and tabs kept, and its caption above it, as the page shows them. A hero prints its badge, title and subtitle, centred when its layout is centred and from the left when it is split, since a printed page is too narrow for the split layout's two columns. A call to action prints its title, subtitle and text. A card prints its title, its summary and its link text, which opens the card's address when clicked in the PDF. An info block prints its summary and its detail in full, each in its own box, as the page shows them once opened, without the button the page shows in their place. A feature grid prints its title, its subtitle and each feature's title and description, two features to a row, and its title and subtitle print on the same page as its first row. Every element but code joins a line break or run of spaces stored in its text into one space, as the browser does, and code keeps them.
 
 A bar chart prints one bar per entry over its axis ticks and grid lines, each bar as tall as its value against the top tick keystone_ui's bar chart rounds its largest value up to, with its label beneath it and, when it is set to show values, its value above it. A shaded bar prints at the opacity keystone_ui's shaded bar rule gives it, and an entry whose value is below zero prints no bar, as the page draws none. A line chart prints one line per series through its values across its labels, with the legend above it, the ticks beside it, the grid lines across it and the axis line beneath it that Chart.js draws on screen, and a series with no value at a label leaves a gap in its line there. A chart with no data prints its empty axis and grid lines, with no bars or lines, rather than refusing the PDF.
 
@@ -90,7 +85,7 @@ The PDF prints regular, bold and italic text from the copies whose `@font-face` 
 
 ### Giving a host element a PDF drawing
 
-A host element prints under the Ruby drawing once it is registered with a `pdf:` drawing. The drawing is anything that answers `call(surface, fields)`, such as a lambda or a method:
+A host element prints in the PDF once it is registered with a `pdf:` drawing. The drawing is anything that answers `call(surface, fields)`, such as a lambda or a method:
 
 ```ruby
 KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph,
@@ -104,7 +99,7 @@ A host element registered without a `pdf:` drawing refuses the PDF with a `NoPdf
 
 ### When a PDF cannot be made
 
-A PDF that cannot be made raises `KeystoneUi::Pages::PrintFailed` with a message saying why. Under the Ruby drawing that is any of these:
+A PDF that cannot be made raises `KeystoneUi::Pages::PrintFailed` with a message saying why. That is any of these:
 
 - An element without a PDF drawing, named by its element.
 - An element the catalog does not have, named by its key.
