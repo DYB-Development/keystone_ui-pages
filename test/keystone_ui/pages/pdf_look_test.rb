@@ -169,6 +169,18 @@ class KeystoneUi::Pages::PdfLookTest < ActiveSupport::TestCase
     assert_equal "223344", color
   end
 
+  test "the host's look is read from the stylesheet the host names as its PDF stylesheet" do
+    KeystoneUi::Pages.pdf_stylesheet = "report.css"
+    asset = Struct.new(:content).new(":root{--ks-color-text:#223344}")
+    load_path = Rails.application.assets.load_path
+
+    color = load_path.stub(:find, ->(logical_path) { asset if logical_path == "report.css" }) { KeystoneUi::Pages::PdfLook.host.color("--ks-color-text") }
+
+    assert_equal "223344", color
+  ensure
+    KeystoneUi::Pages.pdf_stylesheet = nil
+  end
+
   test "the host's font is printed from the TrueType copy in its public folder" do
     Dir.mktmpdir do |public_folder|
       FileUtils.touch(File.join(public_folder, "Inter.ttf"))
