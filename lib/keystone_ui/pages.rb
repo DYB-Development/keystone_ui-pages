@@ -32,6 +32,8 @@ module KeystoneUi
 
       def pdf_drawing=(_choice); end
 
+      def chrome_path=(_path); end
+
       def places
         (@places || {}).merge(place_settings.transform_values { |settings| settings[:label] })
       end
