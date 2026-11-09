@@ -45,9 +45,33 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_match(/0\.0 0\.0 1\.0 scn\n.*BT\n46\.0 736\.0 Td\n\/F1\.0 9 Tf\n\[<4d6f6e>\] TJ/m, surface.render)
   end
 
+  test "a label anchored to its middle or its end is written centred on or ending at its place" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) do |plot|
+      plot.label("Mon", 100, 20, size: "--text-xs", color: "--ks-color-accent", anchor: :middle)
+      plot.label("Tue", 100, 20, size: "--text-xs", color: "--ks-color-accent", anchor: :end)
+    end
+
+    width = ->(text) { Prawn::Document.new.width_of(text, size: 9) }
+    assert_equal [ 136 - width.("Mon") / 2, 136 - width.("Tue") ].map { |left| left.round(3) }, lefts(surface.render).values_at("Mon", "Tue").map { |left| left.round(3) }
+  end
+
   private
 
   def look
     KeystoneUi::Pages::PdfLook.new(":root{--text-xs:0.75rem;--ks-spacing:0.25rem;--ks-color-accent:#0000FF;--ks-color-text:#000000;--ks-font-body:sans-serif}")
+  end
+
+  def lefts(pdf)
+    pdf.scan(/([\d.]+) [\d.]+ Td\n[^\n]*\n\[([^\]]*)\] TJ/).to_h { |left, text| [ shown(text), left.to_f ] }
+  end
+
+  def heights(pdf)
+    pdf.scan(/[\d.]+ ([\d.]+) Td\n[^\n]*\n\[([^\]]*)\] TJ/).to_h { |height, text| [ shown(text), height.to_f ] }
+  end
+
+  def shown(kerned)
+    kerned.scan(/<(\h+)>/).flatten.join.then { |text| [ text ].pack("H*") }
   end
 end

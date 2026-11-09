@@ -3,6 +3,8 @@
 module KeystoneUi
   module Pages
     class PdfPlot
+      ANCHORS = { start: 0, middle: Rational(1, 2), end: 1 }.freeze
+
       attr_reader :width, :height
 
       def initialize(document, look, width, height)
@@ -30,11 +32,15 @@ module KeystoneUi
         @document.undash if dash
       end
 
-      def label(content, left, top, size:, color:, font: "--ks-font-body")
+      def label(content, left, top, size:, color:, font: "--ks-font-body", anchor: :start)
         typeface = @look.font(font)
+        points = @look.points(size)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
-        @document.font(typeface.name) { @document.draw_text(content.to_s, at: placed([ left, top ]), size: @look.points(size)) }
+        @document.font(typeface.name) do
+          shift = @document.width_of(content.to_s, size: points) * ANCHORS.fetch(anchor)
+          @document.draw_text(content.to_s, at: placed([ left - shift, top ]), size: points)
+        end
       end
 
       private
