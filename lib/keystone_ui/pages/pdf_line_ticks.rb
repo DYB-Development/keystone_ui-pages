@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "active_support/number_helper"
-
 module KeystoneUi
   module Pages
     class PdfLineTicks
@@ -10,6 +8,7 @@ module KeystoneUi
       EMPTY_RANGE = [ 0.0, 1.0 ].freeze
       FLAT_SHARE = 0.05
       MOST_DECIMALS = 20
+      THOUSANDS = /(\d)(?=(\d{3})+\z)/
 
       attr_reader :values
 
@@ -79,7 +78,8 @@ module KeystoneUi
         return "0" if value.zero?
 
         places = Math.log10(delta(value).abs).then { |power| power.finite? ? (-power.floor).clamp(0, MOST_DECIMALS) : 1 }
-        ActiveSupport::NumberHelper.number_to_delimited(format("%.#{places}f", value))
+        whole, fraction = format("%.#{places}f", value).split(".")
+        [ whole.gsub(THOUSANDS, "\\1,"), fraction ].compact.join(".")
       end
 
       def delta(value)
