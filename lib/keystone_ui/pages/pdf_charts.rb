@@ -22,6 +22,7 @@ module KeystoneUi
       VALUE_RISE = "4px"
       LINE_CHART_HEIGHT = [ TAILWIND_SPACING, 64 ].freeze
       LINE_WIDTH = "1.5px"
+      VARIABLE = /\Avar\((--[^)]+)\)\z/
       SERIES_COLORS = Array.new(5) { |index| "--ks-color-chart-#{index + 1}" }.freeze
       AXIS_SIZE = "11px"
       CHART_LINE_HEIGHT = 1.2
@@ -64,7 +65,12 @@ module KeystoneUi
       end
 
       def series_colors(series)
-        series.each_index.map { |index| SERIES_COLORS[index % SERIES_COLORS.size] }
+        uncolored = -1
+        series.map { |entry| entry[:color].present? ? own_color(entry[:color].to_s) : SERIES_COLORS[(uncolored += 1) % SERIES_COLORS.size] }
+      end
+
+      def own_color(color)
+        color[VARIABLE, 1] || color
       end
 
       def series_lines(plot, area, labels, entry, color)

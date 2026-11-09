@@ -835,6 +835,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:color] }
   end
 
+  test "a line chart draws a series given its own colour in that colour, and the series without one take the chart colours in turn" do
+    series = [ { "name" => "Target", "data" => [ 1, 2 ], "color" => "var(--ks-color-danger-600)" }, { "name" => "Visits", "data" => [ 1, 2 ] }, { "name" => "Sales", "data" => [ 1, 2 ], "color" => "#123456" } ]
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal [ "--ks-color-danger-600", "--ks-color-chart-1", "#123456" ], drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:color] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
