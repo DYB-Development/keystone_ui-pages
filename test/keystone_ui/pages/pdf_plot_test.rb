@@ -13,6 +13,14 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_match(/0\.0 0\.0 1\.0 scn\n46\.0 696\.0 30\.0 40\.0 re\nf/, surface.render)
   end
 
+  test "a rectangle given an opacity is filled at that opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| plot.rect(10, 20, 30, 40, color: "--ks-color-accent", opacity: 0.4) }
+
+    assert_match(%r{/ca 0\.4\b}, surface.render)
+  end
+
   private
 
   def look
