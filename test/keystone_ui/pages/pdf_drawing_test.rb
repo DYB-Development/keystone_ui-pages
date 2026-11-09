@@ -778,6 +778,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ { color: "--ks-color-chart-1" } ], drawn(document).plotted(:rect).map(&:last)
   end
 
+  test "a bar chart labels each bar beneath it, centred under the bar in keystone_ui's small muted chart text" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    muted = { size: "--text-xs", color: "--ks-color-text-muted", anchor: :middle }
+    assert_equal [ [ :label, "Mon", [ 147.5, 195.5 ], muted ], [ :label, "Tue", [ 382.5, 195.5 ], muted ] ], drawn(document).plotted(:label)
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

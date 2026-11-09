@@ -10,6 +10,8 @@ module KeystoneUi
       BAR_CHART_AXIS_WIDTH = 10
       BAR_CHART_LABEL_HEIGHT = 6
       BAR_COLOR = "--ks-color-chart-1"
+      BAR_LABEL_RISE = "6px"
+      CHART_TEXT = { size: "--text-xs", color: "--ks-color-text-muted" }.freeze
 
       module_function
 
@@ -18,6 +20,7 @@ module KeystoneUi
         surface.plot(height: BAR_CHART_HEIGHT, ratio: BAR_CHART_RATIO) do |plot|
           area = bar_chart_area(plot)
           chart.drawn_bars.each { |bar| plot.rect(*placed(area, bar[:x], bar[:y]), *sized(area, bar[:width], bar[:height]), color: BAR_COLOR) }
+          chart.drawn_bars.each { |bar| plot.label(bar[:label], placed(area, bar[:center], 0).first, plot.height - plot.points(BAR_LABEL_RISE), **CHART_TEXT, anchor: :middle) }
         end
       end
 
