@@ -842,6 +842,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ "--ks-color-danger-600", "--ks-color-chart-1", "#123456" ], drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:color] }
   end
 
+  test "a line chart draws a dashed series in the dashes keystone_ui's line chart gives it" do
+    series = [ { "name" => "Target", "data" => [ 1, 2 ], "dashed" => true }, { "name" => "Visits", "data" => [ 1, 2 ] } ]
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal [ "6px", nil ], drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:dash] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

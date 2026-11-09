@@ -22,6 +22,7 @@ module KeystoneUi
       VALUE_RISE = "4px"
       LINE_CHART_HEIGHT = [ TAILWIND_SPACING, 64 ].freeze
       LINE_WIDTH = "1.5px"
+      DASH = "6px"
       VARIABLE = /\Avar\((--[^)]+)\)\z/
       SERIES_COLORS = Array.new(5) { |index| "--ks-color-chart-#{index + 1}" }.freeze
       AXIS_SIZE = "11px"
@@ -76,7 +77,7 @@ module KeystoneUi
       def series_lines(plot, area, labels, entry, color)
         numbers(entry[:data]).first(labels.size).each_with_index.map { |value, index| value && [ across(area, index, labels.size), down(area, value) ] }
                              .chunk_while { |point, following| point && following }.select { |points| points.compact.size > 1 }
-                             .each { |points| plot.line(points, width: LINE_WIDTH, color: color) }
+                             .each { |points| plot.line(points, width: LINE_WIDTH, color: color, dash: (DASH if entry[:dashed])) }
       end
 
       def across(area, index, count)
