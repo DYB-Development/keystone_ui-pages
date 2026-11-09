@@ -33,9 +33,8 @@ module KeystoneUi
       end
 
       def label(content, left, top, size:, color:, font: "--ks-font-body", anchor: :start, baseline: :alphabetic)
-        typeface = @look.font(font)
+        typeface = typeface(font)
         points = @look.points(size)
-        @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         @document.font(typeface.name) do
           shift = @document.width_of(content.to_s, size: points) * ANCHORS.fetch(anchor)
@@ -43,7 +42,17 @@ module KeystoneUi
         end
       end
 
+      def text_width(content, size:, font: "--ks-font-body")
+        width = 0
+        @document.font(typeface(font).name) { width = @document.width_of(content.to_s, size: @look.points(size)) }
+        width
+      end
+
       private
+
+      def typeface(font)
+        @look.font(font).tap { |typeface| @document.font_families[typeface.name] = typeface.files if typeface.files }
+      end
 
       def lowered(baseline, points)
         ascender, descender = [ @document.font.ascender, @document.font.descender ].map { |height| height / @document.font_size * points }

@@ -68,6 +68,15 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_equal [ 736 - (6.462 - 1.863) / 2, 736 - 6.462 ].map { |height| height.round(3) }, heights(surface.render).values_at("Mon", "Tue").map { |height| height.round(3) }
   end
 
+  test "a plot measures how wide a label is written at a size in a font" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    measured = nil
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| measured = plot.text_width("Wednesday", size: "--text-xs") }
+
+    assert_in_delta Prawn::Document.new.width_of("Wednesday", size: 9), measured, 0.001
+  end
+
   private
 
   def look
