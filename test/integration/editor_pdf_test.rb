@@ -2,7 +2,7 @@
 
 require "test_helper"
 require "minitest/mock"
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_drawing"
 
 class KeystoneUi::Pages::EditorPdfTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
@@ -21,7 +21,7 @@ class KeystoneUi::Pages::EditorPdfTest < ActionDispatch::IntegrationTest
     page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
     printed = []
 
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { printed << "%PDF-#{printed.size + 1}"; printed.last }) do
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { printed << "%PDF-#{printed.size + 1}"; printed.last }) do
       perform_enqueued_jobs { page.publish }
       get "/pages/manage/pages/#{page.id}/pdf"
     end
@@ -33,7 +33,7 @@ class KeystoneUi::Pages::EditorPdfTest < ActionDispatch::IntegrationTest
     page = KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing")
     page.publish
 
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { raise KeystoneUi::Pages::PrintFailed, "The PDF needs the keystone_ui token --ks-spacing." }) do
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { raise KeystoneUi::Pages::PrintFailed, "The PDF needs the keystone_ui token --ks-spacing." }) do
       get "/pages/manage/pages/#{page.id}/pdf", headers: { "Referer" => "/pages/manage/pages" }
       follow_redirect!
     end

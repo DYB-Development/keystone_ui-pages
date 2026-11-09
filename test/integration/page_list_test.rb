@@ -2,7 +2,7 @@
 
 require "test_helper"
 require "minitest/mock"
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_drawing"
 
 class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
   test "the page list shows each page's name, whether it is published and when it was last published" do
@@ -57,7 +57,7 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
     KeystoneUi::Pages::Printer.stub(:chrome, "/usr/bin/chromium") { get "/pages/manage/pages" }
     link = Nokogiri::HTML(response.body).at_css("[data-page='pricing'] a:contains('PDF')")&.[]("href")
 
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { "%PDF-printed" }) { get link.to_s }
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { "%PDF-printed" }) { get link.to_s }
 
     assert_equal [ "application/pdf", "%PDF-printed" ], [ response.media_type, response.body ]
   end
