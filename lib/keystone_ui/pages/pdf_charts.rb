@@ -55,6 +55,7 @@ module KeystoneUi
         surface.plot(height: LINE_CHART_HEIGHT) do |plot|
           area = line_chart_area(plot, series, labels)
           line_chart_ticks(plot, area)
+          line_chart_labels(plot, area, labels)
           series.zip(series_colors(series)).each { |entry, color| series_lines(plot, area, labels, entry, color) }
         end
       end
@@ -73,6 +74,11 @@ module KeystoneUi
         ticks.values.zip(ticks.labels).each do |value, label|
           plot.label(label, area[:left] - plot.points(TICK_LENGTH) - plot.points(TICK_PADDING), down(area, value), **AXIS_TEXT, anchor: :end, baseline: :middle)
         end
+      end
+
+      def line_chart_labels(plot, area, labels)
+        down = area[:bottom] + plot.points(TICK_LENGTH) + plot.points(TICK_PADDING) + axis_line(plot) / 2
+        labels.each_with_index { |label, index| plot.label(label, across(area, index, labels.size), down, **AXIS_TEXT, anchor: :middle, baseline: :middle) }
       end
 
       def series_colors(series)

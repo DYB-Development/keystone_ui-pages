@@ -864,6 +864,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal grid + [ :series ], drawn(document).plotted(:line).map { |call| call.last[:width] == "1.5px" ? :series : [ call[1].map { |point| point.map { |length| length.round(3) } }, call[2] ] }.reject { |call| call != :series && call.last[:color] != "--ks-color-border" }
   end
 
+  test "a line chart writes each of its labels centred under its place along the chart, below the chart's tick marks, in keystone_ui's muted text" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    style = { size: "11px", color: "--ks-color-text-muted", anchor: :middle, baseline: :middle }
+    assert_equal [ [ "Mon", 20.625 ], [ "Tue", 178.354 ], [ "Wed", 336.083 ], [ "Thu", 493.813 ] ].map { |text, across| [ text, [ across, 195.05 ], style ] },
+                 drawn(document).plotted(:label).select { |call| call.last == style }.map { |call| [ call[1], call[2].map { |length| length.round(3) }, call[3] ] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
