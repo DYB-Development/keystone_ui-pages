@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/print_failed"
 
 module KeystoneUi
   module Pages

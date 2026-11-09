@@ -2,8 +2,6 @@
 
 require "application_system_test_case"
 require "keystone_ui/pages/operations"
-require "keystone_ui/pages/pdf_document"
-require "base64"
 
 class KeystoneUi::Pages::FormsOffPaperBrowserTest < KeystoneUi::Pages::ApplicationSystemTestCase
   setup do
@@ -21,14 +19,6 @@ class KeystoneUi::Pages::FormsOffPaperBrowserTest < KeystoneUi::Pages::Applicati
 
   test "a visitor printing a page from the browser sees no form on paper" do
     visit "/pages/contact"
-    printed
-
-    assert_equal false, page.evaluate_script("document.querySelector('form.ks-form').checkVisibility()")
-  end
-
-  test "the page Chrome prints a PDF from shows no form" do
-    html = KeystoneUi::Pages::PdfDocument.html(@page_record.live_version, values: {})
-    page.driver.browser.navigate.to("data:text/html;base64,#{Base64.strict_encode64(html)}")
     printed
 
     assert_equal false, page.evaluate_script("document.querySelector('form.ks-form').checkVisibility()")

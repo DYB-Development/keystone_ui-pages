@@ -3,7 +3,7 @@
 require "keystone_ui/pages"
 require "keystone_ui/pages/operations"
 require "keystone_ui/pages/filling"
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/print_failed"
 require "keystone_ui/pages/pdf_surface"
 require "keystone_ui/pages/pdf_look"
 

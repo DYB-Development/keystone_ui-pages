@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "keystone_ui/look_choice"
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/print_failed"
 require "keystone_ui/pages/pdf_document"
 
 module KeystoneUi

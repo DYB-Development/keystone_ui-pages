@@ -45,9 +45,7 @@
               <%= link_to "Settings", edit_manage_page_path(page), class: "ml-4" %>
               <% if live %>
                 <%= link_to "View live", manage_page_live_path(page), class: "ml-4" %>
-                <% if @printable %>
-                  <%= link_to "PDF", manage_page_pdf_path(page), class: "ml-4" %>
-                <% end %>
+                <%= link_to "PDF", manage_page_pdf_path(page), class: "ml-4" %>
               <% end %>
               <div class="ml-4 inline-block">
                 <% if page.archived_at %>
