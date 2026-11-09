@@ -2,6 +2,7 @@
 
 require "keystone_ui/pages/form_field_kinds"
 require "keystone_ui/pages/pdf_elements"
+require "keystone_ui/pages/pdf_charts"
 
 module KeystoneUi
   module Pages
@@ -113,12 +114,12 @@ module KeystoneUi
                                  { "label" => "Prepared for", "value" => "Your client" },
                                  { "label" => "Issued", "value" => "1 October" } ] },
                     { key: :align, label: "Values", kind: :one_of, options: %w[start end], default: "start" } ])
-        catalog.register(key: :bar_chart, name: "Bar chart", component: :ui_bar_chart, icon: :bars, group: "Data",
+        catalog.register(key: :bar_chart, name: "Bar chart", component: :ui_bar_chart, icon: :bars, group: "Data", pdf: PdfCharts.method(:bar_chart),
           fields: [ { key: :bars, label: "Bars", kind: :data,
                       default: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" }, { "label" => "Wed", "value" => "2" },
                                  { "label" => "Sat", "value" => "1", "shaded" => true } ] },
                     { key: :show_values, label: "Show values", kind: :yes_or_no, default: "true" } ])
-        catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data",
+        catalog.register(key: :line_chart, name: "Line chart", component: :ui_line_chart, icon: :chart, group: "Data", pdf: PdfCharts.method(:line_chart),
           fields: [ { key: :series, label: "Series", kind: :data, default: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ] },
                     { key: :labels, label: "Labels", kind: :data, default: %w[Mon Tue Wed Thu] } ])
       end

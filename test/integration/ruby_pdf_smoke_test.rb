@@ -109,4 +109,20 @@ class KeystoneUi::Pages::RubyPdfSmokeTest < ActiveSupport::TestCase
 
     assert_equal "%PDF", pdf.file.download[0, 4]
   end
+
+  test "a host that chooses the Ruby drawing gets a page of bar and line charts, with data and without, as a PDF, end to end" do
+    page = KeystoneUi::Pages::Page.create!(name: "Trends", slug: "trends")
+    column_id = page.document["sections"][0]["rows"][0]["columns"][0]["id"]
+    document = %w[bar_chart line_chart bar_chart line_chart].reduce(page.document) { |drawn, key| KeystoneUi::Pages::Operations.add(drawn, key, column_id: column_id) }
+    elements = document["sections"][0]["rows"][0]["columns"][0]["elements"]
+    elements[1]["fields"].merge!("series" => [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] }, { "name" => "Target", "data" => [ 4, 4, 5, 6 ], "dashed" => true } ])
+    elements[2]["fields"]["bars"] = []
+    elements[3]["fields"].merge!("series" => [], "labels" => [])
+    page.update!(document: document)
+    page.publish
+
+    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) }
+
+    assert_equal "%PDF", pdf.file.download[0, 4]
+  end
 end

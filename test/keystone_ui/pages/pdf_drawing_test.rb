@@ -7,6 +7,39 @@ require "keystone_ui/pages/catalog"
 require "keystone_ui/pages/keystone_elements"
 
 class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
+  class RecordingPlot
+    LENGTHS = { "--spacing" => 3.0, "--text-xs" => 9.0, "11px" => 8.25, "12px" => 9.0 }.freeze
+
+    attr_reader :calls
+
+    def initialize
+      @calls = []
+    end
+
+    def width = 500.0
+    def height = 200.0
+
+    def points(length)
+      LENGTHS.fetch(length) { length.end_with?("px") ? length.to_f * 0.75 : raise(KeyError, length) }
+    end
+
+    def text_width(content, size:, font: "--ks-font-body")
+      content.to_s.length * points(size) / 2
+    end
+
+    def rect(*place, **style)
+      @calls << [ :rect, place, style ]
+    end
+
+    def line(points, **style)
+      @calls << [ :line, points, style ]
+    end
+
+    def label(content, *place, **style)
+      @calls << [ :label, content, place, style ]
+    end
+  end
+
   class RecordingSurface
     attr_reader :laid_out
 
@@ -68,6 +101,16 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     def table(heading, rows, **style)
       record [ :table, heading, rows, style ]
+    end
+
+    def plot(**style)
+      plotted = RecordingPlot.new
+      yield plotted
+      record [ :plot, style, plotted.calls ]
+    end
+
+    def plotted(call = nil)
+      drawn.select { |drawn_call| drawn_call.first == :plot }.flat_map(&:last).select { |plot_call| call.nil? || plot_call.first == call }
     end
 
     def tables
@@ -133,11 +176,11 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   test "a page holding an element without a PDF drawing is refused with a print failure naming the element" do
-    document = page(section(row(column(element("heading", text: "Pricing"), element("bar_chart")))))
+    document = page(section(row(column(element("heading", text: "Pricing"), element("testimonial")))))
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Bar chart element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Testimonial element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
   end
 
   test "a page holding an element the catalog does not have is refused with a print failure naming the element's key" do
@@ -722,6 +765,168 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal({ height: [ "--spacing", 2 ], radius: [ "--ks-radius-pill", 1 ], track: "--ks-color-track", fill: "--ks-color-meter" }, drawn(document).drawn.last.last)
   end
 
+  test "a bar chart is drawn as one bar per entry, each as tall as its value against the chart's top tick, in the area right of the tick labels and above the bar labels" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    assert_equal [ [ 65.25, 98.28, 164.5, 83.72 ], [ 300.25, 42.467, 164.5, 139.533 ] ],
+                 drawn(document).plotted(:rect).map { |call| call[1].map { |length| length.round(3) } }
+  end
+
+  test "a bar chart's bars are drawn in keystone_ui's first chart colour" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" } ])))))
+
+    assert_equal [ { color: "--ks-color-chart-1" } ], drawn(document).plotted(:rect).map(&:last)
+  end
+
+  test "a bar chart labels each bar beneath it, centred under the bar in keystone_ui's small muted chart text" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    muted = { size: "--text-xs", color: "--ks-color-text-muted", anchor: :middle }
+    assert_equal [ [ :label, "Mon", [ 147.5, 195.5 ], muted ], [ :label, "Tue", [ 382.5, 195.5 ], muted ] ], drawn(document).plotted(:label).select { |call| call.last == muted }
+  end
+
+  test "a bar chart writes each tick of its axis at the tick's height, ending just left of the bars in keystone_ui's small muted chart text" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    ticks = drawn(document).plotted(:label).select { |call| call.last[:anchor] == :end }
+    assert_equal [ [ "0", 182.0 ], [ "2", 126.187 ], [ "4", 70.373 ], [ "6", 14.56 ] ].map { |text, down| [ :label, text, [ 25.5, down ], { size: "--text-xs", color: "--ks-color-text-muted", anchor: :end, baseline: :middle } ] },
+                 ticks.map { |call| [ call[0], call[1], [ call[2].first, call[2].last.round(3) ], call[3] ] }
+  end
+
+  test "a bar chart draws a grid line in keystone_ui's border colour across the bars at each tick, beneath the bars" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    assert_equal [ 182.0, 126.187, 70.373, 14.56 ].map { |down| [ :line, [ [ 30.0, down ], [ 500.0, down ] ], { width: "1px", color: "--ks-color-border" } ] } + %i[rect rect],
+                 drawn(document).plotted.reject { |call| call.first == :label }.map { |call| call.first == :rect ? :rect : [ call[0], call[1].map { |(across, down)| [ across, down.round(3) ] }, call[2] ] }
+  end
+
+  test "a bar chart's shaded bar is drawn in the bar colour at the opacity keystone_ui's shaded bar rule gives it" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Sat", "value" => "1", "shaded" => true } ])))))
+
+    assert_equal [ { color: "--ks-color-chart-1" }, { color: "--ks-color-chart-1", opacity: 0.4 } ], drawn(document).plotted(:rect).map(&:last)
+  end
+
+  test "a bar chart set to show values writes each bar's value centred just above the bar in keystone_ui's small chart value text" do
+    document = page(section(row(column(element("bar_chart", show_values: "true", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "5" } ])))))
+
+    values = drawn(document).plotted(:label).select { |call| call.last[:color] == "--ks-color-text" }
+    assert_equal [ [ "3", [ 147.5, 95.28 ] ], [ "5", [ 382.5, 39.467 ] ] ].map { |text, place| [ :label, text, place, { size: "--text-xs", color: "--ks-color-text", anchor: :middle } ] },
+                 values.map { |call| [ call[0], call[1], call[2].map { |length| length.round(3) }, call[3] ] }
+  end
+
+  test "a bar chart not set to show values writes no value above its bars" do
+    document = page(section(row(column(element("bar_chart", show_values: "false", bars: [ { "label" => "Mon", "value" => "3" } ])))))
+
+    assert_empty drawn(document).plotted(:label).select { |call| call.last[:color] == "--ks-color-text" }
+  end
+
+  test "a line chart is drawn as one line per series through its values across its labels, between its legend, its tick labels and its labels" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    assert_equal [ [ [ 20.625, 181.85 ], [ 178.354, 102.925 ], [ 336.083, 142.388 ], [ 493.813, 24.0 ] ] ],
+                 series_lines(drawn(document)).map { |call| call[1].map { |point| point.map { |length| length.round(3) } } }
+  end
+
+  test "a line chart draws its series in keystone_ui's five chart colours in turn, starting again after the fifth" do
+    series = Array.new(6) { |index| { "name" => "Series #{index}", "data" => [ 1, 2 ] } }
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal %w[1 2 3 4 5 1].map { |position| "--ks-color-chart-#{position}" },
+                 series_lines(drawn(document)).map { |call| call.last[:color] }
+  end
+
+  test "a line chart draws a series given its own colour in that colour, and the series without one take the chart colours in turn" do
+    series = [ { "name" => "Target", "data" => [ 1, 2 ], "color" => "var(--ks-color-danger-600)" }, { "name" => "Visits", "data" => [ 1, 2 ] }, { "name" => "Sales", "data" => [ 1, 2 ], "color" => "#123456" } ]
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal [ "--ks-color-danger-600", "--ks-color-chart-1", "#123456" ], series_lines(drawn(document)).map { |call| call.last[:color] }
+  end
+
+  test "a line chart draws a dashed series in the dashes keystone_ui's line chart gives it" do
+    series = [ { "name" => "Target", "data" => [ 1, 2 ], "dashed" => true }, { "name" => "Visits", "data" => [ 1, 2 ] } ]
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal [ "6px", nil ], series_lines(drawn(document)).map { |call| call.last[:dash] }
+  end
+
+  test "a line chart writes each tick Chart.js gives its values at the tick's height, ending just left of the lines in keystone_ui's muted text" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    ticks = drawn(document).plotted(:label).select { |call| call.last[:anchor] == :end }
+    expected = %w[7.0 6.5 6.0 5.5 5.0 4.5 4.0 3.5 3.0].each_with_index.map { |text, index| [ text, 12.375, (24 + index * 157.85 / 8).round(3), { size: "11px", color: "--ks-color-text-muted", anchor: :end, baseline: :middle } ] }
+    assert_equal expected.reverse, ticks.map { |call| [ call[1], call[2].first.round(3), call[2].last.round(3), call[3] ] }
+  end
+
+  test "a line chart draws a grid line in keystone_ui's border colour at each tick, from its tick mark across to the right of the chart, beneath the lines" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    grid = Array.new(9) { |index| (24 + (8 - index) * 157.85 / 8).round(3) }.map { |down| [ [ [ 14.625, down ], [ 493.813, down ] ], { width: "1px", color: "--ks-color-border" } ] }
+    surface = drawn(document)
+    assert_equal grid + [ :series ], surface.plotted(:line).map { |call| series_lines(surface).include?(call) ? :series : [ call[1].map { |point| point.map { |length| length.round(3) } }, call[2] ] }
+                                            .select { |call| call == :series || call.last[:color] == "--ks-color-border" }
+  end
+
+  test "a line chart writes each of its labels centred under its place along the chart, below the chart's tick marks, in keystone_ui's muted text" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    style = { size: "11px", color: "--ks-color-text-muted", anchor: :middle, baseline: :middle }
+    assert_equal [ [ "Mon", 20.625 ], [ "Tue", 178.354 ], [ "Wed", 336.083 ], [ "Thu", 493.813 ] ].map { |text, across| [ text, [ across, 195.05 ], style ] },
+                 drawn(document).plotted(:label).select { |call| call.last == style }.map { |call| [ call[1], call[2].map { |length| length.round(3) }, call[3] ] }
+  end
+
+  test "a line chart draws Chart.js's faint axis line along the bottom of the chart, over the grid and beneath the lines" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    lines = drawn(document).plotted(:line)
+    assert_equal [ [ [ 20.625, 181.85 ], [ 493.813, 181.85 ] ], { width: "1px", color: "#0000001A" } ], lines[-2].drop(1).then { |points, style| [ points.map { |point| point.map { |length| length.round(3) } }, style ] }
+  end
+
+  test "a line chart draws Chart.js's legend centred above the chart, each series as a box outlined in its colour beside its name" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    outline = [ [ 219.25, 7.5 ], [ 249.25, 7.5 ], [ 249.25, 16.5 ], [ 219.25, 16.5 ], [ 219.25, 7.5 ] ]
+    assert_equal [ [ :rect, [ 219.25, 7.5, 30.0, 9.0 ], { color: "#0000001A" } ], [ :line, outline, { width: "1.5px", color: "--ks-color-chart-1", dash: nil } ],
+                   [ :label, "Visits", [ 253.75, 12.0 ], { size: "12px", color: "#666", font: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", baseline: :middle } ] ],
+                 drawn(document).plotted.first(3)
+  end
+
+  test "a line chart's legend too wide for one row carries its next series onto a row of their own, centred below the first" do
+    series = Array.new(3) { |index| { "name" => index.to_s * 40, "data" => [ 1, 2 ] } }
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal [ 142.75, 24.0 ], drawn(document).plotted(:rect).last[1].first(2)
+  end
+
+  test "a line chart breaks a series' line where it has no value, as Chart.js leaves a gap there" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 1, 2, nil, 3, 4 ] } ], labels: %w[Mon Tue Wed Thu Fri])))))
+
+    assert_equal [ 2, 2 ], series_lines(drawn(document)).map { |call| call[1].size }
+  end
+
+  test "a bar chart bound to a host value with no bars is drawn as its axis and grid lines with no bars, as the page shows it" do
+    document = page(section(row(column(element("bar_chart", bars: { "value" => "weekly_hours" })))))
+
+    assert_equal [ 5, 0, %w[0 0.25 0.5 0.75 1] ], drawn(document).then { |surface| [ surface.plotted(:line).size, surface.plotted(:rect).size, surface.plotted(:label).map { |call| call[1] } ] }
+  end
+
+  test "a line chart bound to host values with no series and no labels is drawn as Chart.js's empty axis from 0 to 1 with no lines" do
+    document = page(section(row(column(element("line_chart", series: { "value" => "visits" }, labels: { "value" => "weeks" })))))
+
+    assert_equal [ %w[0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0], [] ], drawn(document).then { |surface| [ surface.plotted(:label).map { |call| call[1] }, series_lines(surface) ] }
+  end
+
+  test "a bar chart draws no bar for an entry whose value is below zero, as the page draws none" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "-2" } ])))))
+
+    assert_equal 1, drawn(document).plotted(:rect).size
+  end
+
+  test "a line chart writes a tick of a thousand or more with its thousands set apart by commas, as Chart.js writes it" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 0, 5000 ] } ], labels: %w[Mon Tue])))))
+
+    assert_includes drawn(document).plotted(:label).map { |call| call[1] }, "5,000"
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
@@ -946,6 +1151,10 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
   end
 
   private
+
+  def series_lines(surface)
+    surface.plotted(:line).select { |call| call.last[:width] == "1.5px" && call[1].first != call[1].last }
+  end
 
   def drawn(document, values: {})
     RecordingSurface.new.tap { |surface| KeystoneUi::Pages::PdfDrawing.draw(document, surface, values: values) }

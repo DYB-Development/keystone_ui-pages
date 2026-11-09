@@ -134,11 +134,9 @@ linking editors to the builder or drawing a page in the host's screens.
    - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
      columns and elements, so no browser is needed. The heading, label,
      paragraph, alert, label and value list, button, accordion, table, stat,
-     figure, badge, progress, code, hero, call to action, card, info and
-     feature grid elements print. The form, copy button and Next page elements
-     are left out of the PDF. The bar chart and line chart elements have no PDF
-     drawing yet, so a page holding either one is refused under this drawing.
-     An element the host adds to the catalog prints only when it is registered
+     figure, badge, progress, code, hero, call to action, card, info, feature
+     grid, bar chart and line chart elements print. The form, copy button and
+     Next page elements are left out of the PDF. An element the host adds to the catalog prints only when it is registered
      with a PDF drawing of its own, and a PDF of a page holding any other
      element is refused with a message naming that element. An element a place
      leaves out keeps its drawing, so a page in any place that offers it still
@@ -152,11 +150,15 @@ linking editors to the builder or drawing a page in the host's screens.
      host's default look:
 
      - The `--ks-` tokens Keystone UI sets, for fonts, weights, text colours,
-       fills, borders, rounded corners and spacing.
+       fills, borders, rounded corners and spacing, and its chart colours,
+       `--ks-color-chart-1` to `--ks-color-chart-5`, for the bars and the
+       lines of a chart. A line chart series given its own colour as a CSS
+       variable reads that variable from the stylesheet too.
      - The page's line height from the stylesheet's `html` rule.
      - These Tailwind variables, which the compiled stylesheet must also set:
        each `--text-*` size used, from `--text-xs` to `--text-5xl`, with its
-       `--line-height`; `--spacing`; `--leading-relaxed`, for paragraphs and
+       `--line-height`; `--spacing`, which also sets each chart's height;
+       `--leading-relaxed`, for paragraphs and
        code; `--tracking-tight`, for the titles of a hero, a call to action
        and a feature grid; `--tracking-wider`, for labels; `--font-mono`, for
        code; `--color-gray-300`, for the line under a table's heading row and
@@ -185,6 +187,10 @@ linking editors to the builder or drawing a page in the host's screens.
      the element and the character. If the host's pages will hold such
      characters, such as non-Latin scripts, ask the developer which font to
      serve as TrueType copies that holds them.
+   - A line chart's legend always names Helvetica Neue, Helvetica and Arial,
+     so it prints in Helvetica unless the stylesheet loads one of those with
+     `@font-face`. A series name holding a character outside Windows-1252
+     refuses the PDF even when the host's own font holds it.
    - A font the stylesheet loads with `@font-face` needs a TrueType copy of each
      of its files, because a PDF cannot read `.woff2` or `.woff`. Put a `.ttf`
      file beside each font file, under the same name, either in `public/` or in
@@ -259,6 +265,10 @@ linking editors to the builder or drawing a page in the host's screens.
    - each feature grid prints its features two to a row, two features beside
      each other print at the same height, and its title and subtitle print on
      the same page as its first row;
+   - each bar chart prints one bar per entry in the first chart colour, with
+     its label beneath it and the axis ticks and grid lines beside it;
+   - each line chart prints its legend above it and one line per series
+     across its labels, over its ticks and grid lines;
    - the form is left out.
 
    If the host registers elements of its own, add each one to a page and open

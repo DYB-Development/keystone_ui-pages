@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-develop
-description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby and handling a PDF that is refused, giving a host element a Ruby PDF drawing, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
+description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby and handling a PDF that is refused, giving a host element a Ruby PDF drawing including a chart or other shapes placed on a plot, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
 tools: Bash, Read, Write, Edit, Grep
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -199,8 +199,8 @@ inherit from the base controller, so define it there.
   drawing writes it into every PDF, and a name Propshaft cannot find prints
   with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens, the
   `--text-` size and `--tracking-` letter spacing tokens, `--spacing` for a
-  stat's and a progress bar's spacing, and `--color-gray-300` for a table's
-  line under its heading from it, so a name Propshaft cannot find, or a
+  stat's, a progress bar's and a chart's spacing, and `--color-gray-300` for a
+  table's line under its heading from it, so a name Propshaft cannot find, or a
   stylesheet missing a token the drawing reads, makes the Ruby drawing raise
   `KeystoneUi::Pages::PrintFailed` naming the token.
 - `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
@@ -231,15 +231,16 @@ inherit from the base controller, so define it there.
   form, or a length token in a unit other
   than `rem`, `em`, `px` or `pt` that is not zero, raises `PrintFailed` naming
   the token and its value. An eight-digit hex colour is read too, and its last
-  two digits are its opacity, which `boxed_text`'s fill and every outline
-  honour and every other fill and text colour ignore. Each element draws through the `pdf:` drawing given
+  two digits are its opacity, which `boxed_text`'s fill, every outline, and a
+  plot's `rect` and `line` honour, and every other fill and text colour
+  ignores. Each element draws through the `pdf:` drawing given
   to `catalog.register`. Of the built-in elements `heading`, `label`,
   `paragraph`, `alert`, `value_list`, `button`, `accordion`, `data_table`,
   `stat_card`, `figure`, `badge`, `progress`, `code`, `hero`, `cta_banner`,
-  `card`, `info` and `feature_grid` have one.
+  `card`, `info`, `feature_grid`, `bar_chart` and `line_chart` have one.
   `form`, `copy_button` and `next_page` have a drawing that draws nothing, so
-  they are left out of the PDF and do not raise. `bar_chart` and `line_chart`
-  have none and raise `NoPdfDrawing`. A page holding an element whose key the catalog does
+  they are left out of the PDF and do not raise. A host element registered
+  without `pdf:` has none and raises `NoPdfDrawing`. A page holding an element whose key the catalog does
   not have raises `PrintFailed` naming the key. A boxed element that does not
   fit in the space left on a page draws whole at the top of the next page,
   unless it is taller than a page.
@@ -273,8 +274,8 @@ inherit from the base controller, so define it there.
     to `catalog.register`, then `stretch`. A `stretch` element draws across its
     column. A `start`, `center` or `end` element draws through the surface's
     `aligned` call: as wide as what it draws, at that side of its column. A
-    label and value list and a table keep the full width of their column when
-    aligned.
+    label and value list, a table and a chart keep the full width of their
+    column when aligned.
 - **The built-in elements in the Ruby drawing.**
   - A heading draws its text at `--text-lg`, `--text-2xl` or `--text-4xl` for
     `sm`, `md` or `lg` in `--ks-font-heading` at `--ks-font-weight-heading` and
@@ -450,6 +451,46 @@ inherit from the base controller, so define it there.
     in a row are stretched to the same height. The title, the subtitle and the
     first row of features are drawn together, so the title never sits alone at
     the bottom of a page.
+  - A bar chart draws with the surface's `plot` call, across its column, 80
+    `--spacing` steps tall or two fifths of its width, whichever is shorter.
+    Its `bars` field is an array of hashes, each with `label`, `value` and
+    optionally `shaded: true`. Its ticks, and each bar's height against the top
+    tick, are the ones Keystone UI's bar chart gives on screen. The left ten
+    `--spacing` steps hold the tick labels and the bottom six hold the bar
+    labels. Each tick draws a grid line of `1px` in `--ks-color-border` and its
+    label at `--text-xs` in `--ks-color-text-muted`, ending `6px` left of the
+    bars and centred on the line. Each bar is filled with `--ks-color-chart-1`,
+    and a shaded bar at 0.4 opacity. A bar with no height, such as one whose
+    value is zero or below, draws nothing. With `show_values` true, each bar's
+    value draws centred `4px` above its top at `--text-xs` in
+    `--ks-color-text`. Each label draws centred under its bar at `--text-xs` in
+    `--ks-color-text-muted`, on a line `6px` above the chart's bottom.
+  - A line chart draws with the surface's `plot` call, across its column, 64
+    `--spacing` steps tall. Its `series` field is an array of hashes, each with
+    `name`, `data` (one value per label), and optionally `color` and
+    `dashed: true`, and its `labels` field is an array of the labels along the
+    bottom. Its legend draws at the top, one item per series in centred rows
+    that wrap to the width, items and rows `10px` apart. Each item is a
+    `40px` by `12px` box filled with `#0000001A` and outlined `1.5px` in the
+    series' colour, dashed when the series is, then its name at `12px` in
+    `#666` in a written Helvetica Neue, Helvetica, Arial list, which prints in
+    Helvetica unless the stylesheet loads one of those with `@font-face`. The
+    ticks on the left are chosen as Chart.js chooses them, at most eleven and
+    no more than fit at one `11px` line of 1.2 each. Each draws a grid line of
+    `1px` in `--ks-color-border` from an `8px` tick mark across the chart, and
+    its label at `11px` in `--ks-color-text-muted`, ending `3px` left of the
+    tick mark and centred on the line. A tick of a thousand or more is written
+    with commas between its thousands. Each label draws centred under its point
+    at `11px` in `--ks-color-text-muted`, and a line of `1px` in `#0000001A`
+    draws along the bottom of the chart. Each series draws a line `1.5px` wide
+    through its values, in `6px` dashes when it is dashed. A series' `color` is
+    a colour token's name, such as `--ks-color-success-600`, a `var(--token)`,
+    or a written colour, and a series with none takes `--ks-color-chart-1` to
+    `--ks-color-chart-5` in turn among the series with none. A value that is
+    blank or not a number leaves a gap in the line, a single point between gaps
+    draws nothing, and values past the last label are left out.
+  - A chart with no data draws its empty axis and grid lines, with no bars or
+    lines, rather than refusing the PDF.
   - The form, the copy button and the Next page button draw nothing in the
     Ruby drawing. The four `--ks-spacing` steps between elements in a column
     are still kept around each of them.
@@ -488,13 +529,13 @@ inherit from the base controller, so define it there.
   Nothing is kept when it is raised. An element hidden by a show-when condition
   for the values given is not drawn and does not raise.
 - `KeystoneUi::Pages::PdfSurface::UndrawableCharacter` — raised by the
-  surface's `text`, `rich_text` and `boxed_text` when the content holds a
-  character the font in use cannot draw, before anything is drawn. Its
-  `character` is that character, and control characters such as a line break
-  never raise it. It is a `PrintFailed`. When it is raised inside an element's
-  `pdf:` drawing, `KeystoneUi::Pages.pdf` raises a `PrintFailed` in its place
-  whose message names the element and the character, so a `pdf:` drawing does
-  not rescue it.
+  surface's `text`, `rich_text` and `boxed_text`, and by a plot's `label`, when
+  the content holds a character the font in use cannot draw, before anything is
+  drawn. Its `character` is that character, and control characters such as a
+  line break never raise it. It is a `PrintFailed`. When it is raised inside an
+  element's `pdf:` drawing, `KeystoneUi::Pages.pdf` raises a `PrintFailed` in
+  its place whose message names the element and the character, so a `pdf:`
+  drawing does not rescue it.
 
 ### Host values
 
@@ -631,7 +672,7 @@ inherit from the base controller, so define it there.
   since sections, rows, columns and aligned elements are measured before they
   are drawn, so it must change nothing outside the surface. Every call
   on the surface draws below what was drawn before it in the same column, and
-  reads the tokens as the Ruby drawing's look describes. The surface has eleven
+  reads the tokens as the Ruby drawing's look describes. The surface has twelve
   calls.
   - `text(content, size:, font: "--ks-font-body", weight: nil, color: "--ks-color-text", uppercase: false, tracking: nil, align: nil, leading: nil, preformatted: false)`
     writes the content. `size:` names a length token, such as `"--text-sm"`,
@@ -717,8 +758,8 @@ inherit from the base controller, so define it there.
     of `:start`, `:center` or `:end`. Any other value raises `KeyError`. How
     wide the block is comes from what it draws: the widest line of `text` and
     `rich_text`, a `box` as wide as what it holds and its padding or as its
-    `width:`, a `boxed_text` as wide as its fill, and a `row` or a `table` the
-    whole column. `bar`, `rule` and `space` add no width, so a `bar` or a
+    `width:`, a `boxed_text` as wide as its fill, and a `row`, a `table` or a
+    `plot` the whole column. `bar`, `rule` and `space` add no width, so a `bar` or a
     `rule` beside text is drawn as wide as the text, and a block drawing
     nothing with width is drawn across the column. A `pdf:` drawing does not
     need to call it for its own element's placement, since the drawing places
@@ -748,10 +789,49 @@ inherit from the base controller, so define it there.
     heading and first row do not fit below what was drawn starts on the next
     page, and a table longer than a page draws `heading` again at the top of
     each page it continues on.
+  - `plot(height:, ratio: nil) { |plot| ... }` keeps an area the width of the
+    column and hands the block a plot that places shapes and text in it by
+    position, then moves down by the area's height. `height:` is a length token
+    and a number of steps, such as `[ "--spacing", 64 ]`. `ratio:` is a share
+    of the width, such as `Rational(2, 5)`, and with it the area is whichever
+    is shorter of that height and that share of the width. An area that does
+    not fit in the space left on the page starts on the next page. Every
+    position on the plot is in points, measured right and down from the area's
+    top left corner, and nothing stops a shape from drawing outside the area.
+    `plot.width` and `plot.height` are the area's size in points, and
+    `plot.points(length)` reads a length token, or a written length such as
+    `"6px"`, in points. The plot has four drawing calls:
+    - `rect(left, top, across, down, color:, opacity: 1)` fills a rectangle
+      whose top left corner is at `left` and `top`, `across` points wide and
+      `down` points tall, in the colour token `color:`. `opacity:` is a number
+      from 0 to 1, and it is multiplied by the colour's own opacity when the
+      colour is an eight-digit hex colour.
+    - `line(points, width:, color:, dash: nil)` strokes a line through
+      `points`, an array of `[ left, top ]` pairs in order, such as
+      `[ [ 0, 10 ], [ plot.width, 10 ] ]`. `width:` is a length token for its
+      thickness and `color:` a colour token, whose own opacity is honoured.
+      `dash:` is a length token, and with it the line is drawn in dashes and
+      gaps of that length. A closed outline repeats its first point at the end.
+    - `label(content, left, top, size:, color:, font: "--ks-font-body", anchor: :start, baseline: :alphabetic)`
+      writes one line of text at `left` and `top`, in regular weight. `size:`,
+      `color:` and `font:` work as they do for `text`. `anchor:` says which
+      part of the text sits at `left`: `:start` its left end, `:middle` its
+      centre, and `:end` its right end. `baseline:` says which part sits at
+      `top`: `:alphabetic` the line the letters stand on, `:middle` halfway up
+      the letters, and `:top` their top. Any other `anchor:` or `baseline:`
+      raises `KeyError`. Text holding a character the font cannot draw raises
+      `UndrawableCharacter`.
+    - `text_width(content, size:, font: "--ks-font-body")` answers how many
+      points wide `label` would write the content, and draws nothing. Use it to
+      leave room for labels before placing other shapes.
 
   Wherever a call takes a length token, a length written out as a number and
   one of `rem`, `em`, `px` or `pt`, such as `"1px"`, works in its place and is
-  read in the same points.
+  read in the same points. Wherever a call takes a colour token, a hex colour
+  written out, such as `"#666"` or `"#0000001A"`, works in its place, and
+  wherever it takes a font token, a list of families starting with a quoted
+  one, such as `"'Helvetica Neue', sans-serif"`, works in its place and is read
+  as a font token is.
   A token the host's stylesheet does not set raises `PrintFailed` naming it.
   Text holding a character the font cannot draw raises `UndrawableCharacter`.
   An element registered without `pdf:` makes the Ruby drawing raise
@@ -814,6 +894,10 @@ The catalog offers these Keystone UI components by default: `button`,
    `Values.chooser` and `Values.provider`. Ask the developer which records the
    chooser lists, since it decides what editors see in the builder.
 
+   A bar chart's or a line chart's data comes from a value bound to its `bars`,
+   `series` or `labels` field, in the shapes the built-in elements above
+   describe.
+
 5. To draw a page in a host screen with one client's values, find the page and
    call the helper:
 
@@ -853,8 +937,11 @@ The catalog offers these Keystone UI components by default: `button`,
    the host's stylesheet. Of the built-in elements it draws headings, labels,
    paragraphs, alerts, label and value lists, buttons, accordions, tables,
    stats, figures, badges, progress bars, code, heroes, calls to action, cards,
-   info elements and feature grids, it leaves forms, copy buttons and Next page
-   buttons out of the PDF, and it refuses bar charts and line charts.
+   info elements, feature grids, bar charts and line charts, and it leaves
+   forms, copy buttons and Next page buttons out of the PDF. A page holding a
+   chart needs the stylesheet to set `--spacing`, `--ks-color-border`,
+   `--ks-color-text-muted` and each `--ks-color-chart-` colour its bars or
+   series use, and a bar chart that shows values needs `--ks-color-text` too.
 
    With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
    named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
@@ -984,7 +1071,7 @@ The catalog offers these Keystone UI components by default: `button`,
     Register it with `pdf:` in the same `catalog.register` call that adds the
     element, since registering the key again replaces the whole entry. The
     drawing takes the surface and the field values only, so read every field
-    from `fields` by its symbol key and draw only with the surface's eleven
+    from `fields` by its symbol key and draw only with the surface's twelve
     calls. An element registered without `pdf:` refuses every PDF of a page
     showing it with `NoPdfDrawing`, whose message is "The <name> element has
     no PDF drawing, so this page cannot be drawn as a PDF without Chrome."
@@ -996,6 +1083,25 @@ The catalog offers these Keystone UI components by default: `button`,
     since a missing one raises `PrintFailed` naming it. Whether an element is
     left out of the PDF, with a drawing that draws nothing, or drawn on paper is
     the developer's decision, so ask before choosing.
+
+    A chart, a diagram or anything else whose parts are placed by position
+    draws with `plot`. Measure the room labels need with `plot.text_width`
+    first, then place the shapes from `plot.width` and `plot.height`:
+
+    ```ruby
+    pdf: ->(surface, fields) {
+      surface.plot(height: [ "--spacing", 40 ]) do |plot|
+        left = plot.text_width("100", size: "--text-xs") + plot.points("6px")
+        plot.line([ [ left, plot.height ], [ plot.width, plot.height ] ], width: "1px", color: "--ks-color-border")
+        plot.rect(left, plot.height / 2, plot.width - left, plot.height / 2, color: "--ks-color-chart-1")
+        plot.label("100", left - plot.points("6px"), plot.height / 2, size: "--text-xs", color: "--ks-color-text-muted", anchor: :end, baseline: :middle)
+      end
+    }
+    ```
+
+    How tall the area is, and whether it follows a share of the width with
+    `ratio:`, is the developer's decision when the screen's own component gives
+    no height, so ask before choosing.
 
     An element aligned to `start`, `center` or `end`, by its own setting or by
     the `align:` it was registered with, is drawn only as wide as its drawing
@@ -1010,9 +1116,9 @@ The catalog offers these Keystone UI components by default: `button`,
   PDF another way, because the gem's drawing applies bound values, conditions,
   layout and print rules together.
 - **A `pdf:` drawing draws only through the surface.** It takes the surface and
-  the field values and calls the surface's eleven calls, never Prawn directly,
-  since the surface places each call in the element's column and reads the
-  host's tokens.
+  the field values and calls the surface's twelve calls, and the plot's calls
+  inside `plot`, never Prawn directly, since the surface places each call in
+  the element's column and reads the host's tokens.
 - **Only the live version leaves the builder.** The draft is what editors
   change. Visitors, `keystone_ui_page` and PDFs show the live version, so an
   unpublished change shows nowhere else. `keystone_ui_page` and PDFs with

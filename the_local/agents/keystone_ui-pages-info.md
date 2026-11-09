@@ -97,12 +97,13 @@ Keystone UI itself must be installed first. Its own install local,
   screen as wide as the printed page would, and draws each element with Prawn.
 - **PDF drawing.** Under the Ruby drawing each catalog element prints through
   its own PDF drawing, given when the element is registered. It draws with a
-  fixed set of calls, such as text, boxes, rows and tables, each naming Keystone
-  UI tokens like `--text-base` or `--ks-color-accent`, and prints in the values
-  the host's stylesheet gives those tokens in light mode. A page holding an
-  element with no PDF drawing cannot be printed that way. The bar chart and line
-  chart have none yet, and the form, copy button and Next page elements print
-  nothing.
+  fixed set of calls, such as text, boxes, rows and tables, plus a plot area for
+  charts that places rectangles, lines and labels measured in points. Each call
+  names Keystone UI tokens like `--text-base` or `--ks-color-accent` and prints
+  in the values the host's stylesheet gives those tokens in light mode. Every
+  element in the default catalog has a PDF drawing, including the bar chart and
+  line chart, and the form, copy button and Next page elements print nothing. A
+  page holding a host element with no PDF drawing cannot be printed that way.
 - **A refused PDF.** A PDF that cannot be made is refused with a message saying
   why, such as a missing browser, an element with no PDF drawing, a character
   the font cannot draw, an unreadable token or a font with no TrueType copy. A
