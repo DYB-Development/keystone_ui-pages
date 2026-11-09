@@ -2,7 +2,7 @@
 
 require "test_helper"
 require "minitest/mock"
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_drawing"
 
 class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
   test "the page list shows each page's name, whether it is published and when it was last published" do
@@ -54,30 +54,11 @@ class KeystoneUi::Pages::PageListTest < ActionDispatch::IntegrationTest
 
   test "an editor downloads a published page's PDF from the page list" do
     KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
-    KeystoneUi::Pages::Printer.stub(:chrome, "/usr/bin/chromium") { get "/pages/manage/pages" }
+    get "/pages/manage/pages"
     link = Nokogiri::HTML(response.body).at_css("[data-page='pricing'] a:contains('PDF')")&.[]("href")
 
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { "%PDF-printed" }) { get link.to_s }
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { "%PDF-printed" }) { get link.to_s }
 
     assert_equal [ "application/pdf", "%PDF-printed" ], [ response.media_type, response.body ]
-  end
-
-  test "the page list offers no PDF when no Chrome is found to print one" do
-    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
-
-    KeystoneUi::Pages::Printer.stub(:chrome, nil) { get "/pages/manage/pages" }
-
-    assert_equal [ true, false ], [ response.body.include?("View live"), Nokogiri::HTML(response.body).css("[data-page='pricing'] a").map(&:text).include?("PDF") ]
-  end
-
-  test "the page list offers a PDF when the Ruby drawing is chosen and no Chrome is found" do
-    KeystoneUi::Pages::Page.create!(name: "Pricing", slug: "pricing").publish
-    KeystoneUi::Pages.pdf_drawing = :ruby
-
-    KeystoneUi::Pages::Printer.stub(:chrome, nil) { get "/pages/manage/pages" }
-
-    assert_includes Nokogiri::HTML(response.body).css("[data-page='pricing'] a").map(&:text), "PDF"
-  ensure
-    KeystoneUi::Pages.pdf_drawing = nil
   end
 end

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "minitest/mock"
-require "keystone_ui/pages/printer"
 require "keystone_ui/pages/operations"
 require "keystone_ui/pages/pdf_look"
 require "keystone_ui/pages/pdf_drawing"
@@ -10,10 +8,7 @@ require "keystone_ui/pages/pdf_drawing"
 class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
   QUOTE_DRAWING = ->(surface, fields) { surface.text(fields[:text], size: "--text-base") }
 
-  setup { KeystoneUi::Pages.pdf_drawing = :ruby }
-
   teardown do
-    KeystoneUi::Pages.pdf_drawing = nil
     KeystoneUi::Pages.places = nil
     KeystoneUi::Pages.catalog.leave_out(:quote)
   end
@@ -22,7 +17,7 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph, fields: [ { key: :text, label: "Text", default: "Hi" } ], pdf: QUOTE_DRAWING)
     page = page_holding(:quote, { "text" => { "value" => "client_name", "fallback" => "Client" } })
 
-    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: { "client_name" => "Acme" }) }
+    pdf = KeystoneUi::Pages.pdf(page, values: { "client_name" => "Acme" })
 
     assert_includes texts(pdf.file.download), "Acme"
   end
@@ -45,7 +40,7 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     end
     KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph, fields: [ { key: :text, label: "Text", default: "Hi" } ], pdf: drawing)
 
-    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page_holding(:quote, { "text" => "Plain" }), values: {}) }
+    pdf = KeystoneUi::Pages.pdf(page_holding(:quote, { "text" => "Plain" }), values: {})
 
     assert_equal %w[Badge Boxed Cell Heading Left Plain Rich Right], texts(pdf.file.download).sort
   end
@@ -55,7 +50,7 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph, fields: [ { key: :text, label: "Text", default: "Hi" } ], pdf: drawing)
     accent = KeystoneUi::Pages::PdfLook.host.color("--ks-color-accent").scan(/\h\h/).map { |pair| (pair.to_i(16) / 255.0).round(3) }
 
-    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page_holding(:quote, { "text" => "Plain" }), values: {}) }
+    pdf = KeystoneUi::Pages.pdf(page_holding(:quote, { "text" => "Plain" }), values: {})
 
     assert_includes fill_colors(pdf.file.download), accent
   end
@@ -64,9 +59,9 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     KeystoneUi::Pages.catalog.register(key: :quote, name: "Quote", component: :ui_paragraph, fields: [ { key: :text, label: "Text", default: "Hi" } ])
     page = page_holding(:quote, { "text" => "Plain" })
 
-    error = assert_raises(KeystoneUi::Pages::NoPdfDrawing) { KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page, values: {}) } }
+    error = assert_raises(KeystoneUi::Pages::NoPdfDrawing) { KeystoneUi::Pages.pdf(page, values: {}) }
 
-    assert_equal "The Quote element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Quote element has no PDF drawing, so this page cannot be drawn as a PDF.", error.message
   end
 
   test "a host element left out of one place's catalog is drawn by its PDF drawing on a page in a place that offers it" do
@@ -74,7 +69,7 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
     KeystoneUi::Pages.register_place("client_report", label: "Client report", leaves_out: [ :quote ])
     KeystoneUi::Pages.register_place("marketing", label: "Marketing site")
 
-    pdf = KeystoneUi::Pages::Printer.stub(:chrome, nil) { KeystoneUi::Pages.pdf(page_holding(:quote, { "text" => "Offered" }, place: "marketing"), values: {}) }
+    pdf = KeystoneUi::Pages.pdf(page_holding(:quote, { "text" => "Offered" }, place: "marketing"), values: {})
 
     assert_includes texts(pdf.file.download), "Offered"
   end

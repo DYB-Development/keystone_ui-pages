@@ -180,7 +180,7 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
 
     error = assert_raises(KeystoneUi::Pages::PrintFailed) { drawn(document) }
 
-    assert_equal "The Testimonial element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Testimonial element has no PDF drawing, so this page cannot be drawn as a PDF.", error.message
   end
 
   test "a page holding an element the catalog does not have is refused with a print failure naming the element's key" do

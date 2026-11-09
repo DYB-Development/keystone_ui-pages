@@ -18,10 +18,7 @@ develop:
   - KeystoneUi::Pages.refusal_method
   - KeystoneUi::Pages.layout
   - KeystoneUi::Pages.editor_layout
-  - KeystoneUi::Pages.chrome_path
   - KeystoneUi::Pages.pdf_stylesheet
-  - KeystoneUi::Pages.pdf_drawing
-  - KeystoneUi::Pages.ruby_pdf_drawing?
   - KeystoneUi::Pages::PrintFailed
   - KeystoneUi::Pages::NoPdfDrawing
   - KeystoneUi::Pages::PdfSurface::UndrawableCharacter
@@ -64,6 +61,7 @@ sources:
   - lib/keystone_ui/pages/keystone_elements.rb
   - lib/keystone_ui/pages/pdfs.rb
   - lib/keystone_ui/pages/pdf_document.rb
+  - lib/keystone_ui/pages/print_failed.rb
   - lib/keystone_ui/pages/printer.rb
   - lib/keystone_ui/pages/pdf_drawing.rb
   - lib/keystone_ui/pages/pdf_surface.rb

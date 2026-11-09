@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-info
-description: Use to learn what Keystone UI Pages offers — the page builder, page layout, places, published versions, host values, sequences, PDFs, view and click reporting and the element catalog — and the vocabulary the install and develop locals assume.
+description: Use to learn what Keystone UI Pages offers — the page builder, page layout, places, published versions, host values, sequences, PDFs drawn in Ruby, view and click reporting and the element catalog — and the vocabulary the install and develop locals assume.
 tools: Read
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -32,9 +32,9 @@ This local declares no commands. The two working surfaces belong elsewhere:
   file → **`keystone_ui-pages-install`**.
 - **Working with it** — every setting, places, who may view or edit, host
   values, sequences, drawing a page in the host's own screens, making PDFs,
-  choosing how they are drawn, giving a host element a PDF drawing, view and
-  click reporting, form answers, linking to the builder and changing the
-  element catalog → **`keystone_ui-pages-develop`**.
+  naming the stylesheet PDFs read their look from, giving a host element a PDF
+  drawing, view and click reporting, form answers, linking to the builder and
+  changing the element catalog → **`keystone_ui-pages-develop`**.
 
 ## How to use it
 
@@ -89,25 +89,26 @@ Keystone UI itself must be installed first. Its own install local,
 - **Views and clicks.** The gem records nothing about visitors. A place with a
   handler is told of each view and click on the live page, and the browser fires
   matching events an analytics tag can listen for.
-- **PDFs and the two drawings.** A PDF is made from a published version and a
-  set of host values, and kept in Active Storage so the same request returns the
-  same file. The Chrome drawing, the default, prints the page with Chrome or
-  Chromium on the server from the host's stylesheet. The Ruby drawing needs no
-  browser: it lays out the page's sections, rows, columns and elements as a
-  screen as wide as the printed page would, and draws each element with Prawn.
-- **PDF drawing.** Under the Ruby drawing each catalog element prints through
-  its own PDF drawing, given when the element is registered. It draws with a
-  fixed set of calls, such as text, boxes, rows and tables, plus a plot area for
-  charts that places rectangles, lines and labels measured in points. Each call
-  names Keystone UI tokens like `--text-base` or `--ks-color-accent` and prints
-  in the values the host's stylesheet gives those tokens in light mode. Every
-  element in the default catalog has a PDF drawing, including the bar chart and
-  line chart, and the form, copy button and Next page elements print nothing. A
-  page holding a host element with no PDF drawing cannot be printed that way.
+- **PDFs.** A PDF is made from a published version and a set of host values,
+  and kept in Active Storage so the same request returns the same file. It is
+  drawn in Ruby with Prawn, so the server needs no browser installed. The gem
+  lays out the page's sections, rows, columns and elements as a screen as wide
+  as the printed page would, and draws each element in turn. Earlier versions
+  printed with a browser on the server, and a host that still names those
+  settings starts as before, though they no longer change how a PDF is made.
+- **PDF drawing.** Each catalog element prints through its own PDF drawing,
+  given when the element is registered. It draws with a fixed set of calls, such
+  as text, boxes, rows and tables, plus a plot area for charts that places
+  rectangles, lines and labels measured in points. Each call names Keystone UI
+  tokens like `--text-base` or `--ks-color-accent` and prints in the values the
+  host's PDF stylesheet gives those tokens in light mode. Every element in the
+  default catalog has a PDF drawing, including the bar chart and line chart, and
+  the form, copy button and Next page elements print nothing. A page holding a
+  host element with no PDF drawing cannot be printed.
 - **A refused PDF.** A PDF that cannot be made is refused with a message saying
-  why, such as a missing browser, an element with no PDF drawing, a character
-  the font cannot draw, an unreadable token or a font with no TrueType copy. A
-  refused PDF keeps no file, and a refusal while publishing does not stop the
-  publish.
+  why: an element with no PDF drawing, an element the catalog does not have, a
+  character the font cannot draw, a token the stylesheet does not set or sets to
+  a value the gem cannot read, or a font with no TrueType copy served. A refused
+  PDF keeps no file, and a refusal while publishing does not stop the publish.
 - Ruby >= 3.2 and Rails >= 7.1. It depends on keystone_ui >= 0.49.0,
   keystone_ui-styles >= 0.24.0, keystone_ui-react >= 0.1.3 and prawn ~> 2.5.

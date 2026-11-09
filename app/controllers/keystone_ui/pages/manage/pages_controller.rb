@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "keystone_ui/pages/printer"
-
 module KeystoneUi
   module Pages
     module Manage
@@ -11,7 +9,6 @@ module KeystoneUi
           @place = chosen_place
           @pages = owned_pages.public_send(@archived ? :archived : :current).order(:name)
           @pages = @place ? @pages.where(place: @place) : @pages.where.not(place: KeystoneUi::Pages.unlisted_places).or(@pages.where(place: nil))
-          @printable = KeystoneUi::Pages.ruby_pdf_drawing? || Printer.chrome.present?
         end
 
         def new

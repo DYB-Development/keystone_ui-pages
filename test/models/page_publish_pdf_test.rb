@@ -3,7 +3,7 @@
 require "test_helper"
 require "minitest/mock"
 require "keystone_ui/pages/operations"
-require "keystone_ui/pages/printer"
+require "keystone_ui/pages/pdf_drawing"
 
 class KeystoneUi::Pages::PagePublishPdfTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -48,6 +48,6 @@ class KeystoneUi::Pages::PagePublishPdfTest < ActiveSupport::TestCase
   private
 
   def refusing(&publishing)
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { raise KeystoneUi::Pages::PrintFailed, "No font" }, &publishing)
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { raise KeystoneUi::Pages::PrintFailed, "No font" }, &publishing)
   end
 end

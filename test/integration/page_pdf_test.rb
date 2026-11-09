@@ -2,7 +2,6 @@
 
 require "test_helper"
 require "minitest/mock"
-require "keystone_ui/pages/printer"
 require "keystone_ui/pages/pdf_drawing"
 require "keystone_ui/pages/operations"
 
@@ -57,9 +56,9 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     labelled("Second")
     printed = nil
 
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(html) { printed = html; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page, version: 2) }
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(version, values:) { printed = version; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page, version: 2) }
 
-    assert_equal "First", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
+    assert_equal "First", printed.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"]
   end
 
   test "asking again for the same named version and values returns the kept PDF without printing it again" do
@@ -81,26 +80,35 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
     labelled("Second")
     printed = nil
 
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(html) { printed = html; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page.reload) }
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(version, values:) { printed = version; "%PDF-printed" }) { KeystoneUi::Pages.pdf(@page.reload) }
 
-    assert_equal "Second", Nokogiri::HTML(printed).at_css(".ks-button").text.strip
+    assert_equal "Second", printed.document["sections"][0]["rows"][0]["columns"][0]["elements"][0]["fields"]["label"]
   end
 
-  test "with the Ruby drawing chosen, asking again for the same version and values returns the kept PDF without drawing it again" do
-    KeystoneUi::Pages.pdf_drawing = :ruby
-    drawn = 0
+  test "a host that chooses no drawing gets its PDF from the Ruby drawing" do
+    pdf = KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { "%PDF-drawn" }) { KeystoneUi::Pages.pdf(@page, values: {}) }
 
-    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { drawn += 1; "%PDF-drawn" }) do
-      2.times { KeystoneUi::Pages.pdf(@page, version: 1, values: { "client_name" => "Acme" }) }
-    end
+    assert_equal "%PDF-drawn", pdf.file.download
+  end
 
-    assert_equal 1, drawn
-  ensure
-    KeystoneUi::Pages.pdf_drawing = nil
+  test "a host that still chooses the Chrome drawing gets its PDF from the Ruby drawing" do
+    KeystoneUi::Pages.pdf_drawing = :chrome
+
+    pdf = KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { "%PDF-drawn" }) { KeystoneUi::Pages.pdf(@page, values: {}) }
+
+    assert_equal "%PDF-drawn", pdf.file.download
+  end
+
+  test "a host that still names a Chrome path gets its PDF from the Ruby drawing" do
+    KeystoneUi::Pages.chrome_path = "/usr/bin/chromium"
+
+    pdf = KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { "%PDF-drawn" }) { KeystoneUi::Pages.pdf(@page, values: {}) }
+
+    assert_equal "%PDF-drawn", pdf.file.download
   end
 
   test "a refused PDF keeps no file, so asking again after the fix makes a new one" do
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { raise KeystoneUi::Pages::PrintFailed, "No font" }) do
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { raise KeystoneUi::Pages::PrintFailed, "No font" }) do
       assert_raises(KeystoneUi::Pages::PrintFailed) { KeystoneUi::Pages.pdf(@page, values: {}) }
     end
 
@@ -118,6 +126,6 @@ class KeystoneUi::Pages::PagePdfTest < ActiveSupport::TestCase
   end
 
   def printing(&)
-    KeystoneUi::Pages::Printer.stub(:pdf, ->(_html) { @printed += 1; "%PDF-printed" }, &)
+    KeystoneUi::Pages::PdfDrawing.stub(:pdf, ->(_version, values:) { @printed += 1; "%PDF-printed" }, &)
   end
 end
