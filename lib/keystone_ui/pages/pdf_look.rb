@@ -12,6 +12,7 @@ module KeystoneUi
       BUILT_IN_MONOSPACE_FONT = Font.new(name: "Courier", files: nil)
 
       OKLAB_TO_LMS = [ [ 0.3963377774, 0.2158037573 ], [ -0.1055613458, -0.0638541728 ], [ -0.0894841775, -1.2914855480 ] ].freeze
+      WRITTEN_VALUE = /\A#\h+\z/
       WRITTEN_LENGTH = /\A\d+(\.\d+)?(rem|em|px|pt)\z/
       INFINITE_LENGTH = /\Acalc\(infinity \* \d+(\.\d+)?(rem|em|px|pt)\)\z/
       POINTS_PER_UNIT = { "rem" => 12.0, "em" => 12.0, "px" => 0.75, "pt" => 1.0 }.freeze
@@ -87,6 +88,8 @@ module KeystoneUi
       end
 
       def value(name)
+        return name if name.match?(WRITTEN_VALUE)
+
         resolved(@values.fetch(name) { raise PrintFailed, "The PDF needs the keystone_ui token #{name}, and the stylesheet does not set it." })
       end
 
