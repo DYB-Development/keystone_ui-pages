@@ -61,7 +61,7 @@ class KeystoneUi::Pages::HostElementPdfTest < ActiveSupport::TestCase
 
     error = assert_raises(KeystoneUi::Pages::NoPdfDrawing) { KeystoneUi::Pages.pdf(page, values: {}) }
 
-    assert_equal "The Quote element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome.", error.message
+    assert_equal "The Quote element has no PDF drawing, so this page cannot be drawn as a PDF.", error.message
   end
 
   test "a host element left out of one place's catalog is drawn by its PDF drawing on a page in a place that offers it" do

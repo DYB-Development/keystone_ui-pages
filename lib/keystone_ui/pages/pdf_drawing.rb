@@ -74,7 +74,7 @@ module KeystoneUi
       def drawn_element(element, surface, values)
         definition = Pages.catalog.find(element["key"])
         raise PrintFailed, "The page holds a #{element["key"]} element, which the catalog does not have, so this page cannot be drawn as a PDF." unless definition
-        raise NoPdfDrawing, "The #{definition.name} element has no PDF drawing, so this page cannot be drawn as a PDF without Chrome." unless definition.pdf
+        raise NoPdfDrawing, "The #{definition.name} element has no PDF drawing, so this page cannot be drawn as a PDF." unless definition.pdf
 
         placed(element["align"] || definition.align || Operations::DEFAULTS[:element]["align"], surface) do
           definition.pdf.call(surface, definition.fields.to_h { |field| [ field[:key].to_sym, filled_field(field, element, values) ] })
