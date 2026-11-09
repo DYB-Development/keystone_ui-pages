@@ -57,6 +57,17 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_equal [ 136 - width.("Mon") / 2, 136 - width.("Tue") ].map { |left| left.round(3) }, lefts(surface.render).values_at("Mon", "Tue").map { |left| left.round(3) }
   end
 
+  test "a label set on its middle or top has its letters centred on or hanging from its place" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) do |plot|
+      plot.label("Mon", 10, 20, size: "--text-xs", color: "--ks-color-accent", baseline: :middle)
+      plot.label("Tue", 10, 20, size: "--text-xs", color: "--ks-color-accent", baseline: :top)
+    end
+
+    assert_equal [ 736 - (6.462 - 1.863) / 2, 736 - 6.462 ].map { |height| height.round(3) }, heights(surface.render).values_at("Mon", "Tue").map { |height| height.round(3) }
+  end
+
   private
 
   def look

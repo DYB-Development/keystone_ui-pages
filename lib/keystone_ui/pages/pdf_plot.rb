@@ -32,18 +32,23 @@ module KeystoneUi
         @document.undash if dash
       end
 
-      def label(content, left, top, size:, color:, font: "--ks-font-body", anchor: :start)
+      def label(content, left, top, size:, color:, font: "--ks-font-body", anchor: :start, baseline: :alphabetic)
         typeface = @look.font(font)
         points = @look.points(size)
         @document.font_families[typeface.name] = typeface.files if typeface.files
         @document.fill_color(@look.color(color))
         @document.font(typeface.name) do
           shift = @document.width_of(content.to_s, size: points) * ANCHORS.fetch(anchor)
-          @document.draw_text(content.to_s, at: placed([ left - shift, top ]), size: points)
+          @document.draw_text(content.to_s, at: placed([ left - shift, top + lowered(baseline, points) ]), size: points)
         end
       end
 
       private
+
+      def lowered(baseline, points)
+        ascender, descender = [ @document.font.ascender, @document.font.descender ].map { |height| height / @document.font_size * points }
+        { alphabetic: 0, middle: (ascender - descender.abs) / 2, top: ascender }.fetch(baseline)
+      end
 
       def placed((left, top))
         [ left, @top - top ]
