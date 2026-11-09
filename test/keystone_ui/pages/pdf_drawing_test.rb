@@ -827,6 +827,14 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
                  drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call[1].map { |point| point.map { |length| length.round(3) } } }
   end
 
+  test "a line chart draws its series in keystone_ui's five chart colours in turn, starting again after the fifth" do
+    series = Array.new(6) { |index| { "name" => "Series #{index}", "data" => [ 1, 2 ] } }
+    document = page(section(row(column(element("line_chart", series: series, labels: %w[Mon Tue])))))
+
+    assert_equal %w[1 2 3 4 5 1].map { |position| "--ks-color-chart-#{position}" },
+                 drawn(document).plotted(:line).select { |call| call.last[:width] == "1.5px" }.map { |call| call.last[:color] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

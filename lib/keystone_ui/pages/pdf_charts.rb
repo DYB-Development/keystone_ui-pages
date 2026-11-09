@@ -21,7 +21,8 @@ module KeystoneUi
       VALUE_TEXT = { size: "--text-xs", color: "--ks-color-text", anchor: :middle }.freeze
       VALUE_RISE = "4px"
       LINE_CHART_HEIGHT = [ TAILWIND_SPACING, 64 ].freeze
-      LINE_LOOK = { width: "1.5px", color: "--ks-color-chart-1" }.freeze
+      LINE_WIDTH = "1.5px"
+      SERIES_COLORS = Array.new(5) { |index| "--ks-color-chart-#{index + 1}" }.freeze
       AXIS_SIZE = "11px"
       CHART_LINE_HEIGHT = 1.2
       TICK_LENGTH = "8px"
@@ -50,7 +51,7 @@ module KeystoneUi
         labels = Array(fields[:labels].presence).map(&:to_s)
         surface.plot(height: LINE_CHART_HEIGHT) do |plot|
           area = line_chart_area(plot, series, labels)
-          series.each { |entry| series_lines(plot, area, labels, entry) }
+          series.zip(series_colors(series)).each { |entry, color| series_lines(plot, area, labels, entry, color) }
         end
       end
 
@@ -62,10 +63,14 @@ module KeystoneUi
         { left: left, right: plot.width - axis_width(plot, labels.last) / 2, top: top, bottom: bottom, ticks: ticks }
       end
 
-      def series_lines(plot, area, labels, entry)
+      def series_colors(series)
+        series.each_index.map { |index| SERIES_COLORS[index % SERIES_COLORS.size] }
+      end
+
+      def series_lines(plot, area, labels, entry, color)
         numbers(entry[:data]).first(labels.size).each_with_index.map { |value, index| value && [ across(area, index, labels.size), down(area, value) ] }
                              .chunk_while { |point, following| point && following }.select { |points| points.compact.size > 1 }
-                             .each { |points| plot.line(points, **LINE_LOOK) }
+                             .each { |points| plot.line(points, width: LINE_WIDTH, color: color) }
       end
 
       def across(area, index, count)
