@@ -16,7 +16,7 @@ module KeystoneUi
       end
 
       def rect(left, top, across, down, color:, opacity: 1)
-        translucent(opacity) do
+        translucent(opacity * @look.opacity(color)) do
           @document.fill_color(@look.color(color))
           @document.fill_rectangle(placed([ left, top ]), across, down)
         end

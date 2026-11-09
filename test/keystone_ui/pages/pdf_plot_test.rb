@@ -96,6 +96,14 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_equal "→", error.character
   end
 
+  test "a rectangle filled in a colour with its own opacity is filled at that opacity" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| plot.rect(10, 20, 30, 40, color: "#0000001A") }
+
+    assert_match(%r{/ca 0\.102\b}, surface.render)
+  end
+
   private
 
   def look
