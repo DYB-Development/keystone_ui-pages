@@ -124,11 +124,12 @@ module KeystoneUi
         @document.move_down(thickness)
       end
 
-      def plot(height:)
+      def plot(height:, ratio: nil)
         width = @document.bounds.width
         return reached(width) if @reached
 
         tall = @look.points(height.first) * height.last
+        tall = [ tall, width * ratio ].min if ratio
         next_page unless fits?(tall)
         yield PdfPlot.new(@document, @look, width, tall)
         @document.move_down(tall)

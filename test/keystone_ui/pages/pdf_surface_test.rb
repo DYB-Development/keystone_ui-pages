@@ -358,6 +358,16 @@ class KeystoneUi::Pages::PdfSurfaceTest < ActiveSupport::TestCase
     assert_in_delta 60.0 + 13.872, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
   end
 
+  test "a plot given a share of its width as well as a height is drawn at whichever is shorter" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.text("First", size: "--text-base")
+    surface.plot(height: [ "--ks-spacing", 100 ], ratio: Rational(2, 5)) { |_plot| }
+    surface.text("Second", size: "--text-base")
+
+    assert_in_delta 216.0 + 13.872, heights(surface.render).values_at("First", "Second").map(&:to_f).reduce(:-), 0.001
+  end
+
   test "a line of text drawn with a line height token sits with the space its line height leaves split evenly above and below its letters" do
     surface = KeystoneUi::Pages::PdfSurface.new(look)
 
