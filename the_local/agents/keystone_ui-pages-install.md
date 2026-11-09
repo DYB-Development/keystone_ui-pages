@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-install
-description: Use to hook Keystone UI Pages into a project — adding the gem, installing and running the engine's migrations and Active Storage's, mounting the engine, preparing the live-page and editor layouts, choosing how PDFs are made, and starting the settings file.
+description: Use to hook Keystone UI Pages into a project — adding the gem, installing and running the engine's migrations and Active Storage's, mounting the engine, preparing the live-page and editor layouts, preparing the stylesheet and fonts the PDFs read, and starting the settings file.
 tools: Bash, Read, Edit
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -36,6 +36,8 @@ linking editors to the builder or drawing a page in the host's screens.
      keystone_ui-styles, keystone_ui-react and prawn with it, but Keystone UI's
      own setup is the `keystone_ui-install` local's job. Do it first if it is
      missing.
+   - Propshaft serving the host's stylesheet. The PDF reads its whole look from
+     that stylesheet.
    - An Active Job backend. Publishing a page that uses no host values makes its
      PDF in a job.
    - An error reporter subscribed to `Rails.error`, such as the one Sentry,
@@ -44,6 +46,9 @@ linking editors to the builder or drawing a page in the host's screens.
      through `Rails.error` with the page's id and name. With no subscriber, that
      refusal is seen by nobody. If the app has none, ask the developer which
      service to use rather than choosing one.
+
+   No browser is needed on the server. The gem draws every PDF in Ruby with
+   Prawn.
 
 2. Add the gem to the Gemfile and install it:
 
@@ -117,78 +122,68 @@ linking editors to the builder or drawing a page in the host's screens.
    layout holding only the head and the page's content. Ask the developer
    whether to make one or use `application` for both.
 
-6. Choose how PDFs are made, and ask the developer which one:
+6. Prepare the stylesheet the PDFs read.
 
-   - **Chrome, the default.** Chrome or Chromium on the server prints the page
-     from the host's compiled stylesheet, so the PDF looks as the page does.
-     It needs Chrome or Chromium installed wherever the app makes PDFs,
-     including the production server or image, and Propshaft serving the
-     host's stylesheet. The gem uses the path the settings file names, then the
-     `CHROME_BIN` environment variable, then the first of
-     `/usr/bin/google-chrome`, `/usr/bin/google-chrome-stable`,
-     `/usr/bin/chromium`, `/usr/bin/chromium-browser`, and the Google Chrome and
-     Chromium apps in `/Applications` on macOS. Ask the developer how the
-     deployment installs it. Without one, everything except PDFs still works,
-     and a PDF asked for is refused with a message saying how to name a
-     browser.
-   - **Ruby.** The gem draws the PDF with Prawn from the page's sections, rows,
-     columns and elements, so no browser is needed. The heading, label,
-     paragraph, alert, label and value list, button, accordion, table, stat,
-     figure, badge, progress, code, hero, call to action, card, info, feature
-     grid, bar chart and line chart elements print. The form, copy button and
-     Next page elements are left out of the PDF. An element the host adds to the catalog prints only when it is registered
-     with a PDF drawing of its own, and a PDF of a page holding any other
-     element is refused with a message naming that element. An element a place
-     leaves out keeps its drawing, so a page in any place that offers it still
-     prints it. Ask the developer whether the pages they plan to print hold
-     only those elements, or host elements they will give PDF drawings, before
-     choosing this drawing. Writing a host element's PDF drawing belongs to
-     `keystone_ui-pages-develop`.
+   The PDF reads its look from one compiled stylesheet, found by name among the
+   files Propshaft serves. That name defaults to `tailwind.css`. Ask the
+   developer which stylesheet carries keystone_ui-styles and the host's looks,
+   if it is not `tailwind.css`. The name is a setting written in step 8.
 
-     It still needs Propshaft serving the host's stylesheet, since it reads its
-     whole look from that stylesheet's CSS variables, in light mode and the
-     host's default look:
+   The PDF reads these from that stylesheet, in light mode and the host's
+   default look:
 
-     - The `--ks-` tokens Keystone UI sets, for fonts, weights, text colours,
-       fills, borders, rounded corners and spacing, and its chart colours,
-       `--ks-color-chart-1` to `--ks-color-chart-5`, for the bars and the
-       lines of a chart. A line chart series given its own colour as a CSS
-       variable reads that variable from the stylesheet too.
-     - The page's line height from the stylesheet's `html` rule.
-     - These Tailwind variables, which the compiled stylesheet must also set:
-       each `--text-*` size used, from `--text-xs` to `--text-5xl`, with its
-       `--line-height`; `--spacing`, which also sets each chart's height;
-       `--leading-relaxed`, for paragraphs and
-       code; `--tracking-tight`, for the titles of a hero, a call to action
-       and a feature grid; `--tracking-wider`, for labels; `--font-mono`, for
-       code; `--color-gray-300`, for the line under a table's heading row and
-       above its total row; `--container-lg` and `--container-2xl`, for the
-       width of a hero's and a call to action's subtitle; and
-       `--container-2xl`, `--container-4xl`, `--container-6xl` and
-       `--container-7xl`, for the widest a section with a small, medium,
-       large or extra large width setting prints.
+   - The `--ks-` tokens Keystone UI sets, for fonts, weights, text colours,
+     fills, borders, rounded corners and spacing, and its chart colours,
+     `--ks-color-chart-1` to `--ks-color-chart-5`, for the bars and the lines
+     of a chart. A line chart series given its own colour as a CSS variable
+     reads that variable from the stylesheet too.
+   - The page's line height from the stylesheet's `html` rule.
+   - These Tailwind variables, which the compiled stylesheet must also set:
+     each `--text-*` size used, from `--text-xs` to `--text-5xl`, with its
+     `--line-height`; `--spacing`, which also sets each chart's height;
+     `--leading-relaxed`, for paragraphs and code; `--tracking-tight`, for the
+     titles of a hero, a call to action and a feature grid; `--tracking-wider`,
+     for labels; `--font-mono`, for code; `--color-gray-300`, for the line
+     under a table's heading row and above its total row; `--container-lg` and
+     `--container-2xl`, for the width of a hero's and a call to action's
+     subtitle; and `--container-2xl`, `--container-4xl`, `--container-6xl` and
+     `--container-7xl`, for the widest a section with a small, medium, large or
+     extra large width setting prints.
 
-     A token the host's own stylesheet changes reaches the PDF the same way. A
-     token the stylesheet does not set, or sets to a colour or length the gem
-     cannot read, refuses the PDF with a message naming the token. Tailwind
-     writes a theme variable into the compiled stylesheet only when something
-     uses it, so if a PDF is refused naming one of the Tailwind variables
-     above, ask the developer how they want the stylesheet to keep it rather
-     than editing their Tailwind setup unasked.
+   A token the host's own stylesheet changes reaches the PDF the same way. A
+   stylesheet name Propshaft does not serve leaves every token unset. A token
+   the stylesheet does not set, or sets to a colour or length the gem cannot
+   read, refuses the PDF with a message naming the token. Tailwind writes a
+   theme variable into the compiled stylesheet only when something uses it, so
+   if a PDF is refused naming one of the Tailwind variables above, ask the
+   developer how they want the stylesheet to keep it rather than editing their
+   Tailwind setup unasked.
 
-   The choice is a setting in the settings file, written in the next step.
+7. Check which elements the host's pages print, and the fonts they print in.
 
-   With the Ruby drawing, check the fonts the host's stylesheet uses:
+   The heading, label, paragraph, alert, label and value list, button,
+   accordion, table, stat, figure, badge, progress, code, hero, call to action,
+   card, info, feature grid, bar chart and line chart elements print. The form,
+   copy button and Next page elements are left out of the PDF. An element the
+   host adds to the catalog prints only when it is registered with a PDF
+   drawing of its own, and a PDF of a page holding any other element is refused
+   with a message naming that element. An element a place leaves out keeps its
+   drawing, so a page in any place that offers it still prints it. If the host
+   registers elements of its own and plans to print pages holding them, tell
+   the developer each needs a PDF drawing. Writing one belongs to
+   `keystone_ui-pages-develop`.
+
+   Check the fonts the stylesheet uses:
 
    - A font named only by system fonts, with no `@font-face`, prints in
      Helvetica and needs nothing. Code in a code font named only by system
-     fonts prints in Courier. Helvetica draws only Windows-1252 characters,
-     so text holding any other character refuses the PDF with a message naming
+     fonts prints in Courier. Helvetica draws only Windows-1252 characters, so
+     text holding any other character refuses the PDF with a message naming
      the element and the character. If the host's pages will hold such
      characters, such as non-Latin scripts, ask the developer which font to
      serve as TrueType copies that holds them.
-   - A line chart's legend always names Helvetica Neue, Helvetica and Arial,
-     so it prints in Helvetica unless the stylesheet loads one of those with
+   - A line chart's legend always names Helvetica Neue, Helvetica and Arial, so
+     it prints in Helvetica unless the stylesheet loads one of those with
      `@font-face`. A series name holding a character outside Windows-1252
      refuses the PDF even when the host's own font holds it.
    - A font the stylesheet loads with `@font-face` needs a TrueType copy of each
@@ -209,7 +204,7 @@ linking editors to the builder or drawing a page in the host's screens.
      file it looked for. If the host has no `.ttf` files for its font, ask the
      developer where to get them rather than converting or replacing the font.
 
-7. Create `config/initializers/keystone_ui_pages.rb` starting with:
+8. Create `config/initializers/keystone_ui_pages.rb` starting with:
 
    ```ruby
    require "keystone_ui/pages"
@@ -228,16 +223,21 @@ linking editors to the builder or drawing a page in the host's screens.
      public.
    - Whether pages belong to an owner, such as the current team. With no
      answer, all pages are shared across the whole app.
-   - Which layout each of the two from step 5 uses, and which PDF drawing from
-     step 6.
+   - Which layout each of the two from step 5 uses, and which stylesheet from
+     step 6 the PDFs read.
 
-8. Check the install. Boot the app, open the page list at
+   A host upgrading from an earlier version may still set
+   `KeystoneUi::Pages.pdf_drawing` or `KeystoneUi::Pages.chrome_path`. The app
+   still boots with them, and neither changes how the PDF is made. Ask the
+   developer whether to remove them, and whether to remove Chrome or Chromium
+   from the server or image, since nothing in the gem uses it now.
+
+9. Check the install. Boot the app, open the page list at
    `keystone_ui_pages.manage_pages_path`, create a page, add an element in the
-   builder, publish it, and open `/pages/<slug>`. With the Chrome drawing, the
-   page list shows a PDF link only when Chrome or Chromium was found.
+   builder, publish it, and open `/pages/<slug>`.
 
-   With the Ruby drawing, the page list always shows a PDF link. Open it on a
-   page holding only the elements step 6 lists as printing, plus a form, and
+   The page list shows a PDF link beside each published page. Open it on a page
+   holding only the elements step 7 lists as printing, plus a form, and
    confirm:
 
    - each row prints its columns side by side at the share of the row the
@@ -276,8 +276,8 @@ linking editors to the builder or drawing a page in the host's screens.
    message naming it.
 
    When a PDF link in the page list returns to the list showing a message, the
-   PDF was refused, and the message names what to fix: the browser, an
-   element, a character, a token or a font from step 6. A refused PDF keeps no
+   PDF was refused, and the message names what to fix: an element, a
+   character, a token or a font from steps 6 and 7. A refused PDF keeps no
    file, so clicking PDF again after the fix makes a new one. A refusal while
    publishing shows nothing in the page list and reaches only the error
    reporter from step 1.

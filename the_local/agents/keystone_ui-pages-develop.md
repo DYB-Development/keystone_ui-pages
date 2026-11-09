@@ -1,6 +1,6 @@
 ---
 name: keystone_ui-pages-develop
-description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs with Chrome or drawn in Ruby and handling a PDF that is refused, giving a host element a Ruby PDF drawing including a chart or other shapes placed on a plot, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
+description: Use PROACTIVELY for working with Keystone UI Pages in a host app — its settings, host values, drawing a page in the host's own screens, making PDFs drawn in Ruby and handling a PDF that is refused, giving a host element a Ruby PDF drawing including a chart or other shapes placed on a plot, linking editors to the builder, showing a host's ordered set of pages such as a funnel in the builder and letting staff add pages to it, and adding or leaving out catalog elements — MUST BE USED instead of hand-building page drawing or PDF printing.
 tools: Bash, Read, Write, Edit, Grep
 scope: Pages — building, publishing and printing pages drawn with Keystone UI
 ---
@@ -188,25 +188,18 @@ inherit from the base controller, so define it there.
 
 ### PDF settings
 
-- `KeystoneUi::Pages.chrome_path = "/usr/bin/chromium"` — the Chrome or
-  Chromium program that prints PDFs. Unset, the gem uses the `CHROME_BIN`
-  environment variable, then the first of `/usr/bin/google-chrome`,
-  `/usr/bin/google-chrome-stable`, `/usr/bin/chromium`,
-  `/usr/bin/chromium-browser`, and the Google Chrome and Chromium apps in
-  `/Applications` that can be run.
 - `KeystoneUi::Pages.pdf_stylesheet = "tailwind.css"` — the name of the host's
-  compiled stylesheet in Propshaft. Defaults to `"tailwind.css"`. The Chrome
-  drawing writes it into every PDF, and a name Propshaft cannot find prints
-  with no styles. The Ruby drawing reads Keystone UI's `--ks-` tokens, the
-  `--text-` size and `--tracking-` letter spacing tokens, `--spacing` for a
-  stat's, a progress bar's and a chart's spacing, and `--color-gray-300` for a
-  table's line under its heading from it, so a name Propshaft cannot find, or a
-  stylesheet missing a token the drawing reads, makes the Ruby drawing raise
+  compiled stylesheet in Propshaft. Defaults to `"tailwind.css"`. The PDF
+  drawing reads Keystone UI's `--ks-` tokens, the `--text-` size and
+  `--tracking-` letter spacing tokens, `--spacing` for a stat's, a progress
+  bar's and a chart's spacing, and `--color-gray-300` for a table's line under
+  its heading from it, so a name Propshaft cannot find, or a stylesheet missing
+  a token the drawing reads, makes every PDF raise
   `KeystoneUi::Pages::PrintFailed` naming the token.
-- `KeystoneUi::Pages.pdf_drawing = :ruby` — how PDFs are drawn: `:chrome` (the
-  default) prints the page's HTML with Chrome or Chromium, and `:ruby` draws
-  the page in Ruby with Prawn from its sections, rows, columns and elements,
-  with no Chrome needed. A string works too. The Ruby drawing honours bound
+- **How PDFs are drawn.** Every PDF is drawn in Ruby with Prawn from the page's
+  sections, rows, columns and elements, called the Ruby drawing below. No
+  Chrome or Chromium is needed or used, and there is no other drawing to
+  choose. The Ruby drawing honours bound
   values and show-when conditions and lays out sections, rows, columns and
   elements as the page layout below describes, with no host print rules. It
   takes Keystone UI's look from
@@ -509,21 +502,16 @@ inherit from the base controller, so define it there.
   looked for. A weight of 600 or more prints bold. Helvetica draws only the
   Windows-1252 characters, so a page holding any other character, such as most
   emoji, needs a font served as TrueType copies that holds it.
-- `KeystoneUi::Pages.ruby_pdf_drawing?` — true when `pdf_drawing` is `:ruby` or
-  `"ruby"`. Use it to decide whether to offer a PDF without checking for
-  Chrome.
 - `KeystoneUi::Pages::PrintFailed` — the error `KeystoneUi::Pages.pdf` raises
   whenever a PDF cannot be made, with a message saying why, written for an
-  editor to read. Under Chrome it is raised when no Chrome or Chromium is found,
-  when it cannot be started, or when it prints nothing. Under the Ruby drawing
-  it is raised for an element with no `pdf:` drawing, an element key the
+  editor to read. It is raised for an element with no `pdf:` drawing, an element key the
   catalog does not have, a character the element's font cannot draw (naming the
   element and the character), a token the stylesheet does not set or sets to a
   value the gem cannot read, and a font with no TrueType copy served. A refused
   PDF keeps no record and no file, so asking again once the page or the
   stylesheet is fixed prints a new one.
-- `KeystoneUi::Pages::NoPdfDrawing` — raised by `KeystoneUi::Pages.pdf` under
-  the Ruby drawing when the page holds a shown element whose catalog entry has
+- `KeystoneUi::Pages::NoPdfDrawing` — raised by `KeystoneUi::Pages.pdf` when
+  the page holds a shown element whose catalog entry has
   no `pdf:` drawing. Its message names the element. It is a
   `KeystoneUi::Pages::PrintFailed`, so a rescue of `PrintFailed` catches it.
   Nothing is kept when it is raised. An element hidden by a show-when condition
@@ -658,8 +646,7 @@ inherit from the base controller, so define it there.
   its own.
   `placed: true` also passes `element_id:` and `version:` (nil in the builder)
   to the method, which the Form element uses to build its address.
-  `pdf:` is the element's Ruby PDF drawing, used only when `pdf_drawing` is
-  `:ruby`: anything that answers `call(surface, fields)`, such as a lambda or
+  `pdf:` is the element's Ruby PDF drawing: anything that answers `call(surface, fields)`, such as a lambda or
   a method, taking the drawing surface and a hash of every one of the
   element's fields keyed by symbol. A field bound to a host value holds that
   value, or its fallback text when the value is blank, or an empty string when
@@ -845,7 +832,8 @@ inherit from the base controller, so define it there.
   posts to `POST /pages/:slug/versions/:number/forms/:element_id`. Its drawing
   is cached with a placeholder token, and each request puts in the visitor's
   own forgery token, so the host's forgery protection stays on. A published form
-  is hidden in print, so no PDF and no page printed from the browser shows it.
+  draws nothing in a PDF and is hidden when the page is printed from the
+  browser.
 - `KeystoneUi::Pages.catalog.leave_out(:copy_button)` — removes elements from
   the palette by key. Takes several keys.
 
@@ -929,12 +917,13 @@ The catalog offers these Keystone UI components by default: `button`,
 
    The page must be published, since only the live version is printed.
 
-   Which drawing to use is the developer's decision, so ask before setting
-   `pdf_drawing`. Chrome draws every element with the host's styles but needs
-   Chrome or Chromium on the server. Ruby needs no Chrome but draws only
-   elements with a `pdf:` drawing, in Keystone UI's fonts, weights, text sizes,
-   line heights, letter spacing, colours, fills, borders and spacing read from
-   the host's stylesheet. Of the built-in elements it draws headings, labels,
+   If the initializer still sets `pdf_drawing` or `chrome_path`, remove the
+   line: the app still boots with it, and it changes nothing.
+
+   Every PDF is drawn in Ruby, and only elements with a `pdf:` drawing can be
+   drawn, in Keystone UI's fonts, weights, text sizes, line heights, letter
+   spacing, colours, fills, borders and spacing read from the host's
+   stylesheet. Of the built-in elements it draws headings, labels,
    paragraphs, alerts, label and value lists, buttons, accordions, tables,
    stats, figures, badges, progress bars, code, heroes, calls to action, cards,
    info elements, feature grids, bar charts and line charts, and it leaves
@@ -943,18 +932,8 @@ The catalog offers these Keystone UI components by default: `button`,
    `--ks-color-text-muted` and each `--ks-color-chart-` colour its bars or
    series use, and a bar chart that shows values needs `--ks-color-text` too.
 
-   With `:chrome`, the PDF is the page drawn in light mode with the stylesheet
-   named by `pdf_stylesheet`, printed with no header or footer. Printing keeps
-   chart and cell colours on a white background and does not split a section,
-   a table row or a label and value row across pages. When no Chrome or
-   Chromium is found, the page list leaves out its PDF links and
-   `KeystoneUi::Pages.pdf` raises `KeystoneUi::Pages::PrintFailed` with a
-   message saying to install one or name it with `chrome_path` or `CHROME_BIN`.
-   It raises the same error when Chrome cannot be started or prints nothing.
-
-   With `:ruby`, the page list shows its PDF links whether or not Chrome is
-   found. Before switching, check that every element on the pages that will be
-   printed has a `pdf:` drawing, and give a host-registered element one with
+   Check that every element on the pages that will be printed has a `pdf:`
+   drawing, and give a host-registered element one with
    `pdf:` on `catalog.register`. A page showing an element without one raises
    `NoPdfDrawing` from `KeystoneUi::Pages.pdf`. Also check the fonts the
    stylesheet's `--ks-font-heading` and `--ks-font-body` name: a family loaded
@@ -1056,8 +1035,7 @@ The catalog offers these Keystone UI components by default: `button`,
    through `Rails.error`, so search the pages' documents for its key before
    leaving it out.
 
-10. When the host uses the Ruby drawing, give each host element a `pdf:`
-    drawing on `catalog.register`, built from the surface's calls in the
+10. Give each host element a `pdf:` drawing on `catalog.register`, built from the surface's calls in the
     Interface:
 
     ```ruby
@@ -1074,7 +1052,7 @@ The catalog offers these Keystone UI components by default: `button`,
     from `fields` by its symbol key and draw only with the surface's twelve
     calls. An element registered without `pdf:` refuses every PDF of a page
     showing it with `NoPdfDrawing`, whose message is "The <name> element has
-    no PDF drawing, so this page cannot be drawn as a PDF without Chrome."
+    no PDF drawing, so this page cannot be drawn as a PDF."
 
     Use the same tokens the component's Keystone UI classes use on screen, so
     the PDF matches the page. A share of something, such as a score out of a
@@ -1114,7 +1092,7 @@ The catalog offers these Keystone UI components by default: `button`,
 - **Draw through the gem.** Use `keystone_ui_page` and `KeystoneUi::Pages.pdf`.
   Never draw `page.document` or a version's document by hand, and never print a
   PDF another way, because the gem's drawing applies bound values, conditions,
-  layout and print rules together.
+  layout and each element's `pdf:` drawing together.
 - **A `pdf:` drawing draws only through the surface.** It takes the surface and
   the field values and calls the surface's twelve calls, and the plot's calls
   inside `plot`, never Prawn directly, since the surface places each call in
@@ -1129,8 +1107,8 @@ The catalog offers these Keystone UI components by default: `button`,
 - **The editor's page list** at `/pages/manage/pages` shows each page's name,
   its state, and when it was last published, plus its place and access
   exception when the host names any. Each row links to Edit and Settings and has
-  an Archive button, and a published page also links to View live and, when
-  `pdf_drawing` is `:ruby` or Chrome or Chromium is found, to its PDF. A PDF
+  an Archive button, and a published page also links to View live and to its
+  PDF. A PDF
   link whose PDF is refused sends the editor back to the page list they
   clicked it in, or to the page's place's list when the browser sends no
   referrer, and the list shows the refusal's message in an error alert. Show archived lists archived pages
