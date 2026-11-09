@@ -36,6 +36,11 @@ develop:
   - "table(heading"
   - "together {"
   - "aligned(align"
+  - "plot(height:"
+  - "rect(left"
+  - "line(points"
+  - "label(content"
+  - "text_width(content"
   - KeystoneUi::Pages.turnstile_site_key
   - KeystoneUi::Pages.turnstile_secret_key
   - KeystoneUi::Pages::Values.names
@@ -63,6 +68,9 @@ sources:
   - lib/keystone_ui/pages/pdf_drawing.rb
   - lib/keystone_ui/pages/pdf_surface.rb
   - lib/keystone_ui/pages/pdf_elements.rb
+  - lib/keystone_ui/pages/pdf_charts.rb
+  - lib/keystone_ui/pages/pdf_plot.rb
+  - lib/keystone_ui/pages/pdf_line_ticks.rb
   - lib/keystone_ui/pages/pdf_look.rb
   - lib/keystone_ui/pages/sequence.rb
   - app/helpers/keystone_ui/pages/host_helper.rb

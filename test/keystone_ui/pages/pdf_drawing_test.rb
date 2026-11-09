@@ -921,6 +921,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal 1, drawn(document).plotted(:rect).size
   end
 
+  test "a line chart writes a tick of a thousand or more with its thousands set apart by commas, as Chart.js writes it" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 0, 5000 ] } ], labels: %w[Mon Tue])))))
+
+    assert_includes drawn(document).plotted(:label).map { |call| call[1] }, "5,000"
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
