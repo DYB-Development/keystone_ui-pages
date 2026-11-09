@@ -48,6 +48,10 @@ module KeystoneUi
         width
       end
 
+      def points(length)
+        @look.points(length)
+      end
+
       private
 
       def typeface(font)

@@ -77,6 +77,15 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_in_delta Prawn::Document.new.width_of("Wednesday", size: 9), measured, 0.001
   end
 
+  test "a plot reads a length from a keystone_ui token or as written" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    measured = nil
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| measured = [ plot.points("--ks-spacing"), plot.points("6px") ] }
+
+    assert_equal [ 3.0, 4.5 ], measured
+  end
+
   private
 
   def look
