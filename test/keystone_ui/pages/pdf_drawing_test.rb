@@ -915,6 +915,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ %w[0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0], [] ], drawn(document).then { |surface| [ surface.plotted(:label).map { |call| call[1] }, series_lines(surface) ] }
   end
 
+  test "a bar chart draws no bar for an entry whose value is below zero, as the page draws none" do
+    document = page(section(row(column(element("bar_chart", bars: [ { "label" => "Mon", "value" => "3" }, { "label" => "Tue", "value" => "-2" } ])))))
+
+    assert_equal 1, drawn(document).plotted(:rect).size
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

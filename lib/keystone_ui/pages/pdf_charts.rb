@@ -46,7 +46,7 @@ module KeystoneUi
           area = bar_chart_area(plot)
           chart.ticks.each { |tick| plot.line([ placed(area, 0, tick[:y]), placed(area, FULL, tick[:y]) ], **GRID_LINE) }
           chart.ticks.each { |tick| plot.label(tick[:label], area[:left] - plot.points(TICK_GAP), placed(area, 0, tick[:y]).last, **CHART_TEXT, anchor: :end, baseline: :middle) }
-          chart.drawn_bars.each { |bar| plot.rect(*placed(area, bar[:x], bar[:y]), *sized(area, bar[:width], bar[:height]), **bar_look(bar)) }
+          chart.drawn_bars.select { |bar| bar[:height].positive? }.each { |bar| plot.rect(*placed(area, bar[:x], bar[:y]), *sized(area, bar[:width], bar[:height]), **bar_look(bar)) }
           chart.drawn_bars.each { |bar| bar_value(plot, area, bar) } if chart.show_values?
           chart.drawn_bars.each { |bar| plot.label(bar[:label], placed(area, bar[:center], 0).first, plot.height - plot.points(BAR_LABEL_RISE), **CHART_TEXT, anchor: :middle) }
         end
