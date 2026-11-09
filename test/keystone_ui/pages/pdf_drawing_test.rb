@@ -857,6 +857,13 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal expected.reverse, ticks.map { |call| [ call[1], call[2].first.round(3), call[2].last.round(3), call[3] ] }
   end
 
+  test "a line chart draws a grid line in keystone_ui's border colour at each tick, from its tick mark across to the right of the chart, beneath the lines" do
+    document = page(section(row(column(element("line_chart", series: [ { "name" => "Visits", "data" => [ 3, 5, 4, 7 ] } ], labels: %w[Mon Tue Wed Thu])))))
+
+    grid = Array.new(9) { |index| (24 + (8 - index) * 157.85 / 8).round(3) }.map { |down| [ [ [ 14.625, down ], [ 493.813, down ] ], { width: "1px", color: "--ks-color-border" } ] }
+    assert_equal grid + [ :series ], drawn(document).plotted(:line).map { |call| call.last[:width] == "1.5px" ? :series : [ call[1].map { |point| point.map { |length| length.round(3) } }, call[2] ] }.reject { |call| call != :series && call.last[:color] != "--ks-color-border" }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 

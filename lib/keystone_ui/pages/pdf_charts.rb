@@ -69,6 +69,7 @@ module KeystoneUi
 
       def line_chart_ticks(plot, area)
         ticks = area[:ticks]
+        ticks.values.each { |value| plot.line([ [ area[:left] - plot.points(TICK_LENGTH), down(area, value) ], [ area[:right], down(area, value) ] ], **GRID_LINE) }
         ticks.values.zip(ticks.labels).each do |value, label|
           plot.label(label, area[:left] - plot.points(TICK_LENGTH) - plot.points(TICK_PADDING), down(area, value), **AXIS_TEXT, anchor: :end, baseline: :middle)
         end
