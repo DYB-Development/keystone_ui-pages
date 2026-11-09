@@ -30,6 +30,8 @@ module KeystoneUi
         @pdf_stylesheet || "tailwind.css"
       end
 
+      def pdf_drawing=(_choice); end
+
       def places
         (@places || {}).merge(place_settings.transform_values { |settings| settings[:label] })
       end
