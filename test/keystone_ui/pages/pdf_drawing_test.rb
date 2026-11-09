@@ -903,6 +903,12 @@ class KeystoneUi::Pages::PdfDrawingTest < ActiveSupport::TestCase
     assert_equal [ 2, 2 ], series_lines(drawn(document)).map { |call| call[1].size }
   end
 
+  test "a bar chart bound to a host value with no bars is drawn as its axis and grid lines with no bars, as the page shows it" do
+    document = page(section(row(column(element("bar_chart", bars: { "value" => "weekly_hours" })))))
+
+    assert_equal [ 5, 0, %w[0 0.25 0.5 0.75 1] ], drawn(document).then { |surface| [ surface.plotted(:line).size, surface.plotted(:rect).size, surface.plotted(:label).map { |call| call[1] } ] }
+  end
+
   test "a code element is drawn as its code with its line breaks and spaces kept, in the font keystone_ui's code block names" do
     document = page(section(row(column(element("code", code: "def total\n  42\nend")))))
 
