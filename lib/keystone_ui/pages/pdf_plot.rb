@@ -30,6 +30,13 @@ module KeystoneUi
         @document.undash if dash
       end
 
+      def label(content, left, top, size:, color:, font: "--ks-font-body")
+        typeface = @look.font(font)
+        @document.font_families[typeface.name] = typeface.files if typeface.files
+        @document.fill_color(@look.color(color))
+        @document.font(typeface.name) { @document.draw_text(content.to_s, at: placed([ left, top ]), size: @look.points(size)) }
+      end
+
       private
 
       def placed((left, top))

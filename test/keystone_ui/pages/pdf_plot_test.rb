@@ -37,6 +37,14 @@ class KeystoneUi::Pages::PdfPlotTest < ActiveSupport::TestCase
     assert_match(/\[4\.5 4\.5\] 0\.0 d\n36\.0 746\.0 m/, surface.render)
   end
 
+  test "a label is written in its colour and size with its baseline at its place measured from the plot's top left" do
+    surface = KeystoneUi::Pages::PdfSurface.new(look)
+
+    surface.plot(height: [ "--ks-spacing", 40 ]) { |plot| plot.label("Mon", 10, 20, size: "--text-xs", color: "--ks-color-accent") }
+
+    assert_match(/0\.0 0\.0 1\.0 scn\n.*BT\n46\.0 736\.0 Td\n\/F1\.0 9 Tf\n\[<4d6f6e>\] TJ/m, surface.render)
+  end
+
   private
 
   def look
