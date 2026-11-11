@@ -8,9 +8,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - `KeystoneUi::Pages::Sequence` takes an optional `end_label:`, the label of an entry the sequence's list shows after its last page, such as a funnel's End step. The entry cannot be opened, changed or removed from the builder and is not offered as a page to copy.
-- `KeystoneUi::Pages.pdf_drawing = :ruby` draws a published page's PDF in Ruby for a host with no Chrome. The default stays `:chrome`.
-- A Ruby-drawn PDF uses keystone_ui's fonts, colours, sizes and spacing, and prints paragraphs, alerts, label and value lists, buttons, accordions, tables, stats, figures, badges, progress bars and host elements, leaving out elements meant only for the screen.
+- A published page's PDF is drawn in Ruby with Prawn, so a host needs no Chrome.
+- A PDF uses keystone_ui's fonts, colours, sizes and spacing, and prints paragraphs, alerts, label and value lists, buttons, accordions, tables, stats, figures, badges, progress bars, bar and line charts and host elements, leaving out elements meant only for the screen.
+- A PDF follows the page's sections, rows and columns as the narrow screen lays them out, and a section taller than a printed page breaks between its rows.
+- A font the host's stylesheet loads with `@font-face` prints from a `.ttf` copy served beside each font file under the same name.
 - An editor or host whose page PDF cannot be made is told why.
+
+### Removed
+- The Chrome printer. `KeystoneUi::Pages.pdf_drawing=` and `KeystoneUi::Pages.chrome_path=` are still accepted and have no effect.
 
 ## [0.14.0] - 2026-11-07
 
